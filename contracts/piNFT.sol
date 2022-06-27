@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract piNFT is ERC721URIStorage, ERC721Holder{
+contract piNFT is ERC721URIStorage{
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
@@ -26,6 +24,7 @@ contract piNFT is ERC721URIStorage, ERC721Holder{
     event ReceivedERC20(address indexed _from, uint256 indexed _tokenId, address indexed _erc20Contract, uint256 _value);
     event TransferERC20(uint256 indexed _tokenId, address indexed _to, address indexed _erc20Contract, uint256 _value);
 
+    // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public returns (uint256) {
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
@@ -35,12 +34,14 @@ contract piNFT is ERC721URIStorage, ERC721Holder{
     }
 
     // this function requires approval of tokens by _erc20Contract
-    function getERC20(address _from, uint256 _tokenId, address _erc20Contract, uint256 _value) public {
-        require(_from == msg.sender, "not allowed to getERC20");
+    // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
+    function addERC20(address _from, uint256 _tokenId, address _erc20Contract, uint256 _value) public {
+        require(_from == msg.sender, "not allowed to add ERC20");
         erc20Received(_from, _tokenId, _erc20Contract, _value);
         require(IERC20(_erc20Contract).transferFrom(_from, address(this), _value), "ERC20 transfer failed.");
     }
 
+    // update the mappings for a token on recieving ERC20 tokens
     function erc20Received(address _from, uint256 _tokenId, address _erc20Contract, uint256 _value) private {
         require(ERC721.ownerOf(_tokenId) != address(0), "_tokenId does not exist.");
         if (_value == 0) {
@@ -55,6 +56,7 @@ contract piNFT is ERC721URIStorage, ERC721Holder{
         emit ReceivedERC20(_from, _tokenId, _erc20Contract, _value);
     }
 
+    // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
     function transferERC20(uint256 _tokenId, address _to, address _erc20Contract, uint256 _value) external {
         require(_to != address(0));
         address rootOwner = ERC721.ownerOf(_tokenId);
@@ -64,6 +66,7 @@ contract piNFT is ERC721URIStorage, ERC721Holder{
         emit TransferERC20(_tokenId, _to, _erc20Contract, _value);
     }
 
+    // update the mappings for a token when ERC20 tokens gets removed
     function removeERC20(uint256 _tokenId, address _erc20Contract, uint256 _value) private {
         if (_value == 0) {
             return;
@@ -86,9 +89,9 @@ contract piNFT is ERC721URIStorage, ERC721Holder{
         }
     }
 
+    // view ERC 20 token balance of a token
+    function viewBalance(uint256 _tokenId, address _erc20Address) public view returns (uint256) {
+        return erc20Balances[_tokenId][_erc20Address];
+    }
 
-
-    // function viewChildNFT(uint256 _piId) public view returns (uint256) {
-    //     return piIdToChildTokenId[_piId];
-    // }
 }
