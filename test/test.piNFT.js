@@ -31,4 +31,37 @@ contract("PiNFT", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert(balance == 1000, "Failed to mint ERC20 tokens");
   });
+
+  it("should let validator add ERC20 tokens to alice's NFT", async () => {
+    await sampleERC20.approve(piNFT.address, 500, { from: validator });
+    const tx = await piNFT.addERC20(validator, 0, sampleERC20.address, 500, {
+      from: validator,
+    });
+    const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
+    const validatorBal = await sampleERC20.balanceOf(validator);
+    assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
+    assert(validatorBal == 500, "Validators balance not reduced");
+  });
+
+  it("should transfer NFT to bob", async () => {
+    await piNFT.safeTransferFrom(alice, bob, 0);
+    assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
+  });
+
+  it("should let bob disintegrate NFT and ERC20 tokens", async () => {
+    await piNFT.transferERC20(0, validator, sampleERC20.address, 500, {
+      from: bob,
+    });
+    const validatorBal = await sampleERC20.balanceOf(validator);
+    assert.equal(
+      await piNFT.viewBalance(0, sampleERC20.address),
+      0,
+      "Failed to remove ERC20 tokens from NFT"
+    );
+    assert.equal(
+      await sampleERC20.balanceOf(validator),
+      1000,
+      "Failed to transfer ERC20 tokens to validator"
+    );
+  });
 });
