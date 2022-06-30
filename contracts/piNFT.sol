@@ -19,11 +19,11 @@ contract piNFT is ERC721URIStorage{
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
 
-    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
-
     event ReceivedERC20(address indexed _from, uint256 indexed _tokenId, address indexed _erc20Contract, uint256 _value);
     event TransferERC20(uint256 indexed _tokenId, address indexed _to, address indexed _erc20Contract, uint256 _value);
 
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+    
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public returns (uint256) {
         uint256 tokenId_ = _tokenIdCounter.current();
