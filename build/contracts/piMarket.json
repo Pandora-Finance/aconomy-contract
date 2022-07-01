@@ -94,7 +94,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -164,7 +165,8 @@
       "name": "BuyNFT",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
@@ -15882,9 +15884,17 @@
     "name": "solc",
     "version": "0.8.11+commit.d7f03943.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0x61906Ea24bF0Fad8cf14725Fcc844d6D4854Bd82",
+      "transactionHash": "0x30b72e146c843b99f34cb4aede56f96f2bcf2e8e069e3de54f86efb48d926375"
+    }
+  },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-06-30T14:28:35.742Z",
+  "updatedAt": "2022-07-01T08:37:38.573Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {
