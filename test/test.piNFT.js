@@ -6,6 +6,7 @@ contract("PiNFT", (accounts) => {
   let alice = accounts[0];
   let validator = accounts[1];
   let bob = accounts[2];
+  let royaltyReciever = accounts[3];
 
   it("should deploy the contracts", async () => {
     piNFT = await PiNFT.deployed();
@@ -20,10 +21,18 @@ contract("PiNFT", (accounts) => {
   });
 
   it("should mint an ERC721 token to alice", async () => {
-    const tx = await piNFT.mintNFT(alice, "URI1");
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
+  });
+
+  it("should fetch the tokenURI and royalties", async () => {
+    const uri = await piNFT.tokenURI(0);
+    assert.equal(uri, "URI1", "Invalid URI for the token");
+    const royalties = await piNFT.getRoyalties(0);
+    assert.equal(royalties[0][0], royaltyReciever);
+    assert.equal(royalties[0][1], 500);
   });
 
   it("should mint ERC20 tokens to validator", async () => {

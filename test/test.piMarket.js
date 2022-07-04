@@ -8,12 +8,14 @@ contract("PiMarket", async (accounts) => {
   let alice = accounts[0];
   let validator = accounts[1];
   let bob = accounts[2];
+  let royaltyReceiver = accounts[3];
+  let feeReceiver = accounts[4];
 
   it("should create a piNFT with 500 erc20 tokens to alice", async () => {
     piNFT = await PiNFT.deployed();
     sampleERC20 = await SampleERC20.deployed();
     await sampleERC20.mint(validator, 1000);
-    const tx1 = await piNFT.mintNFT(alice, "URI1");
+    const tx1 = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
     const tokenId = tx1.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
 
@@ -52,13 +54,34 @@ contract("PiMarket", async (accounts) => {
     assert.equal(meta.status, true);
 
     let _balance1 = await web3.eth.getBalance(alice);
+    let _balance2 = await web3.eth.getBalance(royaltyReceiver);
+    let _balance3 = await web3.eth.getBalance(feeReceiver);
 
     result2 = await piMarket.BuyNFT(1, { from: bob, value: 5000 });
     assert.equal(await piNFT.ownerOf(0), bob);
 
-    let _balance2 = await web3.eth.getBalance(alice);
+    let balance1 = await web3.eth.getBalance(alice);
+    let balance2 = await web3.eth.getBalance(royaltyReceiver);
+    let balance3 = await web3.eth.getBalance(feeReceiver);
 
-    assert.equal(BigNumber(_balance2).minus(BigNumber(_balance1)), 5000);
+    assert.equal(
+      BigNumber(balance1).minus(BigNumber(_balance1)),
+      (5000 * 9400) / 10000,
+      "Failed to transfer NFT amount"
+    );
+    // console.log(BigNumber(balance1).minus(BigNumber(_balance1)));
+    // console.log(BigNumber(balance2).minus(BigNumber(_balance2)));
+    // console.log(BigNumber(balance3).minus(BigNumber(_balance3)));
+    assert.equal(
+      BigNumber(balance2).minus(BigNumber(_balance2)),
+      (5000 * 500) / 10000,
+      "Failed to transfer royalty amount"
+    );
+    assert.equal(
+      BigNumber(balance3).minus(BigNumber(_balance3)),
+      (5000 * 100) / 10000,
+      "Failed to transfer fee amount"
+    );
 
     meta = await piMarket._tokenMeta(1);
     assert.equal(meta.status, false);
