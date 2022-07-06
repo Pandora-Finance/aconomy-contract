@@ -43,7 +43,7 @@ contract piNFT is ERC721URIStorage{
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) internal {
-        require(royalties.length <= 10);
+        require(royalties.length <= 10, 'Atmost 10 royalties can be added');
         delete royaltiesByTokenId[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
@@ -93,9 +93,9 @@ contract piNFT is ERC721URIStorage{
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
     function transferERC20(uint256 _tokenId, address _to, address _erc20Contract, uint256 _value) external {
-        require(_to != address(0));
+        require(_to != address(0), 'cannot send to zero address');
         address rootOwner = ERC721.ownerOf(_tokenId);
-        require(rootOwner == msg.sender);
+        require(rootOwner == msg.sender, 'only owner can transfer');
         removeERC20(_tokenId, _erc20Contract, _value);
         require(IERC20(_erc20Contract).transfer(_to, _value), "ERC20 transfer failed.");
         emit TransferERC20(_tokenId, _to, _erc20Contract, _value);
