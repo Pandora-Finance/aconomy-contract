@@ -188,7 +188,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -252,7 +253,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -345,7 +347,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -358,7 +361,8 @@
       "name": "BuyNFT",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
@@ -412,7 +416,8 @@
       "name": "Bid",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
@@ -43744,6 +43749,12 @@
     "version": "0.8.11+commit.d7f03943.Emscripten.clang"
   },
   "networks": {
+    "3": {
+      "events": {},
+      "links": {},
+      "address": "0x3b68638B1ABD82a7D4F749b88c13c43dfd1Fa9E9",
+      "transactionHash": "0xda83617dd42639dea878da6531c4f064b2b24e0bed283074acde7d108ce0f16d"
+    },
     "5777": {
       "events": {},
       "links": {},
@@ -43752,7 +43763,8 @@
     }
   },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-07-06T11:13:09.255Z",
+  "updatedAt": "2022-07-07T11:59:15.672Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {
