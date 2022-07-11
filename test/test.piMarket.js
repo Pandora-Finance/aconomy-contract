@@ -72,13 +72,17 @@ contract("PiMarket", async (accounts) => {
         (5000 * 9400) / 10000,
         "Failed to transfer NFT amount"
       );
+   
 
       assert.equal(
         BigNumber(balance2).minus(BigNumber(_balance2)),
         (5000 * 500) / 10000,
         "Failed to transfer royalty amount"
       );
-
+      
+      // console.log(Number(web3.utils.toBN(balance2)-(web3.utils.toBN(_balance2))))
+     
+      console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))))
       assert.equal(
         BigNumber(balance3).minus(BigNumber(_balance3)),
         (5000 * 100) / 10000,
