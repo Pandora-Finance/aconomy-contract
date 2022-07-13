@@ -10,7 +10,7 @@
   "sourceMap": "66:154:20:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "66:154:20:-:0;;;;;;;;",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.4.22 <0.9.0;\n\nlibrary LibShare {\n    // Defines the share of royalties for the address\n    struct Share {\n        address payable account;\n        uint96 value;\n    }\n}",
-  "sourcePath": "/Users/parv/Desktop/Pandora/piNFTOfficial/aconomy-contract/contracts/utils/LibShare.sol",
+  "sourcePath": "/Users/sanskarkhare/Desktop/Pandora/aconomy-contract/contracts/utils/LibShare.sol",
   "ast": {
     "absolutePath": "project:/contracts/utils/LibShare.sol",
     "exportedSymbols": {
@@ -247,7 +247,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-07-06T11:13:09.299Z",
+  "updatedAt": "2022-07-11T14:27:46.976Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
