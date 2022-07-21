@@ -1,0 +1,20 @@
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "test/foundry-test/piNFT.t.sol",
+    "id": 25550,
+    "exportedSymbols": {},
+    "nodeType": "SourceUnit",
+    "src": "4421:0:28",
+    "license": "UNLICENSED"
+  },
+  "id": 28
+}

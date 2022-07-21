@@ -3,7 +3,7 @@
   "paths": {
     "artifacts": "artifacts/contracts",
     "sources": "contracts",
-    "tests": "foundry-test",
+    "tests": "test/foundry-test",
     "scripts": "script",
     "libraries": [
       "lib"
@@ -234,68 +234,6 @@
       "artifacts": {
         "SampleERC20": {
           "0.8.15+commit.e14f2714.Darwin.appleclang": "sampleERC20.sol/SampleERC20.json"
-        }
-      }
-    },
-    "foundry-test/piNFT.t.sol": {
-      "lastModificationDate": 1657704793731,
-      "contentHash": "5bfce72c9a06734d26e47229e81bbc80",
-      "sourceName": "foundry-test/piNFT.t.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs"
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/piNFT.sol",
-        "contracts/utils/LibShare.sol",
-        "contracts/utils/sampleERC20.sol",
-        "lib/forge-std/lib/ds-test/src/test.sol",
-        "lib/forge-std/src/Script.sol",
-        "lib/forge-std/src/Test.sol",
-        "lib/forge-std/src/Vm.sol",
-        "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
-        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Address.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Counters.sol",
-        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
-        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
-        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol"
-      ],
-      "versionRequirement": "^0.8.0",
-      "artifacts": {
-        "ContractTest": {
-          "0.8.15+commit.e14f2714.Darwin.appleclang": "piNFT.t.sol/ContractTest.json"
         }
       }
     },
@@ -1225,6 +1163,110 @@
       "artifacts": {
         "IERC165": {
           "0.8.15+commit.e14f2714.Darwin.appleclang": "IERC165.sol/IERC165.json"
+        }
+      }
+    },
+    "test/foundry-test/piNFT.t.sol": {
+      "lastModificationDate": 1658140036467,
+      "contentHash": "88b31e0240f4966c688a379ec73d06e7",
+      "sourceName": "test/foundry-test/piNFT.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": null,
+      "artifacts": {
+        "piNFT.t": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "piNFT.t.sol/piNFT.t.json"
+        }
+      }
+    },
+    "test/foundry-test/piNFTMarket.t.sol": {
+      "lastModificationDate": 1658406177285,
+      "contentHash": "b3ed71778f8aed03e6ed9154f2dcdf6d",
+      "sourceName": "test/foundry-test/piNFTMarket.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/piMarket.sol",
+        "contracts/piNFT.sol",
+        "contracts/utils/LibShare.sol",
+        "contracts/utils/sampleERC20.sol",
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Address.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Counters.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "PiMarketTest": {
+          "0.8.15+commit.e14f2714.Darwin.appleclang": "piNFTMarket.t.sol/PiMarketTest.json"
         }
       }
     }

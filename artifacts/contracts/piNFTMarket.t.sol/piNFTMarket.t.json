@@ -1,0 +1,19 @@
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "foundry-test/piNFTMarket.t.sol",
+    "id": 1010,
+    "exportedSymbols": {},
+    "nodeType": "SourceUnit",
+    "src": "0:0:4"
+  },
+  "id": 4
+}
