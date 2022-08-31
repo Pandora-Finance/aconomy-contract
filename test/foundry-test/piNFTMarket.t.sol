@@ -86,6 +86,19 @@ import "contracts/utils/LibShare.sol";
       );
     }
 
+    function testFail_bob_place_piNFT_on_sale() public {
+        test_create_a_piNFT_with_500_erc20_tokens_to_alice();
+        vm.prank(bob);
+         piNftContract.approve(address(pimarket), 0);
+         vm.prank(bob);
+       pimarket.sellNFT(address(piNftContract), 0, 5000);
+      assertEq(
+        piNftContract.ownerOf(0),
+        address(pimarket),
+        "Failed to put piNFT on Sale"
+      );
+    }
+
     function test_should_let_bob_buy_piNFT() public {
         test_alice_place_piNFT_on_sale();
 
@@ -169,16 +182,30 @@ import "contracts/utils/LibShare.sol";
       );
   }
 
+  function testFail_alice_disintegrate_NFT_and_ERC20_tokens() public{
+    test_bob_cancel_sale();
+    vm.prank(alice);
+     piNftContract.transferERC20(0, validator, address(erc20Contract), 500);
+      uint256 validatorBal =  erc20Contract.balanceOf(validator);
+      assertEq(piNftContract.viewBalance(0, address(erc20Contract)),
+        0,
+        "Failed to remove ERC20 tokens from NFT"
+      );
+      assertEq(
+        erc20Contract.balanceOf(validator),
+        1000,
+        "Failed to transfer ERC20 tokens to validator"
+      );
+  }
+
   function test_create_a_piNFT_with_500_erc20_tokens_to_alice2() public{
     test_bob_disintegrate_NFT_and_ERC20_tokens();
      LibShare.Share[] memory royArray ;
-        LibShare.Share memory royalty;
-        royalty = LibShare.Share(royaltyReceiver, uint96(500));   
-        royArray= new LibShare.Share[](1);
-        royArray[0] = royalty;
-        string memory uri = "www.sk.com";
-
-        
+      LibShare.Share memory royalty;
+      royalty = LibShare.Share(royaltyReceiver, uint96(500));   
+      royArray= new LibShare.Share[](1);
+      royArray[0] = royalty;
+      string memory uri = "www.sk.com";
       erc20Contract.mint(validator, 1000);
       uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
       assertEq(tokenId, 1, "Failed to mint or wrong token Id");
@@ -224,6 +251,23 @@ import "contracts/utils/LibShare.sol";
 
   }
 
+  function testFail_bidders_place_bid_on_piNFT_after_auction_duration() public{
+    test_alice_place_piNFT_on_auction();
+    bidder1.call{value:10 ether}(" ");
+    bidder2.call{value:10 ether}(" ");
+    skip(301);
+    vm.prank(bidder1);
+    pimarket.Bid{value:6000}(3);
+    vm.prank(bidder2);
+    pimarket.Bid{value:6500}(3);
+    vm.prank(bidder1);
+    pimarket.Bid{value:7000}(3);
+
+   ( ,,,address buyerAddress,,) = pimarket.Bids(3,2);
+   assertEq(buyerAddress, bidder1, "bidding failed bidder1");
+
+  }
+
   function test_alice_execute_highest_bid() public {
     test_bidders_place_bid_on_piNFT();
     uint256 _balance2 = (royaltyReceiver).balance;
@@ -249,11 +293,46 @@ import "contracts/utils/LibShare.sol";
 
   }
 
+  function testFail_bob_execute_highest_bid() public {
+    test_bidders_place_bid_on_piNFT();
+    uint256 _balance2 = (royaltyReceiver).balance;
+    uint256 _balance3 = (feeReceiver).balance;
+
+    vm.prank(bob);
+    pimarket.executeBidOrder(3, 2);
+    assertEq(piNftContract.ownerOf(1), bidder1);
+
+    uint256 balance2 = (royaltyReceiver).balance;
+    uint256 balance3 = (feeReceiver).balance;
+
+    assertEq(
+        balance2-_balance2,
+        (7000 * 500) / 10000,
+        "Failed to transfer royalty amount"
+      );
+    assertEq(
+        balance3-_balance3,
+        (7000 * 100) / 10000,
+        "Failed to transfer royalty amount"
+      );
+
+  }
+
   function test_other_bidders_withdraw_their_bids() public{
     test_alice_execute_highest_bid();
     vm.prank(bidder1);
     pimarket.withdrawBidMoney(3, 0);
     vm.prank(bidder2);
+    pimarket.withdrawBidMoney(3, 1);
+    uint256 result = address(pimarket).balance;
+    assertEq(result, 0, "Not able to withdraw bids");
+  }
+
+  function testFail_other_bidders_withdraw_someone_else_bids() public{
+    test_alice_execute_highest_bid();
+    vm.prank(bidder2);
+    pimarket.withdrawBidMoney(3, 0);
+    vm.prank(bidder1);
     pimarket.withdrawBidMoney(3, 1);
     uint256 result = address(pimarket).balance;
     assertEq(result, 0, "Not able to withdraw bids");
