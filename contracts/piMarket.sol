@@ -14,7 +14,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     Counters.Counter internal _saleIdCounter;
 
     address internal feeAddress;
-    // uint256 internal feePercent;
 
     struct TokenMeta {
         uint256 saleId;
@@ -49,7 +48,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     constructor(address _feeAddress) {
         require(_feeAddress != address(0), 'Fee address cannot be zero');
         feeAddress = _feeAddress;
-        // feePercent = _feePercent;
     }
 
     modifier onlyOwnerOfToken(address _piNFTAddress, uint256 _tokenId) {
