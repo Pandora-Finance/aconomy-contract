@@ -217,6 +217,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     );
 
     _tokenMeta[_saleId].status = false;
+    _tokenMeta[_saleId].price = bids.price;
     Bids[_saleId][_bidOrderID].withdrawn = true;
 
     ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
@@ -253,6 +254,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     require(msg.sender != _tokenMeta[_saleId].currentOwner);
     // BidOrder[] memory bids = Bids[_tokenId];
     BidOrder memory bids = Bids[_saleId][_bidId];
+    require(_tokenMeta[_saleId].price != bids.price);
     require(bids.buyerAddress == msg.sender);
     require(!bids.withdrawn);
     (bool success, ) = payable(msg.sender).call{

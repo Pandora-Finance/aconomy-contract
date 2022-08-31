@@ -224,6 +224,14 @@ import "contracts/utils/LibShare.sol";
 
   }
 
+  function testFail_highest_bidder_tries_to_withdraw_his_bid() public{
+    test_bidders_place_bid_on_piNFT();
+    vm.prank(bidder1);
+    pimarket.withdrawBidMoney(3, 2);
+    uint256 result = address(pimarket).balance;
+    assertEq(result, 12500, "Not able to withdraw bids");
+  }
+
   function test_alice_execute_highest_bid() public {
     test_bidders_place_bid_on_piNFT();
     uint256 _balance2 = (royaltyReceiver).balance;
