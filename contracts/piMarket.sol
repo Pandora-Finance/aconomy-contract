@@ -133,6 +133,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     require(msg.sender == _tokenMeta[_saleId].currentOwner, 'Only owner can cancel sale');
     require(_tokenMeta[_saleId].status, 'Token not on sale');
 
+    _tokenMeta[_saleId].price = 0;
     _tokenMeta[_saleId].status = false;
     ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
       address(this),

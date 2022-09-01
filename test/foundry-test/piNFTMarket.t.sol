@@ -283,6 +283,23 @@ function test_bidder_disintegrate_NFT_and_ERC20_tokens() public{
         2000,
         "Failed to transfer ERC20 tokens to validator"
       );
-}
+  }
+
+function test_cancel_sale_withdraw_bid() public{
+  test_bidders_place_bid_on_piNFT();
+  vm.prank(alice);
+  pimarket.cancelSale(3);
+  (,,,uint256 price,,,bool stat,,,) = pimarket._tokenMeta(3);
+  assertEq(price, 0, "Price was not set to 0");
+  assertEq(stat, false, "Cancel sale failed");
+  vm.prank(bidder1);
+  pimarket.withdrawBidMoney(3, 0);
+  vm.prank(bidder2);
+  pimarket.withdrawBidMoney(3, 1);
+  vm.prank(bidder1);
+  pimarket.withdrawBidMoney(3, 2);
+  uint256 result = address(pimarket).balance;
+  assertEq(result, 0, "Not able to withdraw bids");
+}  
  
- }
+}
