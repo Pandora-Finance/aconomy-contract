@@ -251,7 +251,6 @@ import "contracts/utils/LibShare.sol";
 
   }
 
-<<<<<<< HEAD:foundry-test/piNFTMarket.t.sol
   function testFail_bidders_place_bid_on_piNFT_after_auction_duration() public{
     test_alice_place_piNFT_on_auction();
     bidder1.call{value:10 ether}(" ");
@@ -266,15 +265,14 @@ import "contracts/utils/LibShare.sol";
 
    ( ,,,address buyerAddress,,) = pimarket.Bids(3,2);
    assertEq(buyerAddress, bidder1, "bidding failed bidder1");
+  }
 
-=======
   function testFail_highest_bidder_tries_to_withdraw_his_bid() public{
     test_bidders_place_bid_on_piNFT();
     vm.prank(bidder1);
     pimarket.withdrawBidMoney(3, 2);
     uint256 result = address(pimarket).balance;
     assertEq(result, 12500, "Not able to withdraw bids");
->>>>>>> origin/marketplaceRefactoring:test/foundry-test/piNFTMarket.t.sol
   }
 
   function test_alice_execute_highest_bid() public {
