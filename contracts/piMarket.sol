@@ -14,7 +14,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     Counters.Counter internal _saleIdCounter;
 
     address internal feeAddress;
-    // uint256 internal feePercent;
 
     struct TokenMeta {
         uint256 saleId;
@@ -49,7 +48,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     constructor(address _feeAddress) {
         require(_feeAddress != address(0), 'Fee address cannot be zero');
         feeAddress = _feeAddress;
-        // feePercent = _feePercent;
     }
 
     modifier onlyOwnerOfToken(address _piNFTAddress, uint256 _tokenId) {
@@ -135,6 +133,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     require(msg.sender == _tokenMeta[_saleId].currentOwner, 'Only owner can cancel sale');
     require(_tokenMeta[_saleId].status, 'Token not on sale');
 
+    _tokenMeta[_saleId].price = 0;
     _tokenMeta[_saleId].status = false;
     ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
       address(this),
@@ -219,6 +218,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     );
 
     _tokenMeta[_saleId].status = false;
+    _tokenMeta[_saleId].price = bids.price;
     Bids[_saleId][_bidOrderID].withdrawn = true;
 
     ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
@@ -255,6 +255,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     require(msg.sender != _tokenMeta[_saleId].currentOwner);
     // BidOrder[] memory bids = Bids[_tokenId];
     BidOrder memory bids = Bids[_saleId][_bidId];
+    require(_tokenMeta[_saleId].price != bids.price);
     require(bids.buyerAddress == msg.sender);
     require(!bids.withdrawn);
     (bool success, ) = payable(msg.sender).call{
