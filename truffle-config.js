@@ -66,6 +66,20 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
+    goerli: {
+      provider: () => {
+        return new HDWalletProvider(
+          private_key,
+          `https://goerli.infura.io/v3/${infuraApi}`
+        );
+      },
+      network_id: 5,
+      // gas: 4465030,
+      // // gasPrice: 10000000000,
+      // confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      // timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
     ropsten: {
       provider: () =>
         new HDWalletProvider(
