@@ -12,6 +12,7 @@ import "./utils/LibShare.sol";
 contract piMarket is ERC721Holder, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter internal _saleIdCounter;
+    Counters.Counter private _swapIdCounter;
 
     address internal feeAddress;
 
@@ -37,13 +38,28 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         bool withdrawn;
     }
 
+    struct Swap {
+        address NFTContractAddress;
+        address initiator;
+        uint256 initiatorNftId;
+        address secondUser;
+        uint256 secondUserNftId;
+        bool status;
+    }
+
 
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
+    mapping (uint256 => Swap) public _swaps;
 
     event TokenMetaReturn(TokenMeta data, uint256 id);
     event BidOrderReturn(BidOrder bid);
     event BidExecuted(uint256 price);
+    event SwapProposed(
+        address indexed from,
+        address indexed to,
+        uint256 indexed swapId
+    );
 
     constructor(address _feeAddress) {
         require(_feeAddress != address(0), 'Fee address cannot be zero');
@@ -51,7 +67,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     }
 
     modifier onlyOwnerOfToken(address _piNFTAddress, uint256 _tokenId) {
-        require(msg.sender == ERC721(_piNFTAddress).ownerOf(_tokenId), 'Only token owner can put on sale');
+        require(msg.sender == ERC721(_piNFTAddress).ownerOf(_tokenId), 'Only token owner can execute');
         _;
     }
 
@@ -274,5 +290,75 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         token.directSale = false ;
         token.bidSale = false ;
 
+    }
+
+    function swapTokens(address piNFTAddress, uint256 token1, uint256 token2) public onlyOwnerOfToken(piNFTAddress, token1) returns(uint256) {
+        address token2Owner = ERC721((piNFTAddress)).ownerOf(token2);
+        require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
+        uint256 swapsId = _swapIdCounter.current();
+
+        ERC721(piNFTAddress).safeTransferFrom(msg.sender, address(this), token1);
+
+        Swap memory swap = Swap(
+            piNFTAddress,
+            msg.sender,
+            token1,
+            token2Owner,
+            token2,
+            true
+        );
+
+        _swaps[swapsId] = swap;
+
+        _swapIdCounter.increment();
+
+        emit SwapProposed(
+            msg.sender,
+            token2Owner,
+            swapsId
+        );
+
+        return swapsId;
+    }
+
+    function cancelSwap(uint256 _swapId) public {
+      require(msg.sender == _swaps[_swapId].initiator, 'Only owner can cancel sale');
+      require(_swaps[_swapId].status, 'Token not on swap');
+      _swaps[_swapId].status = false;
+      ERC721(_swaps[_swapId].NFTContractAddress).safeTransferFrom(
+        address(this),
+        _swaps[_swapId].initiator,
+        _swaps[_swapId].initiatorNftId
+      );
+    }
+
+    function acceptSwap(uint256 swapId) public{
+        Swap memory swap = _swaps[swapId];
+        require(swap.status, "token must be on swap");
+        require(swap.secondUser == msg.sender, "Only owner can accept swap");
+        swap.status = false;
+        ERC721(swap.NFTContractAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            swap.initiatorNftId
+        );
+        ERC721(swap.NFTContractAddress).safeTransferFrom(
+            msg.sender,
+            swap.initiator,
+            swap.secondUserNftId
+        );
+        
+    }
+
+    function rejectSwap(uint256 swapId) public{
+      Swap memory swap = _swaps[swapId];
+      require(swap.status, "token must be on swap");
+      require(swap.secondUser == msg.sender, "Only owner can accept swap");
+      _swaps[swapId].status = false;
+      ERC721(swap.NFTContractAddress).safeTransferFrom(
+            address(this),
+            swap.initiator,
+            swap.initiatorNftId
+        );
     }
 }
