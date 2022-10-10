@@ -15,15 +15,15 @@
     "absolutePath": "project:/contracts/utils/LibShare.sol",
     "exportedSymbols": {
       "LibShare": [
-        4196
+        4579
       ]
     },
-    "id": 4197,
+    "id": 4580,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4190,
+        "id": 4573,
         "literals": [
           "solidity",
           ">=",
@@ -43,9 +43,9 @@
         "contractDependencies": [],
         "contractKind": "library",
         "fullyImplemented": true,
-        "id": 4196,
+        "id": 4579,
         "linearizedBaseContracts": [
-          4196
+          4579
         ],
         "name": "LibShare",
         "nameLocation": "74:8:20",
@@ -53,16 +53,16 @@
         "nodes": [
           {
             "canonicalName": "LibShare.Share",
-            "id": 4195,
+            "id": 4578,
             "members": [
               {
                 "constant": false,
-                "id": 4192,
+                "id": 4575,
                 "mutability": "mutable",
                 "name": "account",
                 "nameLocation": "182:7:20",
                 "nodeType": "VariableDeclaration",
-                "scope": 4195,
+                "scope": 4578,
                 "src": "166:23:20",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -71,7 +71,7 @@
                   "typeString": "address payable"
                 },
                 "typeName": {
-                  "id": 4191,
+                  "id": 4574,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "166:15:20",
@@ -85,12 +85,12 @@
               },
               {
                 "constant": false,
-                "id": 4194,
+                "id": 4577,
                 "mutability": "mutable",
                 "name": "value",
                 "nameLocation": "206:5:20",
                 "nodeType": "VariableDeclaration",
-                "scope": 4195,
+                "scope": 4578,
                 "src": "199:12:20",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -99,7 +99,7 @@
                   "typeString": "uint96"
                 },
                 "typeName": {
-                  "id": 4193,
+                  "id": 4576,
                   "name": "uint96",
                   "nodeType": "ElementaryTypeName",
                   "src": "199:6:20",
@@ -114,12 +114,12 @@
             "name": "Share",
             "nameLocation": "150:5:20",
             "nodeType": "StructDefinition",
-            "scope": 4196,
+            "scope": 4579,
             "src": "143:75:20",
             "visibility": "public"
           }
         ],
-        "scope": 4197,
+        "scope": 4580,
         "src": "66:154:20",
         "usedErrors": []
       }
@@ -130,15 +130,15 @@
     "absolutePath": "project:/contracts/utils/LibShare.sol",
     "exportedSymbols": {
       "LibShare": [
-        4196
+        4579
       ]
     },
-    "id": 4197,
+    "id": 4580,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4190,
+        "id": 4573,
         "literals": [
           "solidity",
           ">=",
@@ -158,9 +158,9 @@
         "contractDependencies": [],
         "contractKind": "library",
         "fullyImplemented": true,
-        "id": 4196,
+        "id": 4579,
         "linearizedBaseContracts": [
-          4196
+          4579
         ],
         "name": "LibShare",
         "nameLocation": "74:8:20",
@@ -168,16 +168,16 @@
         "nodes": [
           {
             "canonicalName": "LibShare.Share",
-            "id": 4195,
+            "id": 4578,
             "members": [
               {
                 "constant": false,
-                "id": 4192,
+                "id": 4575,
                 "mutability": "mutable",
                 "name": "account",
                 "nameLocation": "182:7:20",
                 "nodeType": "VariableDeclaration",
-                "scope": 4195,
+                "scope": 4578,
                 "src": "166:23:20",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -186,7 +186,7 @@
                   "typeString": "address payable"
                 },
                 "typeName": {
-                  "id": 4191,
+                  "id": 4574,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
                   "src": "166:15:20",
@@ -200,12 +200,12 @@
               },
               {
                 "constant": false,
-                "id": 4194,
+                "id": 4577,
                 "mutability": "mutable",
                 "name": "value",
                 "nameLocation": "206:5:20",
                 "nodeType": "VariableDeclaration",
-                "scope": 4195,
+                "scope": 4578,
                 "src": "199:12:20",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -214,7 +214,7 @@
                   "typeString": "uint96"
                 },
                 "typeName": {
-                  "id": 4193,
+                  "id": 4576,
                   "name": "uint96",
                   "nodeType": "ElementaryTypeName",
                   "src": "199:6:20",
@@ -229,12 +229,12 @@
             "name": "Share",
             "nameLocation": "150:5:20",
             "nodeType": "StructDefinition",
-            "scope": 4196,
+            "scope": 4579,
             "src": "143:75:20",
             "visibility": "public"
           }
         ],
-        "scope": 4197,
+        "scope": 4580,
         "src": "66:154:20",
         "usedErrors": []
       }
@@ -247,7 +247,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-09-05T10:34:25.421Z",
+  "updatedAt": "2022-10-06T05:24:12.647Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

@@ -28,6 +28,11 @@ contract piNFT is ERC721URIStorage{
     event RoyaltiesSetForTokenId(uint256 indexed tokenId, LibShare.Share[] indexed royalties);
 
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+
+    modifier onlyOwnerOfToken(uint256 _tokenId) {
+        require(msg.sender == ERC721.ownerOf(_tokenId), 'Only token owner can execute');
+        _;
+    }
     
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri, LibShare.Share[] memory royalties) public returns (uint256) {
@@ -91,8 +96,20 @@ contract piNFT is ERC721URIStorage{
         emit ReceivedERC20(_from, _tokenId, _erc20Contract, _value);
     }
 
+    function redeemPiNFT(uint256 _tokenId, address _nftReciever, address _validatorAddress, address _erc20Contract, uint256 _value) external onlyOwnerOfToken(_tokenId){
+        require(_nftReciever != address(0), 'cannot transfer to zero address');
+        _transferERC20(_tokenId, _validatorAddress, _erc20Contract, _value);
+        ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+    }
+
+    function burnPiNFT(uint256 _tokenId, address _nftReciever, address _erc20Reciever, address _erc20Contract, uint256 _value) external onlyOwnerOfToken(_tokenId){
+        require(_nftReciever != address(0), 'cannot transfer to zero address');
+        _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
+        ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+    }
+
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
-    function transferERC20(uint256 _tokenId, address _to, address _erc20Contract, uint256 _value) external {
+    function _transferERC20(uint256 _tokenId, address _to, address _erc20Contract, uint256 _value) private {
         require(_to != address(0), 'cannot send to zero address');
         address rootOwner = ERC721.ownerOf(_tokenId);
         require(rootOwner == msg.sender, 'only owner can transfer');
