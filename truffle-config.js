@@ -28,6 +28,7 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 const private_key = process.env.PK;
 const infuraApi = process.env.INFURA_API;
 const etherscanapi = process.env.ETHERSCAN_API;
+const bscapi = process.env.BSC_API;
 
 module.exports = {
   /**
@@ -41,6 +42,7 @@ module.exports = {
    */
   api_keys: {
     etherscan: etherscanapi,
+    bscscan: bscapi,
   },
 
   networks: {
@@ -79,6 +81,17 @@ module.exports = {
       // confirmations: 2, // # of confs to wait between deployments. (default: 0)
       // timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
+    bscTestnet: {
+      provider: () =>
+        new HDWalletProvider(
+          private_key,
+          `https://data-seed-prebsc-1-s1.binance.org:8545`
+        ),
+      network_id: 97,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true,
     },
     ropsten: {
       provider: () =>
