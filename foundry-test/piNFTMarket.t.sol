@@ -165,41 +165,42 @@ import "contracts/utils/LibShare.sol";
       assertEq(stat, false, "Bob cancel sale failed");
   }
 
-
-  function test_bob_disintegrate_NFT_and_ERC20_tokens() public{
-    test_bob_cancel_sale();
-    vm.prank(bob);
-     piNftContract.transferERC20(0, validator, address(erc20Contract), 500);
-      uint256 validatorBal =  erc20Contract.balanceOf(validator);
-      assertEq(piNftContract.viewBalance(0, address(erc20Contract)),
-        0,
-        "Failed to remove ERC20 tokens from NFT"
-      );
-      assertEq(
-        erc20Contract.balanceOf(validator),
-        1000,
-        "Failed to transfer ERC20 tokens to validator"
-      );
-  }
-
-  function testFail_alice_disintegrate_NFT_and_ERC20_tokens() public{
+function testFail_bob_burn_piNFT() public{
     test_bob_cancel_sale();
     vm.prank(alice);
-     piNftContract.transferERC20(0, validator, address(erc20Contract), 500);
+     piNftContract.burnPiNFT(0, alice, bob, address(erc20Contract), 500);
       uint256 validatorBal =  erc20Contract.balanceOf(validator);
       assertEq(piNftContract.viewBalance(0, address(erc20Contract)),
         0,
         "Failed to remove ERC20 tokens from NFT"
       );
       assertEq(
-        erc20Contract.balanceOf(validator),
-        1000,
+        erc20Contract.balanceOf(bob),
+        500,
         "Failed to transfer ERC20 tokens to validator"
       );
+      assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
+  }
+
+  function test_bob_burn_piNFT() public{
+    test_bob_cancel_sale();
+    vm.prank(bob);
+     piNftContract.burnPiNFT(0, alice, bob, address(erc20Contract), 500);
+      uint256 validatorBal =  erc20Contract.balanceOf(validator);
+      assertEq(piNftContract.viewBalance(0, address(erc20Contract)),
+        0,
+        "Failed to remove ERC20 tokens from NFT"
+      );
+      assertEq(
+        erc20Contract.balanceOf(bob),
+        500,
+        "Failed to transfer ERC20 tokens to validator"
+      );
+      assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
   }
 
   function test_create_a_piNFT_with_500_erc20_tokens_to_alice2() public{
-    test_bob_disintegrate_NFT_and_ERC20_tokens();
+    test_bob_burn_piNFT();
      LibShare.Share[] memory royArray ;
       LibShare.Share memory royalty;
       royalty = LibShare.Share(royaltyReceiver, uint96(500));   
@@ -345,11 +346,11 @@ import "contracts/utils/LibShare.sol";
     assertEq(result, 0, "Not able to withdraw bids");
   }
 
-function test_bidder_disintegrate_NFT_and_ERC20_tokens() public{
+function test_bidder_redeem_piNFT() public{
   test_other_bidders_withdraw_their_bids();
   vm.prank(bidder1);
   
-  piNftContract.transferERC20(1, validator, address(erc20Contract), 500);
+  piNftContract.redeemPiNFT(1, alice, validator, address(erc20Contract), 500);
       uint256 validatorBal = erc20Contract.balanceOf(validator);
       assertEq(
         piNftContract.viewBalance(1, address(erc20Contract)),
@@ -358,9 +359,10 @@ function test_bidder_disintegrate_NFT_and_ERC20_tokens() public{
       );
       assertEq(
        erc20Contract.balanceOf(validator),
-        2000,
+        1500,
         "Failed to transfer ERC20 tokens to validator"
       );
+      assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
   }
 
 function test_cancel_sale_withdraw_bid() public{
@@ -379,5 +381,203 @@ function test_cancel_sale_withdraw_bid() public{
   uint256 result = address(pimarket).balance;
   assertEq(result, 0, "Not able to withdraw bids");
 }  
+
+function test_create_a_piNFT_with_2000_erc20_tokens_to_alice() public{
+    test_cancel_sale_withdraw_bid();
+     LibShare.Share[] memory royArray ;
+      LibShare.Share memory royalty;
+      royalty = LibShare.Share(royaltyReceiver, uint96(500));   
+      royArray= new LibShare.Share[](1);
+      royArray[0] = royalty;
+      string memory uri = "www.sk.com";
+      erc20Contract.mint(validator, 2000);
+      uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
+      assertEq(tokenId, 2, "Failed to mint or wrong token Id");
+      vm.prank(validator);
+      erc20Contract.approve(address(piNftContract), 2000);
+      vm.prank(validator);
+      piNftContract.addERC20(
+        validator,
+        tokenId,
+        address(erc20Contract),
+        2000
+      );
+  }
+
+  function test_create_a_piNFT_with_1000_erc20_tokens_to_bob() public{
+    test_create_a_piNFT_with_2000_erc20_tokens_to_alice();
+     LibShare.Share[] memory royArray ;
+      LibShare.Share memory royalty;
+      royalty = LibShare.Share(royaltyReceiver, uint96(500));   
+      royArray= new LibShare.Share[](1);
+      royArray[0] = royalty;
+      string memory uri = "www.sk.com";
+      erc20Contract.mint(validator, 1000);
+      uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+      assertEq(tokenId, 3, "Failed to mint or wrong token Id");
+      vm.prank(validator);
+      erc20Contract.approve(address(piNftContract), 1000);
+      vm.prank(validator);
+      piNftContract.addERC20(
+        validator,
+        tokenId,
+        address(erc20Contract),
+        1000
+      );
+  }
+
+  function test_alice_initiate_swap_request() public {
+    test_create_a_piNFT_with_1000_erc20_tokens_to_bob();
+    vm.prank(alice);
+    piNftContract.approve(address(pimarket), 2);
+    vm.prank(alice);
+    pimarket.swapTokens(address(piNftContract), 2, 3);
+    assertEq(
+         piNftContract.ownerOf(2),
+        address(pimarket),
+        "Failed to put piNFT on Swap"
+      );
+      (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      true,
+      "Failed to set status"
+    );
+  }
+
+  function testFail_bob_initiate_swap_request_for_alice_nft() public {
+    test_create_a_piNFT_with_1000_erc20_tokens_to_bob();
+    vm.prank(alice);
+    piNftContract.approve(address(pimarket), 2);
+    vm.prank(bob);
+    pimarket.swapTokens(address(piNftContract), 2, 3);
+    assertEq(
+         piNftContract.ownerOf(2),
+        address(pimarket),
+        "Failed to put piNFT on Sawap"
+      );
+      (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      true,
+      "Failed to set status"
+    );
+  }
+
+  function test_bob_accept_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(bob);
+    piNftContract.approve(address(pimarket), 3);
+    vm.prank(bob);
+    pimarket.acceptSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        bob,
+        "Failed to transfer token to bob"
+      );
+    assertEq(
+         piNftContract.ownerOf(3),
+        alice,
+        "Failed to transfer token to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
+
+  function testFail_alice_accept_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(bob);
+    piNftContract.approve(address(pimarket), 3);
+    vm.prank(alice);
+    pimarket.acceptSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        bob,
+        "Failed to transfer token to bob"
+      );
+    assertEq(
+         piNftContract.ownerOf(3),
+        alice,
+        "Failed to transfer token to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
+
+  function test_bob_reject_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(bob);
+    pimarket.rejectSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        alice,
+        "Failed to transfer token back to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
+
+  function testFail_alice_reject_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(alice);
+    pimarket.rejectSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        alice,
+        "Failed to transfer token back to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
+
+  function test_alice_cancel_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(alice);
+    pimarket.cancelSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        alice,
+        "Failed to transfer token back to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
+
+  function testFail_bob_cancel_swap_request() public {
+    test_alice_initiate_swap_request();
+    vm.prank(bob);
+    pimarket.cancelSwap(0);
+    assertEq(
+         piNftContract.ownerOf(2),
+        alice,
+        "Failed to transfer token back to alice"
+      );
+    (,,,,,bool status) = pimarket._swaps(0);
+    assertEq(
+      status,
+      false,
+      "Failed to change status"
+    );
+  }
  
 }

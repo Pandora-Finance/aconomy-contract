@@ -95,10 +95,10 @@ import "contracts/utils/LibShare.sol";
         assertEq(piNftContract.ownerOf(0), bob, "Not transferred NFT to Bob");
     }
 
-    function testFail_alice_disintegrate_NFT_and_ERC20_tokens() public{
+    function testFail_alice_redeem_piNFT() public{
         test_transfer_NFT_to_bob();
         vm.prank(alice);
-        piNftContract.transferERC20(0, validator, address(erc20Contract), 500);
+        piNftContract.redeemPiNFT(0, alice, validator, address(erc20Contract), 500);
          assertEq(
                  piNftContract.viewBalance(0, address(erc20Contract)),
                 0,
@@ -109,13 +109,14 @@ import "contracts/utils/LibShare.sol";
             1000,
             "Failed to transfer ERC20 tokens to validator"
         );
+        assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
     }
 
 
-    function test_bob_disintegrate_NFT_and_ERC20_tokens() public{
+    function test_bob_redeem_piNFT() public{
         test_transfer_NFT_to_bob();
         vm.prank(bob);
-        piNftContract.transferERC20(0, validator, address(erc20Contract), 500);
+        piNftContract.redeemPiNFT(0, bob, validator, address(erc20Contract), 500);
          assertEq(
                  piNftContract.viewBalance(0, address(erc20Contract)),
                 0,
@@ -126,5 +127,6 @@ import "contracts/utils/LibShare.sol";
             1000,
             "Failed to transfer ERC20 tokens to validator"
         );
+        assertEq(piNftContract.ownerOf(0), bob, "NFT not transferred to alice");
     }
 }
