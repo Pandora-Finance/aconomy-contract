@@ -16,10 +16,11 @@ Underlying Value (ERC20 tokens)
 
 - Mint asset NFT
 - Add ERC 20 tokens(PiNFT)
-- Redeem/burn PiNFT
-- Sell/Auction PiNFT
+- Redeem/burn PiNFTs
+- Sell/Auction PiNFTs
 - Buy/Bid on PiNFTs 
 - Swap PiNFTs
+- Pools
 - TBD (coming many more)
 
 ## Installation
