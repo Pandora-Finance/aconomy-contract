@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-// import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-// import "./utils/LibShare.sol";
+import "./AconomyFee.sol";
 import "./Libraries/LibPool.sol";
 import "./AttestationServices.sol";
-// import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-// 0x6515629B35208A10F3ea1142a005DF14e37FDfe5
-// poolAddress": "0x9F89ACA814775181f7468a28ae63eEf36aE0fCD7"
-// Libraries
+// 0xE798Ae7D315A56Cd695f74614292866324431F51   0xcD6a42782d230D7c13A74ddec5dD140e55499Df9
+// poolAddress": "0x3Dc21D5a4a63A46e7FBE2A6b49eaf085Ca3D5582" 0x568864A892a1B25127018Be020d2AF585Dff6c96
+// AS=0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B
+// AF=0xd9145CCE52D386f254917e481eB44e9943F39138
+// a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+// a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract poolRegistry {
@@ -22,13 +22,18 @@ contract poolRegistry {
         _;
     }
 
+    address AconomyFeeAddress;
     AttestationServices public attestationService;
     bytes32 public lenderAttestationSchemaId;
     bytes32 public borrowerAttestationSchemaId;
     bytes32 private _attestingSchemaId;
 
-     constructor(AttestationServices _attestationServices)  {
+    constructor(
+        AttestationServices _attestationServices,
+        address _AconomyFeeAddress
+    ) {
         attestationService = _attestationServices;
+        AconomyFeeAddress = _AconomyFeeAddress;
 
         lenderAttestationSchemaId = _attestationServices
             .getASRegistry()
@@ -62,11 +67,10 @@ contract poolRegistry {
         mapping(address => bytes32) lenderAttestationIds;
         uint32 paymentCycleDuration; //unix time
         uint32 paymentDefaultDuration; //unix time
-        uint32 bidExpirationTime; //unix time
+        uint32 loanExpirationTime; //unix time
         bool borrowerAttestationRequired;
         EnumerableSet.AddressSet verifiedBorrowersForPool;
         mapping(address => bytes32) borrowerAttestationIds;
-        address feeRecipient;
     }
 
     mapping(uint256 => poolDetail) internal pools;
@@ -82,27 +86,27 @@ contract poolRegistry {
     event SetPaymentCycleDuration(uint256 poolId, uint32 duration);
     event SetPaymentDefaultDuration(uint256 poolId, uint32 duration);
     event SetPoolFee(uint256 poolId, uint16 feePct);
-    event SetBidExpirationTime(uint256 poolId, uint32 duration);
+    event SetloanExpirationTime(uint256 poolId, uint32 duration);
     event LenderAttestation(uint256 poolId, address lender);
     event BorrowerAttestation(uint256 poolId, address borrower);
 
     //Create Pool
-    function createMarket(
+    function createPool(
         address _initialOwner,
         uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
-        uint32 _bidExpirationTime,
-        uint16 _feePercent,
+        uint32 _loanExpirationTime,
+        uint16 _poolFeePercent,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation,
         string calldata _uri
     ) external {
-        _createMarket(
+        _createPool(
             _initialOwner,
             _paymentCycleDuration,
             _paymentDefaultDuration,
-            _bidExpirationTime,
-            _feePercent,
+            _loanExpirationTime,
+            _poolFeePercent,
             _requireLenderAttestation,
             _requireBorrowerAttestation,
             _uri
@@ -110,11 +114,11 @@ contract poolRegistry {
     }
 
     // Creates a new Pool.
-    function _createMarket(
+    function _createPool(
         address _initialOwner,
         uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
-        uint32 _bidExpirationTime,
+        uint32 _loanExpirationTime,
         uint16 _feePercent,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation,
@@ -128,6 +132,7 @@ contract poolRegistry {
         address poolAddress = LibPool.deployPoolAddress(
             msg.sender,
             address(this),
+            AconomyFeeAddress,
             _paymentCycleDuration,
             _paymentDefaultDuration,
             _feePercent
@@ -140,7 +145,7 @@ contract poolRegistry {
         setPaymentCycleDuration(poolId_, _paymentCycleDuration);
         setPaymentDefaultDuration(poolId_, _paymentDefaultDuration);
         setPoolFeePercent(poolId_, _feePercent);
-        setBidExpirationTime(poolId_, _bidExpirationTime);
+        setloanExpirationTime(poolId_, _loanExpirationTime);
 
         // Check if pool requires lender attestation to join
         if (_requireLenderAttestation) {
@@ -202,14 +207,14 @@ contract poolRegistry {
         }
     }
 
-    function setBidExpirationTime(uint256 _poolId, uint32 _duration)
+    function setloanExpirationTime(uint256 _poolId, uint32 _duration)
         public
         ownsPool(_poolId)
     {
-        if (_duration != pools[_poolId].bidExpirationTime) {
-            pools[_poolId].bidExpirationTime = _duration;
+        if (_duration != pools[_poolId].loanExpirationTime) {
+            pools[_poolId].loanExpirationTime = _duration;
 
-            emit SetBidExpirationTime(_poolId, _duration);
+            emit SetloanExpirationTime(_poolId, _duration);
         }
     }
 
@@ -240,9 +245,9 @@ contract poolRegistry {
             _isLender ? lenderAttestationSchemaId : borrowerAttestationSchemaId
         )
     {
-        require(msg.sender == pools[_poolId].owner, "Not the market owner");
+        require(msg.sender == pools[_poolId].owner, "Not the pool owner");
 
-        // Submit attestation for borrower to join a market
+        // Submit attestation for borrower to join a pool
         bytes32 uuid = attestationService.attest(
             _Address,
             _attestingSchemaId, // set by the modifier
@@ -261,9 +266,9 @@ contract poolRegistry {
         bool _isLender
     ) internal {
         if (_isLender) {
-            // Store the lender attestation ID for the market ID
+            // Store the lender attestation ID for the pool ID
             pools[_poolId].lenderAttestationIds[_Address] = _uuid;
-            // Add lender address to market set
+            // Add lender address to pool set
             pools[_poolId].verifiedLendersForPool.add(_Address);
 
             emit LenderAttestation(_poolId, _Address);
@@ -277,13 +282,17 @@ contract poolRegistry {
         }
     }
 
+    function getPoolFee(uint256 _poolId) public view returns (uint16 fee) {
+        return pools[_poolId].poolFeePercent;
+    }
+
     function borrowerVarification(uint256 _poolId, address _borrowerAddress)
         public
         view
         returns (bool isVerified_, bytes32 uuid_)
     {
         return
-            _isBorrowerVerified(
+            _isAddressVerified(
                 _borrowerAddress,
                 pools[_poolId].borrowerAttestationRequired,
                 pools[_poolId].borrowerAttestationIds,
@@ -291,19 +300,33 @@ contract poolRegistry {
             );
     }
 
-    function _isBorrowerVerified(
-        address _borrowerAddress,
+    function lenderVarification(uint256 _poolId, address _lenderAddress)
+        public
+        view
+        returns (bool isVerified_, bytes32 uuid_)
+    {
+        return
+            _isAddressVerified(
+                _lenderAddress,
+                pools[_poolId].lenderAttestationRequired,
+                pools[_poolId].lenderAttestationIds,
+                pools[_poolId].verifiedLendersForPool
+            );
+    }
+
+    function _isAddressVerified(
+        address _wltAddress,
         bool _attestationRequired,
         mapping(address => bytes32) storage _stakeholderAttestationIds,
         EnumerableSet.AddressSet storage _verifiedStakeholderForPool
     ) internal view returns (bool isVerified_, bytes32 uuid_) {
         if (_attestationRequired) {
             isVerified_ =
-                _verifiedStakeholderForPool.contains(_borrowerAddress) &&
+                _verifiedStakeholderForPool.contains(_wltAddress) &&
                 attestationService.isAddressActive(
-                    _stakeholderAttestationIds[_borrowerAddress]
+                    _stakeholderAttestationIds[_wltAddress]
                 );
-            uuid_ = _stakeholderAttestationIds[_borrowerAddress];
+            uuid_ = _stakeholderAttestationIds[_wltAddress];
         } else {
             isVerified_ = true;
         }
@@ -329,7 +352,15 @@ contract poolRegistry {
         return pools[_poolId].paymentDefaultDuration;
     }
 
-    function getBidExpirationTime(uint256 poolId) public view returns (uint32) {
-        return pools[poolId].bidExpirationTime;
+    function getloanExpirationTime(uint256 poolId)
+        public
+        view
+        returns (uint32)
+    {
+        return pools[poolId].loanExpirationTime;
+    }
+
+    function getPoolOwner(uint256 _poolId) public view returns (address) {
+        return pools[_poolId].owner;
     }
 }
