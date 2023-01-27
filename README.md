@@ -54,7 +54,7 @@ Underlying Value (ERC20 tokens)
 
 ## Deploy contracts to the BSC testnet
 
-- Create a .env file storing a metamask private key and bscscan api(To verify contracts after deployment)
+- Create a .env file, store a metamask private key and bscscan api(To verify contracts after deployment).
 - the .env stucture should be as follows:
 
         PK=<Private Key>
