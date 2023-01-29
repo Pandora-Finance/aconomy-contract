@@ -13,6 +13,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+// a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+// a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+
 contract poolAddress is poolStorage {
     address poolRegistryAddress;
     address AconomyFeeAddress;
@@ -171,26 +174,26 @@ contract poolAddress is poolStorage {
             amountToAconomy -
             amountToPool;
 
-        //Transfer Aconomy Fee
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-            amountToAconomy
-        );
+        // //Transfer Aconomy Fee
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+        //     amountToAconomy
+        // );
 
-        //Transfer Aconomy Pool Owner
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-            amountToPool
-        );
+        // //Transfer Aconomy Pool Owner
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+        //     amountToPool
+        // );
 
-        //transfer funds to borrower
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            loan.borrower,
-            amountToBorrower
-        );
+        // //transfer funds to borrower
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     loan.borrower,
+        //     amountToBorrower
+        // );
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -218,5 +221,19 @@ contract poolAddress is poolStorage {
 
         return (uint32(block.timestamp) >
             loan.loanDetails.timestamp + loanExpirationTime[_loanId]);
+    }
+
+    event res(uint256 owedPrincipal, uint256 duePrincipal, uint256 interest);
+
+    function repayYourLoan(uint256 _loanId) external {
+        if (loans[_loanId].state != LoanState.ACCEPTED) {
+            revert("Loan must be accepted");
+        }
+        (
+            uint256 owedPrincipal,
+            uint256 duePrincipal,
+            uint256 interest
+        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+        emit res(owedPrincipal, duePrincipal, interest);
     }
 }
