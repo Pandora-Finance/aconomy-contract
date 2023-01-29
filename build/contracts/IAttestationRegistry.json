@@ -71,15 +71,15 @@
     "absolutePath": "project:/contracts/interfaces/IAttestationRegistry.sol",
     "exportedSymbols": {
       "IAttestationRegistry": [
-        6853
+        7446
       ]
     },
-    "id": 6854,
+    "id": 7447,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6830,
+        "id": 7423,
         "literals": [
           "solidity",
           ">=",
@@ -90,7 +90,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:28"
+        "src": "0:31:30"
       },
       {
         "abstract": false,
@@ -99,27 +99,27 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 6853,
+        "id": 7446,
         "linearizedBaseContracts": [
-          6853
+          7446
         ],
         "name": "IAttestationRegistry",
-        "nameLocation": "76:20:28",
+        "nameLocation": "76:20:30",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "IAttestationRegistry.ASRecord",
-            "id": 6837,
+            "id": 7430,
             "members": [
               {
                 "constant": false,
-                "id": 6832,
+                "id": 7425,
                 "mutability": "mutable",
                 "name": "uuid",
-                "nameLocation": "197:4:28",
+                "nameLocation": "197:4:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "189:12:28",
+                "scope": 7430,
+                "src": "189:12:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -127,10 +127,10 @@
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 6831,
+                  "id": 7424,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "189:7:28",
+                  "src": "189:7:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -140,13 +140,13 @@
               },
               {
                 "constant": false,
-                "id": 6834,
+                "id": 7427,
                 "mutability": "mutable",
                 "name": "index",
-                "nameLocation": "302:5:28",
+                "nameLocation": "302:5:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "294:13:28",
+                "scope": 7430,
+                "src": "294:13:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -154,10 +154,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 6833,
+                  "id": 7426,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "294:7:28",
+                  "src": "294:7:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -167,13 +167,13 @@
               },
               {
                 "constant": false,
-                "id": 6836,
+                "id": 7429,
                 "mutability": "mutable",
                 "name": "schema",
-                "nameLocation": "399:6:28",
+                "nameLocation": "399:6:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "393:12:28",
+                "scope": 7430,
+                "src": "393:12:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -181,10 +181,10 @@
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 6835,
+                  "id": 7428,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
-                  "src": "393:5:28",
+                  "src": "393:5:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_storage_ptr",
                     "typeString": "bytes"
@@ -194,34 +194,34 @@
               }
             ],
             "name": "ASRecord",
-            "nameLocation": "110:8:28",
+            "nameLocation": "110:8:30",
             "nodeType": "StructDefinition",
-            "scope": 6853,
-            "src": "103:309:28",
+            "scope": 7446,
+            "src": "103:309:30",
             "visibility": "public"
           },
           {
             "functionSelector": "82fbdc9c",
-            "id": 6844,
+            "id": 7437,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "427:8:28",
+            "nameLocation": "427:8:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6840,
+              "id": 7433,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6839,
+                  "id": 7432,
                   "mutability": "mutable",
                   "name": "schema",
-                  "nameLocation": "451:6:28",
+                  "nameLocation": "451:6:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6844,
-                  "src": "436:21:28",
+                  "scope": 7437,
+                  "src": "436:21:30",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -229,10 +229,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 6838,
+                    "id": 7431,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "436:5:28",
+                    "src": "436:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -241,21 +241,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "435:23:28"
+              "src": "435:23:30"
             },
             "returnParameters": {
-              "id": 6843,
+              "id": 7436,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6842,
+                  "id": 7435,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6844,
-                  "src": "477:7:28",
+                  "scope": 7437,
+                  "src": "477:7:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -263,10 +263,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6841,
+                    "id": 7434,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "477:7:28",
+                    "src": "477:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -275,36 +275,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "476:9:28"
+              "src": "476:9:30"
             },
-            "scope": 6853,
-            "src": "418:68:28",
+            "scope": 7446,
+            "src": "418:68:30",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "72487d52",
-            "id": 6852,
+            "id": 7445,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAS",
-            "nameLocation": "501:5:28",
+            "nameLocation": "501:5:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6847,
+              "id": 7440,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6846,
+                  "id": 7439,
                   "mutability": "mutable",
                   "name": "uuid",
-                  "nameLocation": "515:4:28",
+                  "nameLocation": "515:4:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6852,
-                  "src": "507:12:28",
+                  "scope": 7445,
+                  "src": "507:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -312,10 +312,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6845,
+                    "id": 7438,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "507:7:28",
+                    "src": "507:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -324,76 +324,76 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "506:14:28"
+              "src": "506:14:30"
             },
             "returnParameters": {
-              "id": 6851,
+              "id": 7444,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6850,
+                  "id": 7443,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6852,
-                  "src": "544:15:28",
+                  "scope": 7445,
+                  "src": "544:15:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ASRecord_$6837_memory_ptr",
+                    "typeIdentifier": "t_struct$_ASRecord_$7430_memory_ptr",
                     "typeString": "struct IAttestationRegistry.ASRecord"
                   },
                   "typeName": {
-                    "id": 6849,
+                    "id": 7442,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 6848,
+                      "id": 7441,
                       "name": "ASRecord",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 6837,
-                      "src": "544:8:28"
+                      "referencedDeclaration": 7430,
+                      "src": "544:8:30"
                     },
-                    "referencedDeclaration": 6837,
-                    "src": "544:8:28",
+                    "referencedDeclaration": 7430,
+                    "src": "544:8:30",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$6837_storage_ptr",
+                      "typeIdentifier": "t_struct$_ASRecord_$7430_storage_ptr",
                       "typeString": "struct IAttestationRegistry.ASRecord"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "543:17:28"
+              "src": "543:17:30"
             },
-            "scope": 6853,
-            "src": "492:69:28",
+            "scope": 7446,
+            "src": "492:69:30",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 6854,
-        "src": "66:497:28",
+        "scope": 7447,
+        "src": "66:497:30",
         "usedErrors": []
       }
     ],
-    "src": "0:564:28"
+    "src": "0:564:30"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/interfaces/IAttestationRegistry.sol",
     "exportedSymbols": {
       "IAttestationRegistry": [
-        6853
+        7446
       ]
     },
-    "id": 6854,
+    "id": 7447,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6830,
+        "id": 7423,
         "literals": [
           "solidity",
           ">=",
@@ -404,7 +404,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:28"
+        "src": "0:31:30"
       },
       {
         "abstract": false,
@@ -413,27 +413,27 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 6853,
+        "id": 7446,
         "linearizedBaseContracts": [
-          6853
+          7446
         ],
         "name": "IAttestationRegistry",
-        "nameLocation": "76:20:28",
+        "nameLocation": "76:20:30",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "canonicalName": "IAttestationRegistry.ASRecord",
-            "id": 6837,
+            "id": 7430,
             "members": [
               {
                 "constant": false,
-                "id": 6832,
+                "id": 7425,
                 "mutability": "mutable",
                 "name": "uuid",
-                "nameLocation": "197:4:28",
+                "nameLocation": "197:4:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "189:12:28",
+                "scope": 7430,
+                "src": "189:12:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -441,10 +441,10 @@
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 6831,
+                  "id": 7424,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "189:7:28",
+                  "src": "189:7:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes32",
                     "typeString": "bytes32"
@@ -454,13 +454,13 @@
               },
               {
                 "constant": false,
-                "id": 6834,
+                "id": 7427,
                 "mutability": "mutable",
                 "name": "index",
-                "nameLocation": "302:5:28",
+                "nameLocation": "302:5:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "294:13:28",
+                "scope": 7430,
+                "src": "294:13:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -468,10 +468,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 6833,
+                  "id": 7426,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "294:7:28",
+                  "src": "294:7:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -481,13 +481,13 @@
               },
               {
                 "constant": false,
-                "id": 6836,
+                "id": 7429,
                 "mutability": "mutable",
                 "name": "schema",
-                "nameLocation": "399:6:28",
+                "nameLocation": "399:6:30",
                 "nodeType": "VariableDeclaration",
-                "scope": 6837,
-                "src": "393:12:28",
+                "scope": 7430,
+                "src": "393:12:30",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -495,10 +495,10 @@
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 6835,
+                  "id": 7428,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
-                  "src": "393:5:28",
+                  "src": "393:5:30",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bytes_storage_ptr",
                     "typeString": "bytes"
@@ -508,34 +508,34 @@
               }
             ],
             "name": "ASRecord",
-            "nameLocation": "110:8:28",
+            "nameLocation": "110:8:30",
             "nodeType": "StructDefinition",
-            "scope": 6853,
-            "src": "103:309:28",
+            "scope": 7446,
+            "src": "103:309:30",
             "visibility": "public"
           },
           {
             "functionSelector": "82fbdc9c",
-            "id": 6844,
+            "id": 7437,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "427:8:28",
+            "nameLocation": "427:8:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6840,
+              "id": 7433,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6839,
+                  "id": 7432,
                   "mutability": "mutable",
                   "name": "schema",
-                  "nameLocation": "451:6:28",
+                  "nameLocation": "451:6:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6844,
-                  "src": "436:21:28",
+                  "scope": 7437,
+                  "src": "436:21:30",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -543,10 +543,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 6838,
+                    "id": 7431,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "436:5:28",
+                    "src": "436:5:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -555,21 +555,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "435:23:28"
+              "src": "435:23:30"
             },
             "returnParameters": {
-              "id": 6843,
+              "id": 7436,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6842,
+                  "id": 7435,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6844,
-                  "src": "477:7:28",
+                  "scope": 7437,
+                  "src": "477:7:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -577,10 +577,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6841,
+                    "id": 7434,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "477:7:28",
+                    "src": "477:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -589,36 +589,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "476:9:28"
+              "src": "476:9:30"
             },
-            "scope": 6853,
-            "src": "418:68:28",
+            "scope": 7446,
+            "src": "418:68:30",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "72487d52",
-            "id": 6852,
+            "id": 7445,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAS",
-            "nameLocation": "501:5:28",
+            "nameLocation": "501:5:30",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6847,
+              "id": 7440,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6846,
+                  "id": 7439,
                   "mutability": "mutable",
                   "name": "uuid",
-                  "nameLocation": "515:4:28",
+                  "nameLocation": "515:4:30",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6852,
-                  "src": "507:12:28",
+                  "scope": 7445,
+                  "src": "507:12:30",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -626,10 +626,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6845,
+                    "id": 7438,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "507:7:28",
+                    "src": "507:7:30",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -638,62 +638,62 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "506:14:28"
+              "src": "506:14:30"
             },
             "returnParameters": {
-              "id": 6851,
+              "id": 7444,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6850,
+                  "id": 7443,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6852,
-                  "src": "544:15:28",
+                  "scope": 7445,
+                  "src": "544:15:30",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ASRecord_$6837_memory_ptr",
+                    "typeIdentifier": "t_struct$_ASRecord_$7430_memory_ptr",
                     "typeString": "struct IAttestationRegistry.ASRecord"
                   },
                   "typeName": {
-                    "id": 6849,
+                    "id": 7442,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 6848,
+                      "id": 7441,
                       "name": "ASRecord",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 6837,
-                      "src": "544:8:28"
+                      "referencedDeclaration": 7430,
+                      "src": "544:8:30"
                     },
-                    "referencedDeclaration": 6837,
-                    "src": "544:8:28",
+                    "referencedDeclaration": 7430,
+                    "src": "544:8:30",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$6837_storage_ptr",
+                      "typeIdentifier": "t_struct$_ASRecord_$7430_storage_ptr",
                       "typeString": "struct IAttestationRegistry.ASRecord"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "543:17:28"
+              "src": "543:17:30"
             },
-            "scope": 6853,
-            "src": "492:69:28",
+            "scope": 7446,
+            "src": "492:69:30",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 6854,
-        "src": "66:497:28",
+        "scope": 7447,
+        "src": "66:497:30",
         "usedErrors": []
       }
     ],
-    "src": "0:564:28"
+    "src": "0:564:30"
   },
   "compiler": {
     "name": "solc",
@@ -701,7 +701,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.4",
-  "updatedAt": "2023-01-25T10:28:25.759Z",
+  "updatedAt": "2023-01-29T17:38:15.374Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

@@ -13,5 +13,10 @@
   "license": "ISC",
   "devDependencies": {
     "truffle-plugin-verify": "^0.6.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1",
+    "big-number": "^2.0.0",
+    "moment": "^2.29.4"
   }
 }

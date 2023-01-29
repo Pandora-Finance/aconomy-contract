@@ -35,15 +35,15 @@
     "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
     "exportedSymbols": {
       "IAttestationServices": [
-        6863
+        7456
       ]
     },
-    "id": 6864,
+    "id": 7457,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6855,
+        "id": 7448,
         "literals": [
           "solidity",
           ">=",
@@ -54,7 +54,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:29"
+        "src": "0:31:31"
       },
       {
         "abstract": false,
@@ -63,36 +63,36 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 6863,
+        "id": 7456,
         "linearizedBaseContracts": [
-          6863
+          7456
         ],
         "name": "IAttestationServices",
-        "nameLocation": "76:20:29",
+        "nameLocation": "76:20:31",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "82fbdc9c",
-            "id": 6862,
+            "id": 7455,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "112:8:29",
+            "nameLocation": "112:8:31",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6858,
+              "id": 7451,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6857,
+                  "id": 7450,
                   "mutability": "mutable",
                   "name": "schema",
-                  "nameLocation": "136:6:29",
+                  "nameLocation": "136:6:31",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6862,
-                  "src": "121:21:29",
+                  "scope": 7455,
+                  "src": "121:21:31",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -100,10 +100,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 6856,
+                    "id": 7449,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "121:5:29",
+                    "src": "121:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -112,21 +112,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "120:23:29"
+              "src": "120:23:31"
             },
             "returnParameters": {
-              "id": 6861,
+              "id": 7454,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6860,
+                  "id": 7453,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6862,
-                  "src": "162:7:29",
+                  "scope": 7455,
+                  "src": "162:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -134,10 +134,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6859,
+                    "id": 7452,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "162:7:29",
+                    "src": "162:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -146,35 +146,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "161:9:29"
+              "src": "161:9:31"
             },
-            "scope": 6863,
-            "src": "103:68:29",
+            "scope": 7456,
+            "src": "103:68:31",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 6864,
-        "src": "66:107:29",
+        "scope": 7457,
+        "src": "66:107:31",
         "usedErrors": []
       }
     ],
-    "src": "0:174:29"
+    "src": "0:174:31"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
     "exportedSymbols": {
       "IAttestationServices": [
-        6863
+        7456
       ]
     },
-    "id": 6864,
+    "id": 7457,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 6855,
+        "id": 7448,
         "literals": [
           "solidity",
           ">=",
@@ -185,7 +185,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:29"
+        "src": "0:31:31"
       },
       {
         "abstract": false,
@@ -194,36 +194,36 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 6863,
+        "id": 7456,
         "linearizedBaseContracts": [
-          6863
+          7456
         ],
         "name": "IAttestationServices",
-        "nameLocation": "76:20:29",
+        "nameLocation": "76:20:31",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "82fbdc9c",
-            "id": 6862,
+            "id": 7455,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "112:8:29",
+            "nameLocation": "112:8:31",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 6858,
+              "id": 7451,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6857,
+                  "id": 7450,
                   "mutability": "mutable",
                   "name": "schema",
-                  "nameLocation": "136:6:29",
+                  "nameLocation": "136:6:31",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6862,
-                  "src": "121:21:29",
+                  "scope": 7455,
+                  "src": "121:21:31",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -231,10 +231,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 6856,
+                    "id": 7449,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "121:5:29",
+                    "src": "121:5:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -243,21 +243,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "120:23:29"
+              "src": "120:23:31"
             },
             "returnParameters": {
-              "id": 6861,
+              "id": 7454,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 6860,
+                  "id": 7453,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 6862,
-                  "src": "162:7:29",
+                  "scope": 7455,
+                  "src": "162:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -265,10 +265,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 6859,
+                    "id": 7452,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "162:7:29",
+                    "src": "162:7:31",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -277,21 +277,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "161:9:29"
+              "src": "161:9:31"
             },
-            "scope": 6863,
-            "src": "103:68:29",
+            "scope": 7456,
+            "src": "103:68:31",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 6864,
-        "src": "66:107:29",
+        "scope": 7457,
+        "src": "66:107:31",
         "usedErrors": []
       }
     ],
-    "src": "0:174:29"
+    "src": "0:174:31"
   },
   "compiler": {
     "name": "solc",
@@ -299,7 +299,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.4",
-  "updatedAt": "2023-01-25T10:28:25.760Z",
+  "updatedAt": "2023-01-29T17:38:15.375Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
