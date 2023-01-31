@@ -3,9 +3,13 @@ const attestationServices = artifacts.require("AttestationServices");
 const poolRegistry = artifacts.require("poolRegistry");
 const libPool = artifacts.require("LibPool")
 const libCalc = artifacts.require("LibCalculations")
+const aconomyfee = artifacts.require("AconomyFee")
 
-module.exports = async function (deployer) {
-  await deployer.deploy(attestationRegistry).then((res) => {console.log(res.address)});
+module.exports = async function (deployer,network, accounts) {
+  await deployer.deploy(aconomyfee);
+  
+
+  await deployer.deploy(attestationRegistry)
   var attestRegistry = await attestationRegistry.deployed();
 
   await deployer.deploy(attestationServices, attestRegistry.address)
@@ -19,5 +23,5 @@ module.exports = async function (deployer) {
  
   await deployer.link(libPool, [poolRegistry]);
 
-  await deployer.deploy(poolRegistry, attestServices.address,"0xdeaba94a8ff9dbeaaf1f7e260182964e77523fc5" )
+  await deployer.deploy(poolRegistry, attestServices.address,accounts[0] )
 };

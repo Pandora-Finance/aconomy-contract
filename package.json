@@ -17,6 +17,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1",
     "big-number": "^2.0.0",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "web3": "^1.8.2"
   }
 }
