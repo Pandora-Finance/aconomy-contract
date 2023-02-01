@@ -4,6 +4,7 @@ const poolRegistry = artifacts.require("poolRegistry");
 const libPool = artifacts.require("LibPool")
 const libCalc = artifacts.require("LibCalculations")
 const aconomyfee = artifacts.require("AconomyFee")
+const ERC20 = artifacts.require("ERC20")
 
 module.exports = async function (deployer,network, accounts) {
   await deployer.deploy(aconomyfee);
@@ -24,4 +25,6 @@ module.exports = async function (deployer,network, accounts) {
   await deployer.link(libPool, [poolRegistry]);
 
   await deployer.deploy(poolRegistry, attestServices.address,accounts[0] )
+
+  // await deployer.deploy(ER)
 };

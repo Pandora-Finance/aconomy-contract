@@ -5,6 +5,7 @@ const AttestRegistry = artifacts.require("attestationRegistry")
 const AttestServices = artifacts.require("attestationServices");
 const AconomyFee = artifacts.require("AconomyFee")
 const PoolAddress = artifacts.require('poolAddress')
+const ERC20 = artifacts.require('ERC20')
 
 
 contract("poolRegistry", async (accounts) => {
@@ -17,7 +18,7 @@ const expirationTime = BigNumber(moment.now()).add(
     moment.duration(30, 'days').seconds())
   
 
-let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Address, loanId1, poolAddressInstance;
+let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Address, loanId1, poolAddressInstance, erc20;
 
     it("should set Aconomyfee", async () => {
         aconomyFee = await AconomyFee.deployed();
@@ -70,6 +71,8 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
     })
 
     it("should allow Attested Borrower to Request Loan in a Pool", async() => {
+
+        erc20 = await ERC20.deployed('100000')
         
         poolAddressInstance = await PoolAddress.at(pool1Address)
 
@@ -93,6 +96,6 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         assert.equal(res.status, true, "Not able to accept loan");
     })
 
-    
+
 
 })
