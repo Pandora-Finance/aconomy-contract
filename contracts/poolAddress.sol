@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.2;
+pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -186,26 +186,26 @@ contract poolAddress is poolStorage {
             amountToAconomy -
             amountToPool;
 
-        // //Transfer Aconomy Fee
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-        //     amountToAconomy
-        // );
+        //Transfer Aconomy Fee
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+            amountToAconomy
+        );
 
-        // //Transfer Aconomy Pool Owner
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-        //     amountToPool
-        // );
+        //Transfer Aconomy Pool Owner
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+            amountToPool
+        );
 
-        // //transfer funds to borrower
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     loan.borrower,
-        //     amountToBorrower
-        // );
+        //transfer funds to borrower
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            loan.borrower,
+            amountToBorrower
+        );
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
