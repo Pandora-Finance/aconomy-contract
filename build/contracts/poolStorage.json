@@ -131,11 +131,6 @@
           "type": "uint256"
         },
         {
-          "internalType": "bytes32",
-          "name": "_metadataURI",
-          "type": "bytes32"
-        },
-        {
           "components": [
             {
               "internalType": "contract ERC20",
@@ -240,7 +235,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"borrowerLoans\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lenderLendAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loanDefaultDuration\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loanExpirationTime\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loanId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loans\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"borrower\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"lender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"poolId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_metadataURI\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"contract ERC20\",\"name\":\"lendingToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"principal\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"principal\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"interest\",\"type\":\"uint256\"}],\"internalType\":\"struct poolStorage.Payment\",\"name\":\"totalRepaid\",\"type\":\"tuple\"},{\"internalType\":\"uint32\",\"name\":\"timestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"acceptedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"lastRepaidTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"loanDuration\",\"type\":\"uint32\"}],\"internalType\":\"struct poolStorage.LoanDetails\",\"name\":\"loanDetails\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"paymentCycleAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"paymentCycle\",\"type\":\"uint32\"},{\"internalType\":\"uint16\",\"name\":\"APR\",\"type\":\"uint16\"}],\"internalType\":\"struct poolStorage.Terms\",\"name\":\"terms\",\"type\":\"tuple\"},{\"internalType\":\"enum poolStorage.LoanState\",\"name\":\"state\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"totalERC20Amount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/poolStorage.sol\":\"poolStorage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0x4ffc0547c02ad22925310c585c0f166f8759e2648a09e9b489100c42f15dd98d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://15f52f51413a9de1ff191e2f6367c62178e1df7806d7880fe857a98b0b66253d\",\"dweb:/ipfs/QmaQG1fwfgUt5E9nu2cccFiV47B2V78MM1tCy1qB7n4MsH\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]},\"@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol\":{\"keccak256\":\"0x8de418a5503946cabe331f35fe242d3201a73f67f77aaeb7110acb1f30423aca\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a376d3dda2cb70536c0a45c208b29b34ac560c4cb4f513a42079f96ba47d2dd\",\"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"keccak256\":\"0xc3ff3f5c4584e1d9a483ad7ced51ab64523201f4e3d3c65293e4ca8aeb77a961\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d7d3dd6067a994690471b5fc71b6f81fac3847798b37d404f74db00b4d3c3d0e\",\"dweb:/ipfs/QmRHF1RarifjNi93RttouNPkYZGyu6CD926PgRDzD5iL35\"]},\"project:/contracts/poolStorage.sol\":{\"keccak256\":\"0x2ff7ea826da52181c769437ecaeb80a482cfa97b9bc970ac83cdf79ff1747192\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://99cd4fdd4b89efce5d1a08392ec23acb15cfbae2788b32bc2a400da374fd4446\",\"dweb:/ipfs/QmULsnT1mtJcGtateSePmpLFnm7tTEcACctUooCwnNpZcc\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"borrowerLoans\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"lenderLendAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loanDefaultDuration\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loanExpirationTime\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"loanId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"loans\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"borrower\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"lender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"poolId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"contract ERC20\",\"name\":\"lendingToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"principal\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"principal\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"interest\",\"type\":\"uint256\"}],\"internalType\":\"struct poolStorage.Payment\",\"name\":\"totalRepaid\",\"type\":\"tuple\"},{\"internalType\":\"uint32\",\"name\":\"timestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"acceptedTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"lastRepaidTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"loanDuration\",\"type\":\"uint32\"}],\"internalType\":\"struct poolStorage.LoanDetails\",\"name\":\"loanDetails\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"paymentCycleAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"paymentCycle\",\"type\":\"uint32\"},{\"internalType\":\"uint16\",\"name\":\"APR\",\"type\":\"uint16\"}],\"internalType\":\"struct poolStorage.Terms\",\"name\":\"terms\",\"type\":\"tuple\"},{\"internalType\":\"enum poolStorage.LoanState\",\"name\":\"state\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"totalERC20Amount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/poolStorage.sol\":\"poolStorage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0x4ffc0547c02ad22925310c585c0f166f8759e2648a09e9b489100c42f15dd98d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://15f52f51413a9de1ff191e2f6367c62178e1df7806d7880fe857a98b0b66253d\",\"dweb:/ipfs/QmaQG1fwfgUt5E9nu2cccFiV47B2V78MM1tCy1qB7n4MsH\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]},\"@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol\":{\"keccak256\":\"0x8de418a5503946cabe331f35fe242d3201a73f67f77aaeb7110acb1f30423aca\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a376d3dda2cb70536c0a45c208b29b34ac560c4cb4f513a42079f96ba47d2dd\",\"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92\",\"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3\"]},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"keccak256\":\"0xc3ff3f5c4584e1d9a483ad7ced51ab64523201f4e3d3c65293e4ca8aeb77a961\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d7d3dd6067a994690471b5fc71b6f81fac3847798b37d404f74db00b4d3c3d0e\",\"dweb:/ipfs/QmRHF1RarifjNi93RttouNPkYZGyu6CD926PgRDzD5iL35\"]},\"project:/contracts/poolStorage.sol\":{\"keccak256\":\"0xbc1a75426a7e86dead6312482d3a04f0323f47a79c2103cebd1f83b994de8b14\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://03d4722f4ae5928d63566515ae333355c82cd4df34319a1120845f9b855c2a71\",\"dweb:/ipfs/QmeHHXCPRG1yGNvFwL2wnMBH4Z3iBrQsadc7kNU4hKActJ\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -248,7 +243,7 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity >=0.8.0 <0.9.0;\n// SPDX-License-Identifier: MIT\n\nimport \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\nimport \"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\";\n\nabstract contract poolStorage {\n    using EnumerableSet for EnumerableSet.UintSet;\n    // Current number of loans.\n    uint256 public loanId = 0;\n\n    // Mapping of loanId to loan information.\n    mapping(uint256 => Loan) public loans;\n\n    enum LoanState {\n        NONEXISTENT,\n        PENDING,\n        CANCELLED,\n        ACCEPTED,\n        PAID,\n        LIQUIDATED\n    }\n\n    /**\n     * Represents a total amount for a payment.\n     ~principal Amount that counts towards the principal.\n     ~interest  Amount that counts toward interest.\n     */\n    struct Payment {\n        uint256 principal;\n        uint256 interest;\n    }\n\n    /**\n     * Details about the loan.\n     ~lendingToken The token address for the loan.\n     ~principal The amount of tokens initially lent out.\n     ~totalRepaid Payment struct that represents the total principal and interest amount repaid.\n     ~timestamp Timestamp, in seconds, of when the bid was submitted by the borrower.\n     ~acceptedTimestamp Timestamp, in seconds, of when the bid was accepted by the lender.\n     ~lastRepaidTimestamp Timestamp, in seconds, of when the last payment was made\n     ~loanDuration The duration of the loan.\n     */\n    struct LoanDetails {\n        ERC20 lendingToken;\n        uint256 principal;\n        Payment totalRepaid;\n        uint32 timestamp;\n        uint32 acceptedTimestamp;\n        uint32 lastRepaidTimestamp;\n        uint32 loanDuration;\n    }\n\n    /**\n     *  Details about a loan request.\n     ~ borrower Account address who is requesting a loan.\n     ~ receiver Account address who will receive the loan amount.\n     ~ lender Account address who accepted and funded the loan request.\n     ~ poolId ID of the pool the bid was submitted to.\n     ~ metadataURI ID of off chain metadata to find additional information of the loan request.\n     ~ loanDetails Struct of the specific loan details.\n     ~ terms Struct of the loan request terms.\n     ~ state Represents the current state of the loan.\n     */\n\n    /**\n     *   Information on the terms of a loan request\n     ~paymentCycleAmount Value of tokens expected to be repaid every payment cycle.\n     ~paymentCycle Duration, in seconds, of how often a payment must be made.\n     ~APR Annual percentage rating to be applied on repayments. (10000 == 100%)\n     */\n    struct Terms {\n        uint256 paymentCycleAmount;\n        uint32 paymentCycle;\n        uint16 APR;\n    }\n\n    struct Loan {\n        address borrower;\n        address receiver;\n        address lender;\n        uint256 poolId;\n        bytes32 _metadataURI; // DEPRECATED\n        LoanDetails loanDetails;\n        Terms terms;\n        LoanState state;\n    }\n\n    // Mapping of borrowers to borrower requests.\n    mapping(address => EnumerableSet.UintSet) internal borrowerActiveLoans;\n\n    // Amount filled by all lenders.\n    // Asset address => Volume amount\n    mapping(address => uint256) public totalERC20Amount;\n\n    // Mapping of borrowers to borrower requests.\n    mapping(address => uint256[]) public borrowerLoans;\n    mapping(uint256 => uint32) public loanDefaultDuration;\n    mapping(uint256 => uint32) public loanExpirationTime;\n\n    // Mapping of amount filled by lenders.\n    // Asset address => Lender address => Lend amount\n    mapping(address => mapping(address => uint256)) public lenderLendAmount;\n}\n",
+  "source": "pragma solidity >=0.8.0 <0.9.0;\n// SPDX-License-Identifier: MIT\n\nimport \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\nimport \"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\";\n\nabstract contract poolStorage {\n    using EnumerableSet for EnumerableSet.UintSet;\n    // Current number of loans.\n    uint256 public loanId = 0;\n\n    // Mapping of loanId to loan information.\n    mapping(uint256 => Loan) public loans;\n\n    enum LoanState {\n        NONEXISTENT,\n        PENDING,\n        CANCELLED,\n        ACCEPTED,\n        PAID,\n        LIQUIDATED\n    }\n\n    /**\n     * Represents a total amount for a payment.\n     ~principal Amount that counts towards the principal.\n     ~interest  Amount that counts toward interest.\n     */\n    struct Payment {\n        uint256 principal;\n        uint256 interest;\n    }\n\n    /**\n     * Details about the loan.\n     ~lendingToken The token address for the loan.\n     ~principal The amount of tokens initially lent out.\n     ~totalRepaid Payment struct that represents the total principal and interest amount repaid.\n     ~timestamp Timestamp, in seconds, of when the bid was submitted by the borrower.\n     ~acceptedTimestamp Timestamp, in seconds, of when the bid was accepted by the lender.\n     ~lastRepaidTimestamp Timestamp, in seconds, of when the last payment was made\n     ~loanDuration The duration of the loan.\n     */\n    struct LoanDetails {\n        ERC20 lendingToken;\n        uint256 principal;\n        Payment totalRepaid;\n        uint32 timestamp;\n        uint32 acceptedTimestamp;\n        uint32 lastRepaidTimestamp;\n        uint32 loanDuration;\n    }\n\n    /**\n     *  Details about a loan request.\n     ~ borrower Account address who is requesting a loan.\n     ~ receiver Account address who will receive the loan amount.\n     ~ lender Account address who accepted and funded the loan request.\n     ~ poolId ID of the pool the bid was submitted to.\n     ~ metadataURI ID of off chain metadata to find additional information of the loan request.\n     ~ loanDetails Struct of the specific loan details.\n     ~ terms Struct of the loan request terms.\n     ~ state Represents the current state of the loan.\n     */\n\n    /**\n     *   Information on the terms of a loan request\n     ~paymentCycleAmount Value of tokens expected to be repaid every payment cycle.\n     ~paymentCycle Duration, in seconds, of how often a payment must be made.\n     ~APR Annual percentage rating to be applied on repayments. (10000 == 100%)\n     */\n    struct Terms {\n        uint256 paymentCycleAmount;\n        uint32 paymentCycle;\n        uint16 APR;\n    }\n\n    struct Loan {\n        address borrower;\n        address receiver;\n        address lender;\n        uint256 poolId;\n        LoanDetails loanDetails;\n        Terms terms;\n        LoanState state;\n    }\n\n    // Mapping of borrowers to borrower requests.\n    mapping(address => EnumerableSet.UintSet) internal borrowerActiveLoans;\n\n    // Amount filled by all lenders.\n    // Asset address => Volume amount\n    mapping(address => uint256) public totalERC20Amount;\n\n    // Mapping of borrowers to borrower requests.\n    mapping(address => uint256[]) public borrowerLoans;\n    mapping(uint256 => uint32) public loanDefaultDuration;\n    mapping(uint256 => uint32) public loanExpirationTime;\n\n    // Mapping of amount filled by lenders.\n    // Asset address => Lender address => Lend amount\n    mapping(address => mapping(address => uint256)) public lenderLendAmount;\n}\n",
   "sourcePath": "/Users/sanskarkhare/Desktop/Pandora/aconomy-pool-v1/contracts/poolStorage.sol",
   "ast": {
     "absolutePath": "project:/contracts/poolStorage.sol",
@@ -269,15 +264,15 @@
         856
       ],
       "poolStorage": [
-        10939
+        11823
       ]
     },
-    "id": 10940,
+    "id": 11824,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 10840,
+        "id": 11726,
         "literals": [
           "solidity",
           ">=",
@@ -288,29 +283,29 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:36"
+        "src": "0:31:39"
       },
       {
         "absolutePath": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "id": 10841,
+        "id": 11727,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 10940,
+        "scope": 11824,
         "sourceUnit": 754,
-        "src": "65:55:36",
+        "src": "65:55:39",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
         "file": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
-        "id": 10842,
+        "id": 11728,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 10940,
+        "scope": 11824,
         "sourceUnit": 6400,
-        "src": "121:65:36",
+        "src": "121:65:39",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -321,37 +316,37 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 10939,
+        "id": 11823,
         "linearizedBaseContracts": [
-          10939
+          11823
         ],
         "name": "poolStorage",
-        "nameLocation": "206:11:36",
+        "nameLocation": "206:11:39",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 10846,
+            "id": 11732,
             "libraryName": {
-              "id": 10843,
+              "id": 11729,
               "name": "EnumerableSet",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 6399,
-              "src": "230:13:36"
+              "src": "230:13:39"
             },
             "nodeType": "UsingForDirective",
-            "src": "224:46:36",
+            "src": "224:46:39",
             "typeName": {
-              "id": 10845,
+              "id": 11731,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 10844,
+                "id": 11730,
                 "name": "EnumerableSet.UintSet",
                 "nodeType": "IdentifierPath",
                 "referencedDeclaration": 6269,
-                "src": "248:21:36"
+                "src": "248:21:39"
               },
               "referencedDeclaration": 6269,
-              "src": "248:21:36",
+              "src": "248:21:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_struct$_UintSet_$6269_storage_ptr",
                 "typeString": "struct EnumerableSet.UintSet"
@@ -361,13 +356,13 @@
           {
             "constant": false,
             "functionSelector": "c95669a5",
-            "id": 10849,
+            "id": 11735,
             "mutability": "mutable",
             "name": "loanId",
-            "nameLocation": "322:6:36",
+            "nameLocation": "322:6:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "307:25:36",
+            "scope": 11823,
+            "src": "307:25:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -375,10 +370,10 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 10847,
+              "id": 11733,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "307:7:36",
+              "src": "307:7:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -386,14 +381,14 @@
             },
             "value": {
               "hexValue": "30",
-              "id": 10848,
+              "id": 11734,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "331:1:36",
+              "src": "331:1:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_rational_0_by_1",
                 "typeString": "int_const 0"
@@ -405,51 +400,51 @@
           {
             "constant": false,
             "functionSelector": "e1ec3c68",
-            "id": 10854,
+            "id": 11740,
             "mutability": "mutable",
             "name": "loans",
-            "nameLocation": "417:5:36",
+            "nameLocation": "417:5:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "385:37:36",
+            "scope": 11823,
+            "src": "385:37:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$10910_storage_$",
+              "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$11794_storage_$",
               "typeString": "mapping(uint256 => struct poolStorage.Loan)"
             },
             "typeName": {
-              "id": 10853,
+              "id": 11739,
               "keyType": {
-                "id": 10850,
+                "id": 11736,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "393:7:36",
+                "src": "393:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "385:24:36",
+              "src": "385:24:39",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$10910_storage_$",
+                "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$11794_storage_$",
                 "typeString": "mapping(uint256 => struct poolStorage.Loan)"
               },
               "valueType": {
-                "id": 10852,
+                "id": 11738,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 10851,
+                  "id": 11737,
                   "name": "Loan",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 10910,
-                  "src": "404:4:36"
+                  "referencedDeclaration": 11794,
+                  "src": "404:4:39"
                 },
-                "referencedDeclaration": 10910,
-                "src": "404:4:36",
+                "referencedDeclaration": 11794,
+                "src": "404:4:39",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Loan_$10910_storage_ptr",
+                  "typeIdentifier": "t_struct$_Loan_$11794_storage_ptr",
                   "typeString": "struct poolStorage.Loan"
                 }
               }
@@ -458,69 +453,69 @@
           },
           {
             "canonicalName": "poolStorage.LoanState",
-            "id": 10861,
+            "id": 11747,
             "members": [
               {
-                "id": 10855,
+                "id": 11741,
                 "name": "NONEXISTENT",
-                "nameLocation": "454:11:36",
+                "nameLocation": "454:11:39",
                 "nodeType": "EnumValue",
-                "src": "454:11:36"
+                "src": "454:11:39"
               },
               {
-                "id": 10856,
+                "id": 11742,
                 "name": "PENDING",
-                "nameLocation": "475:7:36",
+                "nameLocation": "475:7:39",
                 "nodeType": "EnumValue",
-                "src": "475:7:36"
+                "src": "475:7:39"
               },
               {
-                "id": 10857,
+                "id": 11743,
                 "name": "CANCELLED",
-                "nameLocation": "492:9:36",
+                "nameLocation": "492:9:39",
                 "nodeType": "EnumValue",
-                "src": "492:9:36"
+                "src": "492:9:39"
               },
               {
-                "id": 10858,
+                "id": 11744,
                 "name": "ACCEPTED",
-                "nameLocation": "511:8:36",
+                "nameLocation": "511:8:39",
                 "nodeType": "EnumValue",
-                "src": "511:8:36"
+                "src": "511:8:39"
               },
               {
-                "id": 10859,
+                "id": 11745,
                 "name": "PAID",
-                "nameLocation": "529:4:36",
+                "nameLocation": "529:4:39",
                 "nodeType": "EnumValue",
-                "src": "529:4:36"
+                "src": "529:4:39"
               },
               {
-                "id": 10860,
+                "id": 11746,
                 "name": "LIQUIDATED",
-                "nameLocation": "543:10:36",
+                "nameLocation": "543:10:39",
                 "nodeType": "EnumValue",
-                "src": "543:10:36"
+                "src": "543:10:39"
               }
             ],
             "name": "LoanState",
-            "nameLocation": "434:9:36",
+            "nameLocation": "434:9:39",
             "nodeType": "EnumDefinition",
-            "src": "429:130:36"
+            "src": "429:130:39"
           },
           {
             "canonicalName": "poolStorage.Payment",
-            "id": 10866,
+            "id": 11752,
             "members": [
               {
                 "constant": false,
-                "id": 10863,
+                "id": 11749,
                 "mutability": "mutable",
                 "name": "principal",
-                "nameLocation": "772:9:36",
+                "nameLocation": "772:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10866,
-                "src": "764:17:36",
+                "scope": 11752,
+                "src": "764:17:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -528,10 +523,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10862,
+                  "id": 11748,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "764:7:36",
+                  "src": "764:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -541,13 +536,13 @@
               },
               {
                 "constant": false,
-                "id": 10865,
+                "id": 11751,
                 "mutability": "mutable",
                 "name": "interest",
-                "nameLocation": "799:8:36",
+                "nameLocation": "799:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10866,
-                "src": "791:16:36",
+                "scope": 11752,
+                "src": "791:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -555,10 +550,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10864,
+                  "id": 11750,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "791:7:36",
+                  "src": "791:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -568,25 +563,25 @@
               }
             ],
             "name": "Payment",
-            "nameLocation": "746:7:36",
+            "nameLocation": "746:7:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "739:75:36",
+            "scope": 11823,
+            "src": "739:75:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.LoanDetails",
-            "id": 10883,
+            "id": 11769,
             "members": [
               {
                 "constant": false,
-                "id": 10869,
+                "id": 11755,
                 "mutability": "mutable",
                 "name": "lendingToken",
-                "nameLocation": "1412:12:36",
+                "nameLocation": "1412:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1406:18:36",
+                "scope": 11769,
+                "src": "1406:18:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -594,17 +589,17 @@
                   "typeString": "contract ERC20"
                 },
                 "typeName": {
-                  "id": 10868,
+                  "id": 11754,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10867,
+                    "id": 11753,
                     "name": "ERC20",
                     "nodeType": "IdentifierPath",
                     "referencedDeclaration": 753,
-                    "src": "1406:5:36"
+                    "src": "1406:5:39"
                   },
                   "referencedDeclaration": 753,
-                  "src": "1406:5:36",
+                  "src": "1406:5:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_contract$_ERC20_$753",
                     "typeString": "contract ERC20"
@@ -614,13 +609,13 @@
               },
               {
                 "constant": false,
-                "id": 10871,
+                "id": 11757,
                 "mutability": "mutable",
                 "name": "principal",
-                "nameLocation": "1442:9:36",
+                "nameLocation": "1442:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1434:17:36",
+                "scope": 11769,
+                "src": "1434:17:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -628,10 +623,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10870,
+                  "id": 11756,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1434:7:36",
+                  "src": "1434:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -641,33 +636,33 @@
               },
               {
                 "constant": false,
-                "id": 10874,
+                "id": 11760,
                 "mutability": "mutable",
                 "name": "totalRepaid",
-                "nameLocation": "1469:11:36",
+                "nameLocation": "1469:11:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1461:19:36",
+                "scope": 11769,
+                "src": "1461:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Payment_$10866_storage_ptr",
+                  "typeIdentifier": "t_struct$_Payment_$11752_storage_ptr",
                   "typeString": "struct poolStorage.Payment"
                 },
                 "typeName": {
-                  "id": 10873,
+                  "id": 11759,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10872,
+                    "id": 11758,
                     "name": "Payment",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10866,
-                    "src": "1461:7:36"
+                    "referencedDeclaration": 11752,
+                    "src": "1461:7:39"
                   },
-                  "referencedDeclaration": 10866,
-                  "src": "1461:7:36",
+                  "referencedDeclaration": 11752,
+                  "src": "1461:7:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Payment_$10866_storage_ptr",
+                    "typeIdentifier": "t_struct$_Payment_$11752_storage_ptr",
                     "typeString": "struct poolStorage.Payment"
                   }
                 },
@@ -675,13 +670,13 @@
               },
               {
                 "constant": false,
-                "id": 10876,
+                "id": 11762,
                 "mutability": "mutable",
                 "name": "timestamp",
-                "nameLocation": "1497:9:36",
+                "nameLocation": "1497:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1490:16:36",
+                "scope": 11769,
+                "src": "1490:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -689,10 +684,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10875,
+                  "id": 11761,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1490:6:36",
+                  "src": "1490:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -702,13 +697,13 @@
               },
               {
                 "constant": false,
-                "id": 10878,
+                "id": 11764,
                 "mutability": "mutable",
                 "name": "acceptedTimestamp",
-                "nameLocation": "1523:17:36",
+                "nameLocation": "1523:17:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1516:24:36",
+                "scope": 11769,
+                "src": "1516:24:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -716,10 +711,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10877,
+                  "id": 11763,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1516:6:36",
+                  "src": "1516:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -729,13 +724,13 @@
               },
               {
                 "constant": false,
-                "id": 10880,
+                "id": 11766,
                 "mutability": "mutable",
                 "name": "lastRepaidTimestamp",
-                "nameLocation": "1557:19:36",
+                "nameLocation": "1557:19:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1550:26:36",
+                "scope": 11769,
+                "src": "1550:26:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -743,10 +738,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10879,
+                  "id": 11765,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1550:6:36",
+                  "src": "1550:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -756,13 +751,13 @@
               },
               {
                 "constant": false,
-                "id": 10882,
+                "id": 11768,
                 "mutability": "mutable",
                 "name": "loanDuration",
-                "nameLocation": "1593:12:36",
+                "nameLocation": "1593:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1586:19:36",
+                "scope": 11769,
+                "src": "1586:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -770,10 +765,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10881,
+                  "id": 11767,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1586:6:36",
+                  "src": "1586:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -783,25 +778,25 @@
               }
             ],
             "name": "LoanDetails",
-            "nameLocation": "1384:11:36",
+            "nameLocation": "1384:11:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "1377:235:36",
+            "scope": 11823,
+            "src": "1377:235:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.Terms",
-            "id": 10890,
+            "id": 11776,
             "members": [
               {
                 "constant": false,
-                "id": 10885,
+                "id": 11771,
                 "mutability": "mutable",
                 "name": "paymentCycleAmount",
-                "nameLocation": "2519:18:36",
+                "nameLocation": "2519:18:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2511:26:36",
+                "scope": 11776,
+                "src": "2511:26:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -809,10 +804,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10884,
+                  "id": 11770,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2511:7:36",
+                  "src": "2511:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -822,13 +817,13 @@
               },
               {
                 "constant": false,
-                "id": 10887,
+                "id": 11773,
                 "mutability": "mutable",
                 "name": "paymentCycle",
-                "nameLocation": "2554:12:36",
+                "nameLocation": "2554:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2547:19:36",
+                "scope": 11776,
+                "src": "2547:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -836,10 +831,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10886,
+                  "id": 11772,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2547:6:36",
+                  "src": "2547:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -849,13 +844,13 @@
               },
               {
                 "constant": false,
-                "id": 10889,
+                "id": 11775,
                 "mutability": "mutable",
                 "name": "APR",
-                "nameLocation": "2583:3:36",
+                "nameLocation": "2583:3:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2576:10:36",
+                "scope": 11776,
+                "src": "2576:10:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -863,10 +858,10 @@
                   "typeString": "uint16"
                 },
                 "typeName": {
-                  "id": 10888,
+                  "id": 11774,
                   "name": "uint16",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2576:6:36",
+                  "src": "2576:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint16",
                     "typeString": "uint16"
@@ -876,25 +871,25 @@
               }
             ],
             "name": "Terms",
-            "nameLocation": "2495:5:36",
+            "nameLocation": "2495:5:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "2488:105:36",
+            "scope": 11823,
+            "src": "2488:105:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.Loan",
-            "id": 10910,
+            "id": 11794,
             "members": [
               {
                 "constant": false,
-                "id": 10892,
+                "id": 11778,
                 "mutability": "mutable",
                 "name": "borrower",
-                "nameLocation": "2629:8:36",
+                "nameLocation": "2629:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2621:16:36",
+                "scope": 11794,
+                "src": "2621:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -902,10 +897,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10891,
+                  "id": 11777,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2621:7:36",
+                  "src": "2621:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -916,13 +911,13 @@
               },
               {
                 "constant": false,
-                "id": 10894,
+                "id": 11780,
                 "mutability": "mutable",
                 "name": "receiver",
-                "nameLocation": "2655:8:36",
+                "nameLocation": "2655:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2647:16:36",
+                "scope": 11794,
+                "src": "2647:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -930,10 +925,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10893,
+                  "id": 11779,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2647:7:36",
+                  "src": "2647:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -944,13 +939,13 @@
               },
               {
                 "constant": false,
-                "id": 10896,
+                "id": 11782,
                 "mutability": "mutable",
                 "name": "lender",
-                "nameLocation": "2681:6:36",
+                "nameLocation": "2681:6:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2673:14:36",
+                "scope": 11794,
+                "src": "2673:14:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -958,10 +953,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10895,
+                  "id": 11781,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2673:7:36",
+                  "src": "2673:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -972,13 +967,13 @@
               },
               {
                 "constant": false,
-                "id": 10898,
+                "id": 11784,
                 "mutability": "mutable",
                 "name": "poolId",
-                "nameLocation": "2705:6:36",
+                "nameLocation": "2705:6:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2697:14:36",
+                "scope": 11794,
+                "src": "2697:14:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -986,10 +981,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10897,
+                  "id": 11783,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2697:7:36",
+                  "src": "2697:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -999,60 +994,33 @@
               },
               {
                 "constant": false,
-                "id": 10900,
-                "mutability": "mutable",
-                "name": "_metadataURI",
-                "nameLocation": "2729:12:36",
-                "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2721:20:36",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bytes32",
-                  "typeString": "bytes32"
-                },
-                "typeName": {
-                  "id": 10899,
-                  "name": "bytes32",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2721:7:36",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  }
-                },
-                "visibility": "internal"
-              },
-              {
-                "constant": false,
-                "id": 10903,
+                "id": 11787,
                 "mutability": "mutable",
                 "name": "loanDetails",
-                "nameLocation": "2777:11:36",
+                "nameLocation": "2733:11:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2765:23:36",
+                "scope": 11794,
+                "src": "2721:23:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_LoanDetails_$10883_storage_ptr",
+                  "typeIdentifier": "t_struct$_LoanDetails_$11769_storage_ptr",
                   "typeString": "struct poolStorage.LoanDetails"
                 },
                 "typeName": {
-                  "id": 10902,
+                  "id": 11786,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10901,
+                    "id": 11785,
                     "name": "LoanDetails",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10883,
-                    "src": "2765:11:36"
+                    "referencedDeclaration": 11769,
+                    "src": "2721:11:39"
                   },
-                  "referencedDeclaration": 10883,
-                  "src": "2765:11:36",
+                  "referencedDeclaration": 11769,
+                  "src": "2721:11:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_LoanDetails_$10883_storage_ptr",
+                    "typeIdentifier": "t_struct$_LoanDetails_$11769_storage_ptr",
                     "typeString": "struct poolStorage.LoanDetails"
                   }
                 },
@@ -1060,33 +1028,33 @@
               },
               {
                 "constant": false,
-                "id": 10906,
+                "id": 11790,
                 "mutability": "mutable",
                 "name": "terms",
-                "nameLocation": "2804:5:36",
+                "nameLocation": "2760:5:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2798:11:36",
+                "scope": 11794,
+                "src": "2754:11:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Terms_$10890_storage_ptr",
+                  "typeIdentifier": "t_struct$_Terms_$11776_storage_ptr",
                   "typeString": "struct poolStorage.Terms"
                 },
                 "typeName": {
-                  "id": 10905,
+                  "id": 11789,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10904,
+                    "id": 11788,
                     "name": "Terms",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10890,
-                    "src": "2798:5:36"
+                    "referencedDeclaration": 11776,
+                    "src": "2754:5:39"
                   },
-                  "referencedDeclaration": 10890,
-                  "src": "2798:5:36",
+                  "referencedDeclaration": 11776,
+                  "src": "2754:5:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Terms_$10890_storage_ptr",
+                    "typeIdentifier": "t_struct$_Terms_$11776_storage_ptr",
                     "typeString": "struct poolStorage.Terms"
                   }
                 },
@@ -1094,33 +1062,33 @@
               },
               {
                 "constant": false,
-                "id": 10909,
+                "id": 11793,
                 "mutability": "mutable",
                 "name": "state",
-                "nameLocation": "2829:5:36",
+                "nameLocation": "2785:5:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2819:15:36",
+                "scope": 11794,
+                "src": "2775:15:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_enum$_LoanState_$10861",
+                  "typeIdentifier": "t_enum$_LoanState_$11747",
                   "typeString": "enum poolStorage.LoanState"
                 },
                 "typeName": {
-                  "id": 10908,
+                  "id": 11792,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10907,
+                    "id": 11791,
                     "name": "LoanState",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10861,
-                    "src": "2819:9:36"
+                    "referencedDeclaration": 11747,
+                    "src": "2775:9:39"
                   },
-                  "referencedDeclaration": 10861,
-                  "src": "2819:9:36",
+                  "referencedDeclaration": 11747,
+                  "src": "2775:9:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_LoanState_$10861",
+                    "typeIdentifier": "t_enum$_LoanState_$11747",
                     "typeString": "enum poolStorage.LoanState"
                   }
                 },
@@ -1128,21 +1096,21 @@
               }
             ],
             "name": "Loan",
-            "nameLocation": "2606:4:36",
+            "nameLocation": "2606:4:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "2599:242:36",
+            "scope": 11823,
+            "src": "2599:198:39",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 10915,
+            "id": 11799,
             "mutability": "mutable",
             "name": "borrowerActiveLoans",
-            "nameLocation": "2948:19:36",
+            "nameLocation": "2904:19:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "2897:70:36",
+            "scope": 11823,
+            "src": "2853:70:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1150,35 +1118,35 @@
               "typeString": "mapping(address => struct EnumerableSet.UintSet)"
             },
             "typeName": {
-              "id": 10914,
+              "id": 11798,
               "keyType": {
-                "id": 10911,
+                "id": 11795,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "2905:7:36",
+                "src": "2861:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "2897:41:36",
+              "src": "2853:41:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_struct$_UintSet_$6269_storage_$",
                 "typeString": "mapping(address => struct EnumerableSet.UintSet)"
               },
               "valueType": {
-                "id": 10913,
+                "id": 11797,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 10912,
+                  "id": 11796,
                   "name": "EnumerableSet.UintSet",
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 6269,
-                  "src": "2916:21:36"
+                  "src": "2872:21:39"
                 },
                 "referencedDeclaration": 6269,
-                "src": "2916:21:36",
+                "src": "2872:21:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_UintSet_$6269_storage_ptr",
                   "typeString": "struct EnumerableSet.UintSet"
@@ -1190,13 +1158,13 @@
           {
             "constant": false,
             "functionSelector": "30f2670c",
-            "id": 10919,
+            "id": 11803,
             "mutability": "mutable",
             "name": "totalERC20Amount",
-            "nameLocation": "3084:16:36",
+            "nameLocation": "3040:16:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3049:51:36",
+            "scope": 11823,
+            "src": "3005:51:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1204,28 +1172,28 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 10918,
+              "id": 11802,
               "keyType": {
-                "id": 10916,
+                "id": 11800,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3057:7:36",
+                "src": "3013:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3049:27:36",
+              "src": "3005:27:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 10917,
+                "id": 11801,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3068:7:36",
+                "src": "3024:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -1237,13 +1205,13 @@
           {
             "constant": false,
             "functionSelector": "e3ed1902",
-            "id": 10924,
+            "id": 11808,
             "mutability": "mutable",
             "name": "borrowerLoans",
-            "nameLocation": "3194:13:36",
+            "nameLocation": "3150:13:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3157:50:36",
+            "scope": 11823,
+            "src": "3113:50:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1251,37 +1219,37 @@
               "typeString": "mapping(address => uint256[])"
             },
             "typeName": {
-              "id": 10923,
+              "id": 11807,
               "keyType": {
-                "id": 10920,
+                "id": 11804,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3165:7:36",
+                "src": "3121:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3157:29:36",
+              "src": "3113:29:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_uint256_$dyn_storage_$",
                 "typeString": "mapping(address => uint256[])"
               },
               "valueType": {
                 "baseType": {
-                  "id": 10921,
+                  "id": 11805,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3176:7:36",
+                  "src": "3132:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
                   }
                 },
-                "id": 10922,
+                "id": 11806,
                 "nodeType": "ArrayTypeName",
-                "src": "3176:9:36",
+                "src": "3132:9:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                   "typeString": "uint256[]"
@@ -1293,13 +1261,13 @@
           {
             "constant": false,
             "functionSelector": "8cda4571",
-            "id": 10928,
+            "id": 11812,
             "mutability": "mutable",
             "name": "loanDefaultDuration",
-            "nameLocation": "3247:19:36",
+            "nameLocation": "3203:19:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3213:53:36",
+            "scope": 11823,
+            "src": "3169:53:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1307,28 +1275,28 @@
               "typeString": "mapping(uint256 => uint32)"
             },
             "typeName": {
-              "id": 10927,
+              "id": 11811,
               "keyType": {
-                "id": 10925,
+                "id": 11809,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3221:7:36",
+                "src": "3177:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3213:26:36",
+              "src": "3169:26:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_uint256_$_t_uint32_$",
                 "typeString": "mapping(uint256 => uint32)"
               },
               "valueType": {
-                "id": 10926,
+                "id": 11810,
                 "name": "uint32",
                 "nodeType": "ElementaryTypeName",
-                "src": "3232:6:36",
+                "src": "3188:6:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint32",
                   "typeString": "uint32"
@@ -1340,13 +1308,13 @@
           {
             "constant": false,
             "functionSelector": "3a31f337",
-            "id": 10932,
+            "id": 11816,
             "mutability": "mutable",
             "name": "loanExpirationTime",
-            "nameLocation": "3306:18:36",
+            "nameLocation": "3262:18:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3272:52:36",
+            "scope": 11823,
+            "src": "3228:52:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1354,28 +1322,28 @@
               "typeString": "mapping(uint256 => uint32)"
             },
             "typeName": {
-              "id": 10931,
+              "id": 11815,
               "keyType": {
-                "id": 10929,
+                "id": 11813,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3280:7:36",
+                "src": "3236:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3272:26:36",
+              "src": "3228:26:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_uint256_$_t_uint32_$",
                 "typeString": "mapping(uint256 => uint32)"
               },
               "valueType": {
-                "id": 10930,
+                "id": 11814,
                 "name": "uint32",
                 "nodeType": "ElementaryTypeName",
-                "src": "3291:6:36",
+                "src": "3247:6:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint32",
                   "typeString": "uint32"
@@ -1387,13 +1355,13 @@
           {
             "constant": false,
             "functionSelector": "fee870e9",
-            "id": 10938,
+            "id": 11822,
             "mutability": "mutable",
             "name": "lenderLendAmount",
-            "nameLocation": "3484:16:36",
+            "nameLocation": "3440:16:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3429:71:36",
+            "scope": 11823,
+            "src": "3385:71:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1401,46 +1369,46 @@
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 10937,
+              "id": 11821,
               "keyType": {
-                "id": 10933,
+                "id": 11817,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3437:7:36",
+                "src": "3393:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3429:47:36",
+              "src": "3385:47:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 10936,
+                "id": 11820,
                 "keyType": {
-                  "id": 10934,
+                  "id": 11818,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3456:7:36",
+                  "src": "3412:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
                 "nodeType": "Mapping",
-                "src": "3448:27:36",
+                "src": "3404:27:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 10935,
+                  "id": 11819,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3467:7:36",
+                  "src": "3423:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -1451,12 +1419,12 @@
             "visibility": "public"
           }
         ],
-        "scope": 10940,
-        "src": "188:3315:36",
+        "scope": 11824,
+        "src": "188:3271:39",
         "usedErrors": []
       }
     ],
-    "src": "0:3504:36"
+    "src": "0:3460:39"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/poolStorage.sol",
@@ -1477,15 +1445,15 @@
         856
       ],
       "poolStorage": [
-        10939
+        11823
       ]
     },
-    "id": 10940,
+    "id": 11824,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 10840,
+        "id": 11726,
         "literals": [
           "solidity",
           ">=",
@@ -1496,29 +1464,29 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:36"
+        "src": "0:31:39"
       },
       {
         "absolutePath": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "id": 10841,
+        "id": 11727,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 10940,
+        "scope": 11824,
         "sourceUnit": 754,
-        "src": "65:55:36",
+        "src": "65:55:39",
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
         "absolutePath": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
         "file": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
-        "id": 10842,
+        "id": 11728,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 10940,
+        "scope": 11824,
         "sourceUnit": 6400,
-        "src": "121:65:36",
+        "src": "121:65:39",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1529,37 +1497,37 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 10939,
+        "id": 11823,
         "linearizedBaseContracts": [
-          10939
+          11823
         ],
         "name": "poolStorage",
-        "nameLocation": "206:11:36",
+        "nameLocation": "206:11:39",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 10846,
+            "id": 11732,
             "libraryName": {
-              "id": 10843,
+              "id": 11729,
               "name": "EnumerableSet",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 6399,
-              "src": "230:13:36"
+              "src": "230:13:39"
             },
             "nodeType": "UsingForDirective",
-            "src": "224:46:36",
+            "src": "224:46:39",
             "typeName": {
-              "id": 10845,
+              "id": 11731,
               "nodeType": "UserDefinedTypeName",
               "pathNode": {
-                "id": 10844,
+                "id": 11730,
                 "name": "EnumerableSet.UintSet",
                 "nodeType": "IdentifierPath",
                 "referencedDeclaration": 6269,
-                "src": "248:21:36"
+                "src": "248:21:39"
               },
               "referencedDeclaration": 6269,
-              "src": "248:21:36",
+              "src": "248:21:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_struct$_UintSet_$6269_storage_ptr",
                 "typeString": "struct EnumerableSet.UintSet"
@@ -1569,13 +1537,13 @@
           {
             "constant": false,
             "functionSelector": "c95669a5",
-            "id": 10849,
+            "id": 11735,
             "mutability": "mutable",
             "name": "loanId",
-            "nameLocation": "322:6:36",
+            "nameLocation": "322:6:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "307:25:36",
+            "scope": 11823,
+            "src": "307:25:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1583,10 +1551,10 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 10847,
+              "id": 11733,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "307:7:36",
+              "src": "307:7:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -1594,14 +1562,14 @@
             },
             "value": {
               "hexValue": "30",
-              "id": 10848,
+              "id": 11734,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "331:1:36",
+              "src": "331:1:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_rational_0_by_1",
                 "typeString": "int_const 0"
@@ -1613,51 +1581,51 @@
           {
             "constant": false,
             "functionSelector": "e1ec3c68",
-            "id": 10854,
+            "id": 11740,
             "mutability": "mutable",
             "name": "loans",
-            "nameLocation": "417:5:36",
+            "nameLocation": "417:5:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "385:37:36",
+            "scope": 11823,
+            "src": "385:37:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$10910_storage_$",
+              "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$11794_storage_$",
               "typeString": "mapping(uint256 => struct poolStorage.Loan)"
             },
             "typeName": {
-              "id": 10853,
+              "id": 11739,
               "keyType": {
-                "id": 10850,
+                "id": 11736,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "393:7:36",
+                "src": "393:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "385:24:36",
+              "src": "385:24:39",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$10910_storage_$",
+                "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Loan_$11794_storage_$",
                 "typeString": "mapping(uint256 => struct poolStorage.Loan)"
               },
               "valueType": {
-                "id": 10852,
+                "id": 11738,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 10851,
+                  "id": 11737,
                   "name": "Loan",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 10910,
-                  "src": "404:4:36"
+                  "referencedDeclaration": 11794,
+                  "src": "404:4:39"
                 },
-                "referencedDeclaration": 10910,
-                "src": "404:4:36",
+                "referencedDeclaration": 11794,
+                "src": "404:4:39",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Loan_$10910_storage_ptr",
+                  "typeIdentifier": "t_struct$_Loan_$11794_storage_ptr",
                   "typeString": "struct poolStorage.Loan"
                 }
               }
@@ -1666,69 +1634,69 @@
           },
           {
             "canonicalName": "poolStorage.LoanState",
-            "id": 10861,
+            "id": 11747,
             "members": [
               {
-                "id": 10855,
+                "id": 11741,
                 "name": "NONEXISTENT",
-                "nameLocation": "454:11:36",
+                "nameLocation": "454:11:39",
                 "nodeType": "EnumValue",
-                "src": "454:11:36"
+                "src": "454:11:39"
               },
               {
-                "id": 10856,
+                "id": 11742,
                 "name": "PENDING",
-                "nameLocation": "475:7:36",
+                "nameLocation": "475:7:39",
                 "nodeType": "EnumValue",
-                "src": "475:7:36"
+                "src": "475:7:39"
               },
               {
-                "id": 10857,
+                "id": 11743,
                 "name": "CANCELLED",
-                "nameLocation": "492:9:36",
+                "nameLocation": "492:9:39",
                 "nodeType": "EnumValue",
-                "src": "492:9:36"
+                "src": "492:9:39"
               },
               {
-                "id": 10858,
+                "id": 11744,
                 "name": "ACCEPTED",
-                "nameLocation": "511:8:36",
+                "nameLocation": "511:8:39",
                 "nodeType": "EnumValue",
-                "src": "511:8:36"
+                "src": "511:8:39"
               },
               {
-                "id": 10859,
+                "id": 11745,
                 "name": "PAID",
-                "nameLocation": "529:4:36",
+                "nameLocation": "529:4:39",
                 "nodeType": "EnumValue",
-                "src": "529:4:36"
+                "src": "529:4:39"
               },
               {
-                "id": 10860,
+                "id": 11746,
                 "name": "LIQUIDATED",
-                "nameLocation": "543:10:36",
+                "nameLocation": "543:10:39",
                 "nodeType": "EnumValue",
-                "src": "543:10:36"
+                "src": "543:10:39"
               }
             ],
             "name": "LoanState",
-            "nameLocation": "434:9:36",
+            "nameLocation": "434:9:39",
             "nodeType": "EnumDefinition",
-            "src": "429:130:36"
+            "src": "429:130:39"
           },
           {
             "canonicalName": "poolStorage.Payment",
-            "id": 10866,
+            "id": 11752,
             "members": [
               {
                 "constant": false,
-                "id": 10863,
+                "id": 11749,
                 "mutability": "mutable",
                 "name": "principal",
-                "nameLocation": "772:9:36",
+                "nameLocation": "772:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10866,
-                "src": "764:17:36",
+                "scope": 11752,
+                "src": "764:17:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1736,10 +1704,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10862,
+                  "id": 11748,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "764:7:36",
+                  "src": "764:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -1749,13 +1717,13 @@
               },
               {
                 "constant": false,
-                "id": 10865,
+                "id": 11751,
                 "mutability": "mutable",
                 "name": "interest",
-                "nameLocation": "799:8:36",
+                "nameLocation": "799:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10866,
-                "src": "791:16:36",
+                "scope": 11752,
+                "src": "791:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1763,10 +1731,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10864,
+                  "id": 11750,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "791:7:36",
+                  "src": "791:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -1776,25 +1744,25 @@
               }
             ],
             "name": "Payment",
-            "nameLocation": "746:7:36",
+            "nameLocation": "746:7:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "739:75:36",
+            "scope": 11823,
+            "src": "739:75:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.LoanDetails",
-            "id": 10883,
+            "id": 11769,
             "members": [
               {
                 "constant": false,
-                "id": 10869,
+                "id": 11755,
                 "mutability": "mutable",
                 "name": "lendingToken",
-                "nameLocation": "1412:12:36",
+                "nameLocation": "1412:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1406:18:36",
+                "scope": 11769,
+                "src": "1406:18:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1802,17 +1770,17 @@
                   "typeString": "contract ERC20"
                 },
                 "typeName": {
-                  "id": 10868,
+                  "id": 11754,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10867,
+                    "id": 11753,
                     "name": "ERC20",
                     "nodeType": "IdentifierPath",
                     "referencedDeclaration": 753,
-                    "src": "1406:5:36"
+                    "src": "1406:5:39"
                   },
                   "referencedDeclaration": 753,
-                  "src": "1406:5:36",
+                  "src": "1406:5:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_contract$_ERC20_$753",
                     "typeString": "contract ERC20"
@@ -1822,13 +1790,13 @@
               },
               {
                 "constant": false,
-                "id": 10871,
+                "id": 11757,
                 "mutability": "mutable",
                 "name": "principal",
-                "nameLocation": "1442:9:36",
+                "nameLocation": "1442:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1434:17:36",
+                "scope": 11769,
+                "src": "1434:17:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1836,10 +1804,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10870,
+                  "id": 11756,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1434:7:36",
+                  "src": "1434:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -1849,33 +1817,33 @@
               },
               {
                 "constant": false,
-                "id": 10874,
+                "id": 11760,
                 "mutability": "mutable",
                 "name": "totalRepaid",
-                "nameLocation": "1469:11:36",
+                "nameLocation": "1469:11:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1461:19:36",
+                "scope": 11769,
+                "src": "1461:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Payment_$10866_storage_ptr",
+                  "typeIdentifier": "t_struct$_Payment_$11752_storage_ptr",
                   "typeString": "struct poolStorage.Payment"
                 },
                 "typeName": {
-                  "id": 10873,
+                  "id": 11759,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10872,
+                    "id": 11758,
                     "name": "Payment",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10866,
-                    "src": "1461:7:36"
+                    "referencedDeclaration": 11752,
+                    "src": "1461:7:39"
                   },
-                  "referencedDeclaration": 10866,
-                  "src": "1461:7:36",
+                  "referencedDeclaration": 11752,
+                  "src": "1461:7:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Payment_$10866_storage_ptr",
+                    "typeIdentifier": "t_struct$_Payment_$11752_storage_ptr",
                     "typeString": "struct poolStorage.Payment"
                   }
                 },
@@ -1883,13 +1851,13 @@
               },
               {
                 "constant": false,
-                "id": 10876,
+                "id": 11762,
                 "mutability": "mutable",
                 "name": "timestamp",
-                "nameLocation": "1497:9:36",
+                "nameLocation": "1497:9:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1490:16:36",
+                "scope": 11769,
+                "src": "1490:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1897,10 +1865,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10875,
+                  "id": 11761,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1490:6:36",
+                  "src": "1490:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -1910,13 +1878,13 @@
               },
               {
                 "constant": false,
-                "id": 10878,
+                "id": 11764,
                 "mutability": "mutable",
                 "name": "acceptedTimestamp",
-                "nameLocation": "1523:17:36",
+                "nameLocation": "1523:17:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1516:24:36",
+                "scope": 11769,
+                "src": "1516:24:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1924,10 +1892,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10877,
+                  "id": 11763,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1516:6:36",
+                  "src": "1516:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -1937,13 +1905,13 @@
               },
               {
                 "constant": false,
-                "id": 10880,
+                "id": 11766,
                 "mutability": "mutable",
                 "name": "lastRepaidTimestamp",
-                "nameLocation": "1557:19:36",
+                "nameLocation": "1557:19:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1550:26:36",
+                "scope": 11769,
+                "src": "1550:26:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1951,10 +1919,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10879,
+                  "id": 11765,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1550:6:36",
+                  "src": "1550:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -1964,13 +1932,13 @@
               },
               {
                 "constant": false,
-                "id": 10882,
+                "id": 11768,
                 "mutability": "mutable",
                 "name": "loanDuration",
-                "nameLocation": "1593:12:36",
+                "nameLocation": "1593:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10883,
-                "src": "1586:19:36",
+                "scope": 11769,
+                "src": "1586:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -1978,10 +1946,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10881,
+                  "id": 11767,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "1586:6:36",
+                  "src": "1586:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -1991,25 +1959,25 @@
               }
             ],
             "name": "LoanDetails",
-            "nameLocation": "1384:11:36",
+            "nameLocation": "1384:11:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "1377:235:36",
+            "scope": 11823,
+            "src": "1377:235:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.Terms",
-            "id": 10890,
+            "id": 11776,
             "members": [
               {
                 "constant": false,
-                "id": 10885,
+                "id": 11771,
                 "mutability": "mutable",
                 "name": "paymentCycleAmount",
-                "nameLocation": "2519:18:36",
+                "nameLocation": "2519:18:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2511:26:36",
+                "scope": 11776,
+                "src": "2511:26:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2017,10 +1985,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10884,
+                  "id": 11770,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2511:7:36",
+                  "src": "2511:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -2030,13 +1998,13 @@
               },
               {
                 "constant": false,
-                "id": 10887,
+                "id": 11773,
                 "mutability": "mutable",
                 "name": "paymentCycle",
-                "nameLocation": "2554:12:36",
+                "nameLocation": "2554:12:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2547:19:36",
+                "scope": 11776,
+                "src": "2547:19:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2044,10 +2012,10 @@
                   "typeString": "uint32"
                 },
                 "typeName": {
-                  "id": 10886,
+                  "id": 11772,
                   "name": "uint32",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2547:6:36",
+                  "src": "2547:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint32",
                     "typeString": "uint32"
@@ -2057,13 +2025,13 @@
               },
               {
                 "constant": false,
-                "id": 10889,
+                "id": 11775,
                 "mutability": "mutable",
                 "name": "APR",
-                "nameLocation": "2583:3:36",
+                "nameLocation": "2583:3:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10890,
-                "src": "2576:10:36",
+                "scope": 11776,
+                "src": "2576:10:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2071,10 +2039,10 @@
                   "typeString": "uint16"
                 },
                 "typeName": {
-                  "id": 10888,
+                  "id": 11774,
                   "name": "uint16",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2576:6:36",
+                  "src": "2576:6:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint16",
                     "typeString": "uint16"
@@ -2084,25 +2052,25 @@
               }
             ],
             "name": "Terms",
-            "nameLocation": "2495:5:36",
+            "nameLocation": "2495:5:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "2488:105:36",
+            "scope": 11823,
+            "src": "2488:105:39",
             "visibility": "public"
           },
           {
             "canonicalName": "poolStorage.Loan",
-            "id": 10910,
+            "id": 11794,
             "members": [
               {
                 "constant": false,
-                "id": 10892,
+                "id": 11778,
                 "mutability": "mutable",
                 "name": "borrower",
-                "nameLocation": "2629:8:36",
+                "nameLocation": "2629:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2621:16:36",
+                "scope": 11794,
+                "src": "2621:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2110,10 +2078,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10891,
+                  "id": 11777,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2621:7:36",
+                  "src": "2621:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -2124,13 +2092,13 @@
               },
               {
                 "constant": false,
-                "id": 10894,
+                "id": 11780,
                 "mutability": "mutable",
                 "name": "receiver",
-                "nameLocation": "2655:8:36",
+                "nameLocation": "2655:8:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2647:16:36",
+                "scope": 11794,
+                "src": "2647:16:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2138,10 +2106,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10893,
+                  "id": 11779,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2647:7:36",
+                  "src": "2647:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -2152,13 +2120,13 @@
               },
               {
                 "constant": false,
-                "id": 10896,
+                "id": 11782,
                 "mutability": "mutable",
                 "name": "lender",
-                "nameLocation": "2681:6:36",
+                "nameLocation": "2681:6:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2673:14:36",
+                "scope": 11794,
+                "src": "2673:14:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2166,10 +2134,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 10895,
+                  "id": 11781,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2673:7:36",
+                  "src": "2673:7:39",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -2180,13 +2148,13 @@
               },
               {
                 "constant": false,
-                "id": 10898,
+                "id": 11784,
                 "mutability": "mutable",
                 "name": "poolId",
-                "nameLocation": "2705:6:36",
+                "nameLocation": "2705:6:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2697:14:36",
+                "scope": 11794,
+                "src": "2697:14:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -2194,10 +2162,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 10897,
+                  "id": 11783,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "2697:7:36",
+                  "src": "2697:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -2207,60 +2175,33 @@
               },
               {
                 "constant": false,
-                "id": 10900,
-                "mutability": "mutable",
-                "name": "_metadataURI",
-                "nameLocation": "2729:12:36",
-                "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2721:20:36",
-                "stateVariable": false,
-                "storageLocation": "default",
-                "typeDescriptions": {
-                  "typeIdentifier": "t_bytes32",
-                  "typeString": "bytes32"
-                },
-                "typeName": {
-                  "id": 10899,
-                  "name": "bytes32",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "2721:7:36",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  }
-                },
-                "visibility": "internal"
-              },
-              {
-                "constant": false,
-                "id": 10903,
+                "id": 11787,
                 "mutability": "mutable",
                 "name": "loanDetails",
-                "nameLocation": "2777:11:36",
+                "nameLocation": "2733:11:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2765:23:36",
+                "scope": 11794,
+                "src": "2721:23:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_LoanDetails_$10883_storage_ptr",
+                  "typeIdentifier": "t_struct$_LoanDetails_$11769_storage_ptr",
                   "typeString": "struct poolStorage.LoanDetails"
                 },
                 "typeName": {
-                  "id": 10902,
+                  "id": 11786,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10901,
+                    "id": 11785,
                     "name": "LoanDetails",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10883,
-                    "src": "2765:11:36"
+                    "referencedDeclaration": 11769,
+                    "src": "2721:11:39"
                   },
-                  "referencedDeclaration": 10883,
-                  "src": "2765:11:36",
+                  "referencedDeclaration": 11769,
+                  "src": "2721:11:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_LoanDetails_$10883_storage_ptr",
+                    "typeIdentifier": "t_struct$_LoanDetails_$11769_storage_ptr",
                     "typeString": "struct poolStorage.LoanDetails"
                   }
                 },
@@ -2268,33 +2209,33 @@
               },
               {
                 "constant": false,
-                "id": 10906,
+                "id": 11790,
                 "mutability": "mutable",
                 "name": "terms",
-                "nameLocation": "2804:5:36",
+                "nameLocation": "2760:5:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2798:11:36",
+                "scope": 11794,
+                "src": "2754:11:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_Terms_$10890_storage_ptr",
+                  "typeIdentifier": "t_struct$_Terms_$11776_storage_ptr",
                   "typeString": "struct poolStorage.Terms"
                 },
                 "typeName": {
-                  "id": 10905,
+                  "id": 11789,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10904,
+                    "id": 11788,
                     "name": "Terms",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10890,
-                    "src": "2798:5:36"
+                    "referencedDeclaration": 11776,
+                    "src": "2754:5:39"
                   },
-                  "referencedDeclaration": 10890,
-                  "src": "2798:5:36",
+                  "referencedDeclaration": 11776,
+                  "src": "2754:5:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Terms_$10890_storage_ptr",
+                    "typeIdentifier": "t_struct$_Terms_$11776_storage_ptr",
                     "typeString": "struct poolStorage.Terms"
                   }
                 },
@@ -2302,33 +2243,33 @@
               },
               {
                 "constant": false,
-                "id": 10909,
+                "id": 11793,
                 "mutability": "mutable",
                 "name": "state",
-                "nameLocation": "2829:5:36",
+                "nameLocation": "2785:5:39",
                 "nodeType": "VariableDeclaration",
-                "scope": 10910,
-                "src": "2819:15:36",
+                "scope": 11794,
+                "src": "2775:15:39",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_enum$_LoanState_$10861",
+                  "typeIdentifier": "t_enum$_LoanState_$11747",
                   "typeString": "enum poolStorage.LoanState"
                 },
                 "typeName": {
-                  "id": 10908,
+                  "id": 11792,
                   "nodeType": "UserDefinedTypeName",
                   "pathNode": {
-                    "id": 10907,
+                    "id": 11791,
                     "name": "LoanState",
                     "nodeType": "IdentifierPath",
-                    "referencedDeclaration": 10861,
-                    "src": "2819:9:36"
+                    "referencedDeclaration": 11747,
+                    "src": "2775:9:39"
                   },
-                  "referencedDeclaration": 10861,
-                  "src": "2819:9:36",
+                  "referencedDeclaration": 11747,
+                  "src": "2775:9:39",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_LoanState_$10861",
+                    "typeIdentifier": "t_enum$_LoanState_$11747",
                     "typeString": "enum poolStorage.LoanState"
                   }
                 },
@@ -2336,21 +2277,21 @@
               }
             ],
             "name": "Loan",
-            "nameLocation": "2606:4:36",
+            "nameLocation": "2606:4:39",
             "nodeType": "StructDefinition",
-            "scope": 10939,
-            "src": "2599:242:36",
+            "scope": 11823,
+            "src": "2599:198:39",
             "visibility": "public"
           },
           {
             "constant": false,
-            "id": 10915,
+            "id": 11799,
             "mutability": "mutable",
             "name": "borrowerActiveLoans",
-            "nameLocation": "2948:19:36",
+            "nameLocation": "2904:19:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "2897:70:36",
+            "scope": 11823,
+            "src": "2853:70:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2358,35 +2299,35 @@
               "typeString": "mapping(address => struct EnumerableSet.UintSet)"
             },
             "typeName": {
-              "id": 10914,
+              "id": 11798,
               "keyType": {
-                "id": 10911,
+                "id": 11795,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "2905:7:36",
+                "src": "2861:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "2897:41:36",
+              "src": "2853:41:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_struct$_UintSet_$6269_storage_$",
                 "typeString": "mapping(address => struct EnumerableSet.UintSet)"
               },
               "valueType": {
-                "id": 10913,
+                "id": 11797,
                 "nodeType": "UserDefinedTypeName",
                 "pathNode": {
-                  "id": 10912,
+                  "id": 11796,
                   "name": "EnumerableSet.UintSet",
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 6269,
-                  "src": "2916:21:36"
+                  "src": "2872:21:39"
                 },
                 "referencedDeclaration": 6269,
-                "src": "2916:21:36",
+                "src": "2872:21:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_struct$_UintSet_$6269_storage_ptr",
                   "typeString": "struct EnumerableSet.UintSet"
@@ -2398,13 +2339,13 @@
           {
             "constant": false,
             "functionSelector": "30f2670c",
-            "id": 10919,
+            "id": 11803,
             "mutability": "mutable",
             "name": "totalERC20Amount",
-            "nameLocation": "3084:16:36",
+            "nameLocation": "3040:16:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3049:51:36",
+            "scope": 11823,
+            "src": "3005:51:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2412,28 +2353,28 @@
               "typeString": "mapping(address => uint256)"
             },
             "typeName": {
-              "id": 10918,
+              "id": 11802,
               "keyType": {
-                "id": 10916,
+                "id": 11800,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3057:7:36",
+                "src": "3013:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3049:27:36",
+              "src": "3005:27:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                 "typeString": "mapping(address => uint256)"
               },
               "valueType": {
-                "id": 10917,
+                "id": 11801,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3068:7:36",
+                "src": "3024:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
@@ -2445,13 +2386,13 @@
           {
             "constant": false,
             "functionSelector": "e3ed1902",
-            "id": 10924,
+            "id": 11808,
             "mutability": "mutable",
             "name": "borrowerLoans",
-            "nameLocation": "3194:13:36",
+            "nameLocation": "3150:13:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3157:50:36",
+            "scope": 11823,
+            "src": "3113:50:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2459,37 +2400,37 @@
               "typeString": "mapping(address => uint256[])"
             },
             "typeName": {
-              "id": 10923,
+              "id": 11807,
               "keyType": {
-                "id": 10920,
+                "id": 11804,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3165:7:36",
+                "src": "3121:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3157:29:36",
+              "src": "3113:29:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_uint256_$dyn_storage_$",
                 "typeString": "mapping(address => uint256[])"
               },
               "valueType": {
                 "baseType": {
-                  "id": 10921,
+                  "id": 11805,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3176:7:36",
+                  "src": "3132:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
                   }
                 },
-                "id": 10922,
+                "id": 11806,
                 "nodeType": "ArrayTypeName",
-                "src": "3176:9:36",
+                "src": "3132:9:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                   "typeString": "uint256[]"
@@ -2501,13 +2442,13 @@
           {
             "constant": false,
             "functionSelector": "8cda4571",
-            "id": 10928,
+            "id": 11812,
             "mutability": "mutable",
             "name": "loanDefaultDuration",
-            "nameLocation": "3247:19:36",
+            "nameLocation": "3203:19:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3213:53:36",
+            "scope": 11823,
+            "src": "3169:53:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2515,28 +2456,28 @@
               "typeString": "mapping(uint256 => uint32)"
             },
             "typeName": {
-              "id": 10927,
+              "id": 11811,
               "keyType": {
-                "id": 10925,
+                "id": 11809,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3221:7:36",
+                "src": "3177:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3213:26:36",
+              "src": "3169:26:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_uint256_$_t_uint32_$",
                 "typeString": "mapping(uint256 => uint32)"
               },
               "valueType": {
-                "id": 10926,
+                "id": 11810,
                 "name": "uint32",
                 "nodeType": "ElementaryTypeName",
-                "src": "3232:6:36",
+                "src": "3188:6:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint32",
                   "typeString": "uint32"
@@ -2548,13 +2489,13 @@
           {
             "constant": false,
             "functionSelector": "3a31f337",
-            "id": 10932,
+            "id": 11816,
             "mutability": "mutable",
             "name": "loanExpirationTime",
-            "nameLocation": "3306:18:36",
+            "nameLocation": "3262:18:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3272:52:36",
+            "scope": 11823,
+            "src": "3228:52:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2562,28 +2503,28 @@
               "typeString": "mapping(uint256 => uint32)"
             },
             "typeName": {
-              "id": 10931,
+              "id": 11815,
               "keyType": {
-                "id": 10929,
+                "id": 11813,
                 "name": "uint256",
                 "nodeType": "ElementaryTypeName",
-                "src": "3280:7:36",
+                "src": "3236:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint256",
                   "typeString": "uint256"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3272:26:36",
+              "src": "3228:26:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_uint256_$_t_uint32_$",
                 "typeString": "mapping(uint256 => uint32)"
               },
               "valueType": {
-                "id": 10930,
+                "id": 11814,
                 "name": "uint32",
                 "nodeType": "ElementaryTypeName",
-                "src": "3291:6:36",
+                "src": "3247:6:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_uint32",
                   "typeString": "uint32"
@@ -2595,13 +2536,13 @@
           {
             "constant": false,
             "functionSelector": "fee870e9",
-            "id": 10938,
+            "id": 11822,
             "mutability": "mutable",
             "name": "lenderLendAmount",
-            "nameLocation": "3484:16:36",
+            "nameLocation": "3440:16:39",
             "nodeType": "VariableDeclaration",
-            "scope": 10939,
-            "src": "3429:71:36",
+            "scope": 11823,
+            "src": "3385:71:39",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2609,46 +2550,46 @@
               "typeString": "mapping(address => mapping(address => uint256))"
             },
             "typeName": {
-              "id": 10937,
+              "id": 11821,
               "keyType": {
-                "id": 10933,
+                "id": 11817,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "3437:7:36",
+                "src": "3393:7:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "3429:47:36",
+              "src": "3385:47:39",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
                 "typeString": "mapping(address => mapping(address => uint256))"
               },
               "valueType": {
-                "id": 10936,
+                "id": 11820,
                 "keyType": {
-                  "id": 10934,
+                  "id": 11818,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3456:7:36",
+                  "src": "3412:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
                 "nodeType": "Mapping",
-                "src": "3448:27:36",
+                "src": "3404:27:39",
                 "typeDescriptions": {
                   "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
                   "typeString": "mapping(address => uint256)"
                 },
                 "valueType": {
-                  "id": 10935,
+                  "id": 11819,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "3467:7:36",
+                  "src": "3423:7:39",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -2659,12 +2600,12 @@
             "visibility": "public"
           }
         ],
-        "scope": 10940,
-        "src": "188:3315:36",
+        "scope": 11824,
+        "src": "188:3271:39",
         "usedErrors": []
       }
     ],
-    "src": "0:3504:36"
+    "src": "0:3460:39"
   },
   "compiler": {
     "name": "solc",
@@ -2672,7 +2613,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.4",
-  "updatedAt": "2023-01-29T17:38:15.531Z",
+  "updatedAt": "2023-02-01T11:06:04.776Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

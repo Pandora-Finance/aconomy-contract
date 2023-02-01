@@ -3,13 +3,15 @@ const attestationServices = artifacts.require("AttestationServices");
 const poolRegistry = artifacts.require("poolRegistry");
 const libPool = artifacts.require("LibPool")
 const libCalc = artifacts.require("LibCalculations")
-const aconomyfee = artifacts.require("AconomyFee")
-const ERC20 = artifacts.require("ERC20")
+const aconomyFee = artifacts.require("AconomyFee")
+const lendingToken = artifacts.require("lendingToken")
+const accountStatus = artifacts.require("accountStatus")
 
 module.exports = async function (deployer,network, accounts) {
-  await deployer.deploy(aconomyfee);
-  
-
+  await deployer.deploy(aconomyFee);
+  var aconomyfee = await aconomyFee.deployed();
+   await deployer.deploy(accountStatus)
+   var accountstatus = await accountStatus.deployed()
   await deployer.deploy(attestationRegistry)
   var attestRegistry = await attestationRegistry.deployed();
 
@@ -24,7 +26,8 @@ module.exports = async function (deployer,network, accounts) {
  
   await deployer.link(libPool, [poolRegistry]);
 
-  await deployer.deploy(poolRegistry, attestServices.address,accounts[0] )
+  await deployer.deploy(poolRegistry, attestServices.address,aconomyfee.address,accountstatus.address)
 
-  // await deployer.deploy(ER)
+   await deployer.deploy(lendingToken, 10000000)
+
 };

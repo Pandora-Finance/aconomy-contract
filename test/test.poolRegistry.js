@@ -5,7 +5,7 @@ const AttestRegistry = artifacts.require("attestationRegistry")
 const AttestServices = artifacts.require("attestationServices");
 const AconomyFee = artifacts.require("AconomyFee")
 const PoolAddress = artifacts.require('poolAddress')
-const ERC20 = artifacts.require('ERC20')
+const lendingToken = artifacts.require('LendingToken')
 
 
 contract("poolRegistry", async (accounts) => {
@@ -72,30 +72,43 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
 
     it("should allow Attested Borrower to Request Loan in a Pool", async() => {
 
-        erc20 = await ERC20.deployed('100000')
+         erc20 = await lendingToken.deployed()
         
         poolAddressInstance = await PoolAddress.at(pool1Address)
 
        res = await poolAddressInstance.loanRequest(
-        accounts[4],
+        erc20.address,
         poolId1,
-        100,
-        loanDefaultDuration,
         1000,
+        loanDefaultDuration,
+        BigNumber(1, 2),
         accounts[1],
         {from: accounts[1]}
        )
 
        loanId1 = res.logs[0].args.loanId.toNumber()
-     
+     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber()
+     console.log(paymentCycleAmount, "pca")
      assert.equal(loanId1, 0, "Unable to create loan: Wrong LoanId")
     })
 
     it("should Accept loan ", async() => {
-        res = poolRegis.acceptLoan(loanId1, {from:accounts[0]})
-        assert.equal(res.status, true, "Not able to accept loan");
+        await erc20.approve(pool1Address, 100)
+        let _balance1 = await erc20.balanceOf(accounts[1]);
+        console.log(_balance1.toNumber())
+        res = await poolAddressInstance.AcceptLoan(loanId1, {from:accounts[0]})
+        _balance1 = await erc20.balanceOf(accounts[1]);
+
+        //Amount that the borrower will get is 98 after cutting fees and market charges
+        assert.equal(_balance1.toNumber(), 98, "Not able to accept loan");
     })
 
+    it("should repay Loan ", async() => {
+        await erc20.transfer(accounts[1], 200, {from: accounts[0]})
+        await erc20.approve(pool1Address, 250, {from:accounts[1]})
+        res = await poolAddressInstance.repayFullLoan(loanId1, {from: accounts[1]})
+        // console.log(res)
+    })
 
 
 })
