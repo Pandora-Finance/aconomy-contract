@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -7,7 +7,9 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
+import "./accountStatus.sol";
 import "./Libraries/LibCalculations.sol";
+import "./interfaces/IaccountStatus.sol";
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -19,6 +21,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract poolAddress is poolStorage {
     address poolRegistryAddress;
     address AconomyFeeAddress;
+    address accountStatusAddress;
     address public poolOwner;
     uint256 public paymentCycleDuration;
     uint256 public paymentDefaultDuration;
@@ -32,6 +35,7 @@ contract poolAddress is poolStorage {
         address _poolOwner,
         address _poolRegistry,
         address _AconomyFeeAddress,
+        address _accountStatusAddress,
         uint256 _paymentCycleDuration,
         uint256 _paymentDefaultDuration,
         uint256 _feePercent
@@ -45,19 +49,27 @@ contract poolAddress is poolStorage {
         createdAt = block.timestamp;
     }
 
-    modifier pendingBid(uint256 _loanId) {
+    modifier pendingLoan(uint256 _loanId) {
         if (loans[_loanId].state != LoanState.PENDING) {
-            revert("Bid must be pending");
+            revert("Loan must be pending");
         }
         _;
     }
 
     event loanAccepted(uint256 indexed loanId, address indexed lender);
+    event repaidAmounts(
+        uint256 owedPrincipal,
+        uint256 duePrincipal,
+        uint256 interest
+    );
     event AcceptedLoanDetail(
         uint256 indexed loanId,
         string indexed feeType,
         uint256 indexed amount
     );
+
+    event LoanRepaid(uint256 indexed bidId);
+    event LoanRepayment(uint256 indexed bidId);
 
     event SubmittedLoan(
         uint256 indexed loanId,
@@ -121,7 +133,7 @@ contract poolAddress is poolStorage {
             loan.terms.paymentCycleAmount
         );
 
-        // Store bid inside borrower loans mapping
+        // Store loan inside borrower loans mapping
         borrowerLoans[loan.borrower].push(loanId);
 
         // Increment loan id counter
@@ -130,7 +142,7 @@ contract poolAddress is poolStorage {
 
     function AcceptLoan(uint256 _loanId)
         external
-        pendingBid(_loanId)
+        pendingLoan(_loanId)
         returns (
             uint256 amountToAconomy,
             uint256 amountToPool,
@@ -223,17 +235,123 @@ contract poolAddress is poolStorage {
             loan.loanDetails.timestamp + loanExpirationTime[_loanId]);
     }
 
-    event res(uint256 owedPrincipal, uint256 duePrincipal, uint256 interest);
+    function isLoanDefaulted(uint256 _loanId) public view returns (bool) {
+        Loan storage loan = loans[_loanId];
+
+        // Make sure loan cannot be liquidated if it is not active
+        if (loan.state != LoanState.ACCEPTED) return false;
+
+        if (loanDefaultDuration[_loanId] == 0) return false;
+
+        return (uint32(block.timestamp) - lastRepaidTimestamp(_loanId) >
+            loanDefaultDuration[_loanId]);
+    }
+
+    function lastRepaidTimestamp(uint256 _loanId) public view returns (uint32) {
+        return LibCalculations.lastRepaidTimestamp(loans[_loanId]);
+    }
+
+    function isPaymentLate(uint256 _loanId) public view returns (bool) {
+        if (loans[_loanId].state != LoanState.ACCEPTED) return false;
+        return uint32(block.timestamp) > calculateNextDueDate(_loanId);
+    }
+
+    function calculateNextDueDate(uint256 _loanId)
+        public
+        view
+        returns (uint32 dueDate_)
+    {
+        Loan storage loan = loans[_loanId];
+        if (loans[_loanId].state != LoanState.ACCEPTED) return dueDate_;
+
+        // Start with the original due date being 1 payment cycle since loan was accepted
+        dueDate_ = loan.loanDetails.acceptedTimestamp + loan.terms.paymentCycle;
+
+        // Calculate the cycle number the last repayment was made
+        uint32 delta = lastRepaidTimestamp(_loanId) -
+            loan.loanDetails.acceptedTimestamp;
+        if (delta > 0) {
+            uint32 repaymentCycle = 1 + (delta / loan.terms.paymentCycle);
+            dueDate_ += (repaymentCycle * loan.terms.paymentCycle);
+        }
+
+        //if we are in the last payment cycle, the next due date is the end of loan duration
+        if (
+            dueDate_ >
+            loan.loanDetails.acceptedTimestamp + loan.loanDetails.loanDuration
+        ) {
+            dueDate_ =
+                loan.loanDetails.acceptedTimestamp +
+                loan.loanDetails.loanDuration;
+        }
+    }
 
     function repayYourLoan(uint256 _loanId) external {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
         (
-            uint256 owedPrincipal,
-            uint256 duePrincipal,
+            uint256 owedAmount,
+            uint256 dueAmount,
             uint256 interest
         ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
-        emit res(owedPrincipal, duePrincipal, interest);
+        _repayLoan(
+            _loanId,
+            Payment({principal: dueAmount, interest: interest}),
+            owedAmount + interest
+        );
+        emit repaidAmounts(owedAmount, dueAmount, interest);
+    }
+
+    function _repayLoan(
+        uint256 _loanId,
+        Payment memory _payment,
+        uint256 _owedAmount
+    ) internal {
+        Loan storage loan = loans[_loanId];
+        uint256 paymentAmount = _payment.principal + _payment.interest;
+        uint256 poolId_ = loan.poolId;
+        address poolAddress_ = poolRegistry(poolRegistryAddress).getPoolAddress(
+            poolId_
+        );
+
+        StatusMark status = accountStatus(accountStatusAddress).updateStatus(
+            loan.borrower,
+            _loanId,
+            poolAddress_
+        );
+
+        // Check if we are sending a payment or amount remaining
+        if (paymentAmount >= _owedAmount) {
+            paymentAmount = _owedAmount;
+            loan.state = LoanState.PAID;
+
+            // Remove borrower's active loan
+            borrowerActiveLoans[loan.borrower].remove(_loanId);
+
+            emit LoanRepaid(_loanId);
+        } else {
+            emit LoanRepayment(_loanId);
+        }
+        // Send payment to the lender
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.borrower,
+            loan.lender,
+            paymentAmount
+        );
+
+        // update our mappings
+        loan.loanDetails.totalRepaid.principal += _payment.principal;
+        loan.loanDetails.totalRepaid.interest += _payment.interest;
+        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
+
+        // If the loan is paid in full and has a mark, we should update the current reputation
+        if (status != StatusMark.Good) {
+            accountStatus(accountStatusAddress).updateStatus(
+                loan.borrower,
+                _loanId,
+                poolAddress_
+            );
+        }
     }
 }

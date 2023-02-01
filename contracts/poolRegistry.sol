@@ -23,6 +23,7 @@ contract poolRegistry {
     }
 
     address AconomyFeeAddress;
+    address accountStatusAddress;
     AttestationServices public attestationService;
     bytes32 public lenderAttestationSchemaId;
     bytes32 public borrowerAttestationSchemaId;
@@ -30,10 +31,12 @@ contract poolRegistry {
 
     constructor(
         AttestationServices _attestationServices,
-        address _AconomyFeeAddress
+        address _AconomyFeeAddress,
+        address _accountStatus
     ) {
         attestationService = _attestationServices;
         AconomyFeeAddress = _AconomyFeeAddress;
+        accountStatusAddress = _accountStatus;
 
         lenderAttestationSchemaId = _attestationServices
             .getASRegistry()
@@ -73,7 +76,9 @@ contract poolRegistry {
         mapping(address => bytes32) borrowerAttestationIds;
     }
 
+    //poolId => poolDetail
     mapping(uint256 => poolDetail) internal pools;
+    //poolId => close or open
     mapping(uint256 => bool) private ClosedPools;
 
     uint256 public poolCount;
@@ -133,6 +138,7 @@ contract poolRegistry {
             msg.sender,
             address(this),
             AconomyFeeAddress,
+            accountStatusAddress,
             _paymentCycleDuration,
             _paymentDefaultDuration,
             _feePercent
@@ -358,6 +364,10 @@ contract poolRegistry {
         returns (uint32)
     {
         return pools[poolId].loanExpirationTime;
+    }
+
+    function getPoolAddress(uint256 _poolId) public view returns (address) {
+        return pools[_poolId].poolAddress;
     }
 
     function getPoolOwner(uint256 _poolId) public view returns (address) {
