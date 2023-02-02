@@ -215,25 +215,25 @@ contract poolAddress is poolStorage {
             amountToPool;
 
         //Transfer Aconomy Fee
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-        //     amountToAconomy
-        // );
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+            amountToAconomy
+        );
 
-        // //Transfer to Pool Owner
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-        //     amountToPool
-        // );
+        //Transfer to Pool Owner
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+            amountToPool
+        );
 
-        // //transfer funds to borrower
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.lender,
-        //     loan.borrower,
-        //     amountToBorrower
-        // );
+        //transfer funds to borrower
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.lender,
+            loan.borrower,
+            amountToBorrower
+        );
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -375,11 +375,11 @@ contract poolAddress is poolStorage {
             emit LoanRepayment(_loanId);
         }
         // Send payment to the lender
-        // IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //     loan.borrower,
-        //     loan.lender,
-        //     paymentAmount
-        // );
+        IERC20(loan.loanDetails.lendingToken).transferFrom(
+            loan.borrower,
+            loan.lender,
+            paymentAmount
+        );
 
         loan.loanDetails.totalRepaid.principal += _payment.principal;
         loan.loanDetails.totalRepaid.interest += _payment.interest;
@@ -429,7 +429,7 @@ contract poolAddress is poolStorage {
         );
 
         // Send payment to the Pool
-        // IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
+        IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
         bidId++;
 
         emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
