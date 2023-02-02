@@ -93,20 +93,20 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
     })
 
     it("should Accept loan ", async() => {
-        await erc20.approve(pool1Address, 100)
+        await erc20.approve(pool1Address, 1000)
         let _balance1 = await erc20.balanceOf(accounts[1]);
         console.log(_balance1.toNumber())
         res = await poolAddressInstance.AcceptLoan(loanId1, {from:accounts[0]})
         _balance1 = await erc20.balanceOf(accounts[1]);
 
         //Amount that the borrower will get is 98 after cutting fees and market charges
-        assert.equal(_balance1.toNumber(), 98, "Not able to accept loan");
+        assert.equal(_balance1.toNumber(), 979, "Not able to accept loan");
     })
 
     it("should repay Loan ", async() => {
         await erc20.transfer(accounts[1], 200, {from: accounts[0]})
         await erc20.approve(pool1Address, 250, {from:accounts[1]})
-        res = await poolAddressInstance.repayFullLoan(loanId1, {from: accounts[1]})
+        res = await poolAddressInstance.repayYourLoan(loanId1, {from: accounts[1]})
         // console.log(res)
     })
 
