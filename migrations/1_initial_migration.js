@@ -4,8 +4,9 @@ const poolRegistry = artifacts.require("poolRegistry");
 const libPool = artifacts.require("LibPool")
 const libCalc = artifacts.require("LibCalculations")
 const aconomyFee = artifacts.require("AconomyFee")
-const lendingToken = artifacts.require("LendingToken")
+const lendingToken = artifacts.require("mintToken")
 const accountStatus = artifacts.require("accountStatus")
+const poolAddress = artifacts.require("poolAddress")
 
 module.exports = async function (deployer,network, accounts) {
   await deployer.deploy(aconomyFee);
@@ -26,7 +27,13 @@ module.exports = async function (deployer,network, accounts) {
  
   await deployer.link(libPool, [poolRegistry]);
 
-  await deployer.deploy(poolRegistry, attestServices.address,aconomyfee.address,accountstatus.address)
+  await deployer.deploy(poolRegistry, attestServices.address)
+
+  var poolRegis = await poolRegistry.deployed() 
+
+  await deployer.link(libCalc, [poolAddress]);
+
+  await deployer.deploy(poolAddress, poolRegis.address, aconomyfee.address, accountstatus.address )
 
    await deployer.deploy(lendingToken, 10000000)
 
