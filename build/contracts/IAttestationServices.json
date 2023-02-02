@@ -30,20 +30,20 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity >=0.8.0 <0.9.0;\n\n// SPDX-License-Identifier: MIT\n\ninterface IAttestationServices {\n    function register(bytes calldata schema) external returns (bytes32);\n}\n",
-  "sourcePath": "/Users/sanskarkhare/Desktop/Pandora/aconomy-pool-v1/contracts/interfaces/IAttestationServices.sol",
+  "sourcePath": "/media/dell/17f09f70-0626-4927-a787-2813ab7ed2c0/dell/Pandora/pooolAddress Pandora Git/aconomy-contract/contracts/interfaces/IAttestationServices.sol",
   "ast": {
     "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
     "exportedSymbols": {
       "IAttestationServices": [
-        7456
+        7746
       ]
     },
-    "id": 7457,
+    "id": 7747,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7448,
+        "id": 7738,
         "literals": [
           "solidity",
           ">=",
@@ -54,7 +54,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:31:31"
+        "src": "0:31:34"
       },
       {
         "abstract": false,
@@ -63,36 +63,36 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 7456,
+        "id": 7746,
         "linearizedBaseContracts": [
-          7456
+          7746
         ],
         "name": "IAttestationServices",
-        "nameLocation": "76:20:31",
+        "nameLocation": "76:20:34",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "functionSelector": "82fbdc9c",
-            "id": 7455,
+            "id": 7745,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "register",
-            "nameLocation": "112:8:31",
+            "nameLocation": "112:8:34",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7451,
+              "id": 7741,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7450,
+                  "id": 7740,
                   "mutability": "mutable",
                   "name": "schema",
-                  "nameLocation": "136:6:31",
+                  "nameLocation": "136:6:34",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7455,
-                  "src": "121:21:31",
+                  "scope": 7745,
+                  "src": "121:21:34",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -100,10 +100,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7449,
+                    "id": 7739,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "121:5:31",
+                    "src": "121:5:34",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -112,21 +112,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "120:23:31"
+              "src": "120:23:34"
             },
             "returnParameters": {
-              "id": 7454,
+              "id": 7744,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7453,
+                  "id": 7743,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7455,
-                  "src": "162:7:31",
+                  "scope": 7745,
+                  "src": "162:7:34",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -134,10 +134,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7452,
+                    "id": 7742,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "162:7:31",
+                    "src": "162:7:34",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -146,160 +146,29 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "161:9:31"
+              "src": "161:9:34"
             },
-            "scope": 7456,
-            "src": "103:68:31",
+            "scope": 7746,
+            "src": "103:68:34",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 7457,
-        "src": "66:107:31",
+        "scope": 7747,
+        "src": "66:107:34",
         "usedErrors": []
       }
     ],
-    "src": "0:174:31"
-  },
-  "legacyAST": {
-    "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
-    "exportedSymbols": {
-      "IAttestationServices": [
-        7456
-      ]
-    },
-    "id": 7457,
-    "license": "MIT",
-    "nodeType": "SourceUnit",
-    "nodes": [
-      {
-        "id": 7448,
-        "literals": [
-          "solidity",
-          ">=",
-          "0.8",
-          ".0",
-          "<",
-          "0.9",
-          ".0"
-        ],
-        "nodeType": "PragmaDirective",
-        "src": "0:31:31"
-      },
-      {
-        "abstract": false,
-        "baseContracts": [],
-        "canonicalName": "IAttestationServices",
-        "contractDependencies": [],
-        "contractKind": "interface",
-        "fullyImplemented": false,
-        "id": 7456,
-        "linearizedBaseContracts": [
-          7456
-        ],
-        "name": "IAttestationServices",
-        "nameLocation": "76:20:31",
-        "nodeType": "ContractDefinition",
-        "nodes": [
-          {
-            "functionSelector": "82fbdc9c",
-            "id": 7455,
-            "implemented": false,
-            "kind": "function",
-            "modifiers": [],
-            "name": "register",
-            "nameLocation": "112:8:31",
-            "nodeType": "FunctionDefinition",
-            "parameters": {
-              "id": 7451,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7450,
-                  "mutability": "mutable",
-                  "name": "schema",
-                  "nameLocation": "136:6:31",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7455,
-                  "src": "121:21:31",
-                  "stateVariable": false,
-                  "storageLocation": "calldata",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes_calldata_ptr",
-                    "typeString": "bytes"
-                  },
-                  "typeName": {
-                    "id": 7449,
-                    "name": "bytes",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "121:5:31",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes_storage_ptr",
-                      "typeString": "bytes"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "120:23:31"
-            },
-            "returnParameters": {
-              "id": 7454,
-              "nodeType": "ParameterList",
-              "parameters": [
-                {
-                  "constant": false,
-                  "id": 7453,
-                  "mutability": "mutable",
-                  "name": "",
-                  "nameLocation": "-1:-1:-1",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 7455,
-                  "src": "162:7:31",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_bytes32",
-                    "typeString": "bytes32"
-                  },
-                  "typeName": {
-                    "id": 7452,
-                    "name": "bytes32",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "162:7:31",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_bytes32",
-                      "typeString": "bytes32"
-                    }
-                  },
-                  "visibility": "internal"
-                }
-              ],
-              "src": "161:9:31"
-            },
-            "scope": 7456,
-            "src": "103:68:31",
-            "stateMutability": "nonpayable",
-            "virtual": false,
-            "visibility": "external"
-          }
-        ],
-        "scope": 7457,
-        "src": "66:107:31",
-        "usedErrors": []
-      }
-    ],
-    "src": "0:174:31"
+    "src": "0:174:34"
   },
   "compiler": {
     "name": "solc",
     "version": "0.8.11+commit.d7f03943.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.4.4",
-  "updatedAt": "2023-01-29T17:38:15.375Z",
+  "schemaVersion": "3.4.10",
+  "updatedAt": "2023-02-01T11:24:42.959Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

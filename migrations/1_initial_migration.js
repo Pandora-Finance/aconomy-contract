@@ -4,7 +4,7 @@ const poolRegistry = artifacts.require("poolRegistry");
 const libPool = artifacts.require("LibPool")
 const libCalc = artifacts.require("LibCalculations")
 const aconomyFee = artifacts.require("AconomyFee")
-const lendingToken = artifacts.require("lendingToken")
+const lendingToken = artifacts.require("LendingToken")
 const accountStatus = artifacts.require("accountStatus")
 
 module.exports = async function (deployer,network, accounts) {

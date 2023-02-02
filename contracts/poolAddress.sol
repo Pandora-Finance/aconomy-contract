@@ -44,6 +44,7 @@ contract poolAddress is poolStorage {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
+        accountStatusAddress = _accountStatusAddress;
         paymentCycleDuration = _paymentCycleDuration;
         paymentDefaultDuration = _paymentDefaultDuration;
         feePercent = _feePercent;
