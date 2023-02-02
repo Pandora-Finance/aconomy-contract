@@ -12,13 +12,36 @@ abstract contract poolStorage {
     // Mapping of loanId to loan information.
     mapping(uint256 => Loan) public loans;
 
-    enum LoanState {
-        NONEXISTENT,
+    //poolId => loanId => LoanState
+    mapping(uint256 => uint256) public poolLoans;
+
+    struct FundDetail {
+        uint256 amount;
+        uint32 expiration;
+        uint32 maxDuration;
+        uint16 interestRate;
+        uint256 bidId;
+        BidState state;
+        uint32 bidTimestamp;
+        uint32 acceptBidTimestamp;
+    }
+
+    enum BidState {
         PENDING,
         CANCELLED,
         ACCEPTED,
-        PAID,
-        LIQUIDATED
+        PAID
+    }
+
+    // Mapping of lender address => poolId => ERC20 token => FundDetail
+    mapping(address => mapping(uint256 => mapping(address => FundDetail)))
+        public lenderPoolFundDetails;
+
+    enum LoanState {
+        PENDING,
+        CANCELLED,
+        ACCEPTED,
+        PAID
     }
 
     /**

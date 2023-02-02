@@ -2,8 +2,10 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
@@ -15,40 +17,39 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+// 0xe2899bddFD890e320e643044c6b95B9B0b84157A
+// poolAddress": "0xEC3c9230499a3FA960Ee28f7D2c0Ee3AD4AeBb07" 0xaabBF7b98Af6E1bcC801ceB3480a97C3d686757b
+// AS=0x3328358128832A260C76A4141e19E2A943CD4B6D
+
 // a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
 // a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+// 1000000000
+// PR=0x7EF2e0048f5bAeDe046f6BF797943daF4ED8CB47
+// poolAddress": "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d" 0xD9eC9E840Bb5Df076DBbb488d01485058f421e58
+// AS=0xf8e81D47203A594245E36C48e151709F0C19fBe8
+// AF=0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8
+// AStts=0xd9145CCE52D386f254917e481eB44e9943F39138
+// a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+// a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+// 222222222222
 
 contract poolAddress is poolStorage {
     address poolRegistryAddress;
     address AconomyFeeAddress;
     address accountStatusAddress;
-    address public poolOwner;
-    uint256 public paymentCycleDuration;
-    uint256 public paymentDefaultDuration;
-    uint256 public feePercent;
-    uint256 public createdAt;
     uint256 public bidId = 0;
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
     constructor(
-        address _poolOwner,
         address _poolRegistry,
         address _AconomyFeeAddress,
-        address _accountStatusAddress,
-        uint256 _paymentCycleDuration,
-        uint256 _paymentDefaultDuration,
-        uint256 _feePercent
+        address _accountStatusAddress
     ) {
-        poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
         accountStatusAddress = _accountStatusAddress;
-        paymentCycleDuration = _paymentCycleDuration;
-        paymentDefaultDuration = _paymentDefaultDuration;
-        feePercent = _feePercent;
-        createdAt = block.timestamp;
     }
 
     modifier pendingLoan(uint256 _loanId) {
@@ -65,23 +66,19 @@ contract poolAddress is poolStorage {
         _;
     }
 
-    struct FundDetail {
-        uint256 amount;
-        uint32 expiration;
-        uint32 maxDuration;
-        uint16 interestRate;
-        uint256 bidId;
-    }
-
-    // Mapping of lender address => poolId => ERC20 token => FundDetail
-    mapping(address => mapping(uint256 => mapping(address => FundDetail)))
-        public lenderPoolFundDetails;
-
     event loanAccepted(uint256 indexed loanId, address indexed lender);
+
+    event AcceptedBid(
+        address reciever,
+        uint256 BidId,
+        uint256 PoolId,
+        uint256 Amount
+    );
 
     event SupplyToPool(
         address indexed lender,
         uint256 indexed poolId,
+        uint256 BidId,
         address indexed ERC20Token,
         uint256 tokenAmount
     );
@@ -124,6 +121,8 @@ contract poolAddress is poolStorage {
         );
 
         loanId_ = loanId;
+
+        poolLoans[_poolId] = loanId_;
 
         // Create and store our loan into the mapping
         Loan storage loan = loans[loanId];
@@ -216,25 +215,25 @@ contract poolAddress is poolStorage {
             amountToPool;
 
         //Transfer Aconomy Fee
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-            amountToAconomy
-        );
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+        //     amountToAconomy
+        // );
 
-        //Transfer to Pool Owner
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-            amountToPool
-        );
+        // //Transfer to Pool Owner
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+        //     amountToPool
+        // );
 
-        //transfer funds to borrower
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            loan.borrower,
-            amountToBorrower
-        );
+        // //transfer funds to borrower
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.lender,
+        //     loan.borrower,
+        //     amountToBorrower
+        // );
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -376,11 +375,11 @@ contract poolAddress is poolStorage {
             emit LoanRepayment(_loanId);
         }
         // Send payment to the lender
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.borrower,
-            loan.lender,
-            paymentAmount
-        );
+        // IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //     loan.borrower,
+        //     loan.lender,
+        //     paymentAmount
+        // );
 
         loan.loanDetails.totalRepaid.principal += _payment.principal;
         loan.loanDetails.totalRepaid.interest += _payment.interest;
@@ -405,6 +404,11 @@ contract poolAddress is poolStorage {
         uint16 _interestRate,
         uint32 _expiration
     ) external {
+        (bool isVerified, ) = poolRegistry(poolRegistryAddress)
+            .lenderVarification(_poolId, msg.sender);
+
+        require(isVerified, "Not verified lender");
+
         address lender = msg.sender;
         require(_expiration > uint32(block.timestamp), "wrong timestamp");
         uint256 _bidId = bidId;
@@ -416,15 +420,48 @@ contract poolAddress is poolStorage {
         fundDetail.maxDuration = _maxLoanDuration;
         fundDetail.interestRate = _interestRate;
         fundDetail.bidId = _bidId;
+        fundDetail.bidTimestamp = uint32(block.timestamp);
+
+        fundDetail.state = BidState.PENDING;
 
         address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
             _poolId
         );
 
         // Send payment to the Pool
-        IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
+        // IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
         bidId++;
 
-        emit SupplyToPool(lender, _poolId, _ERC20Address, _amount);
+        emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
     }
+
+    function AcceptBid(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender,
+        address _receiver
+    ) external onlyPoolOwner(_poolId) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ];
+        fundDetail.acceptBidTimestamp = uint32(block.timestamp);
+        uint256 amount = fundDetail.amount;
+        fundDetail.state = BidState.ACCEPTED;
+        address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
+            _poolId
+        );
+        IERC20(_ERC20Address).approve(_receiver, amount);
+        IERC20(_ERC20Address).transferFrom(_poolAddress, _receiver, amount);
+
+        emit AcceptedBid(_receiver, _bidId, _poolId, amount);
+    }
+
+    function RepayInstallment(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender,
+        address _receiver
+    ) external onlyPoolOwner(_poolId) {}
 }
