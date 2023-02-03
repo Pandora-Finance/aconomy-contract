@@ -31,7 +31,6 @@ contract poolAddress is poolStorage {
     address poolRegistryAddress;
     address AconomyFeeAddress;
     address accountStatusAddress;
-    uint256 public bidId = 0;
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -62,22 +61,6 @@ contract poolAddress is poolStorage {
 
     event loanAccepted(uint256 indexed loanId, address indexed lender);
 
-    event AcceptedBid(
-        address reciever,
-        uint256 BidId,
-        uint256 PoolId,
-        uint256 Amount,
-        uint256 paymentCycleAmount
-    );
-
-    event SupplyToPool(
-        address indexed lender,
-        uint256 indexed poolId,
-        uint256 BidId,
-        address indexed ERC20Token,
-        uint256 tokenAmount
-    );
-
     event repaidAmounts(
         uint256 owedPrincipal,
         uint256 duePrincipal,
@@ -98,123 +81,6 @@ contract poolAddress is poolStorage {
         address receiver,
         uint256 paymentCycleAmount
     );
-
-    //Supply to pool by lenders
-    function supplyToPool(
-        uint256 _poolId,
-        address _ERC20Address,
-        uint256 _amount,
-        uint32 _maxLoanDuration,
-        uint16 _interestRate,
-        uint32 _expiration
-    ) external {
-        (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .lenderVarification(_poolId, msg.sender);
-
-        require(isVerified, "Not verified lender");
-
-        address lender = msg.sender;
-        require(_expiration > uint32(block.timestamp), "wrong timestamp");
-        uint256 _bidId = bidId;
-        FundDetail storage fundDetail = lenderPoolFundDetails[lender][_poolId][
-            _ERC20Address
-        ][_bidId];
-        fundDetail.amount = _amount;
-        fundDetail.expiration = _expiration;
-        fundDetail.maxDuration = _maxLoanDuration;
-        fundDetail.interestRate = _interestRate;
-        fundDetail.bidTimestamp = uint32(block.timestamp);
-
-        fundDetail.state = BidState.PENDING;
-
-        address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
-            _poolId
-        );
-
-        // Send payment to the Pool
-        IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
-        bidId++;
-
-        emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
-    }
-
-    function AcceptBid(
-        uint256 _poolId,
-        address _ERC20Address,
-        uint256 _bidId,
-        address _lender,
-        address _receiver
-    ) external onlyPoolOwner(_poolId) {
-        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
-            _ERC20Address
-        ][_bidId];
-        if (fundDetail.state != BidState.PENDING) {
-            revert("Bid must be pending");
-        }
-        fundDetail.acceptBidTimestamp = uint32(block.timestamp);
-        uint256 amount = fundDetail.amount;
-        fundDetail.state = BidState.ACCEPTED;
-        address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
-            _poolId
-        );
-        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
-            .getPaymentCycleDuration(_poolId);
-
-        fundDetail.paymentCycleAmount = LibCalculations.payment(
-            amount,
-            fundDetail.maxDuration,
-            paymentCycle,
-            fundDetail.interestRate
-        );
-
-        IERC20(_ERC20Address).approve(_receiver, amount);
-        IERC20(_ERC20Address).transferFrom(_poolAddress, _receiver, amount);
-
-        emit AcceptedBid(
-            _receiver,
-            _bidId,
-            _poolId,
-            amount,
-            fundDetail.paymentCycleAmount
-        );
-    }
-
-    function RepayInstallment(
-        uint256 _poolId,
-        address _ERC20Address,
-        uint256 _bidId,
-        address _lender,
-        address _receiver
-    ) external onlyPoolOwner(_poolId) {
-        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
-            _ERC20Address
-        ][_bidId];
-        if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
-        }
-
-        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
-            .getPaymentCycleDuration(_poolId);
-
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.calculateInstallmentAmount(
-                fundDetail.amount,
-                fundDetail.Repaid.leftAmount,
-                fundDetail.interestRate,
-                fundDetail.paymentCycleAmount,
-                paymentCycle,
-                fundDetail.lastRepaidTimestamp,
-                block.timestamp,
-                fundDetail.acceptBidTimestamp,
-                fundDetail.maxDuration
-            );
-
-        emit repaidAmounts(owedAmount, dueAmount, interest);
-    }
-
 
     function loanRequest(
         address _lendingToken,
