@@ -20,10 +20,18 @@ abstract contract poolStorage {
         uint32 expiration;
         uint32 maxDuration;
         uint16 interestRate;
-        uint256 bidId;
         BidState state;
         uint32 bidTimestamp;
         uint32 acceptBidTimestamp;
+        uint256 paymentCycleAmount;
+        uint256 totalRepaidPrincipal;
+        uint32 lastRepaidTimestamp;
+        RePayment Repaid;
+    }
+
+    struct RePayment {
+        uint256 leftAmount;
+        uint256 interest;
     }
 
     enum BidState {
@@ -34,7 +42,7 @@ abstract contract poolStorage {
     }
 
     // Mapping of lender address => poolId => ERC20 token => FundDetail
-    mapping(address => mapping(uint256 => mapping(address => FundDetail)))
+    mapping(address => mapping(uint256 => mapping(address => mapping(uint256 => FundDetail))))
         public lenderPoolFundDetails;
 
     enum LoanState {
