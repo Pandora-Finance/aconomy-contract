@@ -4,6 +4,7 @@ pragma solidity >=0.4.22 <0.9.0;
 import "./Libraries/LibPool.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
@@ -37,6 +38,9 @@ contract deployPool {
 
     uint256 public bidId = 0;
 
+    event BidRepaid(uint256 indexed bidId);
+    event BidRepayment(uint256 indexed bidId);
+
     event AcceptedBid(
         address reciever,
         uint256 BidId,
@@ -54,10 +58,12 @@ contract deployPool {
     );
 
     event repaidAmounts(
-        uint256 owedPrincipal,
-        uint256 duePrincipal,
+        uint256 owedAmount,
+        uint256 dueAmount,
         uint256 interest
     );
+
+    event paidAmount(uint256 Amount, uint256 interest);
 
     struct FundDetail {
         uint256 amount;
@@ -74,7 +80,7 @@ contract deployPool {
     }
 
     struct RePayment {
-        uint256 leftAmount;
+        uint256 amount;
         uint256 interest;
     }
 
@@ -173,8 +179,7 @@ contract deployPool {
         uint256 _poolId,
         address _ERC20Address,
         uint256 _bidId,
-        address _lender,
-        address _receiver
+        address _lender
     ) external onlyPoolOwner(_poolId) {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
@@ -192,7 +197,7 @@ contract deployPool {
             uint256 interest
         ) = LibCalculations.calculateInstallmentAmount(
                 fundDetail.amount,
-                fundDetail.Repaid.leftAmount,
+                fundDetail.Repaid.amount,
                 fundDetail.interestRate,
                 fundDetail.paymentCycleAmount,
                 paymentCycle,
@@ -201,7 +206,89 @@ contract deployPool {
                 fundDetail.acceptBidTimestamp,
                 fundDetail.maxDuration
             );
+        _repayBid(
+            _poolId,
+            _ERC20Address,
+            _bidId,
+            _lender,
+            dueAmount,
+            interest,
+            owedAmount + interest
+        );
 
         emit repaidAmounts(owedAmount, dueAmount, interest);
+    }
+
+    function RepayFullAmount(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) external onlyPoolOwner(_poolId) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) {
+            revert("Bid must be pending");
+        }
+
+        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        (uint256 owedAmount, , uint256 interest) = LibCalculations
+            .calculateInstallmentAmount(
+                fundDetail.amount,
+                fundDetail.Repaid.amount,
+                fundDetail.interestRate,
+                fundDetail.paymentCycleAmount,
+                paymentCycle,
+                fundDetail.lastRepaidTimestamp,
+                block.timestamp,
+                fundDetail.acceptBidTimestamp,
+                fundDetail.maxDuration
+            );
+        _repayBid(
+            _poolId,
+            _ERC20Address,
+            _bidId,
+            _lender,
+            owedAmount,
+            interest,
+            owedAmount + interest
+        );
+
+        emit paidAmount(owedAmount, interest);
+    }
+
+    function _repayBid(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender,
+        uint256 _amount,
+        uint256 _interest,
+        uint256 _owedAmount
+    ) internal {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+
+        uint256 paymentAmount = _amount + _interest;
+
+        // Check if we are sending a payment or amount remaining
+        if (paymentAmount >= _owedAmount) {
+            paymentAmount = _owedAmount;
+
+            fundDetail.state = BidState.PAID;
+            emit BidRepaid(_bidId);
+        } else {
+            emit BidRepayment(_bidId);
+        }
+        // Send payment to the lender
+        IERC20(_ERC20Address).transferFrom(msg.sender, _lender, paymentAmount);
+
+        fundDetail.Repaid.amount += _amount;
+        fundDetail.Repaid.interest += _interest;
+        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
     }
 }

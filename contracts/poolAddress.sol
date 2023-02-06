@@ -72,8 +72,8 @@ contract poolAddress is poolStorage {
         uint256 indexed amount
     );
 
-    event LoanRepaid(uint256 indexed bidId);
-    event LoanRepayment(uint256 indexed bidId);
+    event LoanRepaid(uint256 indexed loanId);
+    event LoanRepayment(uint256 indexed loanId);
 
     event SubmittedLoan(
         uint256 indexed loanId,
@@ -200,11 +200,13 @@ contract poolAddress is poolStorage {
         );
 
         //Transfer to Pool Owner
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-            amountToPool
-        );
+        if (amountToPool != 0) {
+            IERC20(loan.loanDetails.lendingToken).transferFrom(
+                loan.lender,
+                poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+                amountToPool
+            );
+        }
 
         //transfer funds to borrower
         IERC20(loan.loanDetails.lendingToken).transferFrom(
