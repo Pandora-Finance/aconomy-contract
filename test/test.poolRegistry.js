@@ -46,11 +46,12 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
             loanExpirationDuration,
             10,
             true,
-            true,
-            "sk.com"
+            true
         );
         poolId1 = res.logs[0].args.poolId.toNumber()
-        pool1Address = res.logs[5].args.poolAddress;
+        console.log(poolId1, "poolId1")
+        pool1Address = res.logs[4].args.poolAddress;
+        console.log(pool1Address, "poolAdress")
 
         // res =  await poolRegis.createPool(
         //     accounts[0],
