@@ -91,7 +91,7 @@ contract deployPool {
         PAID
     }
 
-    // Mapping of lender address => poolId => ERC20 token => FundDetail
+    // Mapping of lender address => poolId => ERC20 token => BidId => FundDetail
     mapping(address => mapping(uint256 => mapping(address => mapping(uint256 => FundDetail))))
         public lenderPoolFundDetails;
 
