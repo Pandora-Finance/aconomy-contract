@@ -67,8 +67,8 @@ contract deployPool {
 
     struct FundDetail {
         uint256 amount;
-        uint32 expiration;
-        uint32 maxDuration;
+        uint32 expiration; //After expiration time, if owner dose not accept bid then lender can withdraw the fund 
+        uint32 maxDuration; //Bid Duration
         uint16 interestRate;
         BidState state;
         uint32 bidTimestamp;
