@@ -17,15 +17,6 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-// 1000000000
-// PR=0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B
-// poolAddress": "0xddaAd340b0f1Ef65169Ae5E41A8b10776a75482d" 0xD9eC9E840Bb5Df076DBbb488d01485058f421e58
-// AS=0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8
-// AF=0xf8e81D47203A594245E36C48e151709F0C19fBe8
-// AStts=0xd9145CCE52D386f254917e481eB44e9943F39138
-// a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
-// a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
-// 2222222222
 
 contract poolAddress is poolStorage {
     address poolRegistryAddress;
@@ -193,11 +184,13 @@ contract poolAddress is poolStorage {
             amountToPool;
 
         //Transfer Aconomy Fee
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-            amountToAconomy
-        );
+        if (amountToAconomy != 0) {
+            IERC20(loan.loanDetails.lendingToken).transferFrom(
+                loan.lender,
+                AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+                amountToAconomy
+            );
+        }
 
         //Transfer to Pool Owner
         if (amountToPool != 0) {
