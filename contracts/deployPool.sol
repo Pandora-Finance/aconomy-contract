@@ -49,6 +49,13 @@ contract deployPool {
         uint256 paymentCycleAmount
     );
 
+    event Withdrawn(
+        address reciever,
+        uint256 BidId,
+        uint256 PoolId,
+        uint256 Amount
+    );
+
     event SupplyToPool(
         address indexed lender,
         uint256 indexed poolId,
@@ -67,7 +74,7 @@ contract deployPool {
 
     struct FundDetail {
         uint256 amount;
-        uint32 expiration; //After expiration time, if owner dose not accept bid then lender can withdraw the fund 
+        uint256 expiration; //After expiration time, if owner dose not accept bid then lender can withdraw the fund
         uint32 maxDuration; //Bid Duration
         uint16 interestRate;
         BidState state;
@@ -88,7 +95,8 @@ contract deployPool {
         PENDING,
         CANCELLED,
         ACCEPTED,
-        PAID
+        PAID,
+        WITHDRAWN
     }
 
     // Mapping of lender address => poolId => ERC20 token => BidId => FundDetail
@@ -102,7 +110,7 @@ contract deployPool {
         uint256 _amount,
         uint32 _maxLoanDuration,
         uint16 _interestRate,
-        uint32 _expiration
+        uint256 _expiration
     ) external {
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .lenderVarification(_poolId, msg.sender);
@@ -290,5 +298,34 @@ contract deployPool {
         fundDetail.Repaid.amount += _amount;
         fundDetail.Repaid.interest += _interest;
         fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
+    }
+
+    function Withdraw(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) external {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+
+        // Check is lender the calling the function
+        if (msg.sender != msg.sender) {
+            revert("You are not a Lender");
+        }
+
+        require(
+            fundDetail.expiration < uint32(block.timestamp),
+            "You can't Withdraw"
+        );
+
+        // Transfering the amount to the lender
+        IERC20(_ERC20Address).approve(_lender, fundDetail.amount);
+        IERC20(_ERC20Address).transfer(_lender, fundDetail.amount);
+
+        fundDetail.state = BidState.WITHDRAWN;
+
+        emit Withdrawn(_lender, _bidId, _poolId, fundDetail.amount);
     }
 }
