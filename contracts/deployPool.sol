@@ -311,7 +311,7 @@ contract deployPool {
         ][_bidId];
 
         // Check is lender the calling the function
-        if (msg.sender != msg.sender) {
+        if (_lender != msg.sender) {
             revert("You are not a Lender");
         }
 
