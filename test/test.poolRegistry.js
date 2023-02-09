@@ -138,7 +138,7 @@ console.log(_balance1.toNumber())
 
     it("should repay Loan ", async() => {
         // await erc20.transfer(accounts[1], 12000, {from: accounts[0]})
-        await erc20.approve(poolAddressInstance.address, 200, {from:accounts[1]})
+        await erc20.approve(poolAddressInstance.address, 500, {from:accounts[1]})
         res = await poolAddressInstance.repayYourLoan(loanId1, {from: accounts[1]})
         // console.log(res)
         assert.equal(res.receipt.status, true, "Not able to repay loan")
