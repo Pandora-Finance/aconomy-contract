@@ -27,7 +27,7 @@ module.exports = async function (deployer,network, accounts) {
  
   await deployer.link(libPool, [poolRegistry]);
 
-  await deployer.deploy(poolRegistry, attestServices.address)
+  await deployer.deploy(poolRegistry, attestServices.address, aconomyfee.address)
 
   var poolRegis = await poolRegistry.deployed() 
 
