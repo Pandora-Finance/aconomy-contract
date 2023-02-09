@@ -5,14 +5,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibPool.sol";
 import "./AttestationServices.sol";
-// 0xe2899bddFD890e320e643044c6b95B9B0b84157A
-// poolAddress": "0xEC3c9230499a3FA960Ee28f7D2c0Ee3AD4AeBb07" 0xaabBF7b98Af6E1bcC801ceB3480a97C3d686757b
-// AS=0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8
-// AF=0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8
-// AStts=0xd9145CCE52D386f254917e481eB44e9943F39138
-// a1=0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
-// a2=0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
-// 222222222222
+
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract poolRegistry {
@@ -28,9 +21,11 @@ contract poolRegistry {
     bytes32 public lenderAttestationSchemaId;
     bytes32 public borrowerAttestationSchemaId;
     bytes32 private _attestingSchemaId;
+    address public AconomyFeeAddress;
 
-    constructor(AttestationServices _attestationServices) {
+    constructor(AttestationServices _attestationServices, address AconomyFee) {
         attestationService = _attestationServices;
+        AconomyFeeAddress = AconomyFee;
 
         lenderAttestationSchemaId = _attestationServices
             .getASRegistry()
@@ -344,5 +339,13 @@ contract poolRegistry {
 
     function getPoolOwner(uint256 _poolId) public view returns (address) {
         return pools[_poolId].owner;
+    }
+
+    function getAconomyFee() public view returns (uint16) {
+        return AconomyFee(AconomyFeeAddress).protocolFee();
+    }
+
+    function getAconomyOwner() public view returns (address) {
+        return AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress();
     }
 }

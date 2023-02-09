@@ -38,8 +38,8 @@ contract deployPool {
 
     uint256 public bidId = 0;
 
-    event BidRepaid(uint256 indexed bidId);
-    event BidRepayment(uint256 indexed bidId);
+    event BidRepaid(uint256 indexed bidId, uint256 PaidAmount);
+    event BidRepayment(uint256 indexed bidId, uint256 PaidAmount);
 
     event AcceptedBid(
         address reciever,
@@ -171,8 +171,22 @@ contract deployPool {
             fundDetail.interestRate
         );
 
-        IERC20(_ERC20Address).approve(_receiver, amount);
-        IERC20(_ERC20Address).transfer(_receiver, amount);
+        address AconomyOwner = poolRegistry(poolRegistryAddress)
+            .getAconomyOwner();
+
+        //Aconomy Fee
+        uint256 amountToAconomy = LibCalculations.percent(
+            fundDetail.amount,
+            poolRegistry(poolRegistryAddress).getAconomyFee()
+        );
+
+        // transfering Amount to Owner
+        IERC20(_ERC20Address).approve(_receiver, amount - amountToAconomy);
+        IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy);
+
+        // transfering Amount to Protocol Owner
+        IERC20(_ERC20Address).approve(AconomyOwner, amountToAconomy);
+        IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy);
 
         emit AcceptedBid(
             _receiver,
@@ -225,6 +239,74 @@ contract deployPool {
         );
 
         emit repaidAmounts(owedAmount, dueAmount, interest);
+    }
+
+    function viewInstallmentAmount(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) public view returns (uint256) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) {
+            revert("Bid must be pending");
+        }
+        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        (
+            uint256 owedAmount,
+            uint256 dueAmount,
+            uint256 interest
+        ) = LibCalculations.calculateInstallmentAmount(
+                fundDetail.amount,
+                fundDetail.Repaid.amount,
+                fundDetail.interestRate,
+                fundDetail.paymentCycleAmount,
+                paymentCycle,
+                fundDetail.lastRepaidTimestamp,
+                block.timestamp,
+                fundDetail.acceptBidTimestamp,
+                fundDetail.maxDuration
+            );
+        uint256 paymentAmount = dueAmount + interest;
+        return paymentAmount;
+    }
+
+    function viewFullRepayAmount(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) public view returns (uint256) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) {
+            revert("Bid must be pending");
+        }
+        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        (
+            uint256 owedAmount,
+            uint256 dueAmount,
+            uint256 interest
+        ) = LibCalculations.calculateInstallmentAmount(
+                fundDetail.amount,
+                fundDetail.Repaid.amount,
+                fundDetail.interestRate,
+                fundDetail.paymentCycleAmount,
+                paymentCycle,
+                fundDetail.lastRepaidTimestamp,
+                block.timestamp,
+                fundDetail.acceptBidTimestamp,
+                fundDetail.maxDuration
+            );
+        uint256 paymentAmount = owedAmount + interest;
+        return paymentAmount;
     }
 
     function RepayFullAmount(
@@ -288,9 +370,9 @@ contract deployPool {
             paymentAmount = _owedAmount;
 
             fundDetail.state = BidState.PAID;
-            emit BidRepaid(_bidId);
+            emit BidRepaid(_bidId, paymentAmount);
         } else {
-            emit BidRepayment(_bidId);
+            emit BidRepayment(_bidId, paymentAmount);
         }
         // Send payment to the lender
         IERC20(_ERC20Address).transferFrom(msg.sender, _lender, paymentAmount);

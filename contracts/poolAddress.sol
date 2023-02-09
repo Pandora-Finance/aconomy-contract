@@ -304,6 +304,42 @@ contract poolAddress is poolStorage {
         emit repaidAmounts(owedAmount, dueAmount, interest);
     }
 
+    function viewInstallmentAmount(uint256 _loanId)
+        public
+        view
+        returns (uint256)
+    {
+        if (loans[_loanId].state != LoanState.ACCEPTED) {
+            revert("Loan must be accepted");
+        }
+        (
+            uint256 owedAmount,
+            uint256 dueAmount,
+            uint256 interest
+        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+
+        uint256 paymentAmount = dueAmount + interest;
+        return paymentAmount;
+    }
+
+    function viewFullRepayAmount(uint256 _loanId)
+        public
+        view
+        returns (uint256)
+    {
+        if (loans[_loanId].state != LoanState.ACCEPTED) {
+            revert("Loan must be accepted");
+        }
+        (
+            uint256 owedAmount,
+            uint256 dueAmount,
+            uint256 interest
+        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+
+        uint256 paymentAmount = owedAmount + interest;
+        return paymentAmount;
+    }
+
     function repayFullLoan(uint256 _loanId) external {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
@@ -329,11 +365,11 @@ contract poolAddress is poolStorage {
             poolId_
         );
 
-        // StatusMark status = accountStatus(accountStatusAddress).updateStatus(
-        //     loan.borrower,
-        //     _loanId,
-        //     poolAddress_
-        // );
+        StatusMark status = accountStatus(accountStatusAddress).updateStatus(
+            loan.borrower,
+            _loanId,
+            poolAddress_
+        );
 
         // Check if we are sending a payment or amount remaining
         if (paymentAmount >= _owedAmount) {
@@ -359,12 +395,12 @@ contract poolAddress is poolStorage {
         loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
 
         // If the loan is paid in full and has a mark, we should update the current status
-        // if (status != StatusMark.Good) {
-        //     accountStatus(accountStatusAddress).updateStatus(
-        //         loan.borrower,
-        //         _loanId,
-        //         poolAddress_
-        //     );
-        // }
+        if (status != StatusMark.Good) {
+            accountStatus(accountStatusAddress).updateStatus(
+                loan.borrower,
+                _loanId,
+                poolAddress_
+            );
+        }
     }
 }
