@@ -63,8 +63,8 @@ contract poolAddress is poolStorage {
         uint256 indexed amount
     );
 
-    event LoanRepaid(uint256 indexed loanId);
-    event LoanRepayment(uint256 indexed loanId);
+    event LoanRepaid(uint256 indexed loanId, uint256 Amount);
+    event LoanRepayment(uint256 indexed loanId, uint256 Amount);
 
     event SubmittedLoan(
         uint256 indexed loanId,
@@ -379,9 +379,9 @@ contract poolAddress is poolStorage {
             // Remove borrower's active loan
             borrowerActiveLoans[loan.borrower].remove(_loanId);
 
-            emit LoanRepaid(_loanId);
+            emit LoanRepaid(_loanId, paymentAmount);
         } else {
-            emit LoanRepayment(_loanId);
+            emit LoanRepayment(_loanId, paymentAmount);
         }
         // Send payment to the lender
         IERC20(loan.loanDetails.lendingToken).transferFrom(
