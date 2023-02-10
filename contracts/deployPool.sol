@@ -185,8 +185,10 @@ contract deployPool {
         IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy);
 
         // transfering Amount to Protocol Owner
-        IERC20(_ERC20Address).approve(AconomyOwner, amountToAconomy);
-        IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy);
+        if (amountToAconomy != 0) {
+            IERC20(_ERC20Address).approve(AconomyOwner, amountToAconomy);
+            IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy);
+        }
 
         emit AcceptedBid(
             _receiver,
