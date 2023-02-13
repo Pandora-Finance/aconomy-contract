@@ -52,14 +52,15 @@ contract poolRegistry {
     struct poolDetail {
         address poolAddress;
         address owner;
-        string metadataURI;
+        string URI;
+        uint16 APR;
         uint16 poolFeePercent; // 10000 is 100%
         bool lenderAttestationRequired;
         EnumerableSet.AddressSet verifiedLendersForPool;
         mapping(address => bytes32) lenderAttestationIds;
-        uint32 paymentCycleDuration; //unix time
-        uint32 paymentDefaultDuration; //unix time
-        uint32 loanExpirationTime; //unix time
+        uint32 paymentCycleDuration;
+        uint32 paymentDefaultDuration;
+        uint32 loanExpirationTime;
         bool borrowerAttestationRequired;
         EnumerableSet.AddressSet verifiedBorrowersForPool;
         mapping(address => bytes32) borrowerAttestationIds;
@@ -82,23 +83,27 @@ contract poolRegistry {
     event SetloanExpirationTime(uint256 poolId, uint32 duration);
     event LenderAttestation(uint256 poolId, address lender);
     event BorrowerAttestation(uint256 poolId, address borrower);
+    event SetPoolURI(uint256 marketId, string uri);
+    event SetAPR(uint256 marketId, uint16 APR);
 
     //Create Pool
     function createPool(
-        address _initialOwner,
         uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
         uint32 _loanExpirationTime,
         uint16 _poolFeePercent,
+        uint16 _apr,
+        string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) external {
         _createPool(
-            _initialOwner,
             _paymentCycleDuration,
             _paymentDefaultDuration,
             _loanExpirationTime,
             _poolFeePercent,
+            _apr,
+            _uri,
             _requireLenderAttestation,
             _requireBorrowerAttestation
         );
@@ -106,15 +111,15 @@ contract poolRegistry {
 
     // Creates a new Pool.
     function _createPool(
-        address _initialOwner,
         uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
         uint32 _loanExpirationTime,
         uint16 _feePercent,
+        uint16 _apr,
+        string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) internal returns (uint256 poolId_) {
-        require(_initialOwner != address(0), "Invalid owner address");
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
@@ -128,12 +133,14 @@ contract poolRegistry {
         );
         pools[poolId_].poolAddress = poolAddress;
         // Set the pool owner
-        pools[poolId_].owner = _initialOwner;
+        pools[poolId_].owner = msg.sender;
 
+        setApr(poolId_, _apr);
         setPaymentCycleDuration(poolId_, _paymentCycleDuration);
         setPaymentDefaultDuration(poolId_, _paymentDefaultDuration);
         setPoolFeePercent(poolId_, _feePercent);
         setloanExpirationTime(poolId_, _loanExpirationTime);
+        setPoolURI(poolId_, _uri);
 
         // Check if pool requires lender attestation to join
         if (_requireLenderAttestation) {
@@ -144,7 +151,15 @@ contract poolRegistry {
             pools[poolId_].borrowerAttestationRequired = true;
         }
 
-        emit poolCreated(_initialOwner, poolAddress, poolId_);
+        emit poolCreated(msg.sender, poolAddress, poolId_);
+    }
+
+    function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
+        if (_apr != pools[_poolId].APR) {
+            pools[_poolId].APR = _apr;
+
+            emit SetAPR(_poolId, _apr);
+        }
     }
 
     function setPaymentCycleDuration(uint256 _poolId, uint32 _duration)
@@ -155,6 +170,20 @@ contract poolRegistry {
             pools[_poolId].paymentCycleDuration = _duration;
 
             emit SetPaymentCycleDuration(_poolId, _duration);
+        }
+    }
+
+    function setPoolURI(uint256 _poolId, string calldata _uri)
+        public
+        ownsPool(_poolId)
+    {
+        if (
+            keccak256(abi.encodePacked(_uri)) !=
+            keccak256(abi.encodePacked(pools[_poolId].URI))
+        ) {
+            pools[_poolId].URI = _uri;
+
+            emit SetPoolURI(_poolId, _uri);
         }
     }
 
@@ -339,6 +368,10 @@ contract poolRegistry {
 
     function getPoolOwner(uint256 _poolId) public view returns (address) {
         return pools[_poolId].owner;
+    }
+
+    function getPoolApr(uint256 _poolId) public view returns (uint16) {
+        return pools[_poolId].APR;
     }
 
     function getAconomyFee() public view returns (uint16) {
