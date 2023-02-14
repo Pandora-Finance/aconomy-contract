@@ -25,6 +25,8 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         aconomyFee = await AconomyFee.deployed();
        await aconomyFee.setProtocolFee(200);
         let protocolFee = await aconomyFee.protocolFee()
+        let aconomyFeeOwner = await aconomyFee.getAconomyOwnerAddress()
+        assert.equal(aconomyFeeOwner, accounts[0], "wrong Aconomy fee owner")
         assert.equal(protocolFee.toNumber(), 200, "Wrong set Protocol Fee")
     })
 
