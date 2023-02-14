@@ -20,6 +20,8 @@ contract piNFT is ERC721URIStorage {
     // tokenId => royalties
     mapping(uint256 => LibShare.Share[]) public royaltiesByTokenId;
 
+    mapping(uint256 => LibShare.Share[]) public royaltiesForValidator;
+
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
 
@@ -95,16 +97,26 @@ contract piNFT is ERC721URIStorage {
         return royaltiesByTokenId[_tokenId];
     }
 
+    function getValidatorRoyalties(uint256 _tokenId)
+        external
+        view
+        returns (LibShare.Share[] memory)
+    {
+        return royaltiesForValidator[_tokenId];
+    }
+
     // this function requires approval of tokens by _erc20Contract
     // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
     function addERC20(
         address _from,
         uint256 _tokenId,
         address _erc20Contract,
-        uint256 _value
+        uint256 _value,
+        LibShare.Share[] memory royalties
     ) public {
         require(_from == msg.sender, "not allowed to add ERC20");
         erc20Received(_from, _tokenId, _erc20Contract, _value);
+        setRoyaltiesForValidator(_tokenId, royalties);
         require(
             IERC20(_erc20Contract).transferFrom(_from, address(this), _value),
             "ERC20 transfer failed."
@@ -134,6 +146,28 @@ contract piNFT is ERC721URIStorage {
         }
         erc20Balances[_tokenId][_erc20Contract] += _value;
         emit ReceivedERC20(_from, _tokenId, _erc20Contract, _value);
+    }
+
+    //Set Royalties for Validator
+    function setRoyaltiesForValidator(
+        uint256 _tokenId,
+        LibShare.Share[] memory royalties
+    ) internal {
+        require(royalties.length <= 10, "Atmost 10 royalties can be added");
+        delete royaltiesForValidator[_tokenId];
+        uint256 sumRoyalties = 0;
+        for (uint256 i = 0; i < royalties.length; i++) {
+            require(
+                royalties[i].account != address(0x0),
+                "Royalty recipient should be present"
+            );
+            require(royalties[i].value != 0, "Royalty value should be > 0");
+            royaltiesForValidator[_tokenId].push(royalties[i]);
+            sumRoyalties += royalties[i].value;
+        }
+        require(sumRoyalties < 10000, "Sum of Royalties > 100%");
+
+        emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
 
     function redeemPiNFT(

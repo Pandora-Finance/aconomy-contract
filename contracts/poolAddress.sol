@@ -385,7 +385,7 @@ contract poolAddress is poolStorage {
         }
         // Send payment to the lender
         IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.borrower,
+            msg.sender,
             loan.lender,
             paymentAmount
         );
