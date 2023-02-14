@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
-contract deployPool {
+contract FundingPool {
     address poolOwner;
     address poolRegistryAddress;
     uint256 paymentCycleDuration;

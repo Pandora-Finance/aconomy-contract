@@ -40,15 +40,16 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         // console.log("attestTegistry: ", attestServices.address)
         poolRegis = await PoolRegistry.deployed()
        res =  await poolRegis.createPool(
-            accounts[0],
             paymentCycleDuration,
             loanDefaultDuration,
             loanExpirationDuration,
             10,
+            10,
+            "sk.com",
             true,
             true
         );
-        poolId1 = res.logs[0].args.poolId.toNumber()
+        poolId1 = res.logs[6].args.poolId.toNumber()
         console.log(poolId1, "poolId1")
         pool1Address = res.logs[4].args.poolAddress;
         console.log(pool1Address, "poolAdress")
