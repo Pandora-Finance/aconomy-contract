@@ -29,7 +29,7 @@ contract AttestationRegistry is IAttestationRegistry {
             schema: schema
         });
 
-        bytes32 uuid = _getUUID(asRecord);
+        bytes32 uuid = _getUUID(schema);
         if (_registry[uuid].uuid != EMPTY_UUID) {
             revert("AlreadyExists");
         }
@@ -42,8 +42,8 @@ contract AttestationRegistry is IAttestationRegistry {
         return uuid;
     }
 
-    function _getUUID(ASRecord memory asRecord) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(asRecord.schema));
+    function _getUUID(bytes memory schema) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(schema));
     }
 
     function getAS(bytes32 uuid)

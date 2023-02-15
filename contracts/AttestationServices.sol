@@ -40,7 +40,7 @@ contract AttestationServices {
         bytes data;
     }
 
-    bytes32 private _lastUUID;
+    
     // The global counter for the total number of attestations.
     uint256 private _attestationsCount;
 
@@ -114,6 +114,7 @@ contract AttestationServices {
             data: data
         });
 
+        bytes32 _lastUUID;
         _lastUUID = _getUUID(attestation);
         attestation.uuid = _lastUUID;
 
