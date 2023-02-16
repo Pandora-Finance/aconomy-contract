@@ -108,17 +108,15 @@ contract piNFT is ERC721URIStorage {
     // this function requires approval of tokens by _erc20Contract
     // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
     function addERC20(
-        address _from,
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _value,
         LibShare.Share[] memory royalties
     ) public {
-        require(_from == msg.sender, "not allowed to add ERC20");
-        erc20Received(_from, _tokenId, _erc20Contract, _value);
+        erc20Received(msg.sender, _tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
         require(
-            IERC20(_erc20Contract).transferFrom(_from, address(this), _value),
+            IERC20(_erc20Contract).transferFrom(msg.sender, address(this), _value),
             "ERC20 transfer failed."
         );
     }
