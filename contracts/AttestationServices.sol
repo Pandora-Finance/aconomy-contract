@@ -71,7 +71,7 @@ contract AttestationServices {
         uint256 expirationTime,
         bytes32 refUUID,
         bytes calldata data
-    ) public payable virtual returns (bytes32) {
+    ) public virtual returns (bytes32) {
         return
             _attest(
                 recipient,
