@@ -96,30 +96,7 @@ contract poolRegistry {
         string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
-    ) external {
-        _createPool(
-            _paymentCycleDuration,
-            _paymentDefaultDuration,
-            _loanExpirationTime,
-            _poolFeePercent,
-            _apr,
-            _uri,
-            _requireLenderAttestation,
-            _requireBorrowerAttestation
-        );
-    }
-
-    // Creates a new Pool.
-    function _createPool(
-        uint32 _paymentCycleDuration,
-        uint32 _paymentDefaultDuration,
-        uint32 _loanExpirationTime,
-        uint16 _feePercent,
-        uint16 _apr,
-        string calldata _uri,
-        bool _requireLenderAttestation,
-        bool _requireBorrowerAttestation
-    ) internal returns (uint256 poolId_) {
+    ) external returns (uint256 poolId_){
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
@@ -129,7 +106,7 @@ contract poolRegistry {
             address(this),
             _paymentCycleDuration,
             _paymentDefaultDuration,
-            _feePercent
+            _poolFeePercent
         );
         pools[poolId_].poolAddress = poolAddress;
         // Set the pool owner
@@ -138,7 +115,7 @@ contract poolRegistry {
         setApr(poolId_, _apr);
         setPaymentCycleDuration(poolId_, _paymentCycleDuration);
         setPaymentDefaultDuration(poolId_, _paymentDefaultDuration);
-        setPoolFeePercent(poolId_, _feePercent);
+        setPoolFeePercent(poolId_, _poolFeePercent);
         setloanExpirationTime(poolId_, _loanExpirationTime);
         setPoolURI(poolId_, _uri);
 
@@ -153,6 +130,8 @@ contract poolRegistry {
 
         emit poolCreated(msg.sender, poolAddress, poolId_);
     }
+
+   
 
     function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
         if (_apr != pools[_poolId].APR) {
