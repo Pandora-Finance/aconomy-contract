@@ -75,12 +75,14 @@ contract CollectionFactory {
         //Deploy collection Address
         address collectionAddress = LibCollection.deployCollectionAddress(
             msg.sender,
-            address(this)
+            address(this),
+            _name,
+            _symbol
         );
 
         collections[collectionId_].contractAddress = collectionAddress;
-
         collections[collectionId_].owner = msg.sender;
+
         setRoyaltiesForCollection(collectionId_, royalties);
         setCollectionName(collectionId_, _name);
         setCollectionSymble(collectionId_, _symbol);
@@ -166,5 +168,13 @@ contract CollectionFactory {
 
             emit SetDescription(_collectionId, _description);
         }
+    }
+
+    function getCollectionRoyalties(uint256 _collectionId)
+        external
+        view
+        returns (LibShare.Share[] memory)
+    {
+        return royaltiesForCollection[_collectionId];
     }
 }

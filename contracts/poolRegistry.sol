@@ -5,10 +5,11 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibPool.sol";
 import "./AttestationServices.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract poolRegistry {
+contract poolRegistry is ReentrancyGuard {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -96,7 +97,7 @@ contract poolRegistry {
         string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
-    ) external returns (uint256 poolId_){
+    ) external returns (uint256 poolId_) {
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
@@ -130,8 +131,6 @@ contract poolRegistry {
 
         emit poolCreated(msg.sender, poolAddress, poolId_);
     }
-
-   
 
     function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
         if (_apr != pools[_poolId].APR) {
@@ -222,6 +221,7 @@ contract poolRegistry {
         bool _isLender
     )
         internal
+        nonReentrant
         lenderOrBorrowerSchema(
             _isLender ? lenderAttestationSchemaId : borrowerAttestationSchemaId
         )
@@ -250,15 +250,21 @@ contract poolRegistry {
             // Store the lender attestation ID for the pool ID
             pools[_poolId].lenderAttestationIds[_Address] = _uuid;
             // Add lender address to pool set
-        //    (bool isSuccess ) =  pools[_poolId].verifiedLendersForPool.add(_Address);
-            require(pools[_poolId].verifiedLendersForPool.add(_Address), "add lender to poolfailed");
+            //    (bool isSuccess ) =  pools[_poolId].verifiedLendersForPool.add(_Address);
+            require(
+                pools[_poolId].verifiedLendersForPool.add(_Address),
+                "add lender to poolfailed"
+            );
 
             emit LenderAttestation(_poolId, _Address);
         } else {
             // Store the lender attestation ID for the pool ID
             pools[_poolId].borrowerAttestationIds[_Address] = _uuid;
             // Add lender address to pool set
-           require( pools[_poolId].verifiedBorrowersForPool.add(_Address), "add borrower failed, verifiedBorrowersForPool.add failed");
+            require(
+                pools[_poolId].verifiedBorrowersForPool.add(_Address),
+                "add borrower failed, verifiedBorrowersForPool.add failed"
+            );
 
             emit BorrowerAttestation(_poolId, _Address);
         }

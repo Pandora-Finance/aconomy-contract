@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./piNFT.sol";
+import "./CollectionFactory.sol";
+import "./CollectionMethods.sol";
 import "./utils/LibShare.sol";
 
 contract piMarket is ERC721Holder, ReentrancyGuard {
@@ -65,23 +67,63 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         feeAddress = _feeAddress;
     }
 
-    modifier onlyOwnerOfToken(address _piNFTAddress, uint256 _tokenId) {
+    modifier onlyOwnerOfToken(address _contractAddress, uint256 _tokenId) {
         require(
-            msg.sender == ERC721(_piNFTAddress).ownerOf(_tokenId),
+            msg.sender == ERC721(_contractAddress).ownerOf(_tokenId),
             "Only token owner can execute"
         );
         _;
     }
 
+    /*
+    @params
+    * _contractAddress if _fromCollection is true then collection contract Address and if false piNFT contract Address
+    */
+
     function sellNFT(
-        address _piNFTAddress,
+        address _contractAddress,
         uint256 _tokenId,
-        uint256 _price
-    ) external onlyOwnerOfToken(_piNFTAddress, _tokenId) nonReentrant {
+        uint256 _price,
+        bool _fromCollection
+    ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         _saleIdCounter.increment();
 
+        if (_fromCollection) {
+            setTokenMetaForCollection(_contractAddress, _tokenId, _price);
+        } else {
+            //needs approval on frontend
+            ERC721(_contractAddress).safeTransferFrom(
+                msg.sender,
+                address(this),
+                _tokenId
+            );
+
+            TokenMeta memory meta = TokenMeta(
+                _saleIdCounter.current(),
+                _contractAddress,
+                _tokenId,
+                _price,
+                true,
+                false,
+                true,
+                0,
+                0,
+                msg.sender
+            );
+
+            _tokenMeta[_saleIdCounter.current()] = meta;
+
+            emit TokenMetaReturn(meta, _saleIdCounter.current());
+        }
+    }
+
+    function setTokenMetaForCollection(
+        address _contractAddress,
+        uint256 _tokenId,
+        uint256 _price
+    ) internal onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         //needs approval on frontend
-        ERC721(_piNFTAddress).safeTransferFrom(
+        ERC721(_contractAddress).safeTransferFrom(
             msg.sender,
             address(this),
             _tokenId
@@ -89,7 +131,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
         TokenMeta memory meta = TokenMeta(
             _saleIdCounter.current(),
-            _piNFTAddress,
+            _contractAddress,
             _tokenId,
             _price,
             true,
@@ -113,6 +155,28 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getRoyalties(_tokenId);
     }
 
+    // Get Collection Royalty
+    function getCollectionRoyalty(
+        address _collectionFactoryAddress,
+        uint256 _collectionId
+    ) public view returns (LibShare.Share[] memory) {
+        return
+            CollectionFactory(_collectionFactoryAddress).getCollectionRoyalties(
+                _collectionId
+            );
+    }
+
+    // Get Collection validator Royalty by collection TokenId
+    function getCollectionValidatorRoyalty(
+        address _collectionAddress,
+        uint256 _tokenId
+    ) public view returns (LibShare.Share[] memory) {
+        return
+            CollectionMethods(_collectionAddress).getValidatorRoyalties(
+                _tokenId
+            );
+    }
+
     // Retrieve validator Royality
     function retrieveValidatorRoyalty(
         address _contractAddress,
@@ -121,18 +185,34 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getValidatorRoyalties(_tokenId);
     }
 
-    function BuyNFT(uint256 _saleId) external payable nonReentrant {
+    function BuyNFT(uint256 _saleId, bool _fromCollection)
+        external
+        payable
+        nonReentrant
+    {
         TokenMeta memory meta = _tokenMeta[_saleId];
 
-        LibShare.Share[] memory royalties = retrieveRoyalty(
-            meta.tokenContractAddress,
-            meta.tokenId
-        );
-
-        LibShare.Share[] memory validatorRoyalties = retrieveValidatorRoyalty(
-            meta.tokenContractAddress,
-            meta.tokenId
-        );
+        LibShare.Share[] memory royalties;
+        LibShare.Share[] memory validatorRoyalties;
+        if (_fromCollection) {
+            royalties = getCollectionRoyalty(
+                meta.tokenContractAddress,
+                meta.tokenId
+            );
+            validatorRoyalties = getCollectionValidatorRoyalty(
+                meta.tokenContractAddress,
+                meta.tokenId
+            );
+        } else {
+            royalties = retrieveRoyalty(
+                meta.tokenContractAddress,
+                meta.tokenId
+            );
+            validatorRoyalties = retrieveValidatorRoyalty(
+                meta.tokenContractAddress,
+                meta.tokenId
+            );
+        }
 
         require(meta.status, "token must be on sale");
         require(
@@ -197,16 +277,16 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     }
 
     function SellNFT_byBid(
-        address _piNFTAddress,
+        address _contractAddress,
         uint256 _tokenId,
         uint256 _price,
         uint256 _bidTime
-    ) external onlyOwnerOfToken(_piNFTAddress, _tokenId) nonReentrant {
-        require(_piNFTAddress != address(0));
+    ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
+        require(_contractAddress != address(0));
         _saleIdCounter.increment();
 
         //needs approval on frontend
-        ERC721(_piNFTAddress).safeTransferFrom(
+        ERC721(_contractAddress).safeTransferFrom(
             msg.sender,
             address(this),
             _tokenId
@@ -214,7 +294,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
         TokenMeta memory meta = TokenMeta(
             _saleIdCounter.current(),
-            _piNFTAddress,
+            _contractAddress,
             _tokenId,
             _price,
             false,
@@ -257,24 +337,37 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidOrderReturn(bid);
     }
 
-    function executeBidOrder(uint256 _saleId, uint256 _bidOrderID)
-        external
-        nonReentrant
-    {
+    function executeBidOrder(
+        uint256 _saleId,
+        uint256 _bidOrderID,
+        bool _fromCollection
+    ) external nonReentrant {
         BidOrder memory bids = Bids[_saleId][_bidOrderID];
         require(msg.sender == _tokenMeta[_saleId].currentOwner);
         require(!bids.withdrawn);
         require(_tokenMeta[_saleId].status);
 
-        LibShare.Share[] memory royalties = retrieveRoyalty(
-            _tokenMeta[_saleId].tokenContractAddress,
-            _tokenMeta[_saleId].tokenId
-        );
-
-        LibShare.Share[] memory validatorRoyalties = retrieveValidatorRoyalty(
-            _tokenMeta[_saleId].tokenContractAddress,
-            _tokenMeta[_saleId].tokenId
-        );
+        LibShare.Share[] memory royalties;
+        LibShare.Share[] memory validatorRoyalties;
+        if (_fromCollection) {
+            royalties = getCollectionRoyalty(
+                _tokenMeta[_saleId].tokenContractAddress,
+                _tokenMeta[_saleId].tokenId
+            );
+            validatorRoyalties = getCollectionValidatorRoyalty(
+                _tokenMeta[_saleId].tokenContractAddress,
+                _tokenMeta[_saleId].tokenId
+            );
+        } else {
+            royalties = retrieveRoyalty(
+                _tokenMeta[_saleId].tokenContractAddress,
+                _tokenMeta[_saleId].tokenId
+            );
+            validatorRoyalties = retrieveValidatorRoyalty(
+                _tokenMeta[_saleId].tokenContractAddress,
+                _tokenMeta[_saleId].tokenId
+            );
+        }
 
         _tokenMeta[_saleId].status = false;
         _tokenMeta[_saleId].price = bids.price;
@@ -342,22 +435,27 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     }
 
     function swapTokens(
-        address piNFTAddress,
+        address contractAddress,
         uint256 token1,
         uint256 token2
-    ) public onlyOwnerOfToken(piNFTAddress, token1) returns (uint256) {
-        address token2Owner = ERC721((piNFTAddress)).ownerOf(token2);
+    )
+        public
+        onlyOwnerOfToken(contractAddress, token1)
+        nonReentrant
+        returns (uint256)
+    {
+        address token2Owner = ERC721((contractAddress)).ownerOf(token2);
         require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
         uint256 swapsId = _swapIdCounter.current();
 
-        ERC721(piNFTAddress).safeTransferFrom(
+        ERC721(contractAddress).safeTransferFrom(
             msg.sender,
             address(this),
             token1
         );
 
         Swap memory swap = Swap(
-            piNFTAddress,
+            contractAddress,
             msg.sender,
             token1,
             token2Owner,
@@ -374,7 +472,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return swapsId;
     }
 
-    function cancelSwap(uint256 _swapId) public {
+    function cancelSwap(uint256 _swapId) public nonReentrant {
         require(
             msg.sender == _swaps[_swapId].initiator,
             "Only owner can cancel sale"
@@ -388,7 +486,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         );
     }
 
-    function acceptSwap(uint256 swapId) public {
+    function acceptSwap(uint256 swapId) public nonReentrant {
         Swap memory swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
         require(swap.secondUser == msg.sender, "Only owner can accept swap");
@@ -405,7 +503,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         );
     }
 
-    function rejectSwap(uint256 swapId) public {
+    function rejectSwap(uint256 swapId) public nonReentrant {
         Swap memory swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
         require(swap.secondUser == msg.sender, "Only owner can accept swap");
