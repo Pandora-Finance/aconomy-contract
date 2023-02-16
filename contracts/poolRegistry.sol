@@ -202,7 +202,7 @@ contract poolRegistry {
         public
         ownsPool(_poolId)
     {
-        require(_newPercent >= 0 && _newPercent <= 10000, "invalid percent");
+        require(_newPercent <= 10000, "invalid percent");
         if (_newPercent != pools[_poolId].poolFeePercent) {
             pools[_poolId].poolFeePercent = _newPercent;
             emit SetPoolFee(_poolId, _newPercent);
