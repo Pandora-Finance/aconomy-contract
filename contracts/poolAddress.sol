@@ -217,7 +217,7 @@ contract poolAddress is poolStorage {
             .principal;
 
         // Store Borrower's active loan
-        borrowerActiveLoans[loan.borrower].add(_loanId);
+        require(borrowerActiveLoans[loan.borrower].add(_loanId), "accept loan failed, add to borrweractiveloans");
 
         emit loanAccepted(_loanId, loan.lender);
 
@@ -377,7 +377,7 @@ contract poolAddress is poolStorage {
             loan.state = LoanState.PAID;
 
             // Remove borrower's active loan
-            borrowerActiveLoans[loan.borrower].remove(_loanId);
+            require( borrowerActiveLoans[loan.borrower].remove(_loanId) , "not able to repay, remove loanId failed");
 
             emit LoanRepaid(_loanId, paymentAmount);
         } else {

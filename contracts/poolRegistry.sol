@@ -271,14 +271,15 @@ contract poolRegistry {
             // Store the lender attestation ID for the pool ID
             pools[_poolId].lenderAttestationIds[_Address] = _uuid;
             // Add lender address to pool set
-            pools[_poolId].verifiedLendersForPool.add(_Address);
+        //    (bool isSuccess ) =  pools[_poolId].verifiedLendersForPool.add(_Address);
+            require(pools[_poolId].verifiedLendersForPool.add(_Address), "add lender to poolfailed");
 
             emit LenderAttestation(_poolId, _Address);
         } else {
             // Store the lender attestation ID for the pool ID
             pools[_poolId].borrowerAttestationIds[_Address] = _uuid;
             // Add lender address to pool set
-            pools[_poolId].verifiedBorrowersForPool.add(_Address);
+           require( pools[_poolId].verifiedBorrowersForPool.add(_Address), "add borrower failed, verifiedBorrowersForPool.add failed");
 
             emit BorrowerAttestation(_poolId, _Address);
         }
