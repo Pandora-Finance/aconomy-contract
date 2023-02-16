@@ -20,19 +20,16 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract poolAddress is poolStorage {
     address poolRegistryAddress;
     address AconomyFeeAddress;
-    address accountStatusAddress;
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
     constructor(
         address _poolRegistry,
-        address _AconomyFeeAddress,
-        address _accountStatusAddress
+        address _AconomyFeeAddress
     ) {
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
-        accountStatusAddress = _accountStatusAddress;
     }
 
     modifier pendingLoan(uint256 _loanId) {
@@ -184,28 +181,33 @@ contract poolAddress is poolStorage {
 
         //Transfer Aconomy Fee
         if (amountToAconomy != 0) {
-            IERC20(loan.loanDetails.lendingToken).transferFrom(
+           (bool isSuccess) = IERC20(loan.loanDetails.lendingToken).transferFrom(
                 loan.lender,
                 AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
                 amountToAconomy
             );
+            require(isSuccess, "Not able to tansfer to aconomy fee address");
         }
 
         //Transfer to Pool Owner
         if (amountToPool != 0) {
-            IERC20(loan.loanDetails.lendingToken).transferFrom(
+           (bool isSuccess2) = IERC20(loan.loanDetails.lendingToken).transferFrom(
                 loan.lender,
                 poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
                 amountToPool
             );
+            require(isSuccess2, "Not able to tansfer to pool owner");
         }
 
         //transfer funds to borrower
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
+        (bool isSuccess3) = IERC20(loan.loanDetails.lendingToken).transferFrom(
             loan.lender,
             loan.borrower,
             amountToBorrower
         );
+
+        require(isSuccess3, "Not able to tansfer to borrower");
+        
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -377,11 +379,13 @@ contract poolAddress is poolStorage {
             emit LoanRepayment(_loanId, paymentAmount);
         }
         // Send payment to the lender
-        IERC20(loan.loanDetails.lendingToken).transferFrom(
+        (bool isSuccess) = IERC20(loan.loanDetails.lendingToken).transferFrom(
             msg.sender,
             loan.lender,
             paymentAmount
         );
+
+        require(isSuccess, "unable to transfer to lender");
 
         loan.loanDetails.totalRepaid.principal += _payment.principal;
         loan.loanDetails.totalRepaid.interest += _payment.interest;
