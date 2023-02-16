@@ -181,12 +181,10 @@ contract FundingPool {
         );
 
         // transfering Amount to Owner
-        IERC20(_ERC20Address).approve(_receiver, amount - amountToAconomy);
         IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy);
 
         // transfering Amount to Protocol Owner
         if (amountToAconomy != 0) {
-            IERC20(_ERC20Address).approve(AconomyOwner, amountToAconomy);
             IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy);
         }
 
@@ -405,7 +403,6 @@ contract FundingPool {
         );
 
         // Transfering the amount to the lender
-        IERC20(_ERC20Address).approve(_lender, fundDetail.amount);
         IERC20(_ERC20Address).transfer(_lender, fundDetail.amount);
 
         fundDetail.state = BidState.WITHDRAWN;
