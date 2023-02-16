@@ -34,8 +34,6 @@ contract AttestationServices {
         uint256 expirationTime;
         // The time when the attestation was revoked (Unix timestamp).
         uint256 revocationTime;
-        // The UUID of the related attestation.
-        bytes32 refUUID;
         // Custom attestation data.
         bytes data;
     }
@@ -110,7 +108,6 @@ contract AttestationServices {
             time: block.timestamp,
             expirationTime: expirationTime,
             revocationTime: 0,
-            refUUID: refUUID,
             data: data
         });
 
