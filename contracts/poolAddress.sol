@@ -365,12 +365,6 @@ contract poolAddress is poolStorage {
             poolId_
         );
 
-        // StatusMark status = accountStatus(accountStatusAddress).updateStatus(
-        //     loan.borrower,
-        //     _loanId,
-        //     poolAddress_
-        // );
-
         // Check if we are sending a payment or amount remaining
         if (paymentAmount >= _owedAmount) {
             paymentAmount = _owedAmount;
@@ -394,13 +388,5 @@ contract poolAddress is poolStorage {
         loan.loanDetails.totalRepaid.interest += _payment.interest;
         loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
 
-        // If the loan is paid in full and has a mark, we should update the current status
-        // if (status != StatusMark.Good) {
-        //     accountStatus(accountStatusAddress).updateStatus(
-        //         loan.borrower,
-        //         _loanId,
-        //         poolAddress_
-        //     );
-        // }
     }
 }
