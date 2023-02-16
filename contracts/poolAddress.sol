@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
-import "./accountStatus.sol";
 import "./Libraries/LibCalculations.sol";
 import "./interfaces/IaccountStatus.sol";
 
