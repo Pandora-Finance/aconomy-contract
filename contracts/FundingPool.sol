@@ -136,7 +136,7 @@ contract FundingPool {
         );
 
         // Send payment to the Pool
-        IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount);
+      require(IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount), "Unable to tansfer to poolAddress");
         bidId++;
 
         emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
@@ -181,11 +181,11 @@ contract FundingPool {
         );
 
         // transfering Amount to Owner
-        IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy);
+       require( IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy), "unable to transfer to receiver");
 
         // transfering Amount to Protocol Owner
         if (amountToAconomy != 0) {
-            IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy);
+            require(IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy), "Unable to transfer to AconomyOwner");
         }
 
         emit AcceptedBid(
@@ -375,7 +375,7 @@ contract FundingPool {
             emit BidRepayment(_bidId, paymentAmount);
         }
         // Send payment to the lender
-        IERC20(_ERC20Address).transferFrom(msg.sender, _lender, paymentAmount);
+        require(IERC20(_ERC20Address).transferFrom(msg.sender, _lender, paymentAmount), "unable to transfer to lender");
 
         fundDetail.Repaid.amount += _amount;
         fundDetail.Repaid.interest += _interest;
@@ -403,7 +403,7 @@ contract FundingPool {
         );
 
         // Transfering the amount to the lender
-        IERC20(_ERC20Address).transfer(_lender, fundDetail.amount);
+        require(IERC20(_ERC20Address).transfer(_lender, fundDetail.amount), "Unable to transfer to lender");
 
         fundDetail.state = BidState.WITHDRAWN;
 
