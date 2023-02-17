@@ -321,7 +321,7 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
-    function closeMarket(uint256 _poolId) public ownsPool(_poolId) {
+    function closePool(uint256 _poolId) public ownsPool(_poolId) {
         if (!ClosedPools[_poolId]) {
             ClosedPools[_poolId] = true;
 
