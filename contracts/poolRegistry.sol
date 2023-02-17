@@ -86,6 +86,7 @@ contract poolRegistry is ReentrancyGuard {
     event BorrowerAttestation(uint256 poolId, address borrower);
     event SetPoolURI(uint256 marketId, string uri);
     event SetAPR(uint256 marketId, uint16 APR);
+    event poolClosed(uint256 poolId);
 
     //Create Pool
     function createPool(
@@ -202,7 +203,7 @@ contract poolRegistry is ReentrancyGuard {
         uint256 _poolId,
         address _lenderAddress,
         uint256 _expirationTime
-    ) external {
+    ) external ownsPool(_poolId) {
         _attestAddress(_poolId, _lenderAddress, _expirationTime, true);
     }
 
@@ -210,7 +211,7 @@ contract poolRegistry is ReentrancyGuard {
         uint256 _poolId,
         address _borrowerAddress,
         uint256 _expirationTime
-    ) external {
+    ) external ownsPool(_poolId) {
         _attestAddress(_poolId, _borrowerAddress, _expirationTime, false);
     }
 
@@ -317,6 +318,14 @@ contract poolRegistry is ReentrancyGuard {
             uuid_ = _stakeholderAttestationIds[_wltAddress];
         } else {
             isVerified_ = true;
+        }
+    }
+
+    function closeMarket(uint256 _poolId) public ownsPool(_poolId) {
+        if (!ClosedPools[_poolId]) {
+            ClosedPools[_poolId] = true;
+
+            emit poolClosed(_poolId);
         }
     }
 
