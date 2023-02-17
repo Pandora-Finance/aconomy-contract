@@ -105,7 +105,7 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         accounts[1],
         {from: accounts[1]}
        )
-// console.log(res.logs[0].args)
+    // console.log(res.logs[0].args)
        loanId1 = res.logs[0].args.loanId.toNumber()
      let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber()
 
@@ -146,6 +146,24 @@ console.log(_balance1.toNumber())
         // console.log(res)
         assert.equal(res.receipt.status, true, "Not able to repay loan")
     })
+
+//     it("should repay some amount of lone ", async() => {
+//          // Approve loan amount and transfer it to the borrower
+//   await erc20.approve(poolAddressInstance.address, 500, { from: accounts[1] });
+//   await poolAddressInstance.borrow(500, { from: accounts[2] });
+  
+//   // Check loan status before repayment
+//   let loanBefore = await poolAddressInstance.loans(loanId1);
+//   assert.equal(loanBefore.status, "active", "Loan status should be active before repayment");
+  
+//   // Repay full loan amount
+//   await erc20.approve(poolAddressInstance.address, loanAmount, { from: borrower });
+//   await poolAddressInstance.repayYourLoan(loanId1, { from: borrower });
+  
+//   // Check loan status after repayment
+//   let loanAfter = await poolAddressInstance.loans(loanId1);
+//   assert.equal(loanAfter.status, "repaid", "Loan status should be repaid after full repayment");
+//     })
 
 
 })
