@@ -5,10 +5,11 @@ import "./Libraries/LibPool.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
-contract FundingPool {
+contract FundingPool is ReentrancyGuard {
     address poolOwner;
     address poolRegistryAddress;
     uint256 paymentCycleDuration;
@@ -111,7 +112,7 @@ contract FundingPool {
         uint32 _maxLoanDuration,
         uint16 _interestRate,
         uint256 _expiration
-    ) external {
+    ) external nonReentrant {
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .lenderVarification(_poolId, msg.sender);
 
@@ -136,7 +137,10 @@ contract FundingPool {
         );
 
         // Send payment to the Pool
-      require(IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount), "Unable to tansfer to poolAddress");
+        require(
+            IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount),
+            "Unable to tansfer to poolAddress"
+        );
         bidId++;
 
         emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
@@ -148,7 +152,7 @@ contract FundingPool {
         uint256 _bidId,
         address _lender,
         address _receiver
-    ) external onlyPoolOwner(_poolId) {
+    ) external onlyPoolOwner(_poolId) nonReentrant {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -181,11 +185,17 @@ contract FundingPool {
         );
 
         // transfering Amount to Owner
-       require( IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy), "unable to transfer to receiver");
+        require(
+            IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy),
+            "unable to transfer to receiver"
+        );
 
         // transfering Amount to Protocol Owner
         if (amountToAconomy != 0) {
-            require(IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy), "Unable to transfer to AconomyOwner");
+            require(
+                IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy),
+                "Unable to transfer to AconomyOwner"
+            );
         }
 
         emit AcceptedBid(
@@ -358,7 +368,7 @@ contract FundingPool {
         uint256 _amount,
         uint256 _interest,
         uint256 _owedAmount
-    ) internal {
+    ) internal nonReentrant {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -375,7 +385,14 @@ contract FundingPool {
             emit BidRepayment(_bidId, paymentAmount);
         }
         // Send payment to the lender
-        require(IERC20(_ERC20Address).transferFrom(msg.sender, _lender, paymentAmount), "unable to transfer to lender");
+        require(
+            IERC20(_ERC20Address).transferFrom(
+                msg.sender,
+                _lender,
+                paymentAmount
+            ),
+            "unable to transfer to lender"
+        );
 
         fundDetail.Repaid.amount += _amount;
         fundDetail.Repaid.interest += _interest;
@@ -387,7 +404,7 @@ contract FundingPool {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external {
+    ) external nonReentrant {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -403,7 +420,10 @@ contract FundingPool {
         );
 
         // Transfering the amount to the lender
-        require(IERC20(_ERC20Address).transfer(_lender, fundDetail.amount), "Unable to transfer to lender");
+        require(
+            IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),
+            "Unable to transfer to lender"
+        );
 
         fundDetail.state = BidState.WITHDRAWN;
 
