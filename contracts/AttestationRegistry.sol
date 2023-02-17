@@ -33,7 +33,6 @@ contract AttestationRegistry is IAttestationRegistry {
             schema: schema
         });
 
-        asRecord.uuid = uuid;
         _registry[uuid] = asRecord;
 
         emit Registered(uuid, index, schema, msg.sender);
