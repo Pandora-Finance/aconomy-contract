@@ -117,7 +117,7 @@ Borrower can Fully repay their accepted loan .
 ```
 
 
-## deployPool functions
+## FundingPool functions
 
 **Supply to Pool:**
 Attested Lenders can bid for supply to pool after checking the APR and other information of that pool address.
