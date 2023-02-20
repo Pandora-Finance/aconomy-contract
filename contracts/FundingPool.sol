@@ -212,7 +212,7 @@ contract FundingPool is ReentrancyGuard {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external onlyPoolOwner(_poolId) {
+    ) external onlyPoolOwner(_poolId) nonReentrant {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -324,7 +324,7 @@ contract FundingPool is ReentrancyGuard {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external onlyPoolOwner(_poolId) {
+    ) external onlyPoolOwner(_poolId) nonReentrant {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -368,7 +368,7 @@ contract FundingPool is ReentrancyGuard {
         uint256 _amount,
         uint256 _interest,
         uint256 _owedAmount
-    ) internal nonReentrant {
+    ) internal {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];

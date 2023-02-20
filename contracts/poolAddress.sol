@@ -289,7 +289,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         }
     }
 
-    function repayYourLoan(uint256 _loanId) external {
+    function repayYourLoan(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
@@ -342,7 +342,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return paymentAmount;
     }
 
-    function repayFullLoan(uint256 _loanId) external {
+    function repayFullLoan(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
@@ -359,7 +359,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         uint256 _loanId,
         Payment memory _payment,
         uint256 _owedAmount
-    ) internal nonReentrant {
+    ) internal {
         Loan storage loan = loans[_loanId];
         uint256 paymentAmount = _payment.principal + _payment.interest;
         uint256 poolId_ = loan.poolId;
