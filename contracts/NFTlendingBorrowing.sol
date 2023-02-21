@@ -43,7 +43,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     // NFTid => NFTdetail
     mapping(uint256 => NFTdetail) public NFTdetails;
 
-    // NFTid => Bid
+    // NFTid => Bid[]
     mapping(uint256 => BidDetail[]) public Bids;
 
     // Events
