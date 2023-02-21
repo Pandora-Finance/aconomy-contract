@@ -1,8 +1,8 @@
 const BigNumber = require("big-number");
 const PiNFT = artifacts.require("piNFT");
-const SampleERC20 = artifacts.require("sampleERC20");
+const SampleERC20 = artifacts.require("mintToken");
 const PiMarket = artifacts.require("piMarket");
-require("dotenv").config();
+// require("dotenv").config();
 
 contract("PiMarket", async (accounts) => {
   let piNFT, sampleERC20, piMarket;
@@ -11,7 +11,7 @@ contract("PiMarket", async (accounts) => {
   let bob = accounts[2];
   let carl = accounts[3];
   let royaltyReceiver = accounts[3];
-  let feeReceiver = process.env.FEE_ADDRESS;
+  let feeReceiver = '0x7852ef7e88f74138755883fee684abc50af3341e';
   let bidder1 = accounts[5];
   let bidder2 = accounts[6];
 
@@ -26,10 +26,10 @@ contract("PiMarket", async (accounts) => {
 
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
-        validator,
         tokenId,
         sampleERC20.address,
         500,
+        [[validator, 200]],
         {
           from: validator,
         }
@@ -51,7 +51,7 @@ contract("PiMarket", async (accounts) => {
 
     it("should let alice place piNFT on sale", async () => {
       await piNFT.approve(piMarket.address, 0);
-      const result = await piMarket.sellNFT(piNFT.address, 0, 5000);
+      const result = await piMarket.sellNFT(piNFT.address, 0, 5000, false);
       assert.equal(
         await piNFT.ownerOf(0),
         piMarket.address,
@@ -67,16 +67,17 @@ contract("PiMarket", async (accounts) => {
       let _balance2 = await web3.eth.getBalance(royaltyReceiver);
       let _balance3 = await web3.eth.getBalance(feeReceiver);
 
-      result2 = await piMarket.BuyNFT(1, { from: bob, value: 5000 });
+      result2 = await piMarket.BuyNFT(1, false, { from: bob, value: 5000 });
       assert.equal(await piNFT.ownerOf(0), bob);
 
       let balance1 = await web3.eth.getBalance(alice);
       let balance2 = await web3.eth.getBalance(royaltyReceiver);
       let balance3 = await web3.eth.getBalance(feeReceiver);
-
+      let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
+    console.log(balance1, " ",_balance1, " ", temp.toString())
       assert.equal(
-        BigNumber(balance1).minus(BigNumber(_balance1)),
-        (5000 * 9400) / 10000,
+        (BigNumber(balance1).minus(BigNumber(_balance1))),
+        (460000*100)/10000,
         "Failed to transfer NFT amount"
       );
 
@@ -101,7 +102,7 @@ contract("PiMarket", async (accounts) => {
 
     it("should let bob place piNFT on sale again", async () => {
       await piNFT.approve(piMarket.address, 0, { from: bob });
-      const result = await piMarket.sellNFT(piNFT.address, 0, 10000, {
+      const result = await piMarket.sellNFT(piNFT.address, 0, 10000, false,{
         from: bob,
       });
       assert.equal(
@@ -152,10 +153,10 @@ contract("PiMarket", async (accounts) => {
 
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
-        validator,
         tokenId,
         sampleERC20.address,
         500,
+        [[validator, 200]],
         {
           from: validator,
         }
@@ -188,7 +189,7 @@ contract("PiMarket", async (accounts) => {
       let _balance2 = await web3.eth.getBalance(royaltyReceiver);
       let _balance3 = await web3.eth.getBalance(feeReceiver);
 
-      await piMarket.executeBidOrder(3, 2, { from: alice });
+      await piMarket.executeBidOrder(3, 2, false, { from: alice });
       result = await piNFT.ownerOf(1);
       assert.equal(result, bidder1);
 
@@ -258,10 +259,10 @@ contract("PiMarket", async (accounts) => {
 
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
-        validator,
         tokenId,
         sampleERC20.address,
         500,
+        [[validator, 200]],
         {
           from: validator,
         }
@@ -277,10 +278,10 @@ contract("PiMarket", async (accounts) => {
 
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
-        validator,
         tokenId,
         sampleERC20.address,
         500,
+        [[validator, 200]],
         {
           from: validator,
         }

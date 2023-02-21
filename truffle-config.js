@@ -18,17 +18,10 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
-
-require("dotenv").config();
-const HDWalletProvider = require("@truffle/hdwallet-provider");
-const private_key = process.env.PK;
-const infuraApi = process.env.INFURA_API;
-const etherscanapi = process.env.ETHERSCAN_API;
-const bscapi = process.env.BSC_API;
 
 module.exports = {
   /**
@@ -40,10 +33,6 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-  api_keys: {
-    etherscan: etherscanapi,
-    bscscan: bscapi,
-  },
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -53,9 +42,19 @@ module.exports = {
     // options below to some value.
     //
     development: {
-      host: "127.0.0.1", // Localhost (default: none)
-      port: 9545, // Standard Ethereum port (default: none)
-      network_id: "*", // Any network (default: none)
+     host: "127.0.0.1",     // Localhost (default: none)
+     port: 8545,            // Standard Ethereum port (default: none)
+     network_id: "*",       // Any network (default: none)
+    },
+    goerli: {
+      provider: function () {
+        return new HDWalletProvider(
+          'c2a2e257c108692e2b879dde8b9ad2b13dcbef9c7229c646f9f8ee32f1b22ed3',
+          `https://goerli.infura.io/v3/3c7b140952bb485d96cd06904ae06727`
+        );
+      },
+      network_id: 5,
+      gas: 20000000,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -68,55 +67,14 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    goerli: {
-      provider: () => {
-        return new HDWalletProvider(
-          private_key,
-          `https://goerli.infura.io/v3/${infuraApi}`
-        );
-      },
-      network_id: 5,
-      // gas: 4465030,
-      // // gasPrice: 10000000000,
-      // confirmations: 2, // # of confs to wait between deployments. (default: 0)
-      // timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
-    },
-    bscTestnet: {
-      provider: () =>
-        new HDWalletProvider(
-          private_key,
-          `https://data-seed-prebsc-1-s1.binance.org:8545`
-        ),
-      network_id: 97,
-      confirmations: 10,
-      timeoutBlocks: 200,
-      skipDryRun: true,
-    },
-    ropsten: {
-      provider: () =>
-        new HDWalletProvider(
-          private_key,
-          `https://ropsten.infura.io/v3/${infuraApi}`
-        ),
-      network_id: 3, // Ropsten's id
-      gas: 5500000, // Ropsten has a lower block limit than mainnet
-      confirmations: 2, // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
-    },
-    rinkeby: {
-      provider: () =>
-        new HDWalletProvider(
-          private_key,
-          `https://rinkeby.infura.io/v3/${infuraApi}`
-        ),
-      network_id: 4, // Rinkeby's id
-      // gas: 5500000, // Ropsten has a lower block limit than mainnet
-      confirmations: 2, // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
-    },
+    // ropsten: {
+    // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/YOUR-PROJECT-ID`),
+    // network_id: 3,       // Ropsten's id
+    // gas: 5500000,        // Ropsten has a lower block limit than mainnet
+    // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+    // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+    // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    // },
     // Useful for private networks
     // private: {
     // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
@@ -133,7 +91,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.8.11", // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.11",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
@@ -142,7 +100,7 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
-    },
+    }
   },
 
   // Truffle DB is currently disabled by default; to enable it, change enabled:
@@ -152,18 +110,21 @@ module.exports = {
   // NOTE: It is not possible to migrate your contracts to truffle DB and you should
   // make a backup of your artifacts to a safe location before enabling this feature.
   //
-  // After you backed up your artifacts you can utilize db by running migrate as follows:
+  // After you backed up your artifacts you can utilize db by running migrate as follows: 
   // $ truffle migrate --reset --compile-all
   //
   // db: {
-  // enabled: false,
-  // host: "127.0.0.1",
-  // adapter: {
-  //   name: "sqlite",
-  //   settings: {
-  //     directory: ".db"
-  //   }
+    // enabled: false,
+    // host: "127.0.0.1",
+    // adapter: {
+    //   name: "sqlite",
+    //   settings: {
+    //     directory: ".db"
+    //   }
+    // }
   // }
-  // }
-  plugins: ["truffle-contract-size", "truffle-plugin-verify"],
+  plugins: ['truffle-plugin-verify'],
+  api_keys: {
+    etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E'
+  }
 };
