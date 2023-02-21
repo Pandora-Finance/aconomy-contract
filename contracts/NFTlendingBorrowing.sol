@@ -74,12 +74,13 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         _;
     }
 
-    modifier NFTlender(uint256 _NFTid) {
+    modifier NFTOwner(uint256 _NFTid) {
         require(NFTdetails[_NFTid].tokenIdOwner == msg.sender, "Not the owner");
         _;
     }
 
-    function listForLending(
+    // list Your NFT for Borrowing by NFT owner
+    function listNFTforBorrowing(
         uint256 _tokenId,
         address _contractAddress,
         uint16 _percent,
@@ -118,7 +119,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
     function setPercent(uint256 _NFTid, uint16 _percent)
         public
-        NFTlender(_NFTid)
+        NFTOwner(_NFTid)
     {
         if (_percent != NFTdetails[_NFTid].percent) {
             NFTdetails[_NFTid].percent = _percent;
@@ -129,7 +130,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
     function setDurationTime(uint256 _NFTid, uint32 _duration)
         public
-        NFTlender(_NFTid)
+        NFTOwner(_NFTid)
     {
         if (_duration != NFTdetails[_NFTid].duration) {
             NFTdetails[_NFTid].duration = _duration;
@@ -140,7 +141,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
     function setExpirationTime(uint256 _NFTid, uint256 _expiration)
         public
-        NFTlender(_NFTid)
+        NFTOwner(_NFTid)
     {
         uint256 expirationTime = block.timestamp + _expiration;
         if (expirationTime != NFTdetails[_NFTid].expiration) {
@@ -152,7 +153,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
     function setExpectedAmount(uint256 _NFTid, uint256 _expectedAmount)
         public
-        NFTlender(_NFTid)
+        NFTOwner(_NFTid)
     {
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
@@ -161,6 +162,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         }
     }
 
+    // Bid on a NFT by users
     function Bid(
         uint256 _NFTid,
         uint256 _bidAmount,
@@ -194,6 +196,16 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit AppliedBid(Bids[_NFTid].length - 1, bidDetail, _NFTid);
     }
 
+    // Get All Bids Amount for Approving for Accept Bid
+    function viewAllBidsAmount(uint256 _NFTid) external view returns (uint256) {
+        uint256 sum = 0;
+        for (uint256 i = 0; i < Bids[_NFTid].length; i++) {
+            sum = sum + Bids[_NFTid][i].Amount;
+        }
+        return sum;
+    }
+
+    // Accept Bid by NFT owner
     function AcceptBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         BidDetail memory bids = Bids[_NFTid][_bidId];
         NFTdetail memory NFT = NFTdetails[_NFTid];
@@ -211,13 +223,13 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         address AconomyOwner = AconomyFee(AconomyFeeAddress)
             .getAconomyOwnerAddress();
 
-        //Aconomy Fee
+        //Calculating Aconomy Fee
         uint256 amountToAconomy = LibCalculations.percent(
             bids.Amount,
             AconomyFee(AconomyFeeAddress).protocolFee()
         );
 
-        // transfering Amount to Owner
+        // transfering Amount to NFT Owner
         require(
             IERC20(bids.ERC20Address).transfer(
                 msg.sender,
@@ -237,7 +249,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             );
         }
 
-        // Transfering all Bidder's amount to their Account
+        // Transfering all Bidders amount to their Account
         for (uint256 i = 0; i < Bids[_NFTid].length; i++) {
             if (i != _bidId) {
                 require(
@@ -258,6 +270,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
     }
 
+    // Repay Amount including percentage to Bidder
     function Repay(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         // there should be a bool which will be true when it's repaid in mapping
         NFTdetail memory NFT = NFTdetails[_NFTid];
@@ -266,13 +279,13 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         require(NFT.listed, "It's not listed for Lending");
         require(!NFT.repaid, "Already Repaid");
 
-        // Repay percentage Amount
+        // Calculate percentage Amount
         uint256 percentageAmount = LibCalculations.percent(
             bids.Amount,
             bids.percent
         );
 
-        // transfering Amount to bidder
+        // transfering Amount to Bidder
         require(
             IERC20(bids.ERC20Address).transferFrom(
                 msg.sender,
