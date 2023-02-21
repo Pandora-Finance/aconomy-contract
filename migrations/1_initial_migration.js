@@ -8,7 +8,10 @@ const lendingToken = artifacts.require("mintToken")
 // const accountStatus = artifacts.require("accountStatus")
 const poolAddress = artifacts.require("poolAddress")
 
-module.exports = async function (deployer,network, accounts) {
+
+module.exports = async function (deployer) {
+
+
   await deployer.deploy(aconomyFee);
   var aconomyfee = await aconomyFee.deployed();
   //  await deployer.deploy(accountStatus)
