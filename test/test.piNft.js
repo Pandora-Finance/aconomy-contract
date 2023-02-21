@@ -1,5 +1,5 @@
 const PiNFT = artifacts.require("piNFT");
-const SampleERC20 = artifacts.require("sampleERC20");
+const SampleERC20 = artifacts.require("mintToken");
 
 contract("PiNFT", (accounts) => {
   let piNFT, sampleERC20;
@@ -43,7 +43,7 @@ contract("PiNFT", (accounts) => {
 
   it("should let validator add ERC20 tokens to alice's NFT", async () => {
     await sampleERC20.approve(piNFT.address, 500, { from: validator });
-    const tx = await piNFT.addERC20(validator, 0, sampleERC20.address, 500, {
+    const tx = await piNFT.addERC20( 0, sampleERC20.address, 500, [[validator, 200]], {
       from: validator,
     });
     const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
