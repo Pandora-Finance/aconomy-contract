@@ -281,7 +281,15 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             ),
             "unable to transfer to bidder Address"
         );
+
         NFTdetails[_NFTid].repaid = true;
+
+        // transferring NFT to this address
+        ERC721(NFT.contractAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            NFT.NFTtokenId
+        );
         emit repaid(_NFTid, _bidId, bids.Amount + percentageAmount);
     }
 }
