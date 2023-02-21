@@ -314,11 +314,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+        (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
+            loans[_loanId],
+            block.timestamp
+        );
 
         uint256 paymentAmount = dueAmount + interest;
         return paymentAmount;
@@ -332,11 +331,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+        (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
+            loans[_loanId],
+            block.timestamp
+        );
 
         uint256 paymentAmount = owedAmount + interest;
         return paymentAmount;
@@ -362,10 +360,6 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     ) internal {
         Loan storage loan = loans[_loanId];
         uint256 paymentAmount = _payment.principal + _payment.interest;
-        uint256 poolId_ = loan.poolId;
-        address poolAddress_ = poolRegistry(poolRegistryAddress).getPoolAddress(
-            poolId_
-        );
 
         // Check if we are sending a payment or amount remaining
         if (paymentAmount >= _owedAmount) {

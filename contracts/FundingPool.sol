@@ -162,9 +162,6 @@ contract FundingPool is ReentrancyGuard {
         fundDetail.acceptBidTimestamp = uint32(block.timestamp);
         uint256 amount = fundDetail.amount;
         fundDetail.state = BidState.ACCEPTED;
-        address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
-            _poolId
-        );
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
@@ -266,11 +263,8 @@ contract FundingPool is ReentrancyGuard {
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.calculateInstallmentAmount(
+        (, uint256 dueAmount, uint256 interest) = LibCalculations
+            .calculateInstallmentAmount(
                 fundDetail.amount,
                 fundDetail.Repaid.amount,
                 fundDetail.interestRate,
@@ -300,11 +294,8 @@ contract FundingPool is ReentrancyGuard {
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.calculateInstallmentAmount(
+        (uint256 owedAmount, , uint256 interest) = LibCalculations
+            .calculateInstallmentAmount(
                 fundDetail.amount,
                 fundDetail.Repaid.amount,
                 fundDetail.interestRate,

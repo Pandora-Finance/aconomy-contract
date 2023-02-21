@@ -24,9 +24,9 @@ contract poolRegistry is ReentrancyGuard {
     bytes32 private _attestingSchemaId;
     address public AconomyFeeAddress;
 
-    constructor(AttestationServices _attestationServices, address AconomyFee) {
+    constructor(AttestationServices _attestationServices, address _AconomyFee) {
         attestationService = _attestationServices;
-        AconomyFeeAddress = AconomyFee;
+        AconomyFeeAddress = _AconomyFee;
 
         lenderAttestationSchemaId = _attestationServices
             .getASRegistry()
@@ -40,14 +40,6 @@ contract poolRegistry is ReentrancyGuard {
         _attestingSchemaId = schemaId;
         _;
         _attestingSchemaId = bytes32(0);
-    }
-
-    function guess(string memory _word, bytes32 ans)
-        public
-        view
-        returns (bool)
-    {
-        return keccak256(abi.encodePacked(_word)) == ans;
     }
 
     struct poolDetail {
@@ -234,7 +226,6 @@ contract poolRegistry is ReentrancyGuard {
             _Address,
             _attestingSchemaId, // set by the modifier
             _expirationTime,
-            0,
             abi.encode(_poolId, _Address)
         );
 

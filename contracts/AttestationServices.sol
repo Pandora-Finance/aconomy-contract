@@ -67,7 +67,6 @@ contract AttestationServices {
         address recipient,
         bytes32 schema,
         uint256 expirationTime,
-        bytes32 refUUID,
         bytes calldata data
     ) public virtual returns (bytes32) {
         return
@@ -75,7 +74,6 @@ contract AttestationServices {
                 recipient,
                 schema,
                 expirationTime,
-                refUUID,
                 data,
                 msg.sender
             );
@@ -85,7 +83,6 @@ contract AttestationServices {
         address recipient,
         bytes32 schema,
         uint256 expirationTime,
-        bytes32 refUUID,
         bytes calldata data,
         address attester
     ) private returns (bytes32) {
