@@ -400,6 +400,10 @@ contract FundingPool is ReentrancyGuard {
             _ERC20Address
         ][_bidId];
 
+        if (fundDetail.state != BidState.PENDING) {
+            revert("Bid must be pending");
+        }
+
         // Check is lender the calling the function
         if (_lender != msg.sender) {
             revert("You are not a Lender");
