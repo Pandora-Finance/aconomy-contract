@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "./Constants.sol";
 import "./AttestationRegistry.sol";
 import "./interfaces/IAttestationServices.sol";
 import "./interfaces/IAttestationRegistry.sol";
@@ -41,6 +40,8 @@ contract AttestationServices {
     
     // The global counter for the total number of attestations.
     uint256 private _attestationsCount;
+
+    bytes32 constant EMPTY_UUID = 0;
 
     // The global mapping between attestations and their UUIDs.
     mapping(bytes32 => Attestation) private _db;
