@@ -86,6 +86,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         uint256 _price
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         _saleIdCounter.increment();
+        require(
+            _contractAddress != address(0),
+            "you can't do this with zero address"
+        );
 
         //needs approval on frontend
         ERC721(_contractAddress).safeTransferFrom(
@@ -247,7 +251,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         uint256 _price,
         uint256 _bidTime
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
-        require(_contractAddress != address(0));
+        require(
+            _contractAddress != address(0),
+            "you can't do this with zero address"
+        );
         _saleIdCounter.increment();
 
         //needs approval on frontend
@@ -409,6 +416,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         nonReentrant
         returns (uint256)
     {
+        require(
+            contractAddress != address(0),
+            "you can't do this with zero address"
+        );
         address token2Owner = ERC721((contractAddress)).ownerOf(token2);
         require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
         uint256 swapsId = _swapIdCounter.current();

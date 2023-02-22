@@ -66,6 +66,7 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
 
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public returns (uint256) {
+        require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
@@ -81,6 +82,10 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         uint256 _value,
         LibShare.Share[] memory royalties
     ) public {
+        require(
+            _erc20Contract != address(0),
+            "you can't do this with zero address"
+        );
         erc20Added(msg.sender, _tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
         require(
@@ -148,6 +153,10 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
         require(_nftReciever != address(0), "cannot transfer to zero address");
+        require(
+            _erc20Contract != address(0),
+            "you can't do this with zero address"
+        );
         _transferERC20(_tokenId, _validatorAddress, _erc20Contract, _value);
         ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
     }
@@ -160,6 +169,10 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
         require(_nftReciever != address(0), "cannot transfer to zero address");
+        require(
+            _erc20Contract != address(0),
+            "you can't do this with zero address"
+        );
         _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
         ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
     }

@@ -93,6 +93,11 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         nonReentrant
         returns (uint256 _NFTid)
     {
+        require(
+            _contractAddress != address(0),
+            "you can't do this with zero address"
+        );
+
         _NFTid = ++NFTid;
         NFTdetails[_NFTid].tokenIdOwner = msg.sender;
         NFTdetails[_NFTid].NFTtokenId = _tokenId;
@@ -171,6 +176,11 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         uint32 _duration,
         uint256 _expiration
     ) external nonReentrant {
+        require(
+            _ERC20Address != address(0),
+            "you can't do this with zero address"
+        );
+        require(_bidAmount != 0, "You can't bid with zero Amount");
         NFTdetail memory NFT = NFTdetails[_NFTid];
         require(!NFT.bidAccepted, "Bid Already Accepted");
         BidDetail memory bidDetail = BidDetail(

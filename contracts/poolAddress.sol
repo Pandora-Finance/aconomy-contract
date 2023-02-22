@@ -11,7 +11,6 @@ import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
-import "./interfaces/IaccountStatus.sol";
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -74,6 +73,14 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         uint16 _APR,
         address _receiver
     ) public returns (uint256 loanId_) {
+        require(
+            _lendingToken != address(0),
+            "you can't do this with zero address"
+        );
+        require(
+            _receiver != address(0),
+            "you can't set zero address as receiver"
+        );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .borrowerVarification(_poolId, msg.sender);
         require(isVerified, "Not verified borrower");

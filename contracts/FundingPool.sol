@@ -116,6 +116,13 @@ contract FundingPool is ReentrancyGuard {
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .lenderVarification(_poolId, msg.sender);
 
+        require(
+            _ERC20Address != address(0),
+            "you can't do this with zero address"
+        );
+
+        require(_amount != 0, "You can't supply with zero amount");
+
         require(isVerified, "Not verified lender");
 
         address lender = msg.sender;
