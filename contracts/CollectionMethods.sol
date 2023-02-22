@@ -172,8 +172,6 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         uint256 _value
     ) private {
         require(_to != address(0), "cannot send to zero address");
-        address rootOwner = ERC721.ownerOf(_tokenId);
-        require(rootOwner == msg.sender, "only owner can transfer");
         removeERC20(_tokenId, _erc20Contract, _value);
         require(
             IERC20(_erc20Contract).transfer(_to, _value),
