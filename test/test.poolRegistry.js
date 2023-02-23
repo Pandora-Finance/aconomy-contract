@@ -11,7 +11,7 @@ const poolAddress = artifacts.require("poolAddress")
 
 contract("poolRegistry", async (accounts) => {
 
-    const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
+const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
 const loanDefaultDuration = moment.duration(180, 'days').asSeconds()
 const loanExpirationDuration = moment.duration(1, 'days').asSeconds()
 

@@ -9,11 +9,12 @@ Anyone can create their pool on top of Aconomy PoolRegistry Contract using the b
 
 ```jsx
     function createPool(
-        address _initialOwner,
         uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
         uint32 _loanExpirationTime,
         uint16 _poolFeePercent,
+        uint16 _apr,
+        string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) 
@@ -116,7 +117,7 @@ Borrower can Fully repay their accepted loan .
 ```
 
 
-## deployPool functions
+## FundingPool functions
 
 **Supply to Pool:**
 Attested Lenders can bid for supply to pool after checking the APR and other information of that pool address.

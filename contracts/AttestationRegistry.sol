@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "./Constants.sol";
 import "./interfaces/IAttestationServices.sol";
 import "./interfaces/IAttestationRegistry.sol";
 
 contract AttestationRegistry is IAttestationRegistry {
     mapping(bytes32 => ASRecord) public _registry;
+    bytes32 constant EMPTY_UUID = 0;
     event Registered(
         bytes32 indexed uuid,
         uint256 indexed index,
@@ -22,19 +22,17 @@ contract AttestationRegistry is IAttestationRegistry {
         returns (bytes32)
     {
         uint256 index = ++_asCount;
-
-        ASRecord memory asRecord = ASRecord({
-            uuid: EMPTY_UUID,
-            index: index,
-            schema: schema
-        });
-
         bytes32 uuid = _getUUID(schema);
         if (_registry[uuid].uuid != EMPTY_UUID) {
             revert("AlreadyExists");
         }
 
-        asRecord.uuid = uuid;
+        ASRecord memory asRecord = ASRecord({
+            uuid: uuid,
+            index: index,
+            schema: schema
+        });
+
         _registry[uuid] = asRecord;
 
         emit Registered(uuid, index, schema, msg.sender);
@@ -42,7 +40,7 @@ contract AttestationRegistry is IAttestationRegistry {
         return uuid;
     }
 
-    function _getUUID(bytes memory schema) private pure returns (bytes32) {
+    function _getUUID(bytes calldata schema) private pure returns (bytes32) {
         return keccak256(abi.encodePacked(schema));
     }
 
@@ -55,6 +53,3 @@ contract AttestationRegistry is IAttestationRegistry {
         return _registry[uuid];
     }
 }
-
-// 1 = 0xbd590158631F4B5f38B5FbC2336DBe94A2787B9c
-// 0xf8e81D47203A594245E36C48e151709F0C19fBe8

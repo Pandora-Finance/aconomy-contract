@@ -6,28 +6,24 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
-import "./interfaces/IaccountStatus.sol";
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-
-contract poolAddress is poolStorage {
+contract poolAddress is poolStorage, ReentrancyGuard {
     address poolRegistryAddress;
     address AconomyFeeAddress;
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    constructor(
-        address _poolRegistry,
-        address _AconomyFeeAddress
-    ) {
+    constructor(address _poolRegistry, address _AconomyFeeAddress) {
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
     }
@@ -77,6 +73,14 @@ contract poolAddress is poolStorage {
         uint16 _APR,
         address _receiver
     ) public returns (uint256 loanId_) {
+        require(
+            _lendingToken != address(0),
+            "you can't do this with zero address"
+        );
+        require(
+            _receiver != address(0),
+            "you can't set zero address as receiver"
+        );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .borrowerVarification(_poolId, msg.sender);
         require(isVerified, "Not verified borrower");
@@ -136,6 +140,7 @@ contract poolAddress is poolStorage {
     function AcceptLoan(uint256 _loanId)
         external
         pendingLoan(_loanId)
+        nonReentrant
         returns (
             uint256 amountToAconomy,
             uint256 amountToPool,
@@ -181,7 +186,7 @@ contract poolAddress is poolStorage {
 
         //Transfer Aconomy Fee
         if (amountToAconomy != 0) {
-           (bool isSuccess) = IERC20(loan.loanDetails.lendingToken).transferFrom(
+            bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
                 loan.lender,
                 AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
                 amountToAconomy
@@ -191,23 +196,23 @@ contract poolAddress is poolStorage {
 
         //Transfer to Pool Owner
         if (amountToPool != 0) {
-           (bool isSuccess2) = IERC20(loan.loanDetails.lendingToken).transferFrom(
-                loan.lender,
-                poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-                amountToPool
-            );
+            bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
+                .transferFrom(
+                    loan.lender,
+                    poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+                    amountToPool
+                );
             require(isSuccess2, "Not able to tansfer to pool owner");
         }
 
         //transfer funds to borrower
-        (bool isSuccess3) = IERC20(loan.loanDetails.lendingToken).transferFrom(
+        bool isSuccess3 = IERC20(loan.loanDetails.lendingToken).transferFrom(
             loan.lender,
             loan.borrower,
             amountToBorrower
         );
 
         require(isSuccess3, "Not able to tansfer to borrower");
-        
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -218,7 +223,10 @@ contract poolAddress is poolStorage {
             .principal;
 
         // Store Borrower's active loan
-        require(borrowerActiveLoans[loan.borrower].add(_loanId), "accept loan failed, add to borrweractiveloans");
+        require(
+            borrowerActiveLoans[loan.borrower].add(_loanId),
+            "accept loan failed, add to borrweractiveloans"
+        );
 
         emit loanAccepted(_loanId, loan.lender);
 
@@ -288,7 +296,7 @@ contract poolAddress is poolStorage {
         }
     }
 
-    function repayYourLoan(uint256 _loanId) external {
+    function repayYourLoan(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
@@ -313,11 +321,10 @@ contract poolAddress is poolStorage {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+        (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
+            loans[_loanId],
+            block.timestamp
+        );
 
         uint256 paymentAmount = dueAmount + interest;
         return paymentAmount;
@@ -331,17 +338,16 @@ contract poolAddress is poolStorage {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+        (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
+            loans[_loanId],
+            block.timestamp
+        );
 
         uint256 paymentAmount = owedAmount + interest;
         return paymentAmount;
     }
 
-    function repayFullLoan(uint256 _loanId) external {
+    function repayFullLoan(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
@@ -361,10 +367,6 @@ contract poolAddress is poolStorage {
     ) internal {
         Loan storage loan = loans[_loanId];
         uint256 paymentAmount = _payment.principal + _payment.interest;
-        uint256 poolId_ = loan.poolId;
-        address poolAddress_ = poolRegistry(poolRegistryAddress).getPoolAddress(
-            poolId_
-        );
 
         // Check if we are sending a payment or amount remaining
         if (paymentAmount >= _owedAmount) {
@@ -372,14 +374,17 @@ contract poolAddress is poolStorage {
             loan.state = LoanState.PAID;
 
             // Remove borrower's active loan
-            require( borrowerActiveLoans[loan.borrower].remove(_loanId) , "not able to repay, remove loanId failed");
+            require(
+                borrowerActiveLoans[loan.borrower].remove(_loanId),
+                "not able to repay, remove loanId failed"
+            );
 
             emit LoanRepaid(_loanId, paymentAmount);
         } else {
             emit LoanRepayment(_loanId, paymentAmount);
         }
         // Send payment to the lender
-        (bool isSuccess) = IERC20(loan.loanDetails.lendingToken).transferFrom(
+        bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
             msg.sender,
             loan.lender,
             paymentAmount
@@ -390,6 +395,5 @@ contract poolAddress is poolStorage {
         loan.loanDetails.totalRepaid.principal += _payment.principal;
         loan.loanDetails.totalRepaid.interest += _payment.interest;
         loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
-
     }
 }
