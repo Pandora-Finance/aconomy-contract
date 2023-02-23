@@ -222,6 +222,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         require(!bids.withdrawn, "Already withdrawn");
         require(NFT.listed, "It's not listed for Lending");
         require(!bids.bidAccepted, "Bid Already Accepted");
+        require(NFT.tokenIdOwner == msg.sender, "You can't Accept This Bid");
 
         NFTdetails[_NFTid].bidAccepted = true;
         Bids[_NFTid][_bidId].bidAccepted = true;
@@ -255,19 +256,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             );
         }
 
-        // Transfering all Bidders amount to their Account
-        for (uint256 i = 0; i < Bids[_NFTid].length; i++) {
-            if (i != _bidId) {
-                require(
-                    IERC20(Bids[_NFTid][i].ERC20Address).transfer(
-                        msg.sender,
-                        Bids[_NFTid][i].Amount
-                    ),
-                    "unable to transfer to Bidder Address"
-                );
-            }
-        }
-
         emit AcceptedBid(
             _NFTid,
             _bidId,
@@ -278,7 +266,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
     // Repay Amount including percentage to Bidder
     function Repay(uint256 _NFTid, uint256 _bidId) external nonReentrant {
-        // there should be a bool which will be true when it's repaid in mapping
         NFTdetail memory NFT = NFTdetails[_NFTid];
         BidDetail memory bids = Bids[_NFTid][_bidId];
         require(NFT.bidAccepted, "Bid Not Accepted yet");
@@ -310,5 +297,19 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             NFT.NFTtokenId
         );
         emit repaid(_NFTid, _bidId, bids.Amount + percentageAmount);
+    }
+
+    function withdraw(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+        BidDetail memory bid = Bids[_NFTid][_bidId];
+        require(!bid.bidAccepted, "Your Bid has been Accepted");
+        require(bid.bidderAddress == msg.sender, "You can't withdraw this Bid");
+        require(
+            block.timestamp > bid.expiration,
+            "You can't withdraw this Bid"
+        );
+        require(
+            IERC20(bid.ERC20Address).transfer(msg.sender, bid.Amount),
+            "unable to transfer to Bidder Address"
+        );
     }
 }
