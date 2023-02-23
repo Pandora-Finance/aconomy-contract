@@ -80,14 +80,17 @@ contract CollectionFactory {
             _symbol
         );
 
-        collections[collectionId_].contractAddress = collectionAddress;
-        collections[collectionId_].owner = msg.sender;
+        CollectionMeta memory details = CollectionMeta(
+            _name,
+            _symbol,
+            _uri,
+            collectionAddress,
+            msg.sender,
+            _description
+        );
 
+        collections[collectionId_] = details;
         setRoyaltiesForCollection(collectionId_, royalties);
-        setCollectionName(collectionId_, _name);
-        setCollectionSymble(collectionId_, _symbol);
-        setCollectionURI(collectionId_, _uri);
-        setCollectionDescription(collectionId_, _description);
 
         emit CollectionCreated(collectionId_, collectionAddress);
     }

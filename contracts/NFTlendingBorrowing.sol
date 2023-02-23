@@ -99,17 +99,21 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
 
         _NFTid = ++NFTid;
-        NFTdetails[_NFTid].tokenIdOwner = msg.sender;
-        NFTdetails[_NFTid].NFTtokenId = _tokenId;
-        NFTdetails[_NFTid].contractAddress = _contractAddress;
-        NFTdetails[_NFTid].listed = true;
-        NFTdetails[_NFTid].bidAccepted = false;
-        NFTdetails[_NFTid].repaid = false;
 
-        setPercent(_NFTid, _percent);
-        setDurationTime(_NFTid, _duration);
-        setExpirationTime(_NFTid, _expiration);
-        setExpectedAmount(_NFTid, _expectedAmount);
+        NFTdetail memory details = NFTdetail(
+            _tokenId,
+            msg.sender,
+            _contractAddress,
+            _duration,
+            _expiration,
+            _expectedAmount,
+            _percent,
+            true,
+            false,
+            false
+        );
+
+        NFTdetails[_NFTid] = details;
 
         //needs approval on frontend
         // transferring NFT to this address
