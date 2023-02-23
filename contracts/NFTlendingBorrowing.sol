@@ -219,10 +219,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     function AcceptBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         BidDetail memory bids = Bids[_NFTid][_bidId];
         NFTdetail memory NFT = NFTdetails[_NFTid];
-        require(
-            msg.sender == ERC721(NFT.contractAddress).ownerOf(NFT.NFTtokenId),
-            "Only token owner can Accept this Bid"
-        );
         require(!bids.withdrawn, "Already withdrawn");
         require(NFT.listed, "It's not listed for Lending");
         require(!bids.bidAccepted, "Bid Already Accepted");

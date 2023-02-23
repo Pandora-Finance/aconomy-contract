@@ -51,7 +51,7 @@ contract("PiMarket", async (accounts) => {
 
     it("should let alice place piNFT on sale", async () => {
       await piNFT.approve(piMarket.address, 0);
-      const result = await piMarket.sellNFT(piNFT.address, 0, 5000, false);
+      const result = await piMarket.sellNFT(piNFT.address, 0, 5000);
       assert.equal(
         await piNFT.ownerOf(0),
         piMarket.address,
@@ -102,7 +102,7 @@ contract("PiMarket", async (accounts) => {
 
     it("should let bob place piNFT on sale again", async () => {
       await piNFT.approve(piMarket.address, 0, { from: bob });
-      const result = await piMarket.sellNFT(piNFT.address, 0, 10000, false,{
+      const result = await piMarket.sellNFT(piNFT.address, 0, 10000,{
         from: bob,
       });
       assert.equal(
