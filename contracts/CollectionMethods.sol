@@ -28,6 +28,12 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
 
+    // TokenId => Owner Address
+    mapping(uint256 => address) NFTowner;
+
+    // TokenId => Amount
+    mapping(uint256 => uint256) withdrawnAmount;
+
     event ReceivedERC20(
         address indexed _from,
         uint256 indexed _tokenId,
@@ -239,5 +245,36 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         returns (LibShare.Share[] memory)
     {
         return cRoyaltiesForValidator[_tokenId];
+    }
+
+    function viewWithdrawnAmount(uint256 _tokenId)
+        public
+        view
+        returns (uint256)
+    {
+        return withdrawnAmount[_tokenId];
+    }
+
+    function Repay(
+        uint256 _tokenId,
+        address _erc20Contract,
+        uint256 _amount
+    ) external nonReentrant {
+        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
+
+        // Send payment to the Pool
+        require(
+            IERC20(_erc20Contract).transferFrom(
+                msg.sender,
+                address(this),
+                _amount
+            ),
+            "Unable to tansfer to poolAddress"
+        );
+        withdrawnAmount[_tokenId] -= _amount;
+
+        if (withdrawnAmount[_tokenId] <= 0) {
+            ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
+        }
     }
 }
