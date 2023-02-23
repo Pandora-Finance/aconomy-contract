@@ -99,25 +99,21 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
 
         _NFTid = ++NFTid;
-        NFTdetails[_NFTid].tokenIdOwner = msg.sender;
-        NFTdetails[_NFTid].NFTtokenId = _tokenId;
-        NFTdetails[_NFTid].contractAddress = _contractAddress;
-        NFTdetails[_NFTid].listed = true;
-        NFTdetails[_NFTid].bidAccepted = false;
-        NFTdetails[_NFTid].repaid = false;
 
-        setPercent(_NFTid, _percent);
-        setDurationTime(_NFTid, _duration);
-        setExpirationTime(_NFTid, _expiration);
-        setExpectedAmount(_NFTid, _expectedAmount);
-
-        //needs approval on frontend
-        // transferring NFT to this address
-        ERC721(_contractAddress).safeTransferFrom(
+        NFTdetail memory details = NFTdetail(
+            _tokenId,
             msg.sender,
-            address(this),
-            _tokenId
+            _contractAddress,
+            _duration,
+            _expiration,
+            _expectedAmount,
+            _percent,
+            true,
+            false,
+            false
         );
+
+        NFTdetails[_NFTid] = details;
 
         emit NFTlisted(_NFTid, _tokenId, _contractAddress);
     }
@@ -183,6 +179,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         require(_bidAmount != 0, "You can't bid with zero Amount");
         NFTdetail memory NFT = NFTdetails[_NFTid];
         require(!NFT.bidAccepted, "Bid Already Accepted");
+        require(NFT.listed, "You can't Bid on this NFT");
         BidDetail memory bidDetail = BidDetail(
             Bids[_NFTid].length,
             _percent,
@@ -206,21 +203,12 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit AppliedBid(Bids[_NFTid].length - 1, bidDetail, _NFTid);
     }
 
-    // Get All Bids Amount for Approving for Accept Bid
-    function viewAllBidsAmount(uint256 _NFTid) external view returns (uint256) {
-        uint256 sum = 0;
-        for (uint256 i = 0; i < Bids[_NFTid].length; i++) {
-            sum = sum + Bids[_NFTid][i].Amount;
-        }
-        return sum;
-    }
-
     // Accept Bid by NFT owner
     function AcceptBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         BidDetail memory bids = Bids[_NFTid][_bidId];
         NFTdetail memory NFT = NFTdetails[_NFTid];
         require(!bids.withdrawn, "Already withdrawn");
-        require(NFT.listed, "It's not listed for Lending");
+        require(NFT.listed, "It's not listed for Borrowing");
         require(!bids.bidAccepted, "Bid Already Accepted");
         require(NFT.tokenIdOwner == msg.sender, "You can't Accept This Bid");
 
@@ -256,6 +244,14 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             );
         }
 
+        //needs approval on frontend
+        // transferring NFT to this address
+        ERC721(NFT.contractAddress).safeTransferFrom(
+            msg.sender,
+            address(this),
+            NFT.NFTtokenId
+        );
+
         emit AcceptedBid(
             _NFTid,
             _bidId,
@@ -269,7 +265,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         NFTdetail memory NFT = NFTdetails[_NFTid];
         BidDetail memory bids = Bids[_NFTid][_bidId];
         require(NFT.bidAccepted, "Bid Not Accepted yet");
-        require(NFT.listed, "It's not listed for Lending");
+        require(NFT.listed, "It's not listed for Borrowing");
         require(!NFT.repaid, "Already Repaid");
 
         // Calculate percentage Amount
@@ -311,5 +307,18 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             IERC20(bid.ERC20Address).transfer(msg.sender, bid.Amount),
             "unable to transfer to Bidder Address"
         );
+    }
+
+    function removeNFTfromList(uint256 _NFTid) external {
+        NFTdetail memory NFT = NFTdetails[_NFTid];
+        require(
+            msg.sender == ERC721(NFT.contractAddress).ownerOf(NFT.NFTtokenId),
+            "Only token owner can execute"
+        );
+        if (!NFT.listed) {
+            revert("It's aiready removed");
+        }
+
+        NFTdetails[_NFTid].listed = false;
     }
 }
