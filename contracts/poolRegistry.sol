@@ -266,7 +266,7 @@ contract poolRegistry is ReentrancyGuard {
         return pools[_poolId].poolFeePercent;
     }
 
-    function borrowerVarification(uint256 _poolId, address _borrowerAddress)
+    function borrowerVerification(uint256 _poolId, address _borrowerAddress)
         public
         view
         returns (bool isVerified_, bytes32 uuid_)
@@ -280,7 +280,7 @@ contract poolRegistry is ReentrancyGuard {
             );
     }
 
-    function lenderVarification(uint256 _poolId, address _lenderAddress)
+    function lenderVerification(uint256 _poolId, address _lenderAddress)
         public
         view
         returns (bool isVerified_, bytes32 uuid_)

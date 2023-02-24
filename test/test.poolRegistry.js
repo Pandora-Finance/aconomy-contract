@@ -74,18 +74,18 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
 
 
     it("should add Lender to the pool", async() => {
-        res = await poolRegis.lenderVarification(poolId1, accounts[0])
+        res = await poolRegis.lenderVerification(poolId1, accounts[0])
         assert.equal(res.isVerified_, false, "AddLender function not called but verified")
        await poolRegis.addLender(poolId1, accounts[0], expirationTime, {from: accounts[0]} )
-        res = await poolRegis.lenderVarification(poolId1, accounts[0])
-        assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVarification failed")
+        res = await poolRegis.lenderVerification(poolId1, accounts[0])
+        assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVerification failed")
     })
 
     it("should add Borrower to the pool", async() => {
         
          await poolRegis.addBorrower(poolId1, accounts[1], expirationTime, {from: accounts[0]} )
-         res = await poolRegis.borrowerVarification(poolId1, accounts[1])
-        assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVarification failed")
+         res = await poolRegis.borrowerVerification(poolId1, accounts[1])
+        assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVerification failed")
     })
 
     it("should allow Attested Borrower to Request Loan in a Pool", async() => {

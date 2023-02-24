@@ -33,7 +33,7 @@ contract CollectionFactory {
 
     event SetDescription(uint256 collectionId, string Description);
 
-    event SetSymble(uint256 collectionId, string Symble);
+    event SetSymble(uint256 collectionId, string Symbol);
 
     event CollectionCreated(uint256 collectionId, address CollectionAddress);
 
@@ -135,7 +135,7 @@ contract CollectionFactory {
         }
     }
 
-    function setCollectionSymble(uint256 _collectionId, string memory _symbol)
+    function setCollectionSymbol(uint256 _collectionId, string memory _symbol)
         public
         collectionOwner(_collectionId)
     {

@@ -114,7 +114,7 @@ contract FundingPool is ReentrancyGuard {
         uint256 _expiration
     ) external nonReentrant {
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .lenderVarification(_poolId, msg.sender);
+            .lenderVerification(_poolId, msg.sender);
 
         require(
             _ERC20Address != address(0),
