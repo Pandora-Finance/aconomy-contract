@@ -13,7 +13,7 @@ import "./utils/LibShare.sol";
 contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    address poolOwner;
+    address collectionOwner;
     address piNFTAddress;
 
     // tokenId => collection royalties
@@ -53,12 +53,12 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     );
 
     constructor(
-        address _poolOwner,
+        address _collectionOwner,
         address _piNFTAddress,
         string memory _name,
         string memory _symbol
     ) ERC721(_name, _symbol) {
-        poolOwner = _poolOwner;
+        collectionOwner = _collectionOwner;
         piNFTAddress = _piNFTAddress;
     }
 
@@ -72,7 +72,7 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
 
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public returns (uint256) {
-        require(msg.sender == poolOwner, "You are not the collection Owner");
+        require(msg.sender == collectionOwner, "You are not the collection Owner");
         require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
