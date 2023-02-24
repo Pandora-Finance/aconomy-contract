@@ -30,13 +30,6 @@ contract FundingPool is ReentrancyGuard {
         feePercent = _feePercent;
     }
 
-    modifier onlyPoolOwner(uint256 poolId) {
-        require(
-            msg.sender == poolRegistry(poolRegistryAddress).getPoolOwner(poolId)
-        );
-        _;
-    }
-
     uint256 public bidId = 0;
 
     event BidRepaid(uint256 indexed bidId, uint256 PaidAmount);
@@ -159,7 +152,8 @@ contract FundingPool is ReentrancyGuard {
         uint256 _bidId,
         address _lender,
         address _receiver
-    ) external onlyPoolOwner(_poolId) nonReentrant {
+    ) external nonReentrant {
+        require(poolOwner == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -216,7 +210,8 @@ contract FundingPool is ReentrancyGuard {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external onlyPoolOwner(_poolId) nonReentrant {
+    ) external nonReentrant {
+        require(poolOwner == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -322,7 +317,8 @@ contract FundingPool is ReentrancyGuard {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external onlyPoolOwner(_poolId) nonReentrant {
+    ) external nonReentrant {
+        require(poolOwner == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
