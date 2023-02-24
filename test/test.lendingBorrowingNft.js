@@ -35,7 +35,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
             200,
             100
         )
-        const NFTid = tx1.logs[4].args.NFTid.toNumber()
+        const NFTid = tx1.logs[0].args.NFTid.toNumber()
         assert(NFTid===1, "Failed to list NFT for Lending") 
     })
 
