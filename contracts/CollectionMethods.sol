@@ -72,6 +72,7 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
 
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public returns (uint256) {
+        require(msg.sender == poolOwner, "You are not the collection Owner");
         require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
