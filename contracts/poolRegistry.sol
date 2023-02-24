@@ -97,10 +97,7 @@ contract poolRegistry is ReentrancyGuard {
         //Deploy Pool Address
         address poolAddress = LibPool.deployPoolAddress(
             msg.sender,
-            address(this),
-            _paymentCycleDuration,
-            _paymentDefaultDuration,
-            _poolFeePercent
+            address(this)
         );
         pools[poolId_].poolAddress = poolAddress;
         // Set the pool owner

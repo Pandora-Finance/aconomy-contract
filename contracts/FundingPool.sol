@@ -12,22 +12,10 @@ import "./poolRegistry.sol";
 contract FundingPool is ReentrancyGuard {
     address poolOwner;
     address poolRegistryAddress;
-    uint256 paymentCycleDuration;
-    uint256 paymentDefaultDuration;
-    uint256 feePercent;
 
-    constructor(
-        address _poolOwner,
-        address _poolRegistry,
-        uint256 _paymentCycleDuration,
-        uint256 _paymentDefaultDuration,
-        uint256 _feePercent
-    ) {
+    constructor(address _poolOwner, address _poolRegistry) {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
-        paymentCycleDuration = _paymentCycleDuration;
-        paymentDefaultDuration = _paymentDefaultDuration;
-        feePercent = _feePercent;
     }
 
     uint256 public bidId = 0;
@@ -110,14 +98,13 @@ contract FundingPool is ReentrancyGuard {
             .lenderVerification(_poolId, msg.sender);
 
         require(isVerified, "Not verified lender");
-        
+
         require(
             _ERC20Address != address(0),
             "you can't do this with zero address"
         );
 
         require(_amount != 0, "You can't supply with zero amount");
-
 
         address lender = msg.sender;
         require(_expiration > uint32(block.timestamp), "wrong timestamp");
