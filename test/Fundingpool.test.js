@@ -1,5 +1,5 @@
 const FundingPool = artifacts.require("FundingPool");
-const PoolRegistry = artifacts.require("PoolRegistry");
+const PoolRegistry = artifacts.require("poolRegistry");
 const IERC20 = artifacts.require("IERC20");
 
 contract("FundingPool", (accounts) => {
