@@ -6,7 +6,7 @@ import "./interfaces/IAttestationRegistry.sol";
 
 contract AttestationRegistry is IAttestationRegistry {
     mapping(bytes32 => ASRecord) public _registry;
-    bytes32 constant EMPTY_UUID = 0;
+    bytes32 private constant EMPTY_UUID = 0;
     event Registered(
         bytes32 indexed uuid,
         uint256 indexed index,

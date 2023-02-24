@@ -37,11 +37,10 @@ contract AttestationServices {
         bytes data;
     }
 
-    
     // The global counter for the total number of attestations.
     uint256 private _attestationsCount;
 
-    bytes32 constant EMPTY_UUID = 0;
+    bytes32 private constant EMPTY_UUID = 0;
 
     // The global mapping between attestations and their UUIDs.
     mapping(bytes32 => Attestation) private _db;
@@ -70,14 +69,7 @@ contract AttestationServices {
         uint256 expirationTime,
         bytes calldata data
     ) public virtual returns (bytes32) {
-        return
-            _attest(
-                recipient,
-                schema,
-                expirationTime,
-                data,
-                msg.sender
-            );
+        return _attest(recipient, schema, expirationTime, data, msg.sender);
     }
 
     function _attest(
