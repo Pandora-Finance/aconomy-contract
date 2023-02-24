@@ -56,20 +56,10 @@ contract CollectionFactory {
     function createCollection(
         string memory _name,
         string memory _symbol,
-        string calldata _URI,
-        string memory _description,
-        LibShare.Share[] memory royalties
-    ) public {
-        _createCollection(_name, _symbol, _URI, _description, royalties);
-    }
-
-    function _createCollection(
-        string memory _name,
-        string memory _symbol,
         string calldata _uri,
         string memory _description,
         LibShare.Share[] memory royalties
-    ) internal returns (uint256 collectionId_) {
+    ) public returns (uint256 collectionId_) {
         collectionId_ = ++collectionId;
 
         //Deploy collection Address
