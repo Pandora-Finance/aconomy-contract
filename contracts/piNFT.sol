@@ -55,16 +55,6 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         LibShare.Share[] indexed royalties
     );
 
-    event SetCollectionURI(uint256 collectionId, string uri);
-
-    event SetName(uint256 collectionId, string name);
-
-    event SetDescription(uint256 collectionId, string Description);
-
-    event SetSymble(uint256 collectionId, string Symble);
-
-    event CollectionCreated(uint256 collectionId, address CollectionAddress);
-
     event Royalties(
         uint256 indexed tokenId,
         LibShare.Share[] indexed royalties

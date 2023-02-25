@@ -82,7 +82,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             "you can't set zero address as receiver"
         );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .borrowerVarification(_poolId, msg.sender);
+            .borrowerVerification(_poolId, msg.sender);
         require(isVerified, "Not verified borrower");
         require(
             !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
@@ -150,7 +150,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         Loan storage loan = loans[_loanId];
 
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .lenderVarification(loan.poolId, msg.sender);
+            .lenderVerification(loan.poolId, msg.sender);
 
         require(isVerified, "Not verified lender");
         require(
