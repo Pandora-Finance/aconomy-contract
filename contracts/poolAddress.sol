@@ -335,22 +335,19 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         view
         returns (uint256)
     {
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
-            revert("Loan must be accepted");
-        }
         (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
             block.timestamp
         );
 
         uint256 paymentAmount = owedAmount + interest;
+        if (loans[_loanId].state != LoanState.ACCEPTED || loans[_loanId].state == LoanState.PAID) {
+            paymentAmount = 0;
+        }
         return paymentAmount;
     }
 
     function repayFullLoan(uint256 _loanId) external nonReentrant {
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
-            revert("Loan must be accepted");
-        }
         (uint256 owedPrincipal, , uint256 interest) = LibCalculations
             .owedAmount(loans[_loanId], block.timestamp);
         _repayLoan(
@@ -358,6 +355,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             Payment({principal: owedPrincipal, interest: interest}),
             owedPrincipal + interest
         );
+        if (loans[_loanId].state != LoanState.ACCEPTED || loans[_loanId].state == LoanState.PAID) {
+            paymentAmount = 0;
+        }
     }
 
     function _repayLoan(
