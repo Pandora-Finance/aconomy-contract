@@ -145,7 +145,7 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         // await erc20.transfer(accounts[1], 12000, {from: accounts[0]})
         // console.log((await time.latest()).toNumber())
         // console.log((await poolAddressInstance.calculateNextDueDate(loanId1)).toNumber())
-        console.log((await poolAddressInstance.viewFullRepayAmount(loanId1)).toNumber(), "full loan amount") 
+        
         //First Installment
         await time.increase(paymentCycleDuration+1)
         // console.log((await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber()) 
@@ -168,8 +168,10 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         //Full loan repaid, should revert.
         await time.increase(paymentCycleDuration+1)
         
+        assert((await poolAddressInstance.viewFullRepayAmount(loanId1)).toNumber()==0, "Loan not fully repaid, viewFullRepayment")
         await erc20.approve(poolAddressInstance.address, 205000000, {from:accounts[0]})
        await expectRevert(poolAddressInstance.repayYourLoan(loanId1, {from: accounts[0]}), "Loan must be accepted")
+
 
     })
 
