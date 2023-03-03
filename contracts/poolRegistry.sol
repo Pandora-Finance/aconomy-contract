@@ -23,8 +23,14 @@ contract poolRegistry is ReentrancyGuard {
     bytes32 public borrowerAttestationSchemaId;
     bytes32 private _attestingSchemaId;
     address public AconomyFeeAddress;
+    address FundingPoolAddress;
 
-    constructor(AttestationServices _attestationServices, address _AconomyFee) {
+    constructor(
+        AttestationServices _attestationServices,
+        address _AconomyFee,
+        address _FundingPoolAddress
+    ) {
+        FundingPoolAddress = _FundingPoolAddress;
         attestationService = _attestationServices;
         AconomyFeeAddress = _AconomyFee;
 
@@ -97,7 +103,8 @@ contract poolRegistry is ReentrancyGuard {
         //Deploy Pool Address
         address poolAddress = LibPool.deployPoolAddress(
             msg.sender,
-            address(this)
+            address(this),
+            FundingPoolAddress
         );
         pools[poolId_].poolAddress = poolAddress;
         // Set the pool owner

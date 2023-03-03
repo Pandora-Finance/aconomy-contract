@@ -3,17 +3,20 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "./Libraries/LibPool.sol";
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
-contract FundingPool is ReentrancyGuard {
+contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     address poolOwner;
     address poolRegistryAddress;
 
-    constructor(address _poolOwner, address _poolRegistry) {
+    function initialize(address _poolOwner, address _poolRegistry)
+        external
+        initializer
+    {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
     }
