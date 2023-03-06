@@ -13,8 +13,8 @@ import "./utils/LibShare.sol";
 contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    address collectionOwner;
-    address piNFTAddress;
+    address public collectionOwner;
+    address public piNFTAddress;
 
     // tokenId => collection royalties
     mapping(uint256 => LibShare.Share[]) public cRoyaltiesForValidator;

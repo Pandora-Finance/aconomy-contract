@@ -10,8 +10,8 @@ import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
 contract FundingPool is ReentrancyGuard {
-    address poolOwner;
-    address poolRegistryAddress;
+    address public poolOwner;
+    address public poolRegistryAddress;
 
     constructor(address _poolOwner, address _poolRegistry) {
         poolOwner = _poolOwner;
