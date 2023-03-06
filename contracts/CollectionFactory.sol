@@ -42,7 +42,11 @@ contract CollectionFactory {
         LibShare.Share[] indexed royalties
     );
 
-    // constructor(){}
+    address collectionMethodAddress;
+
+    constructor(address _collectionMethodAddress) {
+        collectionMethodAddress = _collectionMethodAddress;
+    }
 
     modifier collectionOwner(uint256 _collectionId) {
         require(
@@ -67,7 +71,8 @@ contract CollectionFactory {
             msg.sender,
             address(this),
             _name,
-            _symbol
+            _symbol,
+            collectionMethodAddress
         );
 
         CollectionMeta memory details = CollectionMeta(
