@@ -18,8 +18,8 @@ contract CollectionMethods is
 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    address collectionOwner;
-    address piNFTAddress;
+    address public collectionOwner;
+    address public piNFTAddress;
 
     // tokenId => collection royalties
     mapping(uint256 => LibShare.Share[]) public cRoyaltiesForValidator;

@@ -10,8 +10,8 @@ import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
 contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
-    address poolOwner;
-    address poolRegistryAddress;
+    address public poolOwner;
+    address public poolRegistryAddress;
 
     function initialize(address _poolOwner, address _poolRegistry)
         external
