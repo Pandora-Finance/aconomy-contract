@@ -266,6 +266,27 @@ contract CollectionMethods is
         return withdrawnAmount[_tokenId];
     }
 
+    function withdraw(
+        uint256 _tokenId,
+        address _erc20Contract,
+        uint256 _amount
+    ) external nonReentrant {
+        require(
+            msg.sender == collectionOwner,
+            "You are not the collection Owner"
+        );
+        require(
+            IERC20(_erc20Contract).transfer(msg.sender, _amount),
+            "unable to transfer to receiver"
+        );
+
+        withdrawnAmount[_tokenId] += _amount;
+
+        //needs approval on frontend
+        // transferring NFT to this address
+        ERC721Upgradeable.safeTransferFrom(msg.sender, address(this), _tokenId);
+    }
+
     function Repay(
         uint256 _tokenId,
         address _erc20Contract,
