@@ -49,6 +49,8 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         LibShare.Share[] indexed royalties
     );
 
+    event mintToken(uint256 tokenId);
+
     constructor(
         address _collectionOwner,
         address _piNFTAddress,
@@ -68,7 +70,7 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     }
 
     // mints an ERC721 token to _to with _uri as token uri
-    function mintNFT(address _to, string memory _uri) public returns (uint256) {
+    function mintNFT(address _to, string memory _uri) public {
         require(
             msg.sender == collectionOwner,
             "You are not the collection Owner"
@@ -78,7 +80,7 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
-        return tokenId_;
+        emit mintToken(tokenId_);
     }
 
     // this function requires approval of tokens by _erc20Contract
