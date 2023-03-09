@@ -24,6 +24,7 @@ contract("PiMarket", async (accounts) => {
       const tokenId = tx1.logs[0].args.tokenId.toNumber();
       assert(tokenId === 0, "Failed to mint or wrong token Id");
 
+      await piNFT.addValidator(tokenId, validator,{ from: carl });
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
         tokenId,
@@ -68,7 +69,12 @@ contract("PiMarket", async (accounts) => {
       let _balance3 = await web3.eth.getBalance(feeReceiver);
 
       result2 = await piMarket.BuyNFT(1, false, { from: bob, value: 5000 });
+      console.log(result2.receipt.rawLogs)
       assert.equal(await piNFT.ownerOf(0), bob);
+
+      //validator 200
+      //royalties 500
+      //fee 50
 
       let balance1 = await web3.eth.getBalance(alice);
       let balance2 = await web3.eth.getBalance(royaltyReceiver);
@@ -150,7 +156,8 @@ contract("PiMarket", async (accounts) => {
       const tx1 = await piNFT.mintNFT(alice, "URI2", [[royaltyReceiver, 500]]);
       const tokenId = tx1.logs[0].args.tokenId.toNumber();
       assert(tokenId === 1, "Failed to mint or wrong token Id");
-
+      
+      piNFT.addValidator(tokenId, validator);
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
         tokenId,
@@ -257,6 +264,7 @@ contract("PiMarket", async (accounts) => {
       const tokenId = tx1.logs[0].args.tokenId.toNumber();
       assert(tokenId === 2, "Failed to mint or wrong token Id");
 
+      await piNFT.addValidator(tokenId, validator);
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
         tokenId,
@@ -276,6 +284,7 @@ contract("PiMarket", async (accounts) => {
       console.log(tokenId);
       assert(tokenId === 3, "Failed to mint or wrong token Id");
 
+      await piNFT.addValidator(tokenId, validator, { from: bob });
       await sampleERC20.approve(piNFT.address, 500, { from: validator });
       const tx = await piNFT.addERC20(
         tokenId,

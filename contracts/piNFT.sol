@@ -24,9 +24,6 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
 
     mapping(uint256 => LibShare.Share[]) public royaltiesForValidator;
 
-    // collectionId => royalties
-    mapping(uint256 => LibShare.Share[]) public royaltiesForCollection;
-
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
 
@@ -35,6 +32,8 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
 
     // TokenId => Amount
     mapping(uint256 => uint256) withdrawnAmount;
+
+    mapping(uint256 => address) public approvedValidator;
 
     uint256 public collectionId;
 
@@ -80,7 +79,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
     ) public returns (uint256) {
         require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
-        NFTowner[tokenId_] = msg.sender;
+        NFTowner[tokenId_] = _to;
         _setRoyaltiesByTokenId(tokenId_, royalties);
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
@@ -125,6 +124,10 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         return royaltiesForValidator[_tokenId];
     }
 
+    function addValidator(uint256 _tokenId, address _validator) external onlyOwnerOfToken(_tokenId){
+        approvedValidator[_tokenId] = _validator;
+    }
+
     // this function requires approval of tokens by _erc20Contract
     // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
     function addERC20(
@@ -133,10 +136,12 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         uint256 _value,
         LibShare.Share[] memory royalties
     ) public {
+        require(msg.sender == approvedValidator[_tokenId]);
         require(
             _erc20Contract != address(0),
             "you can't do this with zero address"
         );
+        NFTowner[_tokenId] = ERC721.ownerOf(_tokenId);
         erc20Received(msg.sender, _tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
         require(
@@ -203,13 +208,19 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         address _erc20Contract,
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
+        require(_validatorAddress == approvedValidator[_tokenId]);
         require(
             _erc20Contract != address(0),
             "you can't do this with zero address"
         );
+        require(erc20Balances[_tokenId][_erc20Contract] != 0);
+        require(erc20Balances[_tokenId][_erc20Contract] == _value);
         require(_nftReciever != address(0), "cannot transfer to zero address");
+        approvedValidator[_tokenId] = address(0);
         _transferERC20(_tokenId, _validatorAddress, _erc20Contract, _value);
-        ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+        if(msg.sender != _nftReciever) {
+            ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+        }
     }
 
     function burnPiNFT(
@@ -219,11 +230,15 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         address _erc20Contract,
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
+        require(_nftReciever == approvedValidator[_tokenId]);
         require(
             _erc20Contract != address(0),
             "you can't do this with zero address"
         );
+        require(erc20Balances[_tokenId][_erc20Contract] != 0);
+        require(erc20Balances[_tokenId][_erc20Contract] == _value);
         require(_nftReciever != address(0), "cannot transfer to zero address");
+        approvedValidator[_tokenId] = address(0);
         _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
         ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
     }
@@ -236,8 +251,6 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         uint256 _value
     ) private {
         require(_to != address(0), "cannot send to zero address");
-        address rootOwner = ERC721.ownerOf(_tokenId);
-        require(rootOwner == msg.sender, "only owner can transfer");
         removeERC20(_tokenId, _erc20Contract, _value);
         require(
             IERC20(_erc20Contract).transfer(_to, _value),
@@ -297,11 +310,13 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
             "unable to transfer to receiver"
         );
 
-        withdrawnAmount[_tokenId] += _amount;
-
         //needs approval on frontend
         // transferring NFT to this address
-        ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
+        if(withdrawnAmount[_tokenId] == 0) {
+            ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
+        }
+
+        withdrawnAmount[_tokenId] += _amount;
     }
 
     function viewWithdrawnAmount(uint256 _tokenId)
@@ -317,8 +332,8 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
-
+        require(NFTowner[_tokenId] == msg.sender, "You can't repay");
+        require(_amount <= withdrawnAmount[_tokenId]);
         // Send payment to the Pool
         require(
             IERC20(_erc20Contract).transferFrom(
@@ -330,7 +345,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         );
         withdrawnAmount[_tokenId] -= _amount;
 
-        if (withdrawnAmount[_tokenId] <= 0) {
+        if (withdrawnAmount[_tokenId] == 0) {
             ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
         }
     }
