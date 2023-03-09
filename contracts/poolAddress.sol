@@ -82,7 +82,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             "you can't set zero address as receiver"
         );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .borrowerVarification(_poolId, msg.sender);
+            .borrowerVerification(_poolId, msg.sender);
         require(isVerified, "Not verified borrower");
         require(
             !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
@@ -150,7 +150,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         Loan storage loan = loans[_loanId];
 
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .lenderVarification(loan.poolId, msg.sender);
+            .lenderVerification(loan.poolId, msg.sender);
 
         require(isVerified, "Not verified lender");
         require(
@@ -318,15 +318,18 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         view
         returns (uint256)
     {
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
-            revert("Loan must be accepted");
-        }
         (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
             block.timestamp
         );
 
         uint256 paymentAmount = dueAmount + interest;
+        if (
+            loans[_loanId].state != LoanState.ACCEPTED ||
+            loans[_loanId].state == LoanState.PAID
+        ) {
+            paymentAmount = 0;
+        }
         return paymentAmount;
     }
 
@@ -335,15 +338,18 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         view
         returns (uint256)
     {
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
-            revert("Loan must be accepted");
-        }
         (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
             block.timestamp
         );
 
         uint256 paymentAmount = owedAmount + interest;
+        if (
+            loans[_loanId].state != LoanState.ACCEPTED ||
+            loans[_loanId].state == LoanState.PAID
+        ) {
+            paymentAmount = 0;
+        }
         return paymentAmount;
     }
 

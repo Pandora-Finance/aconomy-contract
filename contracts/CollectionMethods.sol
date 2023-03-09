@@ -13,8 +13,8 @@ import "./utils/LibShare.sol";
 contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    address poolOwner;
-    address piNFTAddress;
+    address public collectionOwner;
+    address public piNFTAddress;
 
     // tokenId => collection royalties
     mapping(uint256 => LibShare.Share[]) public cRoyaltiesForValidator;
@@ -27,9 +27,6 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
 
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
-
-    // TokenId => Owner Address
-    mapping(uint256 => address) NFTowner;
 
     // TokenId => Amount
     mapping(uint256 => uint256) withdrawnAmount;
@@ -52,13 +49,15 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         LibShare.Share[] indexed royalties
     );
 
+    event mintToken(uint256 tokenId);
+
     constructor(
-        address _poolOwner,
+        address _collectionOwner,
         address _piNFTAddress,
         string memory _name,
         string memory _symbol
     ) ERC721(_name, _symbol) {
-        poolOwner = _poolOwner;
+        collectionOwner = _collectionOwner;
         piNFTAddress = _piNFTAddress;
     }
 
@@ -71,13 +70,17 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
     }
 
     // mints an ERC721 token to _to with _uri as token uri
-    function mintNFT(address _to, string memory _uri) public returns (uint256) {
+    function mintNFT(address _to, string memory _uri) public {
+        require(
+            msg.sender == collectionOwner,
+            "You are not the collection Owner"
+        );
         require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
-        return tokenId_;
+        emit mintToken(tokenId_);
     }
 
     // this function requires approval of tokens by _erc20Contract
@@ -255,12 +258,36 @@ contract CollectionMethods is ERC721URIStorage, ReentrancyGuard {
         return withdrawnAmount[_tokenId];
     }
 
+    function withdraw(
+        uint256 _tokenId,
+        address _erc20Contract,
+        uint256 _amount
+    ) external nonReentrant {
+        require(
+            msg.sender == collectionOwner,
+            "You are not the collection Owner"
+        );
+        require(
+            IERC20(_erc20Contract).transfer(msg.sender, _amount),
+            "unable to transfer to receiver"
+        );
+
+        withdrawnAmount[_tokenId] += _amount;
+
+        //needs approval on frontend
+        // transferring NFT to this address
+        ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
+    }
+
     function Repay(
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
+        require(
+            msg.sender == collectionOwner,
+            "You are not the collection Owner"
+        );
 
         // Send payment to the Pool
         require(
