@@ -88,14 +88,12 @@ const expirationTime = BigNumber(moment.now()).add(
     })
 
     it("should calculate the next deu date", async() => {
-        loanId1 = res.logs[0].args.loanId.toNumber()
-        console.log(loanId1)
+   
         res = await poolAddressInstance.calculateNextDueDate(loanId1)
         console.log(res)
     })
 
     it("should not worke after the lone expires", async() => {
-        loanId1 = res.logs[0].args.loanId.toNumber()
 
         res = await poolAddressInstance.isLoanExpired(loanId1)
 
@@ -103,13 +101,11 @@ const expirationTime = BigNumber(moment.now()).add(
     })
 
     it("should check the payment done in time", async() => {
-        loanId1 = res.logs[0].args.loanId.toNumber()
         res = await poolAddressInstance.isPaymentLate(loanId1)
         assert.equal(res, false, "Unable to create loan: Wrong LoanId")
     })
 
     it("should view intallment amount", async() => {
-        loanId1 = res.logs[0].args.loanId.toNumber()
         res = await poolAddressInstance.isPaymentLate(loanId1)
         console .log(res)
     })
