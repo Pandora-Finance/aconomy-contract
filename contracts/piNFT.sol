@@ -5,11 +5,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibPool.sol";
 import "./Libraries/LibCollection.sol";
 
-contract piNFT is ERC721URIStorage, ReentrancyGuard {
+contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -34,8 +35,6 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
     mapping(uint256 => uint256) withdrawnAmount;
 
     mapping(uint256 => address) public approvedValidator;
-
-    uint256 public collectionId;
 
     event ReceivedERC20(
         address indexed _from,
@@ -79,7 +78,6 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
     ) public returns (uint256) {
         require(_to != address(0), "You can't mint with 0 address");
         uint256 tokenId_ = _tokenIdCounter.current();
-        NFTowner[tokenId_] = _to;
         _setRoyaltiesByTokenId(tokenId_, royalties);
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
@@ -141,6 +139,8 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
             _erc20Contract != address(0),
             "you can't do this with zero address"
         );
+        require(_value != 0);
+        require(erc20Contracts[_tokenId].length < 1);
         NFTowner[_tokenId] = ERC721.ownerOf(_tokenId);
         erc20Received(msg.sender, _tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
@@ -217,6 +217,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
         require(_nftReciever != address(0), "cannot transfer to zero address");
         approvedValidator[_tokenId] = address(0);
+        NFTowner[_tokenId] = address(0);
         _transferERC20(_tokenId, _validatorAddress, _erc20Contract, _value);
         if(msg.sender != _nftReciever) {
             ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
@@ -239,6 +240,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
         require(_nftReciever != address(0), "cannot transfer to zero address");
         approvedValidator[_tokenId] = address(0);
+        NFTowner[_tokenId] = address(0);
         _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
         ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
     }
@@ -304,7 +306,9 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
+        require(NFTowner[_tokenId] == msg.sender, "You can't repay");
+        require(erc20Balances[_tokenId][_erc20Contract] != 0);
+        require(withdrawnAmount[_tokenId] + _amount <= erc20Balances[_tokenId][_erc20Contract]);
         require(
             IERC20(_erc20Contract).transfer(msg.sender, _amount),
             "unable to transfer to receiver"
@@ -333,6 +337,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         uint256 _amount
     ) external nonReentrant {
         require(NFTowner[_tokenId] == msg.sender, "You can't repay");
+        require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(_amount <= withdrawnAmount[_tokenId]);
         // Send payment to the Pool
         require(
@@ -346,7 +351,12 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard {
         withdrawnAmount[_tokenId] -= _amount;
 
         if (withdrawnAmount[_tokenId] == 0) {
+            ERC721(address(this)).approve(msg.sender, _tokenId);
             ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
         }
+    }
+
+    function onERC721Received(address, address, uint256, bytes memory) public virtual override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 }
