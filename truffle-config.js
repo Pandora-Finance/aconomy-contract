@@ -135,7 +135,7 @@ module.exports = {
     //   }
     // }
   // }
-  plugins: ['truffle-plugin-verify'],
+  plugins: ['truffle-plugin-verify', 'truffle-contract-size'],
   api_keys: {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
     bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI'

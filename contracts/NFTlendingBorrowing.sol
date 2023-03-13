@@ -46,13 +46,14 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     mapping(uint256 => BidDetail[]) public Bids;
 
     // Events
-    event AppliedBid(uint256 BidId, BidDetail data, uint256 NFTid);
-    event SetPercent(uint256 NFTid, uint16 Percent);
-    event SetDuration(uint256 NFTid, uint32 Duration);
-    event SetExpectedAmount(uint256 NFTid, uint256 expectedAmount);
+    event AppliedBid(uint256 BidId, uint256 NFTid);
+    event PercentSet(uint256 NFTid, uint16 Percent);
+    event DurationSet(uint256 NFTid, uint32 Duration);
+    event ExpectedAmountSet(uint256 NFTid, uint256 expectedAmount);
     event NFTlisted(uint256 NFTid, uint256 TokenId, address ContractAddress);
     event repaid(uint256 NFTid, uint256 BidId, uint256 Amount);
-    event withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
+    event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
+    event NFTRemoved(uint256 NFTId);
     event AcceptedBid(
         uint256 NFTid,
         uint256 BidId,
@@ -121,7 +122,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         if (_percent != NFTdetails[_NFTid].percent) {
             NFTdetails[_NFTid].percent = _percent;
 
-            emit SetPercent(_NFTid, _percent);
+            emit PercentSet(_NFTid, _percent);
         }
     }
 
@@ -132,7 +133,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         if (_duration != NFTdetails[_NFTid].duration) {
             NFTdetails[_NFTid].duration = _duration;
 
-            emit SetDuration(_NFTid, _duration);
+            emit DurationSet(_NFTid, _duration);
         }
     }
 
@@ -143,7 +144,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
-            emit SetExpectedAmount(_NFTid, _expectedAmount);
+            emit ExpectedAmountSet(_NFTid, _expectedAmount);
         }
     }
 
@@ -183,7 +184,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "Unable to tansfer Your ERC20"
         );
         Bids[_NFTid].push(bidDetail);
-        emit AppliedBid(Bids[_NFTid].length - 1, bidDetail, _NFTid);
+        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid);
     }
 
     // Accept Bid by NFT owner
@@ -301,6 +302,8 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             ),
             "unable to transfer to Bidder Address"
         );
+
+        emit Withdrawn(_NFTid, _bidId, Bids[_NFTid][_bidId].Amount);
     }
 
     function removeNFTfromList(uint256 _NFTid) external {
@@ -316,5 +319,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         }
 
         NFTdetails[_NFTid].listed = false;
+
+        emit NFTRemoved(_NFTid);
     }
 }

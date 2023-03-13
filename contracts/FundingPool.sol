@@ -26,7 +26,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     event BidRepaid(uint256 indexed bidId, uint256 PaidAmount);
     event BidRepayment(uint256 indexed bidId, uint256 PaidAmount);
 
-    event AcceptedBid(
+    event BidAccepted(
+        address lender,
         address reciever,
         uint256 BidId,
         uint256 PoolId,
@@ -41,7 +42,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 Amount
     );
 
-    event SupplyToPool(
+    event SuppliedToPool(
         address indexed lender,
         uint256 indexed poolId,
         uint256 BidId,
@@ -49,13 +50,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 tokenAmount
     );
 
-    event repaidAmounts(
+    event InstallmentRepaid(
+        uint256 poolId,
+        uint256 bidId,
         uint256 owedAmount,
         uint256 dueAmount,
         uint256 interest
     );
 
-    event paidAmount(uint256 Amount, uint256 interest);
+    event FullAmountRepaid(uint256 poolId, uint256 bidId, uint256 Amount, uint256 interest);
 
     struct FundDetail {
         uint256 amount;
@@ -134,7 +137,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         );
         bidId++;
 
-        emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
+        emit SuppliedToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
     }
 
     function AcceptBid(
@@ -187,7 +190,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             );
         }
 
-        emit AcceptedBid(
+        emit BidAccepted(
+            _lender,
             _receiver,
             _bidId,
             _poolId,
@@ -238,7 +242,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             owedAmount + interest
         );
 
-        emit repaidAmounts(owedAmount, dueAmount, interest);
+        emit InstallmentRepaid(_poolId, _bidId,owedAmount, dueAmount, interest);
     }
 
     function viewInstallmentAmount(
@@ -342,7 +346,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             owedAmount + interest
         );
 
-        emit paidAmount(owedAmount, interest);
+        emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
     function _repayBid(

@@ -27,18 +27,18 @@ contract CollectionFactory {
 
     uint256 public collectionId;
 
-    event SetCollectionURI(uint256 collectionId, string uri);
+    event CollectionURISet(uint256 collectionId, string uri);
 
-    event SetName(uint256 collectionId, string name);
+    event CollectionNameSet(uint256 collectionId, string name);
 
-    event SetDescription(uint256 collectionId, string Description);
+    event CollectionDescriptionSet(uint256 collectionId, string Description);
 
-    event SetSymbol(uint256 collectionId, string Symbol);
+    event CollectionSymbolSet(uint256 collectionId, string Symbol);
 
     event CollectionCreated(uint256 collectionId, address CollectionAddress);
 
-    event Royalties(
-        uint256 indexed tokenId,
+    event CollectionRoyaltiesSet(
+        uint256 indexed collectionId,
         LibShare.Share[] indexed royalties
     );
 
@@ -109,7 +109,7 @@ contract CollectionFactory {
         }
         require(sumRoyalties < 10000, "Sum of Royalties > 100%");
 
-        emit Royalties(_collectionId, royalties);
+        emit CollectionRoyaltiesSet(_collectionId, royalties);
     }
 
     function setCollectionURI(uint256 _collectionId, string calldata _uri)
@@ -122,7 +122,7 @@ contract CollectionFactory {
         ) {
             collections[_collectionId].URI = _uri;
 
-            emit SetCollectionURI(_collectionId, _uri);
+            emit CollectionURISet(_collectionId, _uri);
         }
     }
 
@@ -136,7 +136,7 @@ contract CollectionFactory {
         ) {
             collections[_collectionId].name = _name;
 
-            emit SetName(_collectionId, _name);
+            emit CollectionNameSet(_collectionId, _name);
         }
     }
 
@@ -150,7 +150,7 @@ contract CollectionFactory {
         ) {
             collections[_collectionId].symbol = _symbol;
 
-            emit SetSymbol(_collectionId, _symbol);
+            emit CollectionSymbolSet(_collectionId, _symbol);
         }
     }
 
@@ -164,7 +164,7 @@ contract CollectionFactory {
         ) {
             collections[_collectionId].description = _description;
 
-            emit SetDescription(_collectionId, _description);
+            emit CollectionDescriptionSet(_collectionId, _description);
         }
     }
 

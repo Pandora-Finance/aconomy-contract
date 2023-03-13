@@ -53,9 +53,15 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     mapping(uint256 => BidOrder[]) public Bids;
     mapping(uint256 => Swap) public _swaps;
 
-    event TokenMetaReturn(TokenMeta data, uint256 id);
-    event BidOrderReturn(BidOrder bid);
-    event BidExecuted(uint256 price);
+    event SaleCreated(uint256 tokenId, address tokenContract, uint256 saleId);
+    event NFTBought(uint256 saleId, address buyer);
+    event SaleCancelled(uint256 saleId);
+    event BidCreated(uint256 saleId, uint256 bidId);
+    event BidExecuted(uint256 saleId, uint256 bidId, uint256 price);
+    event BidWithdrawn(uint256 saleId, uint256 bidId);
+    event SwapCancelled(uint256 swapId);
+    event SwapAccepted(uint256 swapId);
+    event SwapRejected(uint256 swapId);
     event SwapProposed(
         address indexed from,
         address indexed to,
@@ -113,7 +119,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
         _tokenMeta[_saleIdCounter.current()] = meta;
 
-        emit TokenMetaReturn(meta, _saleIdCounter.current());
+        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
     function retrieveRoyalty(address _contractAddress, uint256 _tokenId)
@@ -189,7 +195,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             "invalid address"
         );
         require(!meta.bidSale);
-        require(msg.value >= meta.price, "value less than price");
+        require(msg.value == meta.price, "value less than price");
 
         transfer(_tokenMeta[_saleId], msg.sender);
 
@@ -227,6 +233,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             msg.sender,
             meta.tokenId
         );
+        emit NFTBought(_saleId, msg.sender);
     }
 
     function cancelSale(uint256 _saleId) external nonReentrant {
@@ -243,6 +250,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             _tokenMeta[_saleId].currentOwner,
             _tokenMeta[_saleId].tokenId
         );
+        emit SaleCancelled(_saleId);
     }
 
     function SellNFT_byBid(
@@ -279,7 +287,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
         _tokenMeta[_saleIdCounter.current()] = meta;
 
-        emit TokenMetaReturn(meta, _saleIdCounter.current());
+        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
     function Bid(uint256 _saleId) external payable {
@@ -306,7 +314,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         Bids[_saleId].push(bid);
         _tokenMeta[_saleId].price = msg.value;
 
-        emit BidOrderReturn(bid);
+        emit BidCreated(_saleId, Bids[_saleId].length - 1);
     }
 
     function executeBidOrder(
@@ -378,7 +386,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         (bool feeSuccess, ) = payable(feeAddress).call{value: fee}("");
         require(feeSuccess, "Fee Transfer failed");
 
-        emit BidExecuted(bids.price);
+        emit BidExecuted(_saleId, _bidOrderID, bids.price);
     }
 
     function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
@@ -397,6 +405,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         } else {
             revert("No Money left!");
         }
+
+        emit BidWithdrawn(_saleId, _bidId);
     }
 
     function transfer(TokenMeta storage token, address _to) internal {
@@ -460,6 +470,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             _swaps[_swapId].initiator,
             _swaps[_swapId].initiatorNftId
         );
+
+        emit SwapCancelled(_swapId);
     }
 
     function acceptSwap(uint256 swapId) public nonReentrant {
@@ -477,6 +489,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             swap.initiator,
             swap.secondUserNftId
         );
+
+        emit SwapAccepted(swapId);
     }
 
     function rejectSwap(uint256 swapId) public nonReentrant {
@@ -489,5 +503,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             swap.initiator,
             swap.initiatorNftId
         );
+
+        emit SwapRejected(swapId);
     }
 }

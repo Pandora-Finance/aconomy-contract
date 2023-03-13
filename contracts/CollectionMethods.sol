@@ -38,29 +38,61 @@ contract CollectionMethods is
     mapping(uint256 => address) NFTowner;
 
     // TokenId => Amount
-    mapping(uint256 => uint256) withdrawnAmount;
+    mapping(uint256 => uint256) public withdrawnAmount;
 
     mapping(uint256 => address) public approvedValidator;
 
-    event ReceivedERC20(
+    event ERC20Added(
         address indexed _from,
         uint256 indexed _tokenId,
         address indexed _erc20Contract,
         uint256 _value
     );
-    event TransferERC20(
+    event ERC20Transferred(
         uint256 indexed _tokenId,
         address indexed _to,
         address indexed _erc20Contract,
         uint256 _value
     );
 
-    event Royalties(
+    event RoyaltiesSet(
         uint256 indexed tokenId,
         LibShare.Share[] indexed royalties
     );
 
-    event mintToken(uint256 tokenId);
+    event PiNFTRedeemed(
+        uint256 tokenId,
+        address nftReciever,
+        address validatorAddress,
+        address erc20Contract,
+        uint256 value
+    );
+
+    event PiNFTBurnt(
+        uint256 tokenId,
+        address nftReciever,
+        address erc20Receiver,
+        address erc20Contract,
+        uint256 value
+    );
+
+    event ValidatorFundsWithdrawn(
+        address withdrawer,
+        uint256 tokenId,
+        address erc20Contract,
+        uint256 amount
+    );
+
+    event ValidatorFundsRepayed(
+        address repayer,
+        uint256 tokenId,
+        address erc20Contract,
+        uint256 amount
+    );
+
+    event ValidatorAdded(uint256 tokenId, address validator);
+
+    event TokenMinted(uint256 tokenId, address to);
 
     function initialize(
         address _collectionOwner,
@@ -77,7 +109,7 @@ contract CollectionMethods is
     modifier onlyOwnerOfToken(uint256 _tokenId) {
         require(
             msg.sender == ERC721Upgradeable.ownerOf(_tokenId),
-            "Only token owner can execute"
+            "Not token Owner"
         );
         _;
     }
@@ -86,18 +118,19 @@ contract CollectionMethods is
     function mintNFT(address _to, string memory _uri) public {
         require(
             msg.sender == collectionOwner,
-            "You are not the collection Owner"
+            "Not Owner"
         );
-        require(_to != address(0), "You can't mint with 0 address");
+        require(_to != address(0), "0 address given");
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
-        emit mintToken(tokenId_);
+        emit TokenMinted(tokenId_, _to);
     }
 
     function addValidator(uint256 _tokenId, address _validator) external onlyOwnerOfToken(_tokenId){
         approvedValidator[_tokenId] = _validator;
+        emit ValidatorAdded(_tokenId, _validator);
     }
 
     // this function requires approval of tokens by _erc20Contract
@@ -111,12 +144,12 @@ contract CollectionMethods is
         require(msg.sender == approvedValidator[_tokenId]);
         require(
             _erc20Contract != address(0),
-            "you can't do this with zero address"
+            "zero address contract"
         );
         require(_value != 0);
         require(erc20Contracts[_tokenId].length < 1);
         NFTowner[_tokenId] = ERC721Upgradeable.ownerOf(_tokenId);
-        erc20Added(msg.sender, _tokenId, _erc20Contract, _value);
+        updateERC20(_tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
         require(
             IERC20(_erc20Contract).transferFrom(
@@ -124,13 +157,13 @@ contract CollectionMethods is
                 address(this),
                 _value
             ),
-            "ERC20 transfer failed."
+            "transfer failed."
         );
+        emit ERC20Added(msg.sender, _tokenId, _erc20Contract, _value);
     }
 
     // update the mappings for a token on recieving ERC20 tokens
-    function erc20Added(
-        address _from,
+    function updateERC20(
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _value
@@ -150,7 +183,6 @@ contract CollectionMethods is
             erc20Contracts[_tokenId].push(_erc20Contract);
         }
         erc20Balances[_tokenId][_erc20Contract] += _value;
-        emit ReceivedERC20(_from, _tokenId, _erc20Contract, _value);
     }
 
     //Set Royalties for Validator
@@ -158,21 +190,21 @@ contract CollectionMethods is
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) internal {
-        require(royalties.length <= 10, "Atmost 10 royalties can be added");
+        require(royalties.length <= 10, "10 Royalty limit");
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
             require(
                 royalties[i].account != address(0x0),
-                "Royalty recipient should be present"
+                "0 address given"
             );
-            require(royalties[i].value != 0, "Royalty value should be > 0");
+            require(royalties[i].value != 0, "Royalty = 0");
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "Sum of Royalties > 100%");
+        require(sumRoyalties < 10000, "Royalties overflow");
 
-        emit Royalties(_tokenId, royalties);
+        emit RoyaltiesSet(_tokenId, royalties);
     }
 
     function redeemPiNFT(
@@ -183,10 +215,10 @@ contract CollectionMethods is
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
         require(_validatorAddress == approvedValidator[_tokenId]);
-        require(_nftReciever != address(0), "cannot transfer to zero address");
+        require(_nftReciever != address(0), "0 address given");
         require(
             _erc20Contract != address(0),
-            "you can't do this with zero address"
+            "0 address contract"
         );
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
@@ -196,6 +228,7 @@ contract CollectionMethods is
         if(msg.sender != _nftReciever) {
             ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
         }
+        emit PiNFTRedeemed(_tokenId, _nftReciever, _validatorAddress, _erc20Contract, _value);
     }
 
     function burnPiNFT(
@@ -205,11 +238,11 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
-        require(_nftReciever != address(0), "cannot transfer to zero address");
+        require(_nftReciever != address(0), "0 address given");
         require(_nftReciever == approvedValidator[_tokenId]);
         require(
             _erc20Contract != address(0),
-            "you can't do this with zero address"
+            "0 address contract"
         );
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
@@ -217,6 +250,7 @@ contract CollectionMethods is
         NFTowner[_tokenId] = address(0);
         _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
         ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+        emit PiNFTBurnt(_tokenId, _nftReciever, _erc20Reciever, _erc20Contract, _value);
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
@@ -226,13 +260,13 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _value
     ) private {
-        require(_to != address(0), "cannot send to zero address");
+        require(_to != address(0), "0 address given");
         removeERC20(_tokenId, _erc20Contract, _value);
         require(
             IERC20(_erc20Contract).transfer(_to, _value),
-            "ERC20 transfer failed."
+            "transfer failed."
         );
-        emit TransferERC20(_tokenId, _to, _erc20Contract, _value);
+        emit ERC20Transferred(_tokenId, _to, _erc20Contract, _value);
     }
 
     // update the mappings for a token when ERC20 tokens gets removed
@@ -247,7 +281,7 @@ contract CollectionMethods is
         uint256 erc20Balance = erc20Balances[_tokenId][_erc20Contract];
         require(
             erc20Balance >= _value,
-            "Not enough token available to transfer."
+            "available balance low"
         );
         uint256 newERC20Balance = erc20Balance - _value;
         erc20Balances[_tokenId][_erc20Contract] = newERC20Balance;
@@ -283,25 +317,17 @@ contract CollectionMethods is
         return RoyaltiesForValidator[_tokenId];
     }
 
-    function viewWithdrawnAmount(uint256 _tokenId)
-        public
-        view
-        returns (uint256)
-    {
-        return withdrawnAmount[_tokenId];
-    }
-
     function withdraw(
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
+        require(NFTowner[_tokenId] == msg.sender, "not owner");
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(withdrawnAmount[_tokenId] + _amount <= erc20Balances[_tokenId][_erc20Contract]);
         require(
             IERC20(_erc20Contract).transfer(msg.sender, _amount),
-            "unable to transfer to receiver"
+            "transfer failed"
         );
         
         //needs approval on frontend
@@ -311,6 +337,7 @@ contract CollectionMethods is
         }
 
         withdrawnAmount[_tokenId] += _amount;
+        emit ValidatorFundsWithdrawn(msg.sender, _tokenId, _erc20Contract, _amount);
     }
 
     function Repay(
@@ -318,7 +345,7 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "You can't withdraw");
+        require(NFTowner[_tokenId] == msg.sender, "not owner");
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(_amount <= withdrawnAmount[_tokenId]);
         // Send payment to the Pool
@@ -328,7 +355,7 @@ contract CollectionMethods is
                 address(this),
                 _amount
             ),
-            "Unable to tansfer to poolAddress"
+            "transfer failed"
         );
         withdrawnAmount[_tokenId] -= _amount;
 
@@ -340,6 +367,7 @@ contract CollectionMethods is
                 _tokenId
             );
         }
+        emit ValidatorFundsRepayed(msg.sender, _tokenId, _erc20Contract, _amount);
     }
 
     function onERC721Received(address, address, uint256, bytes memory) public virtual override returns (bytes4) {
