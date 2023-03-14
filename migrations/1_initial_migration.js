@@ -18,8 +18,7 @@ module.exports = async function (deployer) {
 
   await deployer.deploy(aconomyFee);
   var aconomyfee = await aconomyFee.deployed();
-  //  await deployer.deploy(accountStatus)
-  //  var accountstatus = await accountStatus.deployed()
+
   await deployer.deploy(attestationRegistry)
   var attestRegistry = await attestationRegistry.deployed();
 
