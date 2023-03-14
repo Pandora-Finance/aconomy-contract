@@ -13,10 +13,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     address public poolOwner;
     address public poolRegistryAddress;
 
-    function initialize(address _poolOwner, address _poolRegistry)
-        external
-        initializer
-    {
+    function initialize(
+        address _poolOwner,
+        address _poolRegistry
+    ) external initializer {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
     }
@@ -58,7 +58,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 interest
     );
 
-    event FullAmountRepaid(uint256 poolId, uint256 bidId, uint256 Amount, uint256 interest);
+    event FullAmountRepaid(
+        uint256 poolId,
+        uint256 bidId,
+        uint256 Amount,
+        uint256 interest
+    );
 
     struct FundDetail {
         uint256 amount;
@@ -242,7 +247,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             owedAmount + interest
         );
 
-        emit InstallmentRepaid(_poolId, _bidId,owedAmount, dueAmount, interest);
+        emit InstallmentRepaid(
+            _poolId,
+            _bidId,
+            owedAmount,
+            dueAmount,
+            interest
+        );
     }
 
     function viewInstallmentAmount(

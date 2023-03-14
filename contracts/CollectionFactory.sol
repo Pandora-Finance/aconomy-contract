@@ -112,10 +112,10 @@ contract CollectionFactory {
         emit CollectionRoyaltiesSet(_collectionId, royalties);
     }
 
-    function setCollectionURI(uint256 _collectionId, string calldata _uri)
-        public
-        collectionOwner(_collectionId)
-    {
+    function setCollectionURI(
+        uint256 _collectionId,
+        string calldata _uri
+    ) public collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_uri)) !=
             keccak256(abi.encodePacked(collections[_collectionId].URI))
@@ -126,10 +126,10 @@ contract CollectionFactory {
         }
     }
 
-    function setCollectionName(uint256 _collectionId, string memory _name)
-        public
-        collectionOwner(_collectionId)
-    {
+    function setCollectionName(
+        uint256 _collectionId,
+        string memory _name
+    ) public collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_name)) !=
             keccak256(abi.encodePacked(collections[_collectionId].name))
@@ -140,10 +140,10 @@ contract CollectionFactory {
         }
     }
 
-    function setCollectionSymbol(uint256 _collectionId, string memory _symbol)
-        public
-        collectionOwner(_collectionId)
-    {
+    function setCollectionSymbol(
+        uint256 _collectionId,
+        string memory _symbol
+    ) public collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_symbol)) !=
             keccak256(abi.encodePacked(collections[_collectionId].symbol))
@@ -168,11 +168,9 @@ contract CollectionFactory {
         }
     }
 
-    function getCollectionRoyalties(uint256 _collectionId)
-        external
-        view
-        returns (LibShare.Share[] memory)
-    {
+    function getCollectionRoyalties(
+        uint256 _collectionId
+    ) external view returns (LibShare.Share[] memory) {
         return royaltiesForCollection[_collectionId];
     }
 }

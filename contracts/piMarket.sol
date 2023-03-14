@@ -122,11 +122,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
-    function retrieveRoyalty(address _contractAddress, uint256 _tokenId)
-        public
-        view
-        returns (LibShare.Share[] memory)
-    {
+    function retrieveRoyalty(
+        address _contractAddress,
+        uint256 _tokenId
+    ) public view returns (LibShare.Share[] memory) {
         return piNFT(_contractAddress).getRoyalties(_tokenId);
     }
 
@@ -160,11 +159,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getValidatorRoyalties(_tokenId);
     }
 
-    function BuyNFT(uint256 _saleId, bool _fromCollection)
-        external
-        payable
-        nonReentrant
-    {
+    function BuyNFT(
+        uint256 _saleId,
+        bool _fromCollection
+    ) external payable nonReentrant {
         TokenMeta memory meta = _tokenMeta[_saleId];
 
         LibShare.Share[] memory royalties;
@@ -389,10 +387,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidExecuted(_saleId, _bidOrderID, bids.price);
     }
 
-    function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
-        external
-        nonReentrant
-    {
+    function withdrawBidMoney(
+        uint256 _saleId,
+        uint256 _bidId
+    ) external nonReentrant {
         require(msg.sender != _tokenMeta[_saleId].currentOwner);
         // BidOrder[] memory bids = Bids[_tokenId];
         BidOrder memory bids = Bids[_saleId][_bidId];
