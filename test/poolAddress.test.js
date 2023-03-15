@@ -87,6 +87,15 @@
 //         // assert.equal(_balance1.toNumber(), 979, "Not able to accept loan");
 //     })
 
+<<<<<<< HEAD
+    it("should calculate the next deu date", async() => {
+   
+        res = await poolAddressInstance.calculateNextDueDate(loanId1)
+        console.log(res)
+    })
+
+    it("should not worke after the lone expires", async() => {
+=======
 //     it("should calculate the next deu date", async() => {
 //         loanId1 = res.logs[0].args.loanId.toNumber()
 //         console.log(loanId1)
@@ -96,12 +105,24 @@
 
 //     it("should not worke after the lone expires", async() => {
 //         loanId1 = res.logs[0].args.loanId.toNumber()
+>>>>>>> f57d0068aad3ed34a38f6566d05c74d5ddba9e72
 
 //         res = await poolAddressInstance.isLoanExpired(loanId1)
 
 //         assert.equal(res, false, "Unable to create loan: Wrong LoanId")
 //     })
 
+<<<<<<< HEAD
+    it("should check the payment done in time", async() => {
+        res = await poolAddressInstance.isPaymentLate(loanId1)
+        assert.equal(res, false, "Unable to create loan: Wrong LoanId")
+    })
+
+    it("should view intallment amount", async() => {
+        res = await poolAddressInstance.isPaymentLate(loanId1)
+        console .log(res)
+    })
+=======
 //     it("should check the payment done in time", async() => {
 //         loanId1 = res.logs[0].args.loanId.toNumber()
 //         res = await poolAddressInstance.isPaymentLate(loanId1)
@@ -113,6 +134,7 @@
 //         res = await poolAddressInstance.isPaymentLate(loanId1)
 //         console .log(res)
 //     })
+>>>>>>> f57d0068aad3ed34a38f6566d05c74d5ddba9e72
 
 //     it("should repay full amount", async() => {
 //          // await erc20.transfer(accounts[1], 12000, {from: accounts[0]})

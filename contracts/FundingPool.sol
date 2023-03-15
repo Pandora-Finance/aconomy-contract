@@ -10,6 +10,7 @@ import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
 contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
+
     address public poolOwner;
     address public poolRegistryAddress;
 
