@@ -137,7 +137,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         loanId++;
     }
 
-    function AcceptLoan(uint256 _loanId)
+    function AcceptLoan(
+        uint256 _loanId
+    )
         external
         pendingLoan(_loanId)
         nonReentrant
@@ -266,11 +268,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return uint32(block.timestamp) > calculateNextDueDate(_loanId);
     }
 
-    function calculateNextDueDate(uint256 _loanId)
-        public
-        view
-        returns (uint32 dueDate_)
-    {
+    function calculateNextDueDate(
+        uint256 _loanId
+    ) public view returns (uint32 dueDate_) {
         Loan storage loan = loans[_loanId];
         if (loans[_loanId].state != LoanState.ACCEPTED) return dueDate_;
 
@@ -313,11 +313,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         emit repaidAmounts(owedAmount, dueAmount, interest);
     }
 
-    function viewInstallmentAmount(uint256 _loanId)
-        public
-        view
-        returns (uint256)
-    {
+    function viewInstallmentAmount(
+        uint256 _loanId
+    ) public view returns (uint256) {
         (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
             block.timestamp
@@ -333,11 +331,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return paymentAmount;
     }
 
-    function viewFullRepayAmount(uint256 _loanId)
-        public
-        view
-        returns (uint256)
-    {
+    function viewFullRepayAmount(
+        uint256 _loanId
+    ) public view returns (uint256) {
         (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
             block.timestamp

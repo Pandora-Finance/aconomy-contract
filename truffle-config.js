@@ -63,7 +63,7 @@ module.exports = {
           `https://data-seed-prebsc-1-s1.binance.org:8545`
         ),
       network_id: 97,
-      confirmations: 10,
+      gasPrice: 40000000000,
       timeoutBlocks: 200,
       skipDryRun: true,
     },
@@ -96,7 +96,8 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    //reporterOptions : { ... } // See options below
   },
 
   // Configure your compilers
@@ -134,7 +135,7 @@ module.exports = {
     //   }
     // }
   // }
-  plugins: ['truffle-plugin-verify'],
+  plugins: ['truffle-plugin-verify', 'truffle-contract-size'],
   api_keys: {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
     bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI'

@@ -16,10 +16,13 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1",
+    "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "@openzeppelin/test-helpers": "^0.5.16",
     "@truffle/hdwallet-provider": "^2.1.5",
     "big-number": "^2.0.0",
+    "eth-gas-reporter": "^0.2.25",
     "moment": "^2.29.4",
+    "truffle-contract-size": "^2.0.1",
     "web3": "^1.8.2"
   }
 }

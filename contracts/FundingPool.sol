@@ -3,17 +3,21 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "./Libraries/LibPool.sol";
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
-contract FundingPool is ReentrancyGuard {
+contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
+
     address public poolOwner;
     address public poolRegistryAddress;
 
-    constructor(address _poolOwner, address _poolRegistry) {
+    function initialize(
+        address _poolOwner,
+        address _poolRegistry
+    ) external initializer {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
     }
@@ -23,7 +27,8 @@ contract FundingPool is ReentrancyGuard {
     event BidRepaid(uint256 indexed bidId, uint256 PaidAmount);
     event BidRepayment(uint256 indexed bidId, uint256 PaidAmount);
 
-    event AcceptedBid(
+    event BidAccepted(
+        address lender,
         address reciever,
         uint256 BidId,
         uint256 PoolId,
@@ -38,7 +43,7 @@ contract FundingPool is ReentrancyGuard {
         uint256 Amount
     );
 
-    event SupplyToPool(
+    event SuppliedToPool(
         address indexed lender,
         uint256 indexed poolId,
         uint256 BidId,
@@ -46,13 +51,20 @@ contract FundingPool is ReentrancyGuard {
         uint256 tokenAmount
     );
 
-    event repaidAmounts(
+    event InstallmentRepaid(
+        uint256 poolId,
+        uint256 bidId,
         uint256 owedAmount,
         uint256 dueAmount,
         uint256 interest
     );
 
-    event paidAmount(uint256 Amount, uint256 interest);
+    event FullAmountRepaid(
+        uint256 poolId,
+        uint256 bidId,
+        uint256 Amount,
+        uint256 interest
+    );
 
     struct FundDetail {
         uint256 amount;
@@ -131,7 +143,7 @@ contract FundingPool is ReentrancyGuard {
         );
         bidId++;
 
-        emit SupplyToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
+        emit SuppliedToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
     }
 
     function AcceptBid(
@@ -184,7 +196,8 @@ contract FundingPool is ReentrancyGuard {
             );
         }
 
-        emit AcceptedBid(
+        emit BidAccepted(
+            _lender,
             _receiver,
             _bidId,
             _poolId,
@@ -235,7 +248,13 @@ contract FundingPool is ReentrancyGuard {
             owedAmount + interest
         );
 
-        emit repaidAmounts(owedAmount, dueAmount, interest);
+        emit InstallmentRepaid(
+            _poolId,
+            _bidId,
+            owedAmount,
+            dueAmount,
+            interest
+        );
     }
 
     function viewInstallmentAmount(
@@ -339,7 +358,7 @@ contract FundingPool is ReentrancyGuard {
             owedAmount + interest
         );
 
-        emit paidAmount(owedAmount, interest);
+        emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
     function _repayBid(

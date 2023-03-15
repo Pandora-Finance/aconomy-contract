@@ -35,8 +35,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
             piNFT.address,
             1000,
             200,
-            200,
-            100
+            200
         )
         const NFTid = tx1.logs[0].args.NFTid.toNumber()
         assert(NFTid===1, "Failed to list NFT for Lending") 
@@ -123,13 +122,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
             piNFT.address,
             1000,
             200,
-            200,
-            100
+            200
         )
         const NFTid = tx1.logs[0].args.NFTid.toNumber()
 
         const tx2 = await nftLendBorrow.removeNFTfromList(2)
         assert(tx2.receipt.status===true, "Unable to remove NFT from listing")
+        let t = await nftLendBorrow.NFTdetails(2);
+        assert.equal(t.listed, false);
     })
 
     
