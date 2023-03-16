@@ -2,6 +2,7 @@ const BigNumber = require("big-number");
 const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const PiMarket = artifacts.require("piMarket");
+const { BN, constants, expectEvent, shouldFail, time, expectRevert } = require('@openzeppelin/test-helpers');
 // require("dotenv").config();
 
 contract("PiMarket", async (accounts) => {
@@ -60,6 +61,26 @@ contract("PiMarket", async (accounts) => {
       );
     });
 
+    it("should edit the price after listing on sale", async () => {
+      const tx = await piMarket.editSalePrice(1, 6000, {from : alice});
+      await  expectRevert( piMarket.editSalePrice(1, 6000, {from : bob}), "You are not the owner");
+      await  expectRevert( piMarket.editSalePrice(1, 6000, {from : bob}), "You are not the owner");
+      let price = tx.logs[0].args.Price.toNumber()
+      console.log("newPrice",price);
+      assert.equal(
+        price,
+        6000,
+        "Price not updated"
+      );
+      const tx1 = await piMarket.editSalePrice(1, 5000, {from : alice});
+      let newPrice = tx1.logs[0].args.Price.toNumber()
+      assert.equal(
+        newPrice,
+        5000,
+        "Price is still 6000"
+      );
+    })
+
     it("should let bob buy piNFT", async () => {
       let meta = await piMarket._tokenMeta(1);
       assert.equal(meta.status, true);
@@ -69,7 +90,7 @@ contract("PiMarket", async (accounts) => {
       let _balance3 = await web3.eth.getBalance(feeReceiver);
 
       result2 = await piMarket.BuyNFT(1, false, { from: bob, value: 5000 });
-      console.log(result2.receipt.rawLogs)
+      // console.log(result2.receipt.rawLogs)
       assert.equal(await piNFT.ownerOf(0), bob);
 
       //validator 200
