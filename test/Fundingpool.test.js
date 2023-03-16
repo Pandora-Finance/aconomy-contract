@@ -57,7 +57,7 @@ contract("FundingPool", (accounts) => {
           true,
           true
       );
-      console.log(res);
+      // console.log(res);
       poolId1 = res.logs[6].args.poolId.toNumber()
       console.log(poolId1, "poolId1")
       poolId = poolId1;
