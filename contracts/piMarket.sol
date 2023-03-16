@@ -67,6 +67,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address indexed to,
         uint256 indexed swapId
     );
+    event updatedSalePrice(
+        address NFTContractAddress,
+        uint256 saleId,
+        uint256 Price
+    );
 
     constructor(address _feeAddress) {
         require(_feeAddress != address(0), "Fee address cannot be zero");
@@ -120,6 +125,22 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         _tokenMeta[_saleIdCounter.current()] = meta;
 
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
+    }
+
+    function editSaleDetail(
+        address _contractAddress,
+        uint256 _saleId,
+        uint256 _price
+    ) public {
+        require(
+            msg.sender == _tokenMeta[_saleId].currentOwner,
+            "You are not the owner"
+        );
+        if (_price != _tokenMeta[_saleId].price) {
+            _tokenMeta[_saleId].price = _price;
+
+            emit updatedSalePrice(_contractAddress, _saleId, _price);
+        }
     }
 
     function retrieveRoyalty(
