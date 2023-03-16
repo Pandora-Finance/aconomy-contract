@@ -64,7 +64,6 @@ contract("PiMarket", async (accounts) => {
     it("should edit the price after listing on sale", async () => {
       const tx = await piMarket.editSalePrice(1, 6000, {from : alice});
       await  expectRevert( piMarket.editSalePrice(1, 6000, {from : bob}), "You are not the owner");
-      await  expectRevert( piMarket.editSalePrice(1, 6000, {from : bob}), "You are not the owner");
       let price = tx.logs[0].args.Price.toNumber()
       console.log("newPrice",price);
       assert.equal(
