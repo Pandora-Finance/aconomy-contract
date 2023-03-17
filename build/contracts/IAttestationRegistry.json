@@ -1,0 +1,401 @@
+{
+  "contractName": "IAttestationRegistry",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "schema",
+          "type": "bytes"
+        }
+      ],
+      "name": "register",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "uuid",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getAS",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "uuid",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "schema",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IAttestationRegistry.ASRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"uuid\",\"type\":\"bytes32\"}],\"name\":\"getAS\",\"outputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"uuid\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"schema\",\"type\":\"bytes\"}],\"internalType\":\"struct IAttestationRegistry.ASRecord\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"schema\",\"type\":\"bytes\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interfaces/IAttestationRegistry.sol\":\"IAttestationRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/interfaces/IAttestationRegistry.sol\":{\"keccak256\":\"0x8abaa38c6322400fd38d094c3cf91b2a885920e94d16c65ceb6652826cd060ce\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://919c900da4a23f7d17f3cd77f49e01f8166d625560441e9e7ed7f3b55a4e7b4c\",\"dweb:/ipfs/QmbEoM4KhgZxMDrkuEjHqfWcCpdiw4AMUkoXycytcKiP8g\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity >=0.8.0 <0.9.0;\n\n// SPDX-License-Identifier: MIT\n\ninterface IAttestationRegistry {\n    struct ASRecord {\n        // A unique identifier of the Attestation Registry.\n        bytes32 uuid;\n        // Auto-incrementing index for reference, assigned by the registry itself.\n        uint256 index;\n        // Custom specification of the Attestation Registry (e.g., an ABI).\n        bytes schema;\n    }\n\n    function register(bytes calldata schema) external returns (bytes32);\n\n    function getAS(bytes32 uuid) external view returns (ASRecord memory);\n}\n",
+  "sourcePath": "/home/sheeshco/code/truffle/aconomy-contract/contracts/interfaces/IAttestationRegistry.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/interfaces/IAttestationRegistry.sol",
+    "exportedSymbols": {
+      "IAttestationRegistry": [
+        13980
+      ]
+    },
+    "id": 13981,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 13957,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:31:51"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IAttestationRegistry",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 13980,
+        "linearizedBaseContracts": [
+          13980
+        ],
+        "name": "IAttestationRegistry",
+        "nameLocation": "76:20:51",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "IAttestationRegistry.ASRecord",
+            "id": 13964,
+            "members": [
+              {
+                "constant": false,
+                "id": 13959,
+                "mutability": "mutable",
+                "name": "uuid",
+                "nameLocation": "197:4:51",
+                "nodeType": "VariableDeclaration",
+                "scope": 13964,
+                "src": "189:12:51",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 13958,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "189:7:51",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 13961,
+                "mutability": "mutable",
+                "name": "index",
+                "nameLocation": "302:5:51",
+                "nodeType": "VariableDeclaration",
+                "scope": 13964,
+                "src": "294:13:51",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 13960,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "294:7:51",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 13963,
+                "mutability": "mutable",
+                "name": "schema",
+                "nameLocation": "399:6:51",
+                "nodeType": "VariableDeclaration",
+                "scope": 13964,
+                "src": "393:12:51",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 13962,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "393:5:51",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "ASRecord",
+            "nameLocation": "110:8:51",
+            "nodeType": "StructDefinition",
+            "scope": 13980,
+            "src": "103:309:51",
+            "visibility": "public"
+          },
+          {
+            "functionSelector": "82fbdc9c",
+            "id": 13971,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "register",
+            "nameLocation": "427:8:51",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13967,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13966,
+                  "mutability": "mutable",
+                  "name": "schema",
+                  "nameLocation": "451:6:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13971,
+                  "src": "436:21:51",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 13965,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "436:5:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "435:23:51"
+            },
+            "returnParameters": {
+              "id": 13970,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13969,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13971,
+                  "src": "477:7:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 13968,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "477:7:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "476:9:51"
+            },
+            "scope": 13980,
+            "src": "418:68:51",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "72487d52",
+            "id": 13979,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAS",
+            "nameLocation": "501:5:51",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13974,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13973,
+                  "mutability": "mutable",
+                  "name": "uuid",
+                  "nameLocation": "515:4:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13979,
+                  "src": "507:12:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 13972,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "507:7:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "506:14:51"
+            },
+            "returnParameters": {
+              "id": 13978,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13977,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13979,
+                  "src": "544:15:51",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ASRecord_$13964_memory_ptr",
+                    "typeString": "struct IAttestationRegistry.ASRecord"
+                  },
+                  "typeName": {
+                    "id": 13976,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 13975,
+                      "name": "ASRecord",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 13964,
+                      "src": "544:8:51"
+                    },
+                    "referencedDeclaration": 13964,
+                    "src": "544:8:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ASRecord_$13964_storage_ptr",
+                      "typeString": "struct IAttestationRegistry.ASRecord"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "543:17:51"
+            },
+            "scope": 13980,
+            "src": "492:69:51",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 13981,
+        "src": "66:497:51",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:564:51"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.11+commit.d7f03943.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.10",
+  "updatedAt": "2023-03-17T06:00:03.393Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
