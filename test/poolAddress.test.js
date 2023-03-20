@@ -87,13 +87,13 @@ contract("PoolAddress", async (accounts) =>{
     it("should not work after the loan expires", async() => {
         loanId1 = res.logs[0].args.loanId.toNumber()
         let r = await poolAddressInstance.isLoanExpired(loanId1)
-        assert.equal(r, false, "Unable to create loan: Wrong LoanId")
+        assert.equal(r, false, "Unable to check loan: Wrong LoanId")
     })
 
     it("should check the payment done in time", async() => {
         loanId1 = res.logs[0].args.loanId.toNumber()
         let r = await poolAddressInstance.isPaymentLate(loanId1)
-        assert.equal(r, false, "Unable to create loan: Wrong LoanId")
+        assert.equal(r, false, "Unable to check loan: Wrong LoanId")
     })
 
     it("should view intallment amount", async() => {

@@ -95,7 +95,6 @@ contract("FundingPool", (accounts) => {
         erc20.address,
         erc20Amount,
         loanDefaultDuration,
-        200,
         expiration,
         { from: lender }
       );      bidId = tx.logs[0].args.BidId.toNumber();
@@ -110,7 +109,7 @@ contract("FundingPool", (accounts) => {
       // console.log(fundDetail)
       assert.equal(fundDetail.amount, erc20Amount);
       assert.equal(fundDetail.maxDuration, loanDefaultDuration);
-      assert.equal(fundDetail.interestRate, 200);
+      assert.equal(fundDetail.interestRate, 1000);
       console.log(expiration.toString())
       assert.equal(fundDetail.expiration, expiration.toString());
       assert.equal(fundDetail.state, 0); // BidState.PENDING
@@ -126,7 +125,6 @@ contract("FundingPool", (accounts) => {
           erc20.address,
           erc20Amount,
           maxLoanDuration,
-          interestRate,
           loanExpirationDuration,
           { from: nonLender }
         ),

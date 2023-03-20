@@ -103,7 +103,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _ERC20Address,
         uint256 _amount,
         uint32 _maxLoanDuration,
-        uint16 _interestRate,
         uint256 _expiration
     ) external nonReentrant {
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
@@ -127,7 +126,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.amount = _amount;
         fundDetail.expiration = _expiration;
         fundDetail.maxDuration = _maxLoanDuration;
-        fundDetail.interestRate = _interestRate;
+        fundDetail.interestRate = poolRegistry(poolRegistryAddress).getPoolApr(_poolId);
         fundDetail.bidTimestamp = uint32(block.timestamp);
 
         fundDetail.state = BidState.PENDING;
