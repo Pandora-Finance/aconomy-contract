@@ -122,7 +122,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
-        function editSalePrice(uint256 _saleId, uint256 _price) public {
+    function editSalePrice(uint256 _saleId, uint256 _price) public {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
             "You are not the owner"
