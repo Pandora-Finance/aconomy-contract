@@ -61,7 +61,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     event BidWithdrawn(uint256 saleId, uint256 bidId);
     event SwapCancelled(uint256 swapId);
     event SwapAccepted(uint256 swapId);
-    event SwapRejected(uint256 swapId);
     event SwapProposed(
         address indexed from,
         address indexed to,
@@ -138,10 +137,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         }
     }
 
-    function retrieveRoyalty(
-        address _contractAddress,
-        uint256 _tokenId
-    ) public view returns (LibShare.Share[] memory) {
+    function retrieveRoyalty(address _contractAddress, uint256 _tokenId)
+        public
+        view
+        returns (LibShare.Share[] memory)
+    {
         return piNFT(_contractAddress).getRoyalties(_tokenId);
     }
 
@@ -175,10 +175,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getValidatorRoyalties(_tokenId);
     }
 
-    function BuyNFT(
-        uint256 _saleId,
-        bool _fromCollection
-    ) external payable nonReentrant {
+    function BuyNFT(uint256 _saleId, bool _fromCollection)
+        external
+        payable
+        nonReentrant
+    {
         TokenMeta memory meta = _tokenMeta[_saleId];
 
         LibShare.Share[] memory royalties;
@@ -403,10 +404,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidExecuted(_saleId, _bidOrderID, bids.price);
     }
 
-    function withdrawBidMoney(
-        uint256 _saleId,
-        uint256 _bidId
-    ) external nonReentrant {
+    function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
+        external
+        nonReentrant
+    {
         require(msg.sender != _tokenMeta[_saleId].currentOwner);
         // BidOrder[] memory bids = Bids[_tokenId];
         BidOrder memory bids = Bids[_saleId][_bidId];
@@ -430,10 +431,12 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         token.bidSale = false;
     }
 
-    function swapTokens(
+    // who will be making request, his tokenId will be token1
+    function makeSwapRequest(
         address contractAddress,
         uint256 token1,
-        uint256 token2
+        uint256 token2,
+        address token2Owner
     )
         public
         onlyOwnerOfToken(contractAddress, token1)
@@ -444,10 +447,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             contractAddress != address(0),
             "you can't do this with zero address"
         );
-        address token2Owner = ERC721((contractAddress)).ownerOf(token2);
         require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
         uint256 swapsId = _swapIdCounter.current();
-
         ERC721(contractAddress).safeTransferFrom(
             msg.sender,
             address(this),
@@ -472,6 +473,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return swapsId;
     }
 
+    // cancle swap by initiator
     function cancelSwap(uint256 _swapId) public nonReentrant {
         require(
             msg.sender == _swaps[_swapId].initiator,
@@ -488,36 +490,25 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SwapCancelled(_swapId);
     }
 
-    function acceptSwap(uint256 swapId) public nonReentrant {
+    // NFTcontractAddress will be of tokenId2
+    function acceptSwapRequest(uint256 swapId, address NFTcontractAddress)
+        public
+        nonReentrant
+    {
         Swap memory swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
         require(swap.secondUser == msg.sender, "Only owner can accept swap");
-        swap.status = false;
         ERC721(swap.NFTContractAddress).safeTransferFrom(
             address(this),
             msg.sender,
             swap.initiatorNftId
         );
-        ERC721(swap.NFTContractAddress).safeTransferFrom(
+        ERC721(NFTcontractAddress).safeTransferFrom(
             msg.sender,
             swap.initiator,
             swap.secondUserNftId
         );
-
+        swap.status = false;
         emit SwapAccepted(swapId);
-    }
-
-    function rejectSwap(uint256 swapId) public nonReentrant {
-        Swap memory swap = _swaps[swapId];
-        require(swap.status, "token must be on swap");
-        require(swap.secondUser == msg.sender, "Only owner can accept swap");
-        _swaps[swapId].status = false;
-        ERC721(swap.NFTContractAddress).safeTransferFrom(
-            address(this),
-            swap.initiator,
-            swap.initiatorNftId
-        );
-
-        emit SwapRejected(swapId);
     }
 }
