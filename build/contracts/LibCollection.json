@@ -3834,10 +3834,10 @@
         168
       ],
       "LibCollection": [
-        12865
+        12872
       ],
       "LibShare": [
-        19203
+        19208
       ],
       "Math": [
         6935
@@ -3855,12 +3855,12 @@
         2000
       ]
     },
-    "id": 12866,
+    "id": 12873,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 12824,
+        "id": 12831,
         "literals": [
           "solidity",
           ">=",
@@ -3876,10 +3876,10 @@
       {
         "absolutePath": "project:/contracts/CollectionMethods.sol",
         "file": "../CollectionMethods.sol",
-        "id": 12825,
+        "id": 12832,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 12866,
+        "scope": 12873,
         "sourceUnit": 11426,
         "src": "66:34:44",
         "symbolAliases": [],
@@ -3888,10 +3888,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/proxy/Clones.sol",
         "file": "@openzeppelin/contracts/proxy/Clones.sol",
-        "id": 12826,
+        "id": 12833,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 12866,
+        "scope": 12873,
         "sourceUnit": 3115,
         "src": "101:50:44",
         "symbolAliases": [],
@@ -3904,9 +3904,9 @@
         "contractDependencies": [],
         "contractKind": "library",
         "fullyImplemented": true,
-        "id": 12865,
+        "id": 12872,
         "linearizedBaseContracts": [
-          12865
+          12872
         ],
         "name": "LibCollection",
         "nameLocation": "161:13:44",
@@ -3914,23 +3914,23 @@
         "nodes": [
           {
             "body": {
-              "id": 12863,
+              "id": 12870,
               "nodeType": "Block",
               "src": "401:262:44",
               "statements": [
                 {
                   "assignments": [
-                    12842
+                    12849
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 12842,
+                      "id": 12849,
                       "mutability": "mutable",
                       "name": "tokenAddress",
                       "nameLocation": "419:12:44",
                       "nodeType": "VariableDeclaration",
-                      "scope": 12863,
+                      "scope": 12870,
                       "src": "411:20:44",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -3939,7 +3939,7 @@
                         "typeString": "address"
                       },
                       "typeName": {
-                        "id": 12841,
+                        "id": 12848,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "411:7:44",
@@ -3952,15 +3952,15 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 12847,
+                  "id": 12854,
                   "initialValue": {
                     "arguments": [
                       {
-                        "id": 12845,
+                        "id": 12852,
                         "name": "_collectionMethods",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12836,
+                        "referencedDeclaration": 12843,
                         "src": "447:18:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -3976,7 +3976,7 @@
                         }
                       ],
                       "expression": {
-                        "id": 12843,
+                        "id": 12850,
                         "name": "Clones",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -3987,7 +3987,7 @@
                           "typeString": "type(library Clones)"
                         }
                       },
-                      "id": 12844,
+                      "id": 12851,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4001,7 +4001,7 @@
                         "typeString": "function (address) returns (address)"
                       }
                     },
-                    "id": 12846,
+                    "id": 12853,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4023,11 +4023,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 12852,
+                        "id": 12859,
                         "name": "_collectionOwner",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12828,
+                        "referencedDeclaration": 12835,
                         "src": "532:16:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4035,11 +4035,11 @@
                         }
                       },
                       {
-                        "id": 12853,
+                        "id": 12860,
                         "name": "_piNFT",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12830,
+                        "referencedDeclaration": 12837,
                         "src": "562:6:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4047,11 +4047,11 @@
                         }
                       },
                       {
-                        "id": 12854,
+                        "id": 12861,
                         "name": "_name",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12832,
+                        "referencedDeclaration": 12839,
                         "src": "582:5:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory_ptr",
@@ -4059,11 +4059,11 @@
                         }
                       },
                       {
-                        "id": 12855,
+                        "id": 12862,
                         "name": "_symbol",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12834,
+                        "referencedDeclaration": 12841,
                         "src": "601:7:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory_ptr",
@@ -4093,11 +4093,11 @@
                       "expression": {
                         "arguments": [
                           {
-                            "id": 12849,
+                            "id": 12856,
                             "name": "tokenAddress",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 12842,
+                            "referencedDeclaration": 12849,
                             "src": "494:12:44",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
@@ -4112,7 +4112,7 @@
                               "typeString": "address"
                             }
                           ],
-                          "id": 12848,
+                          "id": 12855,
                           "name": "CollectionMethods",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
@@ -4123,7 +4123,7 @@
                             "typeString": "type(contract CollectionMethods)"
                           }
                         },
-                        "id": 12850,
+                        "id": 12857,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -4138,7 +4138,7 @@
                           "typeString": "contract CollectionMethods"
                         }
                       },
-                      "id": 12851,
+                      "id": 12858,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -4152,7 +4152,7 @@
                         "typeString": "function (address,address,string memory,string memory) external"
                       }
                     },
-                    "id": 12856,
+                    "id": 12863,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4167,7 +4167,7 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 12857,
+                  "id": 12864,
                   "nodeType": "ExpressionStatement",
                   "src": "476:142:44"
                 },
@@ -4175,11 +4175,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 12860,
+                        "id": 12867,
                         "name": "tokenAddress",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 12842,
+                        "referencedDeclaration": 12849,
                         "src": "643:12:44",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -4194,7 +4194,7 @@
                           "typeString": "address"
                         }
                       ],
-                      "id": 12859,
+                      "id": 12866,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -4206,14 +4206,14 @@
                         "typeString": "type(address)"
                       },
                       "typeName": {
-                        "id": 12858,
+                        "id": 12865,
                         "name": "address",
                         "nodeType": "ElementaryTypeName",
                         "src": "635:7:44",
                         "typeDescriptions": {}
                       }
                     },
-                    "id": 12861,
+                    "id": 12868,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -4228,15 +4228,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 12840,
-                  "id": 12862,
+                  "functionReturnParameters": 12847,
+                  "id": 12869,
                   "nodeType": "Return",
                   "src": "628:28:44"
                 }
               ]
             },
             "functionSelector": "d7d5c6f4",
-            "id": 12864,
+            "id": 12871,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -4244,17 +4244,17 @@
             "nameLocation": "190:23:44",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 12837,
+              "id": 12844,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 12828,
+                  "id": 12835,
                   "mutability": "mutable",
                   "name": "_collectionOwner",
                   "nameLocation": "231:16:44",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "223:24:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4263,7 +4263,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 12827,
+                    "id": 12834,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "223:7:44",
@@ -4277,12 +4277,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 12830,
+                  "id": 12837,
                   "mutability": "mutable",
                   "name": "_piNFT",
                   "nameLocation": "265:6:44",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "257:14:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4291,7 +4291,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 12829,
+                    "id": 12836,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "257:7:44",
@@ -4305,12 +4305,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 12832,
+                  "id": 12839,
                   "mutability": "mutable",
                   "name": "_name",
                   "nameLocation": "295:5:44",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "281:19:44",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -4319,7 +4319,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 12831,
+                    "id": 12838,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "281:6:44",
@@ -4332,12 +4332,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 12834,
+                  "id": 12841,
                   "mutability": "mutable",
                   "name": "_symbol",
                   "nameLocation": "324:7:44",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "310:21:44",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -4346,7 +4346,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 12833,
+                    "id": 12840,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "310:6:44",
@@ -4359,12 +4359,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 12836,
+                  "id": 12843,
                   "mutability": "mutable",
                   "name": "_collectionMethods",
                   "nameLocation": "349:18:44",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "341:26:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4373,7 +4373,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 12835,
+                    "id": 12842,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "341:7:44",
@@ -4389,17 +4389,17 @@
               "src": "213:160:44"
             },
             "returnParameters": {
-              "id": 12840,
+              "id": 12847,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 12839,
+                  "id": 12846,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 12864,
+                  "scope": 12871,
                   "src": "392:7:44",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -4408,7 +4408,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 12838,
+                    "id": 12845,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "392:7:44",
@@ -4423,14 +4423,14 @@
               ],
               "src": "391:9:44"
             },
-            "scope": 12865,
+            "scope": 12872,
             "src": "181:482:44",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 12866,
+        "scope": 12873,
         "src": "153:512:44",
         "usedErrors": []
       }
@@ -4443,7 +4443,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2023-03-20T09:10:39.802Z",
+  "updatedAt": "2023-03-21T07:02:45.411Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

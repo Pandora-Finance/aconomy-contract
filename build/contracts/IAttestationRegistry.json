@@ -71,15 +71,15 @@
     "absolutePath": "project:/contracts/interfaces/IAttestationRegistry.sol",
     "exportedSymbols": {
       "IAttestationRegistry": [
-        13983
+        13990
       ]
     },
-    "id": 13984,
+    "id": 13991,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 13960,
+        "id": 13967,
         "literals": [
           "solidity",
           ">=",
@@ -99,9 +99,9 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 13983,
+        "id": 13990,
         "linearizedBaseContracts": [
-          13983
+          13990
         ],
         "name": "IAttestationRegistry",
         "nameLocation": "76:20:51",
@@ -109,16 +109,16 @@
         "nodes": [
           {
             "canonicalName": "IAttestationRegistry.ASRecord",
-            "id": 13967,
+            "id": 13974,
             "members": [
               {
                 "constant": false,
-                "id": 13962,
+                "id": 13969,
                 "mutability": "mutable",
                 "name": "uuid",
                 "nameLocation": "197:4:51",
                 "nodeType": "VariableDeclaration",
-                "scope": 13967,
+                "scope": 13974,
                 "src": "189:12:51",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -127,7 +127,7 @@
                   "typeString": "bytes32"
                 },
                 "typeName": {
-                  "id": 13961,
+                  "id": 13968,
                   "name": "bytes32",
                   "nodeType": "ElementaryTypeName",
                   "src": "189:7:51",
@@ -140,12 +140,12 @@
               },
               {
                 "constant": false,
-                "id": 13964,
+                "id": 13971,
                 "mutability": "mutable",
                 "name": "index",
                 "nameLocation": "302:5:51",
                 "nodeType": "VariableDeclaration",
-                "scope": 13967,
+                "scope": 13974,
                 "src": "294:13:51",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -154,7 +154,7 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 13963,
+                  "id": 13970,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
                   "src": "294:7:51",
@@ -167,12 +167,12 @@
               },
               {
                 "constant": false,
-                "id": 13966,
+                "id": 13973,
                 "mutability": "mutable",
                 "name": "schema",
                 "nameLocation": "399:6:51",
                 "nodeType": "VariableDeclaration",
-                "scope": 13967,
+                "scope": 13974,
                 "src": "393:12:51",
                 "stateVariable": false,
                 "storageLocation": "default",
@@ -181,7 +181,7 @@
                   "typeString": "bytes"
                 },
                 "typeName": {
-                  "id": 13965,
+                  "id": 13972,
                   "name": "bytes",
                   "nodeType": "ElementaryTypeName",
                   "src": "393:5:51",
@@ -196,13 +196,13 @@
             "name": "ASRecord",
             "nameLocation": "110:8:51",
             "nodeType": "StructDefinition",
-            "scope": 13983,
+            "scope": 13990,
             "src": "103:309:51",
             "visibility": "public"
           },
           {
             "functionSelector": "82fbdc9c",
-            "id": 13974,
+            "id": 13981,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -210,17 +210,17 @@
             "nameLocation": "427:8:51",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13970,
+              "id": 13977,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13969,
+                  "id": 13976,
                   "mutability": "mutable",
                   "name": "schema",
                   "nameLocation": "451:6:51",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13974,
+                  "scope": 13981,
                   "src": "436:21:51",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -229,7 +229,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 13968,
+                    "id": 13975,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "436:5:51",
@@ -244,17 +244,17 @@
               "src": "435:23:51"
             },
             "returnParameters": {
-              "id": 13973,
+              "id": 13980,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13972,
+                  "id": 13979,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13974,
+                  "scope": 13981,
                   "src": "477:7:51",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -263,7 +263,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13971,
+                    "id": 13978,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "477:7:51",
@@ -277,7 +277,7 @@
               ],
               "src": "476:9:51"
             },
-            "scope": 13983,
+            "scope": 13990,
             "src": "418:68:51",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -285,7 +285,7 @@
           },
           {
             "functionSelector": "72487d52",
-            "id": 13982,
+            "id": 13989,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -293,17 +293,17 @@
             "nameLocation": "501:5:51",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 13977,
+              "id": 13984,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13976,
+                  "id": 13983,
                   "mutability": "mutable",
                   "name": "uuid",
                   "nameLocation": "515:4:51",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13982,
+                  "scope": 13989,
                   "src": "507:12:51",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -312,7 +312,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 13975,
+                    "id": 13982,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "507:7:51",
@@ -327,38 +327,38 @@
               "src": "506:14:51"
             },
             "returnParameters": {
-              "id": 13981,
+              "id": 13988,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 13980,
+                  "id": 13987,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 13982,
+                  "scope": 13989,
                   "src": "544:15:51",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ASRecord_$13967_memory_ptr",
+                    "typeIdentifier": "t_struct$_ASRecord_$13974_memory_ptr",
                     "typeString": "struct IAttestationRegistry.ASRecord"
                   },
                   "typeName": {
-                    "id": 13979,
+                    "id": 13986,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 13978,
+                      "id": 13985,
                       "name": "ASRecord",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 13967,
+                      "referencedDeclaration": 13974,
                       "src": "544:8:51"
                     },
-                    "referencedDeclaration": 13967,
+                    "referencedDeclaration": 13974,
                     "src": "544:8:51",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$13967_storage_ptr",
+                      "typeIdentifier": "t_struct$_ASRecord_$13974_storage_ptr",
                       "typeString": "struct IAttestationRegistry.ASRecord"
                     }
                   },
@@ -367,14 +367,14 @@
               ],
               "src": "543:17:51"
             },
-            "scope": 13983,
+            "scope": 13990,
             "src": "492:69:51",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 13984,
+        "scope": 13991,
         "src": "66:497:51",
         "usedErrors": []
       }
@@ -387,7 +387,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2023-03-20T09:10:39.817Z",
+  "updatedAt": "2023-03-21T07:02:45.421Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

@@ -88,7 +88,6 @@ contract poolRegistry is ReentrancyGuard {
 
     //Create Pool
     function createPool(
-        uint32 _paymentCycleDuration,
         uint32 _paymentDefaultDuration,
         uint32 _loanExpirationTime,
         uint16 _poolFeePercent,
@@ -111,7 +110,7 @@ contract poolRegistry is ReentrancyGuard {
         pools[poolId_].owner = msg.sender;
 
         setApr(poolId_, _apr);
-        setPaymentCycleDuration(poolId_, _paymentCycleDuration);
+        setPaymentCycleDuration(poolId_, 30 days);
         setPaymentDefaultDuration(poolId_, _paymentDefaultDuration);
         setPoolFeePercent(poolId_, _poolFeePercent);
         setloanExpirationTime(poolId_, _loanExpirationTime);

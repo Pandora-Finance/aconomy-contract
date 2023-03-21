@@ -4,6 +4,7 @@ pragma solidity >=0.4.22 <0.9.0;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
 import "../poolAddress.sol";
 
@@ -49,12 +50,22 @@ library LibCalculations {
         uint32 cycleDuration,
         uint16 apr
     ) public pure returns (uint256) {
-        uint256 n = loanDuration / cycleDuration;
-        if (apr == 0) return (principal / n);
+        require(loanDuration >= cycleDuration, "cycle > duration");
+        if (apr == 0)
+            return
+                Math.mulDiv(
+                    principal,
+                    cycleDuration,
+                    loanDuration,
+                    Math.Rounding.Up
+                );
+
+        // Number of payment cycles for the duration of the loan
+        uint256 n = Math.ceilDiv(loanDuration, cycleDuration);
 
         uint256 one = WadRayMath.wad();
         uint256 r = WadRayMath.pctToWad(apr).wadMul(cycleDuration).wadDiv(
-            365 days
+            360 days
         );
         uint256 exp = (one + r).wadPow(n);
         uint256 numerator = principal.wadMul(r).wadMul(exp);

@@ -15,15 +15,35 @@ contract("PoolAddress", async (accounts) =>{
     moment.duration(30, 'days').seconds())
     let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Address,poolId2,  loanId1, poolAddressInstance, erc20;
 
+    const advanceBlockAtTime = (time) => {
+      return new Promise((resolve, reject) => {
+        web3.currentProvider.send(
+          {
+            jsonrpc: "2.0",
+            method: "evm_mine",
+            params: [time],
+            id: new Date().getTime(),
+          },
+          (err, _) => {
+            if (err) {
+              return reject(err);
+            }
+            const newBlockHash = web3.eth.getBlock("latest").hash;
+    
+            return resolve(newBlockHash);
+          },
+        );
+      });
+    };
+
     it("should create Pool", async() => {
         // console.log("attestTegistry: ", attestServices.address)
         poolRegis = await PoolRegistry.deployed()
        res =  await poolRegis.createPool(
-            paymentCycleDuration,
             loanDefaultDuration,
             loanExpirationDuration,
-            10,
-            10,
+            100,
+            100,
             "sk.com",
             true,
             true
@@ -56,7 +76,7 @@ contract("PoolAddress", async (accounts) =>{
         poolId1,
         1000,
         loanDefaultDuration,
-        1,
+        100,
         accounts[1],
         {from: accounts[1]}
         )
@@ -74,7 +94,7 @@ contract("PoolAddress", async (accounts) =>{
         _balance1 = await erc20.balanceOf(accounts[1]);
         //console.log(_balance1.toNumber())
         //Amount that the borrower will get is 999 after cutting fees and market charges
-        assert.equal(_balance1.toNumber(), 999, "Not able to accept loan");
+        assert.equal(_balance1.toNumber(), 990, "Not able to accept loan");
     })
 
     it("should calculate the next due date", async() => {
@@ -98,12 +118,15 @@ contract("PoolAddress", async (accounts) =>{
 
     it("should view intallment amount", async() => {
         loanId1 = res.logs[0].args.loanId.toNumber()
+        let loan = await poolAddressInstance.loans(loanId1);
+        console.log(loan)
+        advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
         let r = await poolAddressInstance.viewInstallmentAmount(loanId1)
         console.log('installment', r.toString());
     })
 
     it("should repay full amount", async() => {
-         await erc20.transfer(accounts[1], 1, {from: accounts[0]})
+         await erc20.transfer(accounts[1], 10, {from: accounts[0]})
          let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
          console.log(bal);
          await erc20.approve(poolAddressInstance.address, bal, {from:accounts[1]})
