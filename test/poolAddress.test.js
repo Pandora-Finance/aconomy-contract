@@ -1,5 +1,6 @@
 var BigNumber = require('big-number');
 var moment = require('moment');
+const { BN, constants, expectEvent, shouldFail, time, expectRevert } = require('@openzeppelin/test-helpers');
 const PoolRegistry = artifacts.require("poolRegistry");
 const AttestRegistry = artifacts.require("AttestationRegistry")
 const AttestServices = artifacts.require("AttestationServices");
@@ -70,13 +71,14 @@ contract("PoolAddress", async (accounts) =>{
 
     it("testing loan request function", async ()=> {
         erc20 = await lendingToken.deployed()
+        await erc20.mint(accounts[0], '10000000000')
         poolAddressInstance = await PoolAddress.deployed();
         res = await poolAddressInstance.loanRequest(
         erc20.address,
         poolId1,
-        1000,
+        1000000000,
         loanDefaultDuration,
-        100,
+        1000,
         accounts[1],
         {from: accounts[1]}
         )
@@ -87,14 +89,14 @@ contract("PoolAddress", async (accounts) =>{
     })    
 
     it("should Accept loan ", async() => {
-        await erc20.approve(poolAddressInstance.address, 100000)
+        await erc20.approve(poolAddressInstance.address, 1000000000)
         let _balance1 = await erc20.balanceOf(accounts[0]);
-        // console.log(_balance1.toNumber())
+        console.log(_balance1.toNumber())
         res = await poolAddressInstance.AcceptLoan(loanId1, {from:accounts[0]})
         _balance1 = await erc20.balanceOf(accounts[1]);
         //console.log(_balance1.toNumber())
         //Amount that the borrower will get is 999 after cutting fees and market charges
-        assert.equal(_balance1.toNumber(), 990, "Not able to accept loan");
+        assert.equal(_balance1.toNumber(), 990000000, "Not able to accept loan");
     })
 
     it("should calculate the next due date", async() => {
@@ -120,16 +122,24 @@ contract("PoolAddress", async (accounts) =>{
         loanId1 = res.logs[0].args.loanId.toNumber()
         let loan = await poolAddressInstance.loans(loanId1);
         console.log(loan)
-        advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-        let r = await poolAddressInstance.viewInstallmentAmount(loanId1)
+        // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
+        await time.increase(paymentCycleDuration + 1)
+        let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
         console.log('installment', r.toString());
+        await erc20.approve(poolAddressInstance.address, r + 10, {from:accounts[1]})
+        let result = await poolAddressInstance.repayYourLoan(loanId1, {from: accounts[1]});
+        console.log(result.logs[1].args.owedPrincipal.toNumber());
+        console.log(result.logs[1].args.duePrincipal.toNumber());
+        console.log(result.logs[1].args.interest.toNumber());
+        
     })
 
     it("should repay full amount", async() => {
-         await erc20.transfer(accounts[1], 10, {from: accounts[0]})
          let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
-         console.log(bal);
-         await erc20.approve(poolAddressInstance.address, bal, {from:accounts[1]})
+         console.log(bal.toNumber());
+         let b = await erc20.balanceOf(accounts[1]);
+         await erc20.transfer(accounts[1], bal - b + 10, {from: accounts[0]})
+         await erc20.approve(poolAddressInstance.address, bal + 10, {from:accounts[1]})
          let r = await poolAddressInstance.repayFullLoan(loanId1, {from: accounts[1]})
          // console.log(res)
          assert.equal(r.receipt.status, true, "Not able to repay loan")

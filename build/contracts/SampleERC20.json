@@ -7273,15 +7273,15 @@
         3858
       ],
       "SampleERC20": [
-        19229
+        19185
       ]
     },
-    "id": 19230,
+    "id": 19186,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 19210,
+        "id": 19166,
         "literals": [
           "solidity",
           ">=",
@@ -7297,10 +7297,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "id": 19211,
+        "id": 19167,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 19230,
+        "scope": 19186,
         "sourceUnit": 3756,
         "src": "66:55:60",
         "symbolAliases": [],
@@ -7313,7 +7313,7 @@
             "arguments": [
               {
                 "hexValue": "53616d706c654552433230",
-                "id": 19213,
+                "id": 19169,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7329,7 +7329,7 @@
               },
               {
                 "hexValue": "5454",
-                "id": 19214,
+                "id": 19170,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7345,13 +7345,13 @@
               }
             ],
             "baseName": {
-              "id": 19212,
+              "id": 19168,
               "name": "ERC20",
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 3755,
               "src": "147:5:60"
             },
-            "id": 19215,
+            "id": 19171,
             "nodeType": "InheritanceSpecifier",
             "src": "147:26:60"
           }
@@ -7360,9 +7360,9 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 19229,
+        "id": 19185,
         "linearizedBaseContracts": [
-          19229,
+          19185,
           3755,
           3858,
           3833,
@@ -7374,7 +7374,7 @@
         "nodes": [
           {
             "body": {
-              "id": 19227,
+              "id": 19183,
               "nodeType": "Block",
               "src": "240:43:60",
               "statements": [
@@ -7382,11 +7382,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 19223,
+                        "id": 19179,
                         "name": "_recipient",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 19217,
+                        "referencedDeclaration": 19173,
                         "src": "256:10:60",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -7394,11 +7394,11 @@
                         }
                       },
                       {
-                        "id": 19224,
+                        "id": 19180,
                         "name": "_amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 19219,
+                        "referencedDeclaration": 19175,
                         "src": "268:7:60",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -7417,7 +7417,7 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 19222,
+                      "id": 19178,
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
@@ -7428,7 +7428,7 @@
                         "typeString": "function (address,uint256)"
                       }
                     },
-                    "id": 19225,
+                    "id": 19181,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -7443,14 +7443,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 19226,
+                  "id": 19182,
                   "nodeType": "ExpressionStatement",
                   "src": "250:26:60"
                 }
               ]
             },
             "functionSelector": "40c10f19",
-            "id": 19228,
+            "id": 19184,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -7458,17 +7458,17 @@
             "nameLocation": "189:4:60",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 19220,
+              "id": 19176,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 19217,
+                  "id": 19173,
                   "mutability": "mutable",
                   "name": "_recipient",
                   "nameLocation": "202:10:60",
                   "nodeType": "VariableDeclaration",
-                  "scope": 19228,
+                  "scope": 19184,
                   "src": "194:18:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7477,7 +7477,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 19216,
+                    "id": 19172,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "194:7:60",
@@ -7491,12 +7491,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 19219,
+                  "id": 19175,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "222:7:60",
                   "nodeType": "VariableDeclaration",
-                  "scope": 19228,
+                  "scope": 19184,
                   "src": "214:15:60",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7505,7 +7505,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 19218,
+                    "id": 19174,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "214:7:60",
@@ -7520,19 +7520,19 @@
               "src": "193:37:60"
             },
             "returnParameters": {
-              "id": 19221,
+              "id": 19177,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "240:0:60"
             },
-            "scope": 19229,
+            "scope": 19185,
             "src": "180:103:60",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 19230,
+        "scope": 19186,
         "src": "123:162:60",
         "usedErrors": []
       }
@@ -7545,7 +7545,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2023-03-21T07:02:45.461Z",
+  "updatedAt": "2023-03-21T11:44:56.195Z",
   "devdoc": {
     "kind": "dev",
     "methods": {

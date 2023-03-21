@@ -1893,7 +1893,7 @@
                 }
               ]
             },
-            "name": "abi_encode_t_struct$_ASRecord_$13974_memory_ptr_to_t_struct$_ASRecord_$13974_memory_ptr_fromStack",
+            "name": "abi_encode_t_struct$_ASRecord_$13991_memory_ptr_to_t_struct$_ASRecord_$13991_memory_ptr_fromStack",
             "nodeType": "YulFunctionDefinition",
             "parameters": [
               {
@@ -2034,7 +2034,7 @@
                       }
                     ],
                     "functionName": {
-                      "name": "abi_encode_t_struct$_ASRecord_$13974_memory_ptr_to_t_struct$_ASRecord_$13974_memory_ptr_fromStack",
+                      "name": "abi_encode_t_struct$_ASRecord_$13991_memory_ptr_to_t_struct$_ASRecord_$13991_memory_ptr_fromStack",
                       "nodeType": "YulIdentifier",
                       "src": "3508:97:61"
                     },
@@ -2051,7 +2051,7 @@
                 }
               ]
             },
-            "name": "abi_encode_tuple_t_struct$_ASRecord_$13974_memory_ptr__to_t_struct$_ASRecord_$13974_memory_ptr__fromStack_reversed",
+            "name": "abi_encode_tuple_t_struct$_ASRecord_$13991_memory_ptr__to_t_struct$_ASRecord_$13991_memory_ptr__fromStack_reversed",
             "nodeType": "YulFunctionDefinition",
             "parameters": [
               {
@@ -5402,7 +5402,7 @@
           }
         ]
       },
-      "contents": "{\n\n    function allocate_unbounded() -> memPtr {\n        memPtr := mload(64)\n    }\n\n    function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n        revert(0, 0)\n    }\n\n    function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n        revert(0, 0)\n    }\n\n    function cleanup_t_bytes32(value) -> cleaned {\n        cleaned := value\n    }\n\n    function validator_revert_t_bytes32(value) {\n        if iszero(eq(value, cleanup_t_bytes32(value))) { revert(0, 0) }\n    }\n\n    function abi_decode_t_bytes32(offset, end) -> value {\n        value := calldataload(offset)\n        validator_revert_t_bytes32(value)\n    }\n\n    function abi_decode_tuple_t_bytes32(headStart, dataEnd) -> value0 {\n        if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n        {\n\n            let offset := 0\n\n            value0 := abi_decode_t_bytes32(add(headStart, offset), dataEnd)\n        }\n\n    }\n\n    function abi_encode_t_bytes32_to_t_bytes32(value, pos) {\n        mstore(pos, cleanup_t_bytes32(value))\n    }\n\n    function cleanup_t_uint256(value) -> cleaned {\n        cleaned := value\n    }\n\n    function abi_encode_t_uint256_to_t_uint256(value, pos) {\n        mstore(pos, cleanup_t_uint256(value))\n    }\n\n    function array_length_t_bytes_memory_ptr(value) -> length {\n\n        length := mload(value)\n\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function copy_memory_to_memory(src, dst, length) {\n        let i := 0\n        for { } lt(i, length) { i := add(i, 32) }\n        {\n            mstore(add(dst, i), mload(add(src, i)))\n        }\n        if gt(i, length)\n        {\n            // clear end\n            mstore(add(dst, length), 0)\n        }\n    }\n\n    function round_up_to_mul_of_32(value) -> result {\n        result := and(add(value, 31), not(31))\n    }\n\n    function abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr(value, pos) -> end {\n        let length := array_length_t_bytes_memory_ptr(value)\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr(pos, length)\n        copy_memory_to_memory(add(value, 0x20), pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    // struct IAttestationRegistry.ASRecord -> struct IAttestationRegistry.ASRecord\n    function abi_encode_t_struct$_ASRecord_$13974_memory_ptr_to_t_struct$_ASRecord_$13974_memory_ptr_fromStack(value, pos)  -> end  {\n        let tail := add(pos, 0x60)\n\n        {\n            // uuid\n\n            let memberValue0 := mload(add(value, 0x00))\n            abi_encode_t_bytes32_to_t_bytes32(memberValue0, add(pos, 0x00))\n        }\n\n        {\n            // index\n\n            let memberValue0 := mload(add(value, 0x20))\n            abi_encode_t_uint256_to_t_uint256(memberValue0, add(pos, 0x20))\n        }\n\n        {\n            // schema\n\n            let memberValue0 := mload(add(value, 0x40))\n\n            mstore(add(pos, 0x40), sub(tail, pos))\n            tail := abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr(memberValue0, tail)\n\n        }\n\n        end := tail\n    }\n\n    function abi_encode_tuple_t_struct$_ASRecord_$13974_memory_ptr__to_t_struct$_ASRecord_$13974_memory_ptr__fromStack_reversed(headStart , value0) -> tail {\n        tail := add(headStart, 32)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_struct$_ASRecord_$13974_memory_ptr_to_t_struct$_ASRecord_$13974_memory_ptr_fromStack(value0,  tail)\n\n    }\n\n    function revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() {\n        revert(0, 0)\n    }\n\n    function revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() {\n        revert(0, 0)\n    }\n\n    function revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() {\n        revert(0, 0)\n    }\n\n    // bytes\n    function abi_decode_t_bytes_calldata_ptr(offset, end) -> arrayPos, length {\n        if iszero(slt(add(offset, 0x1f), end)) { revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() }\n        length := calldataload(offset)\n        if gt(length, 0xffffffffffffffff) { revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() }\n        arrayPos := add(offset, 0x20)\n        if gt(add(arrayPos, mul(length, 0x01)), end) { revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() }\n    }\n\n    function abi_decode_tuple_t_bytes_calldata_ptr(headStart, dataEnd) -> value0, value1 {\n        if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n        {\n\n            let offset := calldataload(add(headStart, 0))\n            if gt(offset, 0xffffffffffffffff) { revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() }\n\n            value0, value1 := abi_decode_t_bytes_calldata_ptr(add(headStart, offset), dataEnd)\n        }\n\n    }\n\n    function abi_encode_t_bytes32_to_t_bytes32_fromStack(value, pos) {\n        mstore(pos, cleanup_t_bytes32(value))\n    }\n\n    function abi_encode_tuple_t_bytes32__to_t_bytes32__fromStack_reversed(headStart , value0) -> tail {\n        tail := add(headStart, 32)\n\n        abi_encode_t_bytes32_to_t_bytes32_fromStack(value0,  add(headStart, 0))\n\n    }\n\n    function abi_encode_t_uint256_to_t_uint256_fromStack(value, pos) {\n        mstore(pos, cleanup_t_uint256(value))\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value, pos) -> end {\n        let length := array_length_t_bytes_memory_ptr(value)\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length)\n        copy_memory_to_memory(add(value, 0x20), pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    function abi_encode_tuple_t_bytes32_t_uint256_t_bytes_memory_ptr__to_t_bytes32_t_uint256_t_bytes_memory_ptr__fromStack_reversed(headStart , value2, value1, value0) -> tail {\n        tail := add(headStart, 96)\n\n        abi_encode_t_bytes32_to_t_bytes32_fromStack(value0,  add(headStart, 0))\n\n        abi_encode_t_uint256_to_t_uint256_fromStack(value1,  add(headStart, 32))\n\n        mstore(add(headStart, 64), sub(tail, headStart))\n        tail := abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value2,  tail)\n\n    }\n\n    function panic_error_0x22() {\n        mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n        mstore(4, 0x22)\n        revert(0, 0x24)\n    }\n\n    function extract_byte_array_length(data) -> length {\n        length := div(data, 2)\n        let outOfPlaceEncoding := and(data, 1)\n        if iszero(outOfPlaceEncoding) {\n            length := and(length, 0x7f)\n        }\n\n        if eq(outOfPlaceEncoding, lt(length, 32)) {\n            panic_error_0x22()\n        }\n    }\n\n    function panic_error_0x11() {\n        mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n        mstore(4, 0x11)\n        revert(0, 0x24)\n    }\n\n    function increment_t_uint256(value) -> ret {\n        value := cleanup_t_uint256(value)\n        if eq(value, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) { panic_error_0x11() }\n        ret := add(value, 1)\n    }\n\n    function array_storeLengthForEncoding_t_string_memory_ptr_fromStack(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function store_literal_in_memory_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a(memPtr) {\n\n        mstore(add(memPtr, 0), \"AlreadyExists\")\n\n    }\n\n    function abi_encode_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a_to_t_string_memory_ptr_fromStack(pos) -> end {\n        pos := array_storeLengthForEncoding_t_string_memory_ptr_fromStack(pos, 13)\n        store_literal_in_memory_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a(pos)\n        end := add(pos, 32)\n    }\n\n    function abi_encode_tuple_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a__to_t_string_memory_ptr__fromStack_reversed(headStart ) -> tail {\n        tail := add(headStart, 32)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a_to_t_string_memory_ptr_fromStack( tail)\n\n    }\n\n    function copy_calldata_to_memory(src, dst, length) {\n        calldatacopy(dst, src, length)\n        // clear end\n        mstore(add(dst, length), 0)\n    }\n\n    // bytes -> bytes\n    function abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_fromStack(start, length, pos) -> end {\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length)\n\n        copy_calldata_to_memory(start, pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    function cleanup_t_uint160(value) -> cleaned {\n        cleaned := and(value, 0xffffffffffffffffffffffffffffffffffffffff)\n    }\n\n    function cleanup_t_address(value) -> cleaned {\n        cleaned := cleanup_t_uint160(value)\n    }\n\n    function abi_encode_t_address_to_t_address_fromStack(value, pos) {\n        mstore(pos, cleanup_t_address(value))\n    }\n\n    function abi_encode_tuple_t_bytes_calldata_ptr_t_address__to_t_bytes_memory_ptr_t_address__fromStack_reversed(headStart , value2, value1, value0) -> tail {\n        tail := add(headStart, 64)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_fromStack(value0, value1,  tail)\n\n        abi_encode_t_address_to_t_address_fromStack(value2,  add(headStart, 32))\n\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr_nonPadded_inplace_fromStack(pos, length) -> updated_pos {\n        updated_pos := pos\n    }\n\n    // bytes -> bytes\n    function abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_nonPadded_inplace_fromStack(start, length, pos) -> end {\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_nonPadded_inplace_fromStack(pos, length)\n\n        copy_calldata_to_memory(start, pos, length)\n        end := add(pos, length)\n    }\n\n    function abi_encode_tuple_packed_t_bytes_calldata_ptr__to_t_bytes_memory_ptr__nonPadded_inplace_fromStack_reversed(pos , value1, value0) -> end {\n\n        pos := abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_nonPadded_inplace_fromStack(value0, value1,  pos)\n\n        end := pos\n    }\n\n}\n",
+      "contents": "{\n\n    function allocate_unbounded() -> memPtr {\n        memPtr := mload(64)\n    }\n\n    function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n        revert(0, 0)\n    }\n\n    function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n        revert(0, 0)\n    }\n\n    function cleanup_t_bytes32(value) -> cleaned {\n        cleaned := value\n    }\n\n    function validator_revert_t_bytes32(value) {\n        if iszero(eq(value, cleanup_t_bytes32(value))) { revert(0, 0) }\n    }\n\n    function abi_decode_t_bytes32(offset, end) -> value {\n        value := calldataload(offset)\n        validator_revert_t_bytes32(value)\n    }\n\n    function abi_decode_tuple_t_bytes32(headStart, dataEnd) -> value0 {\n        if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n        {\n\n            let offset := 0\n\n            value0 := abi_decode_t_bytes32(add(headStart, offset), dataEnd)\n        }\n\n    }\n\n    function abi_encode_t_bytes32_to_t_bytes32(value, pos) {\n        mstore(pos, cleanup_t_bytes32(value))\n    }\n\n    function cleanup_t_uint256(value) -> cleaned {\n        cleaned := value\n    }\n\n    function abi_encode_t_uint256_to_t_uint256(value, pos) {\n        mstore(pos, cleanup_t_uint256(value))\n    }\n\n    function array_length_t_bytes_memory_ptr(value) -> length {\n\n        length := mload(value)\n\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function copy_memory_to_memory(src, dst, length) {\n        let i := 0\n        for { } lt(i, length) { i := add(i, 32) }\n        {\n            mstore(add(dst, i), mload(add(src, i)))\n        }\n        if gt(i, length)\n        {\n            // clear end\n            mstore(add(dst, length), 0)\n        }\n    }\n\n    function round_up_to_mul_of_32(value) -> result {\n        result := and(add(value, 31), not(31))\n    }\n\n    function abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr(value, pos) -> end {\n        let length := array_length_t_bytes_memory_ptr(value)\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr(pos, length)\n        copy_memory_to_memory(add(value, 0x20), pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    // struct IAttestationRegistry.ASRecord -> struct IAttestationRegistry.ASRecord\n    function abi_encode_t_struct$_ASRecord_$13991_memory_ptr_to_t_struct$_ASRecord_$13991_memory_ptr_fromStack(value, pos)  -> end  {\n        let tail := add(pos, 0x60)\n\n        {\n            // uuid\n\n            let memberValue0 := mload(add(value, 0x00))\n            abi_encode_t_bytes32_to_t_bytes32(memberValue0, add(pos, 0x00))\n        }\n\n        {\n            // index\n\n            let memberValue0 := mload(add(value, 0x20))\n            abi_encode_t_uint256_to_t_uint256(memberValue0, add(pos, 0x20))\n        }\n\n        {\n            // schema\n\n            let memberValue0 := mload(add(value, 0x40))\n\n            mstore(add(pos, 0x40), sub(tail, pos))\n            tail := abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr(memberValue0, tail)\n\n        }\n\n        end := tail\n    }\n\n    function abi_encode_tuple_t_struct$_ASRecord_$13991_memory_ptr__to_t_struct$_ASRecord_$13991_memory_ptr__fromStack_reversed(headStart , value0) -> tail {\n        tail := add(headStart, 32)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_struct$_ASRecord_$13991_memory_ptr_to_t_struct$_ASRecord_$13991_memory_ptr_fromStack(value0,  tail)\n\n    }\n\n    function revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() {\n        revert(0, 0)\n    }\n\n    function revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() {\n        revert(0, 0)\n    }\n\n    function revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() {\n        revert(0, 0)\n    }\n\n    // bytes\n    function abi_decode_t_bytes_calldata_ptr(offset, end) -> arrayPos, length {\n        if iszero(slt(add(offset, 0x1f), end)) { revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() }\n        length := calldataload(offset)\n        if gt(length, 0xffffffffffffffff) { revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() }\n        arrayPos := add(offset, 0x20)\n        if gt(add(arrayPos, mul(length, 0x01)), end) { revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() }\n    }\n\n    function abi_decode_tuple_t_bytes_calldata_ptr(headStart, dataEnd) -> value0, value1 {\n        if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n        {\n\n            let offset := calldataload(add(headStart, 0))\n            if gt(offset, 0xffffffffffffffff) { revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() }\n\n            value0, value1 := abi_decode_t_bytes_calldata_ptr(add(headStart, offset), dataEnd)\n        }\n\n    }\n\n    function abi_encode_t_bytes32_to_t_bytes32_fromStack(value, pos) {\n        mstore(pos, cleanup_t_bytes32(value))\n    }\n\n    function abi_encode_tuple_t_bytes32__to_t_bytes32__fromStack_reversed(headStart , value0) -> tail {\n        tail := add(headStart, 32)\n\n        abi_encode_t_bytes32_to_t_bytes32_fromStack(value0,  add(headStart, 0))\n\n    }\n\n    function abi_encode_t_uint256_to_t_uint256_fromStack(value, pos) {\n        mstore(pos, cleanup_t_uint256(value))\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value, pos) -> end {\n        let length := array_length_t_bytes_memory_ptr(value)\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length)\n        copy_memory_to_memory(add(value, 0x20), pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    function abi_encode_tuple_t_bytes32_t_uint256_t_bytes_memory_ptr__to_t_bytes32_t_uint256_t_bytes_memory_ptr__fromStack_reversed(headStart , value2, value1, value0) -> tail {\n        tail := add(headStart, 96)\n\n        abi_encode_t_bytes32_to_t_bytes32_fromStack(value0,  add(headStart, 0))\n\n        abi_encode_t_uint256_to_t_uint256_fromStack(value1,  add(headStart, 32))\n\n        mstore(add(headStart, 64), sub(tail, headStart))\n        tail := abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value2,  tail)\n\n    }\n\n    function panic_error_0x22() {\n        mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n        mstore(4, 0x22)\n        revert(0, 0x24)\n    }\n\n    function extract_byte_array_length(data) -> length {\n        length := div(data, 2)\n        let outOfPlaceEncoding := and(data, 1)\n        if iszero(outOfPlaceEncoding) {\n            length := and(length, 0x7f)\n        }\n\n        if eq(outOfPlaceEncoding, lt(length, 32)) {\n            panic_error_0x22()\n        }\n    }\n\n    function panic_error_0x11() {\n        mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n        mstore(4, 0x11)\n        revert(0, 0x24)\n    }\n\n    function increment_t_uint256(value) -> ret {\n        value := cleanup_t_uint256(value)\n        if eq(value, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) { panic_error_0x11() }\n        ret := add(value, 1)\n    }\n\n    function array_storeLengthForEncoding_t_string_memory_ptr_fromStack(pos, length) -> updated_pos {\n        mstore(pos, length)\n        updated_pos := add(pos, 0x20)\n    }\n\n    function store_literal_in_memory_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a(memPtr) {\n\n        mstore(add(memPtr, 0), \"AlreadyExists\")\n\n    }\n\n    function abi_encode_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a_to_t_string_memory_ptr_fromStack(pos) -> end {\n        pos := array_storeLengthForEncoding_t_string_memory_ptr_fromStack(pos, 13)\n        store_literal_in_memory_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a(pos)\n        end := add(pos, 32)\n    }\n\n    function abi_encode_tuple_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a__to_t_string_memory_ptr__fromStack_reversed(headStart ) -> tail {\n        tail := add(headStart, 32)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_stringliteral_25c70936ac913d786adf0d6e0b28237b3d070344ed419c9401ec8d2fe2ea940a_to_t_string_memory_ptr_fromStack( tail)\n\n    }\n\n    function copy_calldata_to_memory(src, dst, length) {\n        calldatacopy(dst, src, length)\n        // clear end\n        mstore(add(dst, length), 0)\n    }\n\n    // bytes -> bytes\n    function abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_fromStack(start, length, pos) -> end {\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length)\n\n        copy_calldata_to_memory(start, pos, length)\n        end := add(pos, round_up_to_mul_of_32(length))\n    }\n\n    function cleanup_t_uint160(value) -> cleaned {\n        cleaned := and(value, 0xffffffffffffffffffffffffffffffffffffffff)\n    }\n\n    function cleanup_t_address(value) -> cleaned {\n        cleaned := cleanup_t_uint160(value)\n    }\n\n    function abi_encode_t_address_to_t_address_fromStack(value, pos) {\n        mstore(pos, cleanup_t_address(value))\n    }\n\n    function abi_encode_tuple_t_bytes_calldata_ptr_t_address__to_t_bytes_memory_ptr_t_address__fromStack_reversed(headStart , value2, value1, value0) -> tail {\n        tail := add(headStart, 64)\n\n        mstore(add(headStart, 0), sub(tail, headStart))\n        tail := abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_fromStack(value0, value1,  tail)\n\n        abi_encode_t_address_to_t_address_fromStack(value2,  add(headStart, 32))\n\n    }\n\n    function array_storeLengthForEncoding_t_bytes_memory_ptr_nonPadded_inplace_fromStack(pos, length) -> updated_pos {\n        updated_pos := pos\n    }\n\n    // bytes -> bytes\n    function abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_nonPadded_inplace_fromStack(start, length, pos) -> end {\n        pos := array_storeLengthForEncoding_t_bytes_memory_ptr_nonPadded_inplace_fromStack(pos, length)\n\n        copy_calldata_to_memory(start, pos, length)\n        end := add(pos, length)\n    }\n\n    function abi_encode_tuple_packed_t_bytes_calldata_ptr__to_t_bytes_memory_ptr__nonPadded_inplace_fromStack_reversed(pos , value1, value0) -> end {\n\n        pos := abi_encode_t_bytes_calldata_ptr_to_t_bytes_memory_ptr_nonPadded_inplace_fromStack(value0, value1,  pos)\n\n        end := pos\n    }\n\n}\n",
       "id": 61,
       "language": "Yul",
       "name": "#utility.yul"
@@ -5419,10 +5419,10 @@
         9571
       ],
       "IAttestationRegistry": [
-        13990
+        14007
       ],
       "IAttestationServices": [
-        14000
+        14017
       ]
     },
     "id": 9572,
@@ -5450,7 +5450,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 9572,
-        "sourceUnit": 14001,
+        "sourceUnit": 14018,
         "src": "66:47:38",
         "symbolAliases": [],
         "unitAlias": ""
@@ -5462,7 +5462,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 9572,
-        "sourceUnit": 13991,
+        "sourceUnit": 14008,
         "src": "114:47:38",
         "symbolAliases": [],
         "unitAlias": ""
@@ -5475,7 +5475,7 @@
               "id": 9463,
               "name": "IAttestationRegistry",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 13990,
+              "referencedDeclaration": 14007,
               "src": "195:20:38"
             },
             "id": 9464,
@@ -5490,7 +5490,7 @@
         "id": 9571,
         "linearizedBaseContracts": [
           9571,
-          13990
+          14007
         ],
         "name": "AttestationRegistry",
         "nameLocation": "172:19:38",
@@ -5509,7 +5509,7 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13974_storage_$",
+              "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13991_storage_$",
               "typeString": "mapping(bytes32 => struct IAttestationRegistry.ASRecord)"
             },
             "typeName": {
@@ -5527,7 +5527,7 @@
               "nodeType": "Mapping",
               "src": "222:28:38",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13974_storage_$",
+                "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13991_storage_$",
                 "typeString": "mapping(bytes32 => struct IAttestationRegistry.ASRecord)"
               },
               "valueType": {
@@ -5537,13 +5537,13 @@
                   "id": 9466,
                   "name": "ASRecord",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 13974,
+                  "referencedDeclaration": 13991,
                   "src": "241:8:38"
                 },
-                "referencedDeclaration": 13974,
+                "referencedDeclaration": 13991,
                 "src": "241:8:38",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_struct$_ASRecord_$13974_storage_ptr",
+                  "typeIdentifier": "t_struct$_ASRecord_$13991_storage_ptr",
                   "typeString": "struct IAttestationRegistry.ASRecord"
                 }
               }
@@ -5750,7 +5750,7 @@
           },
           {
             "baseFunctions": [
-              13981
+              13998
             ],
             "body": {
               "id": 9540,
@@ -5927,7 +5927,7 @@
                           "referencedDeclaration": 9469,
                           "src": "683:9:38",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13974_storage_$",
+                            "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13991_storage_$",
                             "typeString": "mapping(bytes32 => struct IAttestationRegistry.ASRecord storage ref)"
                           }
                         },
@@ -5951,7 +5951,7 @@
                         "nodeType": "IndexAccess",
                         "src": "683:15:38",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ASRecord_$13974_storage",
+                          "typeIdentifier": "t_struct$_ASRecord_$13991_storage",
                           "typeString": "struct IAttestationRegistry.ASRecord storage ref"
                         }
                       },
@@ -5962,7 +5962,7 @@
                       "lValueRequested": false,
                       "memberName": "uuid",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 13969,
+                      "referencedDeclaration": 13986,
                       "src": "683:20:38",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
@@ -6077,7 +6077,7 @@
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ASRecord_$13974_memory_ptr",
+                        "typeIdentifier": "t_struct$_ASRecord_$13991_memory_ptr",
                         "typeString": "struct IAttestationRegistry.ASRecord"
                       },
                       "typeName": {
@@ -6087,13 +6087,13 @@
                           "id": 9515,
                           "name": "ASRecord",
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 13974,
+                          "referencedDeclaration": 13991,
                           "src": "777:8:38"
                         },
-                        "referencedDeclaration": 13974,
+                        "referencedDeclaration": 13991,
                         "src": "777:8:38",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_struct$_ASRecord_$13974_storage_ptr",
+                          "typeIdentifier": "t_struct$_ASRecord_$13991_storage_ptr",
                           "typeString": "struct IAttestationRegistry.ASRecord"
                         }
                       },
@@ -6159,10 +6159,10 @@
                       "name": "ASRecord",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 13974,
+                      "referencedDeclaration": 13991,
                       "src": "804:8:38",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_struct$_ASRecord_$13974_storage_ptr_$",
+                        "typeIdentifier": "t_type$_t_struct$_ASRecord_$13991_storage_ptr_$",
                         "typeString": "type(struct IAttestationRegistry.ASRecord storage pointer)"
                       }
                     },
@@ -6181,7 +6181,7 @@
                     "src": "804:98:38",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$13974_memory_ptr",
+                      "typeIdentifier": "t_struct$_ASRecord_$13991_memory_ptr",
                       "typeString": "struct IAttestationRegistry.ASRecord memory"
                     }
                   },
@@ -6204,7 +6204,7 @@
                         "referencedDeclaration": 9469,
                         "src": "913:9:38",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13974_storage_$",
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13991_storage_$",
                           "typeString": "mapping(bytes32 => struct IAttestationRegistry.ASRecord storage ref)"
                         }
                       },
@@ -6228,7 +6228,7 @@
                       "nodeType": "IndexAccess",
                       "src": "913:15:38",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ASRecord_$13974_storage",
+                        "typeIdentifier": "t_struct$_ASRecord_$13991_storage",
                         "typeString": "struct IAttestationRegistry.ASRecord storage ref"
                       }
                     },
@@ -6242,13 +6242,13 @@
                       "referencedDeclaration": 9517,
                       "src": "931:8:38",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ASRecord_$13974_memory_ptr",
+                        "typeIdentifier": "t_struct$_ASRecord_$13991_memory_ptr",
                         "typeString": "struct IAttestationRegistry.ASRecord memory"
                       }
                     },
                     "src": "913:26:38",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$13974_storage",
+                      "typeIdentifier": "t_struct$_ASRecord_$13991_storage",
                       "typeString": "struct IAttestationRegistry.ASRecord storage ref"
                     }
                   },
@@ -6674,7 +6674,7 @@
           },
           {
             "baseFunctions": [
-              13989
+              14006
             ],
             "body": {
               "id": 9569,
@@ -6691,7 +6691,7 @@
                       "referencedDeclaration": 9469,
                       "src": "1301:9:38",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13974_storage_$",
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_ASRecord_$13991_storage_$",
                         "typeString": "mapping(bytes32 => struct IAttestationRegistry.ASRecord storage ref)"
                       }
                     },
@@ -6715,7 +6715,7 @@
                     "nodeType": "IndexAccess",
                     "src": "1301:15:38",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$13974_storage",
+                      "typeIdentifier": "t_struct$_ASRecord_$13991_storage",
                       "typeString": "struct IAttestationRegistry.ASRecord storage ref"
                     }
                   },
@@ -6790,7 +6790,7 @@
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ASRecord_$13974_memory_ptr",
+                    "typeIdentifier": "t_struct$_ASRecord_$13991_memory_ptr",
                     "typeString": "struct IAttestationRegistry.ASRecord"
                   },
                   "typeName": {
@@ -6800,13 +6800,13 @@
                       "id": 9561,
                       "name": "ASRecord",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 13974,
+                      "referencedDeclaration": 13991,
                       "src": "1263:8:38"
                     },
-                    "referencedDeclaration": 13974,
+                    "referencedDeclaration": 13991,
                     "src": "1263:8:38",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ASRecord_$13974_storage_ptr",
+                      "typeIdentifier": "t_struct$_ASRecord_$13991_storage_ptr",
                       "typeString": "struct IAttestationRegistry.ASRecord"
                     }
                   },
@@ -6835,7 +6835,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2023-03-21T07:02:45.379Z",
+  "updatedAt": "2023-03-21T11:44:56.015Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

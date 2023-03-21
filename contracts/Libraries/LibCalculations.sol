@@ -4,7 +4,7 @@ pragma solidity >=0.4.22 <0.9.0;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
 import "../poolAddress.sol";
 
@@ -50,7 +50,10 @@ library LibCalculations {
         uint32 cycleDuration,
         uint16 apr
     ) public pure returns (uint256) {
-        require(loanDuration >= cycleDuration, "cycle > duration");
+        require(
+            loanDuration >= cycleDuration,
+            "cycle < duration"
+        );
         if (apr == 0)
             return
                 Math.mulDiv(
@@ -165,12 +168,12 @@ library LibCalculations {
 
         uint256 interestInAYear = percent(owedPrincipal_, _interestRate);
         uint256 owedTime = _timestamp - uint256(_lastRepaidTimestamp);
-        interest_ = (interestInAYear * owedTime) / 365 days;
+        interest_ = (interestInAYear * owedTime) / 360 days;
 
         // Cast to int265 to avoid underflow errors (negative means loan duration has passed)
-        int256 durationLeftOnLoan = int256(_loanDuration) -
-            (int256(_timestamp) - int256(_startTimestamp));
-        bool isLastPaymentCycle = durationLeftOnLoan < int256(_paymentCycle) || // Check if current payment cycle is within or beyond the last one
+        int256 durationLeftOnLoan = int256(uint256(_loanDuration)) -
+            (int256(_timestamp) - int256(uint256(_startTimestamp)));
+        bool isLastPaymentCycle = durationLeftOnLoan < int256(uint256(_paymentCycle)) || // Check if current payment cycle is within or beyond the last one
             owedPrincipal_ + interest_ <= _paymentCycleAmount; // Check if what is left to pay is less than the payment cycle amount
 
         // Max payable amount in a cycle
