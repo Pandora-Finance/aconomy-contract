@@ -48,13 +48,23 @@ contract("PiNFT", (accounts) => {
 
   it("should let validator add ERC20 tokens to alice's NFT", async () => {
     await sampleERC20.approve(piNFT.address, 500, { from: validator });
-    const tx = await piNFT.addERC20( 0, sampleERC20.address, 500, [[validator, 200]], {
+    const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {
       from: validator,
     });
     const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
+  });
+
+  it("should let alice transfer NFT to bob", async () => {
+    await piNFT.transferAfterFunding(0, bob, { from: alice });
+    assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
+  });
+
+  it("should let bob transfer NFT to alice", async () => {
+    await piNFT.transferAfterFunding(0, alice, { from: bob });
+    assert.equal(await piNFT.ownerOf(0), alice, "Failed to transfer NFT");
   });
 
   it("should let alice withdraw erc20", async () => {
@@ -83,21 +93,24 @@ contract("PiNFT", (accounts) => {
     assert.equal(_bal - bal, 500);
   })
 
+
   it("should redeem piNft", async () => {
     await piNFT.redeemPiNFT(0, alice, sampleERC20.address, 500);
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
   });
 
+
   it("should transfer NFT to bob", async () => {
-    await piNFT.transferAfterFunding(0, bob);
+    await piNFT.safeTransferFrom(alice, bob, 0);
     assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
   });
 
+
   it("should let validator add ERC20 tokens to bob's NFT", async () => {
     await sampleERC20.approve(piNFT.address, 500, { from: validator });
-    await piNFT.addValidator(0, validator, {from: bob});
-    const tx = await piNFT.addERC20( 0, sampleERC20.address, 500, [[validator, 200]], {
+    await piNFT.addValidator(0, validator, { from: bob });
+    const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {
       from: validator,
     });
     const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);

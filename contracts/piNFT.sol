@@ -110,7 +110,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         string memory _uri,
         LibShare.Share[] memory royalties
     ) public returns (uint256) {
-        require(_to != address(0), "0 address given");
+        require(_to != address(0));
         uint256 tokenId_ = _tokenIdCounter.current();
         _setRoyaltiesByTokenId(tokenId_, royalties);
         _safeMint(_to, tokenId_);
@@ -130,13 +130,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         for (uint256 i = 0; i < royalties.length; i++) {
             require(
                 royalties[i].account != address(0x0),
-                "Royalty recipient should be present"
+                "Royalty not present"
             );
             require(royalties[i].value != 0, "royalty value 0");
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "royalty sum overflow");
+        require(sumRoyalties < 10000, "royalty overflow");
 
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
@@ -174,7 +174,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         LibShare.Share[] memory royalties
     ) public {
         require(msg.sender == approvedValidator[_tokenId]);
-        require(_erc20Contract != address(0), "0 address given");
+        require(_erc20Contract != address(0));
         require(_value != 0);
         require(erc20Contracts[_tokenId].length < 1);
         NFTowner[_tokenId] = ERC721.ownerOf(_tokenId);
@@ -186,7 +186,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
                 address(this),
                 _value
             ),
-            "transfer failed"
+            "failed"
         );
         emit ERC20Added(msg.sender, _tokenId, _erc20Contract, _value);
     }
@@ -197,10 +197,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         address _erc20Contract,
         uint256 _value
     ) private {
-        require(
-            ERC721.ownerOf(_tokenId) != address(0),
-            "_tokenId does not exist."
-        );
+        require(ERC721.ownerOf(_tokenId) != address(0));
         if (_value == 0) {
             return;
         }
@@ -228,7 +225,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             royaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "Royalty sum overflow");
+        require(sumRoyalties < 10000, "Royalty overflow");
 
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
@@ -246,7 +243,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
         require(_nftReciever != address(0));
         NFTowner[_tokenId] = address(0);
-        _transferERC20(_tokenId, approvedValidator[_tokenId], _erc20Contract, _value);
+        _transferERC20(
+            _tokenId,
+            approvedValidator[_tokenId],
+            _erc20Contract,
+            _value
+        );
         approvedValidator[_tokenId] = address(0);
         if (msg.sender != _nftReciever) {
             ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
@@ -294,10 +296,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     ) private {
         require(_to != address(0));
         removeERC20(_tokenId, _erc20Contract, _value);
-        require(
-            IERC20(_erc20Contract).transfer(_to, _value),
-            "transfer failed"
-        );
+        require(IERC20(_erc20Contract).transfer(_to, _value), "failed");
         emit ERC20Transferred(_tokenId, _to, _erc20Contract, _value);
     }
 
@@ -408,8 +407,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         );
     }
 
-    function transferAfterFunding(uint256 _tokenId, address _to) external {
+    function transferAfterFunding(uint256 _tokenId, address _to)
+        external
+        nonReentrant
+    {
         require(ERC721.ownerOf(_tokenId) == msg.sender);
+        require(msg.sender == NFTowner[_tokenId]);
         NFTowner[_tokenId] = _to;
         ERC721.safeTransferFrom(msg.sender, _to, _tokenId);
     }
