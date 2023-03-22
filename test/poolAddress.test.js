@@ -135,6 +135,8 @@ contract("PoolAddress", async (accounts) =>{
     })
 
     it("should repay full amount", async() => {
+         let loan = await poolAddressInstance.loans(loanId1);
+         advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
          let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
          console.log(bal.toNumber());
          let b = await erc20.balanceOf(accounts[1]);
@@ -144,4 +146,12 @@ contract("PoolAddress", async (accounts) =>{
          // console.log(res)
          assert.equal(r.receipt.status, true, "Not able to repay loan")
     })
+
+    it("should repay full amount", async() => {
+      let loan = await poolAddressInstance.loans(loanId1);
+      advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
+      let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
+      console.log(bal.toNumber())
+      assert.equal(bal,0)
+ })
 })
