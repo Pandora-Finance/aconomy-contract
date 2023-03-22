@@ -57,7 +57,7 @@ module.exports = async function (deployer) {
   await deployer.deploy(NftLendingBorrowing, aconomyfee.address)
 
 
-  await deployer.deploy(lendingToken, 10000000)
+  await deployer.deploy(lendingToken, 100000000000)
 
 
 };

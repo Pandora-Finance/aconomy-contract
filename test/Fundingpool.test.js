@@ -48,7 +48,6 @@ contract("FundingPool", (accounts) => {
       //console.log("attestTegistry: ", attestServices.address)
       poolRegis = await PoolRegistry.deployed()
       res =  await poolRegis.createPool(
-          paymentCycleDuration,
           loanDefaultDuration,
           loanExpirationDuration,
           100,

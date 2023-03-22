@@ -44,7 +44,6 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         // console.log("attestTegistry: ", attestServices.address)
         poolRegis = await PoolRegistry.deployed()
        res =  await poolRegis.createPool(
-            paymentCycleDuration,
             loanDefaultDuration,
             loanExpirationDuration,
             100,
@@ -148,20 +147,21 @@ let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Ad
         
         //First Installment
         await time.increase(paymentCycleDuration+1)
-        // console.log((await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber()) 
-        await erc20.approve(poolAddressInstance.address, 205000000, {from:accounts[0]})
+        console.log("rr", (await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber()) 
+        await erc20.approve(poolAddressInstance.address, 206000000, {from:accounts[0]})
         res = await poolAddressInstance.repayYourLoan(loanId1, {from: accounts[0]})
+        console.log(res.logs[1])
         console.log(res.logs[0].args.Amount.toNumber())
         
         //Second installment
-        await time.increase(paymentCycleDuration+1)
-        await erc20.approve(poolAddressInstance.address, 205000000, {from:accounts[1]})
+        await time.increase(1000)
+        await erc20.approve(poolAddressInstance.address, 80000, {from:accounts[1]})
         res = await poolAddressInstance.repayYourLoan(loanId1, {from: accounts[1]})
         console.log(res.logs[0].args.Amount.toNumber())
        
         
         //Full loan Repay
-        await erc20.approve(poolAddressInstance.address, 700000000, {from:accounts[0]})
+        await erc20.approve(poolAddressInstance.address, 900000000, {from:accounts[0]})
         res = await poolAddressInstance.repayFullLoan(loanId1, {from: accounts[0]})
         console.log(res.logs[0].args.Amount.toNumber())
 
