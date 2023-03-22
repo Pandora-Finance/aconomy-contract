@@ -341,7 +341,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice initiate swap request", async () => {
             await piNFT.approve(piMarket.address, 2);
-            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 2, 3, bob);
+            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 2, 3);
             const swapId = result.logs[0].args.swapId.toNumber();
             assert(swapId === 0, "Failed to initiate swap request");
             assert.equal(
@@ -353,7 +353,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice initiate swap request again", async () => {
             await piNFT.approve(piMarket.address, 4);
-            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 4, 3, bob);
+            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 4, 3);
             const swapId = result.logs[0].args.swapId.toNumber();
             assert(swapId === 1, "Failed to initiate swap request");
             assert.equal(

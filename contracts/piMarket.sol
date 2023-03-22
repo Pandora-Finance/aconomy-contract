@@ -44,9 +44,9 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address initiatorNFTAddress;
         address initiator;
         uint256 initiatorNftId;
-        address secondUser;
-        uint256 secondUserNftId;
-        address secondUserNFTaddress;
+        address requestedTokenOwner;
+        uint256 requestedTokenId;
+        address requestedTokenAddress;
         bool status;
     }
 
@@ -439,18 +439,13 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address contractAddress1,
         address contractAddress2,
         uint256 token1,
-        uint256 token2,
-        address token2Owner
+        uint256 token2
     )
         public
         onlyOwnerOfToken(contractAddress1, token1)
         nonReentrant
         returns (uint256)
     {
-        require(
-            token2Owner == ERC721(contractAddress2).ownerOf(token2),
-            "He is not the owner of this NFT"
-        );
         require(
             contractAddress1 != address(0),
             "you can't do this with zero address"
@@ -460,6 +455,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             contractAddress2 != address(0),
             "you can't do this with zero address"
         );
+        address token2Owner = ERC721(contractAddress2).ownerOf(token2);
         require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
         uint256 swapsId = _swapIdCounter.current();
         ERC721(contractAddress1).safeTransferFrom(
@@ -508,16 +504,20 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     function acceptSwapRequest(uint256 swapId) public nonReentrant {
         Swap storage swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
-        require(swap.secondUser == msg.sender, "Only owner can accept swap");
+        require(swap.requestedTokenOwner == msg.sender, "Only owner can accept swap");
+        if(ERC721(swap.initiatorNFTAddress).ownerOf(swap.initiatorNftId) == swap.initiator) {
+            swap.status = false;
+            revert("requested token owner has changed");
+        }
         ERC721(swap.initiatorNFTAddress).safeTransferFrom(
             address(this),
             msg.sender,
             swap.initiatorNftId
         );
-        ERC721(swap.secondUserNFTaddress).safeTransferFrom(
+        ERC721(swap.requestedTokenAddress).safeTransferFrom(
             msg.sender,
             swap.initiator,
-            swap.secondUserNftId
+            swap.requestedTokenId
         );
         swap.status = false;
         emit SwapAccepted(swapId);
