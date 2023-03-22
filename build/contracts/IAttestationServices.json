@@ -30,7 +30,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity >=0.8.0 <0.9.0;\n\n// SPDX-License-Identifier: MIT\n\ninterface IAttestationServices {\n    function register(bytes calldata schema) external returns (bytes32);\n}\n",
-  "sourcePath": "/home/sheeshco/code/truffle/aconomy-contract/contracts/interfaces/IAttestationServices.sol",
+  "sourcePath": "/media/dell/17f09f70-0626-4927-a787-2813ab7ed2c0/dell/Pandora/pooolAddress Pandora Git/aconomy-contract/contracts/interfaces/IAttestationServices.sol",
   "ast": {
     "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
     "exportedSymbols": {
@@ -168,7 +168,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2023-03-20T09:10:39.817Z",
+  "updatedAt": "2023-03-22T05:36:14.015Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

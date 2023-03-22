@@ -84,7 +84,7 @@ contract("PiNFT", (accounts) => {
   })
 
   it("should redeem piNft", async () => {
-    await piNFT.redeemPiNFT(0, alice, validator, sampleERC20.address, 500);
+    await piNFT.redeemPiNFT(0, alice, sampleERC20.address, 500);
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
   });
