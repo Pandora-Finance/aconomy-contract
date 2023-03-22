@@ -507,7 +507,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         require(swap.requestedTokenOwner == msg.sender, "Only owner can accept swap");
         if(ERC721(swap.initiatorNFTAddress).ownerOf(swap.initiatorNftId) == swap.initiator) {
             swap.status = false;
-            revert("requested token owner has changed");
+            revert("requesting token owner has changed");
         }
         ERC721(swap.initiatorNFTAddress).safeTransferFrom(
             address(this),
