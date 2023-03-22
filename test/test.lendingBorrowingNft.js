@@ -33,12 +33,34 @@ contract("NFTlendingBorrowing", async (accounts) => {
         const tx1 = await nftLendBorrow.listNFTforBorrowing(
             tokenId,
             piNFT.address,
-            1000,
-            200,
-            200
+            2000,
+            300,
+            300
         )
         const NFTid = tx1.logs[0].args.NFTid.toNumber()
         assert(NFTid===1, "Failed to list NFT for Lending") 
+    })
+
+    it("let alice Set new percent fee", async () => {
+        const tx = await nftLendBorrow.setPercent(1, 1000, {from: alice})
+        await  expectRevert(nftLendBorrow.setPercent(1, 1000, {from: bob}), "Not the owner")
+        const Percent = tx.logs[0].args.Percent.toNumber();
+        assert(Percent==1000, "Percent should be 1000")
+    })
+
+    it("let alice Set new Duration Time", async () => {
+        const tx = await nftLendBorrow.setDurationTime(1, 200, {from: alice})
+        await  expectRevert(nftLendBorrow.setDurationTime(1, 200, {from: bob}), "Not the owner")
+        const Duration = tx.logs[0].args.Duration.toNumber();
+        assert(Duration==200, "Percent should be 1000")
+    })
+
+    
+    it("let alice Set new Expected Amount", async () => {
+        const tx = await nftLendBorrow.setExpectedAmount(1, 200, {from: alice})
+        await  expectRevert(nftLendBorrow.setExpectedAmount(1, 200, {from: bob}), "Not the owner")
+        const expectedAmount = tx.logs[0].args.expectedAmount.toNumber();
+        assert(expectedAmount==200, "Percent should be 1000")
     })
 
     it("Bid for NFT", async () => {
@@ -93,7 +115,6 @@ contract("NFTlendingBorrowing", async (accounts) => {
                 0
             )
             const amount = tx.logs[0].args.Amount.toNumber()
-            console.log(amount)
     })
 
     it("Withdraw second Bid", async () => {
