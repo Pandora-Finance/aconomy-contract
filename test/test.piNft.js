@@ -90,7 +90,7 @@ contract("PiNFT", (accounts) => {
   });
 
   it("should transfer NFT to bob", async () => {
-    await piNFT.safeTransferFrom(alice, bob, 0);
+    await piNFT.transferAfterFunding(0, bob);
     assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
   });
 

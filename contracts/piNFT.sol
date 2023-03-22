@@ -409,7 +409,6 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     }
 
     function transferAfterFunding(uint256 _tokenId, address _to) external {
-        require(msg.sender == NFTowner[_tokenId]);
         require(ERC721.ownerOf(_tokenId) == msg.sender);
         NFTowner[_tokenId] = _to;
         ERC721.safeTransferFrom(msg.sender, _to, _tokenId);
