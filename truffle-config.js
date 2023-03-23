@@ -1,3 +1,4 @@
+require('dotenv').config()
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -19,6 +20,7 @@
  */
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
+const pk = process.env.PK
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
@@ -59,7 +61,7 @@ module.exports = {
     bscTestnet: {
       provider: () =>
         new HDWalletProvider(
-          'c2a2e257c108692e2b879dde8b9ad2b13dcbef9c7229c646f9f8ee32f1b22ed3',
+          pk,
           `https://data-seed-prebsc-1-s1.binance.org:8545`
         ),
       network_id: 97,

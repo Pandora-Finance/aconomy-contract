@@ -116,8 +116,8 @@ contract CollectionMethods is
 
     // mints an ERC721 token to _to with _uri as token uri
     function mintNFT(address _to, string memory _uri) public {
-        require(msg.sender == collectionOwner, "Not Owner");
-        require(_to != address(0), "0 address given");
+        require(msg.sender == collectionOwner);
+        require(_to != address(0));
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
@@ -142,7 +142,7 @@ contract CollectionMethods is
         LibShare.Share[] memory royalties
     ) public {
         require(msg.sender == approvedValidator[_tokenId]);
-        require(_erc20Contract != address(0), "zero address contract");
+        require(_erc20Contract != address(0), "zero address");
         require(_value != 0);
         require(erc20Contracts[_tokenId].length < 1);
         NFTowner[_tokenId] = ERC721Upgradeable.ownerOf(_tokenId);
@@ -154,7 +154,7 @@ contract CollectionMethods is
                 address(this),
                 _value
             ),
-            "transfer failed."
+            "failed."
         );
         emit ERC20Added(msg.sender, _tokenId, _erc20Contract, _value);
     }
@@ -167,7 +167,7 @@ contract CollectionMethods is
     ) private {
         require(
             ERC721Upgradeable.ownerOf(_tokenId) != address(0),
-            "_tokenId does not exist."
+            "does not exist."
         );
         if (_value == 0) {
             return;
@@ -191,12 +191,12 @@ contract CollectionMethods is
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
-            require(royalties[i].account != address(0x0), "0 address given");
+            require(royalties[i].account != address(0x0));
             require(royalties[i].value != 0, "Royalty = 0");
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "Royalties overflow");
+        require(sumRoyalties < 10000, "overflow");
 
         emit RoyaltiesSet(_tokenId, royalties);
     }
@@ -209,8 +209,8 @@ contract CollectionMethods is
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
         require(_validatorAddress == approvedValidator[_tokenId]);
-        require(_nftReciever != address(0), "0 address given");
-        require(_erc20Contract != address(0), "0 address contract");
+        require(_nftReciever != address(0));
+        require(_erc20Contract != address(0));
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
         approvedValidator[_tokenId] = address(0);
@@ -239,9 +239,9 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _value
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
-        require(_nftReciever != address(0), "0 address given");
+        require(_nftReciever != address(0));
         require(_nftReciever == approvedValidator[_tokenId]);
-        require(_erc20Contract != address(0), "0 address contract");
+        require(_erc20Contract != address(0));
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
         approvedValidator[_tokenId] = address(0);
@@ -383,6 +383,16 @@ contract CollectionMethods is
             _erc20Contract,
             _amount
         );
+    }
+
+    function transferAfterFunding(uint256 _tokenId, address _to)
+        external
+        nonReentrant
+    {
+        require(ERC721Upgradeable.ownerOf(_tokenId) == msg.sender);
+        require(msg.sender == NFTowner[_tokenId]);
+        NFTowner[_tokenId] = _to;
+        ERC721Upgradeable.safeTransferFrom(msg.sender, _to, _tokenId);
     }
 
     function onERC721Received(
