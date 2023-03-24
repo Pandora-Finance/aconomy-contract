@@ -164,7 +164,7 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let bob redeem piNFT", async () => {
-            await piNFT.redeemOrBurnPiNFT(0, alice, validator, sampleERC20.address, 500, false, {
+            await piNFT.redeemOrBurnPiNFT(0, alice, '0x0000000000000000000000000000000000000000', sampleERC20.address, 500, false, {
                 from: bob,
             });
             const validatorBal = await sampleERC20.balanceOf(validator);
@@ -272,7 +272,7 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
-            await piNFT.redeemOrBurnPiNFT(1, bob, validator, sampleERC20.address, 500, false, {
+            await piNFT.redeemOrBurnPiNFT(1, bob, '0x0000000000000000000000000000000000000000', sampleERC20.address, 500, false, {
                 from: bidder1,
             });
             const validatorBal = await sampleERC20.balanceOf(validator);
