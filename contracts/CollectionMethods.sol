@@ -109,7 +109,7 @@ contract CollectionMethods is
     modifier onlyOwnerOfToken(uint256 _tokenId) {
         require(
             msg.sender == ERC721Upgradeable.ownerOf(_tokenId),
-            "Not token Owner"
+            "Not Owner"
         );
         _;
     }
@@ -142,7 +142,7 @@ contract CollectionMethods is
         LibShare.Share[] memory royalties
     ) public {
         require(msg.sender == approvedValidator[_tokenId]);
-        require(_erc20Contract != address(0), "zero address");
+        require(_erc20Contract != address(0), "zero");
         require(_value != 0);
         require(erc20Contracts[_tokenId].length < 1);
         NFTowner[_tokenId] = ERC721Upgradeable.ownerOf(_tokenId);
@@ -166,8 +166,7 @@ contract CollectionMethods is
         uint256 _value
     ) private {
         require(
-            ERC721Upgradeable.ownerOf(_tokenId) != address(0),
-            "does not exist."
+            ERC721Upgradeable.ownerOf(_tokenId) != address(0)
         );
         if (_value == 0) {
             return;
@@ -187,12 +186,12 @@ contract CollectionMethods is
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) internal {
-        require(royalties.length <= 10, "10 Royalty limit");
+        require(royalties.length <= 10, "limit");
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
             require(royalties[i].account != address(0x0));
-            require(royalties[i].value != 0, "Royalty = 0");
+            require(royalties[i].value != 0, "Royalty 0");
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
@@ -259,11 +258,11 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _value
     ) private {
-        require(_to != address(0), "0 address given");
+        require(_to != address(0), "0 address");
         removeERC20(_tokenId, _erc20Contract, _value);
         require(
             IERC20(_erc20Contract).transfer(_to, _value),
-            "transfer failed."
+            "failed."
         );
         emit ERC20Transferred(_tokenId, _to, _erc20Contract, _value);
     }
@@ -278,7 +277,7 @@ contract CollectionMethods is
             return;
         }
         uint256 erc20Balance = erc20Balances[_tokenId][_erc20Contract];
-        require(erc20Balance >= _value, "available balance low");
+        require(erc20Balance >= _value, "balance");
         uint256 newERC20Balance = erc20Balance - _value;
         erc20Balances[_tokenId][_erc20Contract] = newERC20Balance;
         if (newERC20Balance == 0) {
@@ -319,7 +318,7 @@ contract CollectionMethods is
             require(msg.sender == ownerOf(_tokenId));
             NFTowner[_tokenId] = msg.sender;
         }
-        require(NFTowner[_tokenId] == msg.sender, "not owner");
+        require(NFTowner[_tokenId] == msg.sender);
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(
             withdrawnAmount[_tokenId] + _amount <=
@@ -354,7 +353,7 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
-        require(NFTowner[_tokenId] == msg.sender, "not owner");
+        require(NFTowner[_tokenId] == msg.sender);
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(_amount <= withdrawnAmount[_tokenId]);
         // Send payment to the Pool
@@ -364,7 +363,7 @@ contract CollectionMethods is
                 address(this),
                 _amount
             ),
-            "transfer failed"
+            "failed"
         );
         withdrawnAmount[_tokenId] -= _amount;
 
