@@ -201,6 +201,12 @@ contract CollectionMethods is
         emit RoyaltiesSet(_tokenId, royalties);
     }
 
+    function deleteNFT(uint256 _tokenId) external nonReentrant {
+        require(NFTowner[_tokenId] == address(0));
+        require(ownerOf(_tokenId) == msg.sender);
+        _burn(_tokenId);
+    }
+
     function RedeemOrBurnPiNFT(
         uint256 _tokenId,
         address _nftReciever,
