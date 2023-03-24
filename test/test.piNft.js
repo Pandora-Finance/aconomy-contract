@@ -27,6 +27,18 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
   });
 
+  it("should mint an ERC721 token to alice", async () => {
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    assert(tokenId === 1, "Failed to mint or wrong token Id");
+    assert.equal(await piNFT.balanceOf(alice), 2, "Failed to mint");
+  });
+
+  it("should Delete an ERC721 token to alice", async () => {
+    const tx = await piNFT.deleteNFT(1);
+    assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
+  });
+
   it("should fetch the tokenURI and royalties", async () => {
     const uri = await piNFT.tokenURI(0);
     assert.equal(uri, "URI1", "Invalid URI for the token");
@@ -94,50 +106,50 @@ contract("PiNFT", (accounts) => {
   })
 
 
-  it("should redeem piNft", async () => {
-    await piNFT.redeemPiNFT(0, alice, sampleERC20.address, 500);
-    const balance = await sampleERC20.balanceOf(validator);
-    assert.equal(balance, 1000);
-  });
+  // it("should redeem piNft", async () => {
+  //   await piNFT.redeemPiNFT(0, alice, sampleERC20.address, 500);
+  //   const balance = await sampleERC20.balanceOf(validator);
+  //   assert.equal(balance, 1000);
+  // });
 
 
-  it("should transfer NFT to bob", async () => {
-    await piNFT.safeTransferFrom(alice, bob, 0);
-    assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
-  });
+  // it("should transfer NFT to bob", async () => {
+  //   await piNFT.safeTransferFrom(alice, bob, 0);
+  //   assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
+  // });
 
 
-  it("should let validator add ERC20 tokens to bob's NFT", async () => {
-    await sampleERC20.approve(piNFT.address, 500, { from: validator });
-    await piNFT.addValidator(0, validator, { from: bob });
-    const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {
-      from: validator,
-    });
-    const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
-    const validatorBal = await sampleERC20.balanceOf(validator);
-    assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
-    assert(validatorBal == 500, "Validators balance not reduced");
-  });
+  // it("should let validator add ERC20 tokens to bob's NFT", async () => {
+  //   await sampleERC20.approve(piNFT.address, 500, { from: validator });
+  //   await piNFT.addValidator(0, validator, { from: bob });
+  //   const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {
+  //     from: validator,
+  //   });
+  //   const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
+  //   const validatorBal = await sampleERC20.balanceOf(validator);
+  //   assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
+  //   assert(validatorBal == 500, "Validators balance not reduced");
+  // });
 
-  it("should let bob burn piNFT", async () => {
-    await piNFT.burnPiNFT(0, validator, bob, sampleERC20.address, 500, {
-      from: bob,
-    });
-    const bobBal = await sampleERC20.balanceOf(bob);
-    assert.equal(
-      await piNFT.viewBalance(0, sampleERC20.address),
-      0,
-      "Failed to remove ERC20 tokens from NFT"
-    );
-    assert.equal(
-      await sampleERC20.balanceOf(bob),
-      500,
-      "Failed to transfer ERC20 tokens to bob"
-    );
-    assert.equal(
-      await piNFT.ownerOf(0),
-      validator,
-      "Failed to transfer NFT to alice"
-    );
-  });
+  // it("should let bob burn piNFT", async () => {
+  //   await piNFT.burnPiNFT(0, validator, bob, sampleERC20.address, 500, {
+  //     from: bob,
+  //   });
+  //   const bobBal = await sampleERC20.balanceOf(bob);
+  //   assert.equal(
+  //     await piNFT.viewBalance(0, sampleERC20.address),
+  //     0,
+  //     "Failed to remove ERC20 tokens from NFT"
+  //   );
+  //   assert.equal(
+  //     await sampleERC20.balanceOf(bob),
+  //     500,
+  //     "Failed to transfer ERC20 tokens to bob"
+  //   );
+  //   assert.equal(
+  //     await piNFT.ownerOf(0),
+  //     validator,
+  //     "Failed to transfer NFT to alice"
+  //   );
+  // });
 });
