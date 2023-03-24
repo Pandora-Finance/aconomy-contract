@@ -219,22 +219,23 @@ contract CollectionMethods is
         require(_erc20Contract != address(0));
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
-        require(_nftReciever != address(0));
         if(burnNFT) {
-            require(_nftReciever == approvedValidator[_tokenId]);
+            require(_erc20Reciever != address(0));
+            require(_nftReciever == address(0));
             _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
-            ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+            ERC721Upgradeable.safeTransferFrom(msg.sender, approvedValidator[_tokenId], _tokenId);
 
             emit PiNFTBurnt(
             _tokenId,
-            _nftReciever,
+            approvedValidator[_tokenId],
             _erc20Reciever,
             _erc20Contract,
             _value
             );
         } else {
-            require(_erc20Reciever == approvedValidator[_tokenId]);
-            _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
+            require(_nftReciever != address(0));
+            require(_erc20Reciever == address(0));
+            _transferERC20(_tokenId, approvedValidator[_tokenId], _erc20Contract, _value);
             if (msg.sender != _nftReciever) {
             ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
             }
@@ -242,7 +243,7 @@ contract CollectionMethods is
             emit PiNFTRedeemed(
             _tokenId,
             _nftReciever,
-            _erc20Reciever,
+            approvedValidator[_tokenId],
             _erc20Contract,
             _value
             );

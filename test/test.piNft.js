@@ -107,7 +107,7 @@ contract("PiNFT", (accounts) => {
 
 
   it("should redeem piNft", async () => {
-    await piNFT.redeemOrBurnPiNFT(0, alice, validator, sampleERC20.address, 500, false);
+    await piNFT.redeemOrBurnPiNFT(0, alice, '0x0000000000000000000000000000000000000000', sampleERC20.address, 500, false);
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await piNFT.ownerOf(0), alice);
@@ -137,7 +137,7 @@ contract("PiNFT", (accounts) => {
       await sampleERC20.balanceOf(bob),
       0,
     );
-    await piNFT.redeemOrBurnPiNFT(0, validator, bob, sampleERC20.address, 500, true, {
+    await piNFT.redeemOrBurnPiNFT(0, '0x0000000000000000000000000000000000000000', bob, sampleERC20.address, 500, true, {
       from: bob,
     });
     const bobBal = await sampleERC20.balanceOf(bob);
