@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./utils/LibShare.sol";
-import "./Libraries/LibPool.sol";
-import "./Libraries/LibCollection.sol";
 
 contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -124,7 +122,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) internal {
-        require(royalties.length <= 10, "royalties > 10");
+        require(royalties.length <= 10, "> 10");
         delete royaltiesByTokenId[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
@@ -132,11 +130,11 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
                 royalties[i].account != address(0x0),
                 "Royalty not present"
             );
-            require(royalties[i].value != 0, "royalty value 0");
+            require(royalties[i].value != 0, "value 0");
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "royalty overflow");
+        require(sumRoyalties < 10000, "overflow");
 
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
@@ -335,6 +333,10 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
+        if(withdrawnAmount[_tokenId] == 0) {
+            require(msg.sender == ownerOf(_tokenId));
+            NFTowner[_tokenId] = msg.sender;
+        }
         require(NFTowner[_tokenId] == msg.sender, "not owner");
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(
@@ -384,7 +386,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
                 address(this),
                 _amount
             ),
-            "transfer failed"
+            "failed"
         );
         withdrawnAmount[_tokenId] -= _amount;
 

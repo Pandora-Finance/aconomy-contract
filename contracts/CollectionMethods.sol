@@ -308,6 +308,10 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _amount
     ) external nonReentrant {
+        if(withdrawnAmount[_tokenId] == 0) {
+            require(msg.sender == ownerOf(_tokenId));
+            NFTowner[_tokenId] = msg.sender;
+        }
         require(NFTowner[_tokenId] == msg.sender, "not owner");
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(

@@ -126,6 +126,25 @@ contract("PiMarket", async (accounts) => {
             assert.equal(meta.status, false);
         });
 
+        it("should let bob withdraw funds from the NFT", async () => {
+            await piNFT.withdraw(0, sampleERC20.address, 200, { from: bob });
+            assert.equal(await sampleERC20.balanceOf(bob), 200);
+            assert.equal(await piNFT.ownerOf(0), piNFT.address);
+        })
+
+        it("should let bob withdraw more funds from the NFT", async () => {
+            await piNFT.withdraw(0, sampleERC20.address, 100, { from: bob });
+            assert.equal(await sampleERC20.balanceOf(bob), 300);
+            assert.equal(await piNFT.ownerOf(0), piNFT.address);
+        })
+
+        it("should let bob repay funds to the NFT", async () => {
+            await sampleERC20.approve(piNFT.address, 300, { from: bob });
+            await piNFT.Repay(0, sampleERC20.address, 300, { from: bob });
+            assert.equal(await sampleERC20.balanceOf(bob), 0);
+            assert.equal(await piNFT.ownerOf(0), bob);
+        })
+
         it("should let bob place piNFT on sale again", async () => {
             await piNFT.approve(piMarket.address, 0, { from: bob });
             const result = await piMarket.sellNFT(piNFT.address, 0, 10000, {
