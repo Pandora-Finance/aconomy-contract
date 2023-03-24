@@ -201,60 +201,48 @@ contract CollectionMethods is
         emit RoyaltiesSet(_tokenId, royalties);
     }
 
-    function redeemPiNFT(
-        uint256 _tokenId,
-        address _nftReciever,
-        address _validatorAddress,
-        address _erc20Contract,
-        uint256 _value
-    ) external onlyOwnerOfToken(_tokenId) nonReentrant {
-        require(_validatorAddress == approvedValidator[_tokenId]);
-        require(_nftReciever != address(0));
-        require(_erc20Contract != address(0));
-        require(erc20Balances[_tokenId][_erc20Contract] != 0);
-        require(erc20Balances[_tokenId][_erc20Contract] == _value);
-        approvedValidator[_tokenId] = address(0);
-        NFTowner[_tokenId] = address(0);
-        _transferERC20(_tokenId, _validatorAddress, _erc20Contract, _value);
-        if (msg.sender != _nftReciever) {
-            ERC721Upgradeable.safeTransferFrom(
-                msg.sender,
-                _nftReciever,
-                _tokenId
-            );
-        }
-        emit PiNFTRedeemed(
-            _tokenId,
-            _nftReciever,
-            _validatorAddress,
-            _erc20Contract,
-            _value
-        );
-    }
-
-    function burnPiNFT(
+    function RedeemOrBurnPiNFT(
         uint256 _tokenId,
         address _nftReciever,
         address _erc20Reciever,
         address _erc20Contract,
-        uint256 _value
+        uint256 _value,
+        bool burnNFT
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
-        require(_nftReciever != address(0));
-        require(_nftReciever == approvedValidator[_tokenId]);
+        require(approvedValidator[_tokenId] != address(0));
         require(_erc20Contract != address(0));
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(erc20Balances[_tokenId][_erc20Contract] == _value);
-        approvedValidator[_tokenId] = address(0);
-        NFTowner[_tokenId] = address(0);
-        _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
-        ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
-        emit PiNFTBurnt(
+        require(_nftReciever != address(0));
+        if(burnNFT) {
+            require(_nftReciever == approvedValidator[_tokenId]);
+            _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
+            ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+
+            emit PiNFTBurnt(
             _tokenId,
             _nftReciever,
             _erc20Reciever,
             _erc20Contract,
             _value
-        );
+            );
+        } else {
+            require(_erc20Reciever == approvedValidator[_tokenId]);
+            _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
+            if (msg.sender != _nftReciever) {
+            ERC721Upgradeable.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+            }
+
+            emit PiNFTRedeemed(
+            _tokenId,
+            _nftReciever,
+            _erc20Reciever,
+            _erc20Contract,
+            _value
+            );
+        }
+        approvedValidator[_tokenId] = address(0);
+        NFTowner[_tokenId] = address(0);
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
