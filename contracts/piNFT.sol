@@ -48,12 +48,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     );
     event RoyaltiesSetForTokenId(
         uint256 indexed tokenId,
-        LibShare.Share[] indexed royalties
+        LibShare.Share[] royalties
     );
 
     event RoyaltiesSetForValidator(
         uint256 indexed tokenId,
-        LibShare.Share[] indexed royalties
+        LibShare.Share[] royalties
     );
 
     event PiNFTRedeemed(

@@ -39,7 +39,7 @@ contract CollectionFactory {
 
     event CollectionRoyaltiesSet(
         uint256 indexed collectionId,
-        LibShare.Share[] indexed royalties
+        LibShare.Share[] royalties
     );
 
     address collectionMethodAddress;
