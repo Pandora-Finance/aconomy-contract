@@ -53,7 +53,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on sale", async () => {
             await piNFT.approve(piMarket.address, 0);
-            const result = await piMarket.sellNFT(piNFT.address, 0, 5000);
+            const result = await piMarket.sellNFT(piNFT.address, 0, 5000, "0x0000000000000000000000000000000000000000");
             assert.equal(
                 await piNFT.ownerOf(0),
                 piMarket.address,
@@ -147,7 +147,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let bob place piNFT on sale again", async () => {
             await piNFT.approve(piMarket.address, 0, { from: bob });
-            const result = await piMarket.sellNFT(piNFT.address, 0, 10000, {
+            const result = await piMarket.sellNFT(piNFT.address, 0, 10000, "0x0000000000000000000000000000000000000000", {
                 from: bob,
             });
             assert.equal(
@@ -211,7 +211,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on auction", async () => {
             await piNFT.approve(piMarket.address, 1);
-            const tx = await piMarket.SellNFT_byBid(piNFT.address, 1, 5000, 300);
+            const tx = await piMarket.SellNFT_byBid(piNFT.address, 1, 5000, 300, "0x0000000000000000000000000000000000000000");
             assert.equal(
                 await piNFT.ownerOf(1),
                 piMarket.address,
@@ -222,9 +222,9 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let bidders place bid on piNFT", async () => {
-            await piMarket.Bid(3, { from: bidder1, value: 6000 });
-            await piMarket.Bid(3, { from: bidder2, value: 6500 });
-            await piMarket.Bid(3, { from: bidder1, value: 7000 });
+            await piMarket.Bid(3, 6000, { from: bidder1, value: 6000 });
+            await piMarket.Bid(3, 6500, { from: bidder2, value: 6500 });
+            await piMarket.Bid(3, 7000, { from: bidder1, value: 7000 });
 
             result = await piMarket.Bids(3, 2);
             assert.equal(result.buyerAddress, bidder1);
