@@ -57,7 +57,7 @@ contract CollectionMethods is
 
     event RoyaltiesSet(
         uint256 indexed tokenId,
-        LibShare.Share[] indexed royalties
+        LibShare.Share[] royalties
     );
 
     event PiNFTRedeemed(
