@@ -187,9 +187,14 @@ library LibMarket {
         piMarket.BidOrder storage bids
     ) external {
         //require(msg.sender != meta.currentOwner);
-        require(meta.price != bids.price);
-        require(bids.buyerAddress == msg.sender);
-        require(!bids.withdrawn);
+        if(block.timestamp > meta.bidEndTime) {
+            require(!bids.withdrawn);
+            require(bids.buyerAddress == msg.sender);
+        } else {
+            require(meta.price != bids.price);
+            require(bids.buyerAddress == msg.sender);
+            require(!bids.withdrawn);
+        }
 
         if (meta.currency == address(0)) {
             (bool success, ) = payable(msg.sender).call{value: bids.price}("");
