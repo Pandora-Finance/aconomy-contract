@@ -195,7 +195,7 @@ contract CollectionMethods is
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "overflow");
+        require(sumRoyalties <= 4000, "overflow");
 
         emit RoyaltiesSet(_tokenId, royalties);
     }

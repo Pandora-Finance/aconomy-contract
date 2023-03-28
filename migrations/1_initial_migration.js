@@ -51,7 +51,7 @@ module.exports = async function (deployer) {
   var poolRegis = await poolRegistry.deployed()
 
   await deployer.link(libCalc, [poolAddress, NftLendingBorrowing]);
-
+  
   await deployer.deploy(poolAddress, poolRegis.address, aconomyfee.address)
 
   await deployer.deploy(NftLendingBorrowing, aconomyfee.address)

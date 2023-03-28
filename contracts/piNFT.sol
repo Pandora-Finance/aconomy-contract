@@ -134,7 +134,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "overflow");
+        require(sumRoyalties <= 4000, "overflow");
 
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
@@ -223,7 +223,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             royaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties < 10000, "overflow");
+        require(sumRoyalties <= 4000, "overflow");
 
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
