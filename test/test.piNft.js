@@ -129,7 +129,7 @@ contract("PiNFT", (accounts) => {
   it("should let validator add ERC20 tokens to bob's NFT", async () => {
     await sampleERC20.approve(piNFT.address, 500, { from: validator });
     await piNFT.addValidator(0, validator, { from: bob });
-    await  expectRevert(piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 4001]], {
+    await  expectRevert(piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 2000],[bob, 2001]], {
       from: validator,
     }), "overflow")
     const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {
