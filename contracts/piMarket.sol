@@ -6,10 +6,12 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./piNFT.sol";
 import "./CollectionFactory.sol";
 import "./CollectionMethods.sol";
 import "./utils/LibShare.sol";
+import "./Libraries/LibMarket.sol";
 
 contract piMarket is ERC721Holder, ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -29,6 +31,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         uint256 bidStartTime;
         uint256 bidEndTime;
         address currentOwner;
+        address currency;
     }
 
     struct BidOrder {
@@ -90,7 +93,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     function sellNFT(
         address _contractAddress,
         uint256 _tokenId,
-        uint256 _price
+        uint256 _price,
+        address _currency
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         _saleIdCounter.increment();
         require(
@@ -115,7 +119,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             true,
             0,
             0,
-            msg.sender
+            msg.sender,
+            _currency
         );
 
         _tokenMeta[_saleIdCounter.current()] = meta;
@@ -207,45 +212,12 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             );
         }
 
-        require(meta.status, "token must be on sale");
-        require(
-            msg.sender != address(0) && msg.sender != meta.currentOwner,
-            "invalid address"
-        );
-        require(!meta.bidSale);
-        require(msg.value == meta.price, "value less than price");
+        LibMarket.checkSale(_tokenMeta[_saleId]);
 
-        transfer(_tokenMeta[_saleId], msg.sender);
+        LibMarket.executeSale(_tokenMeta[_saleId], feeAddress, royalties, validatorRoyalties);
 
-        uint256 sum = msg.value;
-        uint256 val = msg.value;
-        uint256 fee = msg.value / 100;
+        //transfer(_tokenMeta[_saleId], msg.sender);
 
-        for (uint256 i = 0; i < royalties.length; i++) {
-            uint256 amount = (royalties[i].value * val) / 10000;
-            // address payable receiver = royalties[i].account;
-            (bool royalSuccess, ) = payable(royalties[i].account).call{
-                value: amount
-            }("");
-            require(royalSuccess, "Royalty Transfer failed");
-            sum = sum - amount;
-        }
-
-        for (uint256 i = 0; i < validatorRoyalties.length; i++) {
-            uint256 amount = (validatorRoyalties[i].value * val) / 10000;
-            (bool royalSuccess, ) = payable(validatorRoyalties[i].account).call{
-                value: amount
-            }("");
-            require(royalSuccess, "Royalty Transfer failed");
-            sum = sum - amount;
-        }
-
-        (bool isSuccess, ) = payable(meta.currentOwner).call{
-            value: (sum - fee)
-        }("");
-        require(isSuccess, "Transfer failed");
-        (bool feeSuccess, ) = payable(feeAddress).call{value: fee}("");
-        require(feeSuccess, "Fee Transfer failed");
         ERC721(meta.tokenContractAddress).safeTransferFrom(
             address(this),
             msg.sender,
@@ -275,12 +247,15 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address _contractAddress,
         uint256 _tokenId,
         uint256 _price,
-        uint256 _bidTime
+        uint256 _bidTime,
+        address _currency
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         require(
             _contractAddress != address(0),
             "you can't do this with zero address"
         );
+        require(_price != 0);
+        require(_bidTime != 0);
         _saleIdCounter.increment();
 
         //needs approval on frontend
@@ -300,7 +275,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             true,
             block.timestamp,
             block.timestamp + _bidTime,
-            msg.sender
+            msg.sender,
+            _currency
         );
 
         _tokenMeta[_saleIdCounter.current()] = meta;
@@ -308,29 +284,30 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
-    function Bid(uint256 _saleId) external payable {
-        require(_tokenMeta[_saleId].currentOwner != msg.sender);
-        require(_tokenMeta[_saleId].status);
-        require(_tokenMeta[_saleId].bidSale);
+    function Bid(uint256 _saleId, uint256 _bidPrice) external payable {
+        if(_tokenMeta[_saleId].currency == address(0)) {
+            require(msg.value == _bidPrice);
+        }
+        
+        LibMarket.checkBid(_tokenMeta[_saleId], _bidPrice);
+
         require(block.timestamp <= _tokenMeta[_saleId].bidEndTime);
-        require(
-            _tokenMeta[_saleId].price +
-                ((5 * _tokenMeta[_saleId].price) / 100) <=
-                msg.value,
-            "Bid should be more than 5% of current bid"
-        );
+        _tokenMeta[_saleId].price = _bidPrice;
         //  require(_timeOfAuction[_saleId] >= block.timestamp,"Auction Over");
+
+        if(_tokenMeta[_saleId].currency != address(0)) {
+            IERC20(_tokenMeta[_saleId].currency).transferFrom(msg.sender, address(this), _bidPrice);
+        }
 
         BidOrder memory bid = BidOrder(
             Bids[_saleId].length,
             _saleId,
             _tokenMeta[_saleId].currentOwner,
             msg.sender,
-            msg.value,
+            _bidPrice,
             false
         );
         Bids[_saleId].push(bid);
-        _tokenMeta[_saleId].price = msg.value;
 
         emit BidCreated(_saleId, Bids[_saleId].length - 1);
     }
@@ -340,10 +317,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         uint256 _bidOrderID,
         bool _fromCollection
     ) external nonReentrant {
-        BidOrder memory bids = Bids[_saleId][_bidOrderID];
-        require(msg.sender == _tokenMeta[_saleId].currentOwner);
-        require(!bids.withdrawn);
-        require(_tokenMeta[_saleId].status);
 
         LibShare.Share[] memory royalties;
         LibShare.Share[] memory validatorRoyalties;
@@ -367,72 +340,31 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             );
         }
 
-        _tokenMeta[_saleId].status = false;
-        _tokenMeta[_saleId].price = bids.price;
-        Bids[_saleId][_bidOrderID].withdrawn = true;
+        LibMarket.executeBid(_tokenMeta[_saleId], Bids[_saleId][_bidOrderID], royalties, validatorRoyalties, feeAddress);
 
         ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
             address(this),
-            bids.buyerAddress,
+            Bids[_saleId][_bidOrderID].buyerAddress,
             _tokenMeta[_saleId].tokenId
         );
 
-        uint256 sum = bids.price;
-        uint256 fee = bids.price / 100;
-
-        for (uint256 i = 0; i < royalties.length; i++) {
-            uint256 amount = (royalties[i].value * bids.price) / 10000;
-            // address payable receiver = royalties[i].account;
-            (bool royalSuccess, ) = payable(royalties[i].account).call{
-                value: amount
-            }("");
-            require(royalSuccess, "Royalty transfer failed");
-            sum = sum - amount;
-        }
-
-        for (uint256 i = 0; i < validatorRoyalties.length; i++) {
-            uint256 amount = (validatorRoyalties[i].value * bids.price) / 10000;
-            (bool royalSuccess, ) = payable(validatorRoyalties[i].account).call{
-                value: amount
-            }("");
-            require(royalSuccess, "Royalty transfer failed");
-            sum = sum - amount;
-        }
-
-        (bool isSuccess, ) = payable(msg.sender).call{value: (sum - fee)}("");
-        require(isSuccess, "Transfer failed");
-        (bool feeSuccess, ) = payable(feeAddress).call{value: fee}("");
-        require(feeSuccess, "Fee Transfer failed");
-
-        emit BidExecuted(_saleId, _bidOrderID, bids.price);
+        emit BidExecuted(_saleId, _bidOrderID, Bids[_saleId][_bidOrderID].price);
     }
 
     function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
         external
         nonReentrant
     {
-        require(msg.sender != _tokenMeta[_saleId].currentOwner);
-        // BidOrder[] memory bids = Bids[_tokenId];
-        BidOrder memory bids = Bids[_saleId][_bidId];
-        require(_tokenMeta[_saleId].price != bids.price);
-        require(bids.buyerAddress == msg.sender);
-        require(!bids.withdrawn);
-        (bool success, ) = payable(msg.sender).call{value: bids.price}("");
-        if (success) {
-            Bids[_saleId][_bidId].withdrawn = true;
-        } else {
-            revert("No Money left!");
-        }
-
+        LibMarket.withdrawBid(_tokenMeta[_saleId], Bids[_saleId][_bidId]);
         emit BidWithdrawn(_saleId, _bidId);
     }
 
-    function transfer(TokenMeta storage token, address _to) internal {
-        token.currentOwner = _to;
-        token.status = false;
-        token.directSale = false;
-        token.bidSale = false;
-    }
+    // function transfer(TokenMeta storage token, address _to) internal {
+    //     token.currentOwner = _to;
+    //     token.status = false;
+    //     token.directSale = false;
+    //     token.bidSale = false;
+    // }
 
     // who will be making request, his tokenId will be token1
     function makeSwapRequest(
