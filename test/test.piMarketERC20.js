@@ -53,7 +53,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on sale", async () => {
             await piNFT.approve(piMarket.address, 0);
-            const result = await piMarket.sellNFT(piNFT.address, 0, 5000, "0x0000000000000000000000000000000000000000");
+            const result = await piMarket.sellNFT(piNFT.address, 0, 5000, sampleERC20.address);
             assert.equal(
                 await piNFT.ownerOf(0),
                 piMarket.address,
@@ -83,41 +83,50 @@ contract("PiMarket", async (accounts) => {
         it("should let bob buy piNFT", async () => {
             let meta = await piMarket._tokenMeta(1);
             assert.equal(meta.status, true);
+            await sampleERC20.mint(bob, 5000);
 
-            let _balance1 = await web3.eth.getBalance(alice);
-            let _balance2 = await web3.eth.getBalance(royaltyReceiver);
-            let _balance3 = await web3.eth.getBalance(feeReceiver);
-
-            result2 = await piMarket.BuyNFT(1, false, { from: bob, value: 5000 });
+            let _balance1 = await sampleERC20.balanceOf(alice);
+            let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+            let _balance3 = await sampleERC20.balanceOf(feeReceiver);
+            let _balance4 = await sampleERC20.balanceOf(bob);
+            // console.log("Balance",_balance4.toString(), _balance1.toString())
+            await sampleERC20.approve(piMarket.address, 5000, {from: bob});
+            result2 = await piMarket.BuyNFT(1, false, { from: bob });
             // console.log(result2.receipt.rawLogs)
             assert.equal(await piNFT.ownerOf(0), bob);
 
-            //validator 200
-            //royalties 500
-            //fee 50
+            /*validator 200
+            royalties 500
+            fee 100
+            total = 800
 
-            let balance1 = await web3.eth.getBalance(alice);
-            let balance2 = await web3.eth.getBalance(royaltyReceiver);
-            let balance3 = await web3.eth.getBalance(feeReceiver);
-            let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
-            console.log(balance1, " ", _balance1, " ", temp.toString())
+            mean alic should get 10000 - 800 = 9200 = 92%
+
+            */
+
+
+            let balance1 = await sampleERC20.balanceOf(alice);
+            let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+            let balance3 = await sampleERC20.balanceOf(feeReceiver);
+            // let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
+            // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
             assert.equal(
-                (BigNumber(balance1).minus(BigNumber(_balance1))),
-                (5000 * 9200) / 10000,
+                (balance1 - _balance1),
+                ( 5000 * 9200) / 10000,
                 "Failed to transfer NFT amount"
             );
 
             assert.equal(
-                BigNumber(balance2).minus(BigNumber(_balance2)),
+                balance2 - _balance2,
                 (5000 * 500) / 10000,
                 "Failed to transfer royalty amount"
             );
 
             // console.log(Number(web3.utils.toBN(balance2)-(web3.utils.toBN(_balance2))))
 
-            console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
+            // console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
             assert.equal(
-                BigNumber(balance3).minus(BigNumber(_balance3)),
+                balance3 - _balance3,
                 (5000 * 100) / 10000,
                 "Failed to transfer fee amount"
             );
@@ -128,13 +137,15 @@ contract("PiMarket", async (accounts) => {
 
         it("should let bob withdraw funds from the NFT", async () => {
             await piNFT.withdraw(0, sampleERC20.address, 200, { from: bob });
-            assert.equal(await sampleERC20.balanceOf(bob), 200);
+            let balance = await sampleERC20.balanceOf(bob)
+            assert.equal(balance.toNumber(), 200);
             assert.equal(await piNFT.ownerOf(0), piNFT.address);
         })
 
         it("should let bob withdraw more funds from the NFT", async () => {
             await piNFT.withdraw(0, sampleERC20.address, 100, { from: bob });
-            assert.equal(await sampleERC20.balanceOf(bob), 300);
+            let balance = await sampleERC20.balanceOf(bob)
+            assert.equal(balance.toNumber(), 300);
             assert.equal(await piNFT.ownerOf(0), piNFT.address);
         })
 
@@ -147,7 +158,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let bob place piNFT on sale again", async () => {
             await piNFT.approve(piMarket.address, 0, { from: bob });
-            const result = await piMarket.sellNFT(piNFT.address, 0, 10000, "0x0000000000000000000000000000000000000000", {
+            const result = await piMarket.sellNFT(piNFT.address, 0, 10000, sampleERC20.address, {
                 from: bob,
             });
             assert.equal(
@@ -173,9 +184,10 @@ contract("PiMarket", async (accounts) => {
                 0,
                 "Failed to remove ERC20 tokens from NFT"
             );
+            //100 sale royalty
             assert.equal(
                 await sampleERC20.balanceOf(validator),
-                1000,
+                1100,
                 "Failed to transfer ERC20 tokens to validator"
             );
             assert.equal(
@@ -211,7 +223,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on auction", async () => {
             await piNFT.approve(piMarket.address, 1);
-            const tx = await piMarket.SellNFT_byBid(piNFT.address, 1, 5000, 300, "0x0000000000000000000000000000000000000000");
+            const tx = await piMarket.SellNFT_byBid(piNFT.address, 1, 5000, 300, sampleERC20.address);
             assert.equal(
                 await piNFT.ownerOf(1),
                 piMarket.address,
@@ -222,8 +234,14 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let bidders place bid on piNFT", async () => {
+            await sampleERC20.mint(bidder1, 13000);
+            await sampleERC20.mint(bidder2, 6500);
+
+            await sampleERC20.approve(piMarket.address, 6000, {from: bidder1})
             await piMarket.Bid(3, 6000, { from: bidder1, value: 6000 });
+            await sampleERC20.approve(piMarket.address, 6500, {from: bidder2})
             await piMarket.Bid(3, 6500, { from: bidder2, value: 6500 });
+            await sampleERC20.approve(piMarket.address, 7000, {from: bidder1})
             await piMarket.Bid(3, 7000, { from: bidder1, value: 7000 });
 
             result = await piMarket.Bids(3, 2);
@@ -231,41 +249,48 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let alice execute highest bid", async () => {
-            let _balance1 = await web3.eth.getBalance(alice);
-            let _balance2 = await web3.eth.getBalance(royaltyReceiver);
-            let _balance3 = await web3.eth.getBalance(feeReceiver);
+            let _balance1 = await sampleERC20.balanceOf(alice);
+            let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+            let _balance3 = await sampleERC20.balanceOf(feeReceiver);
 
-            console.log("Ball",_balance1.toString());
+            console.log("ss1", _balance1.toString())
 
             await piMarket.executeBidOrder(3, 2, false, { from: alice });
             result = await piNFT.ownerOf(1);
             assert.equal(result, bidder1);
 
-            let balance1 = await web3.eth.getBalance(alice);
-            let balance2 = await web3.eth.getBalance(royaltyReceiver);
-            let balance3 = await web3.eth.getBalance(feeReceiver);
-            // assert.equal(
-            //     balance1-_balance1,
-            //   (7000 * 9200) / 10000,
-            //   "Failed to transfer NFT amount"
-            // );
-            console.log("ccc",(7000 * 9200) / 10000)
+            let balance1 = await sampleERC20.balanceOf(alice);
+            let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+            let balance3 = await sampleERC20.balanceOf(feeReceiver);
+            // let tt = BigNumber(_balance1).minus(BigNumber(balance1));
+            // console.log("Alic Balance",balance1-_balance1);
+            // console.log(BigNumber(balance2).minus(BigNumber(_balance2)));
+            // console.log(BigNumber(balance3).minus(BigNumber(_balance3)));
+
             assert.equal(
-                BigNumber(balance2).minus(BigNumber(_balance2)),
+                balance1-_balance1,
+              (7000 * 9200) / 10000,
+              "Failed to transfer NFT amount"
+            );
+            console.log("Get Token",(7000 * 9200) / 10000);
+            assert.equal(
+                balance2 - _balance2,
                 (7000 * 500) / 10000,
                 "Failed to transfer royalty amount"
             );
             assert.equal(
-                BigNumber(balance3).minus(BigNumber(_balance3)),
+                balance3 - _balance3,
                 (7000 * 100) / 10000,
                 "Failed to transfer fee amount"
             );
         });
 
         it("should let other bidders withdraw their bids", async () => {
+            result = await sampleERC20.balanceOf(piMarket.address);
+            assert.equal(result, 12500);
             await piMarket.withdrawBidMoney(3, 0, { from: bidder1 });
             await piMarket.withdrawBidMoney(3, 1, { from: bidder2 });
-            result = await web3.eth.getBalance(piMarket.address);
+            result = await sampleERC20.balanceOf(piMarket.address);
             assert.equal(result, 0);
         });
 
@@ -279,9 +304,10 @@ contract("PiMarket", async (accounts) => {
                 0,
                 "Failed to remove ERC20 tokens from NFT"
             );
+            //140 bid royalty
             assert.equal(
                 await sampleERC20.balanceOf(validator),
-                2000,
+                2240,
                 "Failed to transfer ERC20 tokens to validator"
             );
             assert.equal(
@@ -291,118 +317,4 @@ contract("PiMarket", async (accounts) => {
             );
         });
     });
-    describe("Swap NFTs", () => {
-        it("should create a piNFT with 500 erc20 tokens to alice", async () => {
-            piNFT = await PiNFT.deployed();
-            sampleERC20 = await SampleERC20.deployed();
-            piMarket = await PiMarket.deployed();
-            await sampleERC20.mint(validator, 1000);
-            const tx1 = await piNFT.mintNFT(alice, "URI2", [[royaltyReceiver, 500]]);
-            const tokenId = tx1.logs[0].args.tokenId.toNumber();
-            assert(tokenId === 2, "Failed to mint or wrong token Id");
-
-            await piNFT.addValidator(tokenId, validator);
-            await sampleERC20.approve(piNFT.address, 500, { from: validator });
-            const tx = await piNFT.addERC20(
-                tokenId,
-                sampleERC20.address,
-                500,
-                [[validator, 200]],
-                {
-                    from: validator,
-                }
-            );
-        });
-
-        it("should create a piNFT with 1000 erc20 tokens to bob", async () => {
-            await sampleERC20.mint(validator, 1000);
-            const tx1 = await piNFT.mintNFT(bob, "URI2", [[royaltyReceiver, 500]]);
-            const tokenId = tx1.logs[0].args.tokenId.toNumber();
-            assert(tokenId === 3, "Failed to mint or wrong token Id");
-
-            await piNFT.addValidator(tokenId, validator, { from: bob });
-            await sampleERC20.approve(piNFT.address, 500, { from: validator });
-            const tx = await piNFT.addERC20(
-                tokenId,
-                sampleERC20.address,
-                500,
-                [[validator, 200]],
-                {
-                    from: validator,
-                }
-            );
-        });
-
-        it("should create a piNFT again with 500 erc20 tokens to alice", async () => {
-            piNFT = await PiNFT.deployed();
-            sampleERC20 = await SampleERC20.deployed();
-            piMarket = await PiMarket.deployed();
-            await sampleERC20.mint(validator, 1000);
-            const tx1 = await piNFT.mintNFT(alice, "URI2", [[royaltyReceiver, 500]]);
-            const tokenId = tx1.logs[0].args.tokenId.toNumber();
-            assert(tokenId === 4, "Failed to mint or wrong token Id");
-
-            await piNFT.addValidator(tokenId, validator);
-            await sampleERC20.approve(piNFT.address, 500, { from: validator });
-            const tx = await piNFT.addERC20(
-                tokenId,
-                sampleERC20.address,
-                500,
-                [[validator, 200]],
-                {
-                    from: validator,
-                }
-            );
-        });
-
-
-        it("should let alice initiate swap request", async () => {
-            await piNFT.approve(piMarket.address, 2);
-            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 2, 3);
-            const swapId = result.logs[0].args.swapId.toNumber();
-            assert(swapId === 0, "Failed to initiate swap request");
-            assert.equal(
-                await piNFT.ownerOf(2),
-                piMarket.address,
-                "Failed to put piNFT on Swap"
-            );
-        });
-
-        it("should let alice initiate swap request again", async () => {
-            await piNFT.approve(piMarket.address, 4);
-            const result = await piMarket.makeSwapRequest(piNFT.address, piNFT.address, 4, 3);
-            const swapId = result.logs[0].args.swapId.toNumber();
-            assert(swapId === 1, "Failed to initiate swap request");
-            assert.equal(
-                await piNFT.ownerOf(4),
-                piMarket.address,
-                "Failed to put piNFT on Swap"
-            );
-        });
-
-
-        it("should let bob accept the swap request", async () => {
-            await piNFT.approve(piMarket.address, 3, { from: bob });
-            const result = await piMarket.acceptSwapRequest(0, { from: bob });
-            assert.equal(
-                await piNFT.ownerOf(2),
-                bob,
-                "Failed to Swap token with Id 2"
-            );
-            assert.equal(
-                await piNFT.ownerOf(3),
-                alice,
-                "Failed to Swap token with Id 3"
-            );
-        });
-
-        it("should let alice cancle the swap request", async () => {
-            const result = await piMarket.cancelSwap(1, { from: alice });
-            assert.equal(
-                await piNFT.ownerOf(4),
-                alice,
-                "Failed to Swap token with Id 4"
-            );
-        });
-    });
-});
+})
