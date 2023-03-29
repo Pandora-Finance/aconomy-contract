@@ -206,18 +206,17 @@ contract CollectionMethods is
         _burn(_tokenId);
     }
 
-    function RedeemOrBurnPiNFT(
+ function redeemOrBurnPiNFT(
         uint256 _tokenId,
         address _nftReciever,
         address _erc20Reciever,
         address _erc20Contract,
-        uint256 _value,
         bool burnNFT
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
         require(approvedValidator[_tokenId] != address(0));
         require(_erc20Contract != address(0));
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
-        require(erc20Balances[_tokenId][_erc20Contract] == _value);
+        uint256 _value = erc20Balances[_tokenId][_erc20Contract];
         if(burnNFT) {
             require(_erc20Reciever != address(0));
             require(_nftReciever == address(0));
