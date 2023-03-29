@@ -103,7 +103,7 @@ contract("PiMarket", async (accounts) => {
             console.log(balance1, " ", _balance1, " ", temp.toString())
             assert.equal(
                 (BigNumber(balance1).minus(BigNumber(_balance1))),
-                (460000 * 100) / 10000,
+                (5000 * 9200) / 10000,
                 "Failed to transfer NFT amount"
             );
 
