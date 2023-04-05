@@ -136,7 +136,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
         assert.equal(balance.toString(), 200, "carl balance must be 200");
         const res = await nftLendBorrow.withdraw(1, 2, { from: carl })
         const newBalance = await sampleERC20.balanceOf(carl);
-        assert.equal(newBalance.toString(), 300, "carl balance must be 200");
+        assert.equal(newBalance.toString(), 300, "carl balance must be 300");
         assert(res.receipt.status == true, "Unable to withdraw bid")
 
     })
