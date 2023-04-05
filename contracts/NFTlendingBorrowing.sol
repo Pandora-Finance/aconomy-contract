@@ -37,6 +37,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         uint256 Amount;
         bool withdrawn;
         bool bidAccepted;
+        bool bidRejected;
     }
 
     // NFTid => NFTdetail
@@ -54,6 +55,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     event repaid(uint256 NFTid, uint256 BidId, uint256 Amount);
     event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
     event NFTRemoved(uint256 NFTId);
+    event BidRejected(uint256 NFTid, uint256 BidId);
     event AcceptedBid(
         uint256 NFTid,
         uint256 BidId,
@@ -173,6 +175,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             _ERC20Address,
             _bidAmount,
             false,
+            false,
             false
         );
         require(
@@ -245,6 +248,19 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
     }
 
+    // Reject Bid by NFT owner
+    function rejectBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+        require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
+        require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
+        require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
+        require(
+            NFTdetails[_NFTid].tokenIdOwner == msg.sender,
+            "You can't Accept This Bid"
+        );
+        Bids[_NFTid][_bidId].bidRejected = true;
+        emit BidRejected(_NFTid, _bidId);
+    }
+
     // Repay Amount including percentage to Bidder
     function Repay(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         require(NFTdetails[_NFTid].bidAccepted, "Bid Not Accepted yet");
@@ -291,10 +307,12 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             Bids[_NFTid][_bidId].bidderAddress == msg.sender,
             "You can't withdraw this Bid"
         );
-        require(
-            block.timestamp > Bids[_NFTid][_bidId].expiration,
-            "Can't withdraw Bid before expiration"
-        );
+        if (!Bids[_NFTid][_bidId].bidRejected) {
+            require(
+                block.timestamp > Bids[_NFTid][_bidId].expiration,
+                "Can't withdraw Bid before expiration"
+            );
+        }
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
                 msg.sender,
