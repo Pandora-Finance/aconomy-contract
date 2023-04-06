@@ -159,6 +159,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         external
         onlyOwnerOfToken(_tokenId)
     {
+        require(approvedValidator[_tokenId] == address(0));
         approvedValidator[_tokenId] = _validator;
         emit ValidatorAdded(_tokenId, _validator);
     }
