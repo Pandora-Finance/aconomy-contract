@@ -129,7 +129,7 @@ contract CollectionMethods is
         uint256 _tokenId,
         address _validator
     ) external onlyOwnerOfToken(_tokenId) {
-        require(approvedValidator[_tokenId] == address(0));
+        require(erc20Contracts[_tokenId].length == 0);
         approvedValidator[_tokenId] = _validator;
         emit ValidatorAdded(_tokenId, _validator);
     }
