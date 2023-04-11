@@ -449,12 +449,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             revert("You are not a Lender");
         }
 
-        if (fundDetail.state != BidState.REJECTED) {
-            require(
-                fundDetail.expiration < uint32(block.timestamp),
-                "You can't Withdraw"
-            );
-        }
+        require(
+            fundDetail.expiration < uint32(block.timestamp),
+            "You can't Withdraw"
+        );
+
         // Transfering the amount to the lender
         require(
             IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),
