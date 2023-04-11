@@ -134,14 +134,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
             2
         )
         let Bid = await nftLendBorrow.Bids(1, 2);
-        assert.equal(Bid.bidRejected, true, "Mapping Not changed");
+        assert.equal(Bid.withdrawn, true, "Mapping Not changed");
         const newBalance = await sampleERC20.balanceOf(carl);
         console.log("dd",newBalance.toString())
         assert.equal(newBalance.toString(), 300, "carl balance must be 300");
     })
 
     it("Withdraw Third Bid", async () => {
-        await expectRevert(nftLendBorrow.withdraw(1, 2, { from: carl }), "Your Bid is Already Rejected")
+        await expectRevert(nftLendBorrow.withdraw(1, 2, { from: carl }), "Already withdrawn")
 
     })
 
