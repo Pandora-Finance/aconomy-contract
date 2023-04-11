@@ -10,14 +10,13 @@ import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 
 contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
-
     address public poolOwner;
     address public poolRegistryAddress;
 
-    function initialize(
-        address _poolOwner,
-        address _poolRegistry
-    ) external initializer {
+    function initialize(address _poolOwner, address _poolRegistry)
+        external
+        initializer
+    {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
     }
@@ -34,6 +33,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 PoolId,
         uint256 Amount,
         uint256 paymentCycleAmount
+    );
+
+    event BidRejected(
+        address lender,
+        uint256 BidId,
+        uint256 PoolId,
+        uint256 Amount
     );
 
     event Withdrawn(
@@ -90,7 +96,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         CANCELLED,
         ACCEPTED,
         PAID,
-        WITHDRAWN
+        WITHDRAWN,
+        REJECTED
     }
 
     // Mapping of lender address => poolId => ERC20 token => BidId => FundDetail
@@ -126,7 +133,9 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.amount = _amount;
         fundDetail.expiration = _expiration;
         fundDetail.maxDuration = _maxLoanDuration;
-        fundDetail.interestRate = poolRegistry(poolRegistryAddress).getPoolApr(_poolId);
+        fundDetail.interestRate = poolRegistry(poolRegistryAddress).getPoolApr(
+            _poolId
+        );
         fundDetail.bidTimestamp = uint32(block.timestamp);
 
         fundDetail.state = BidState.PENDING;
@@ -203,6 +212,28 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             amount,
             fundDetail.paymentCycleAmount
         );
+    }
+
+    function RejectBid(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) external nonReentrant {
+        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.PENDING) {
+            revert("Bid must be pending");
+        }
+        fundDetail.state = BidState.REJECTED;
+        // transfering Amount to Lender
+        require(
+            IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),
+            "unable to transfer to receiver"
+        );
+        emit BidRejected(_lender, _bidId, _poolId, fundDetail.amount);
     }
 
     function RepayInstallment(
@@ -418,11 +449,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             revert("You are not a Lender");
         }
 
-        require(
-            fundDetail.expiration < uint32(block.timestamp),
-            "You can't Withdraw"
-        );
-
+        if (fundDetail.state != BidState.REJECTED) {
+            require(
+                fundDetail.expiration < uint32(block.timestamp),
+                "You can't Withdraw"
+            );
+        }
         // Transfering the amount to the lender
         require(
             IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),

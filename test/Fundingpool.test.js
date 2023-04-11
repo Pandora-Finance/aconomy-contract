@@ -41,7 +41,7 @@ contract("FundingPool", (accounts) => {
     describe("supplyToPool()", () => {    
 
     let fundingpooladdress = 0;
-    let bidId;    
+    let bidId,bidId1;    
 
     
     it("should create Pool", async() => {
@@ -96,8 +96,28 @@ contract("FundingPool", (accounts) => {
         loanDefaultDuration,
         expiration,
         { from: lender }
-      );      bidId = tx.logs[0].args.BidId.toNumber();
-      // console.log(bidId, "bidid");
+      );      
+      bidId = tx.logs[0].args.BidId.toNumber();
+      // console.log(bidId, "bidid111");
+
+      await erc20.transfer(lender, 500, {from : accounts[0]}) 
+      await erc20.approve(fundingpoolInstance.address, 500, {
+        from: lender,
+      });    
+
+      const tx1 = await fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        500,
+        loanDefaultDuration,
+        expiration,
+        { from: lender }
+      );      
+      bidId1 = tx1.logs[0].args.BidId.toNumber();
+      const balance = await erc20.balanceOf(lender);
+      assert.equal(balance.toString(), 0, "Error")
+
+      // console.log(bidId1, "bidid");
       // console.log(tx.logs[0].args);
       const fundDetail = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
@@ -188,6 +208,43 @@ contract("FundingPool", (accounts) => {
         'Bid must be pending'
       )
     });    
+
+    it('should accept the bid and emit RejectBid event', async () => {
+      const balance = await erc20.balanceOf(lender);
+      console.log("bbb",balance.toString());
+      const tx = await fundingpoolInstance.RejectBid(
+        poolId,
+        erc20.address,
+        bidId1,
+        lender
+      );
+      // console.log(poolId)
+      const balance1 = await erc20.balanceOf(lender);
+      console.log("bbb",balance1.toString());
+      assert.equal(balance1.toString(), 500, "Bid not rejected Yet")
+
+      await truffleAssert.reverts(
+         fundingpoolInstance.RejectBid(
+          poolId,
+          erc20.address,
+          bidId1,
+          lender,
+          { from: lender }
+        ),
+        'You are not the Pool Owner'
+      )
+      // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
+      //   .to.emit(fundingpoolInstance, 'AcceptedBid')
+      //   .withArgs(
+      //     receiver,
+      //     bidId,
+      //     poolId,
+      //     ethers.utils.parseEther('10'),
+      //     expectedPaymentCycleAmount
+      //   );    
+
+      
+    });
 
     it("should not allow cancelling a bid that is not pending", async () => {
       await truffleAssert.reverts(
