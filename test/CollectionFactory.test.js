@@ -18,9 +18,9 @@ contract("CollectionFactory", (accounts) => {
 
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [[royaltyReciever, 500]])
-     let meta = await CollectionFactory.collections(1);
-     let address = meta.contractAddress
-     collectionInstance = await CollectionMethods.at(address)
+    let meta = await CollectionFactory.collections(1);
+    let address = meta.contractAddress
+    collectionInstance = await CollectionMethods.at(address)
   });
 
   it("should mint an ERC721 token to alice", async () => {

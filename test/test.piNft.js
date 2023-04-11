@@ -23,14 +23,14 @@ contract("PiNFT", (accounts) => {
 
   it("should mint an ERC721 token to alice", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
-    await  expectRevert(piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]), "overflow")
+    await expectRevert(piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]), "overflow")
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
   });
 
   it("should Royality must be less 4000", async () => {
-    await  expectRevert(piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]), "overflow")
+    await expectRevert(piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]), "overflow")
   });
 
   it("should mint an ERC721 token to alice", async () => {
@@ -129,7 +129,7 @@ contract("PiNFT", (accounts) => {
   it("should let validator add ERC20 tokens to bob's NFT", async () => {
     await sampleERC20.approve(piNFT.address, 500, { from: validator });
     await piNFT.addValidator(0, validator, { from: bob });
-    await  expectRevert(piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 2000],[bob, 2001]], {
+    await expectRevert(piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 2000], [bob, 2001]], {
       from: validator,
     }), "overflow")
     const tx = await piNFT.addERC20(0, sampleERC20.address, 500, [[validator, 200]], {

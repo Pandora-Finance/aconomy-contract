@@ -90,7 +90,7 @@ contract("PiMarket", async (accounts) => {
             let _balance3 = await sampleERC20.balanceOf(feeReceiver);
             let _balance4 = await sampleERC20.balanceOf(bob);
             // console.log("Balance",_balance4.toString(), _balance1.toString())
-            await sampleERC20.approve(piMarket.address, 5000, {from: bob});
+            await sampleERC20.approve(piMarket.address, 5000, { from: bob });
             result2 = await piMarket.BuyNFT(1, false, { from: bob });
             // console.log(result2.receipt.rawLogs)
             assert.equal(await piNFT.ownerOf(0), bob);
@@ -112,7 +112,7 @@ contract("PiMarket", async (accounts) => {
             // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
             assert.equal(
                 (balance1 - _balance1),
-                ( 5000 * 9200) / 10000,
+                (5000 * 9200) / 10000,
                 "Failed to transfer NFT amount"
             );
 
@@ -237,11 +237,11 @@ contract("PiMarket", async (accounts) => {
             await sampleERC20.mint(bidder1, 13000);
             await sampleERC20.mint(bidder2, 6500);
 
-            await sampleERC20.approve(piMarket.address, 6000, {from: bidder1})
+            await sampleERC20.approve(piMarket.address, 6000, { from: bidder1 })
             await piMarket.Bid(3, 6000, { from: bidder1, value: 6000 });
-            await sampleERC20.approve(piMarket.address, 6500, {from: bidder2})
+            await sampleERC20.approve(piMarket.address, 6500, { from: bidder2 })
             await piMarket.Bid(3, 6500, { from: bidder2, value: 6500 });
-            await sampleERC20.approve(piMarket.address, 7000, {from: bidder1})
+            await sampleERC20.approve(piMarket.address, 7000, { from: bidder1 })
             await piMarket.Bid(3, 7000, { from: bidder1, value: 7000 });
 
             result = await piMarket.Bids(3, 2);
@@ -268,11 +268,11 @@ contract("PiMarket", async (accounts) => {
             // console.log(BigNumber(balance3).minus(BigNumber(_balance3)));
 
             assert.equal(
-                balance1-_balance1,
-              (7000 * 9200) / 10000,
-              "Failed to transfer NFT amount"
+                balance1 - _balance1,
+                (7000 * 9200) / 10000,
+                "Failed to transfer NFT amount"
             );
-            console.log("Get Token",(7000 * 9200) / 10000);
+            console.log("Get Token", (7000 * 9200) / 10000);
             assert.equal(
                 balance2 - _balance2,
                 (7000 * 500) / 10000,

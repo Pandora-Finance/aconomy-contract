@@ -235,7 +235,7 @@ contract("PiMarket", async (accounts) => {
             let _balance2 = await web3.eth.getBalance(royaltyReceiver);
             let _balance3 = await web3.eth.getBalance(feeReceiver);
 
-            console.log("Ball",_balance1.toString());
+            console.log("Ball", _balance1.toString());
 
             await piMarket.executeBidOrder(3, 2, false, { from: alice });
             result = await piNFT.ownerOf(1);
@@ -249,7 +249,7 @@ contract("PiMarket", async (accounts) => {
             //   (7000 * 9200) / 10000,
             //   "Failed to transfer NFT amount"
             // );
-            console.log("ccc",(7000 * 9200) / 10000)
+            console.log("ccc", (7000 * 9200) / 10000)
             assert.equal(
                 BigNumber(balance2).minus(BigNumber(_balance2)),
                 (7000 * 500) / 10000,
