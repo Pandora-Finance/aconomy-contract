@@ -55,7 +55,12 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     event repaid(uint256 NFTid, uint256 BidId, uint256 Amount);
     event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
     event NFTRemoved(uint256 NFTId);
-    event BidRejected(uint256 NFTid, uint256 BidId);
+    event BidRejected(
+        uint256 NFTid,
+        uint256 BidId,
+        address recieverAddress,
+        uint256 Amount
+    );
     event AcceptedBid(
         uint256 NFTid,
         uint256 BidId,
@@ -257,7 +262,19 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "You can't Accept This Bid"
         );
         Bids[_NFTid][_bidId].bidRejected = true;
-        emit BidRejected(_NFTid, _bidId);
+        require(
+            IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
+                Bids[_NFTid][_bidId].bidderAddress,
+                Bids[_NFTid][_bidId].Amount
+            ),
+            "unable to transfer to bidder Address"
+        );
+        emit BidRejected(
+            _NFTid,
+            _bidId,
+            Bids[_NFTid][_bidId].bidderAddress,
+            Bids[_NFTid][_bidId].Amount
+        );
     }
 
     // Repay Amount including percentage to Bidder
@@ -311,6 +328,8 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
                 block.timestamp > Bids[_NFTid][_bidId].expiration,
                 "Can't withdraw Bid before expiration"
             );
+        } else {
+            revert("Your Bid is Already Rejected");
         }
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
