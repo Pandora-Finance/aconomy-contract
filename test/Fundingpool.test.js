@@ -1,4 +1,4 @@
-const ethers  = require("ethers");
+const ethers = require("ethers");
 const FundingPool = artifacts.require("FundingPool");
 const PoolRegistry = artifacts.require("poolRegistry");
 const IERC20 = artifacts.require("IERC20");
@@ -11,84 +11,84 @@ const AttestServices = artifacts.require("AttestationServices");
 const AconomyFee = artifacts.require("AconomyFee")
 const PoolAddress = artifacts.require('poolAddress')
 const lendingToken = artifacts.require('mintToken')
-const poolAddress = artifacts.require("poolAddress")  
+const poolAddress = artifacts.require("poolAddress")
 
 
 contract("FundingPool", (accounts) => {
-    let fundingPool;
-    let poolRegistry;
-    let erc20Token;    
-    const poolOwner = accounts[0];
-    const lender = accounts[1];
-    const nonLender = accounts[2];
-    const receiver = accounts[3];    
-    const paymentDefaultDuration = 7;
-    const feePercent = 1;    
-    let poolId;
-    const erc20Amount = 1000;
-    const maxLoanDuration = 90;
-    const interestRate = 10;
-    const expiration = BigNumber(moment.now()).plus(3600); // expires in an hour 
-    
-    
-    const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
-    const loanDefaultDuration = moment.duration(180, 'days').asSeconds()
-    const loanExpirationDuration = moment.duration(1, 'days').asSeconds()
-    const expirationTime = BigNumber(moment.now()).add(moment.duration(30, 'days').seconds())  
+  let fundingPool;
+  let poolRegistry;
+  let erc20Token;
+  const poolOwner = accounts[0];
+  const lender = accounts[1];
+  const nonLender = accounts[2];
+  const receiver = accounts[3];
+  const paymentDefaultDuration = 7;
+  const feePercent = 1;
+  let poolId;
+  const erc20Amount = 1000;
+  const maxLoanDuration = 90;
+  const interestRate = 10;
+  const expiration = BigNumber(moment.now()).plus(3600); // expires in an hour 
 
-    let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Address,poolId2,  loanId1, poolAddressInstance, erc20;   
 
-    describe("supplyToPool()", () => {    
+  const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
+  const loanDefaultDuration = moment.duration(180, 'days').asSeconds()
+  const loanExpirationDuration = moment.duration(1, 'days').asSeconds()
+  const expirationTime = BigNumber(moment.now()).add(moment.duration(30, 'days').seconds())
+
+  let aconomyFee, poolRegis, attestRegistry, attestServices, res, poolId1, pool1Address, poolId2, loanId1, poolAddressInstance, erc20;
+
+  describe("supplyToPool()", () => {
 
     let fundingpooladdress = 0;
-    let bidId,bidId1;    
+    let bidId, bidId1;
 
-    
-    it("should create Pool", async() => {
+
+    it("should create Pool", async () => {
       //console.log("attestTegistry: ", attestServices.address)
       poolRegis = await PoolRegistry.deployed()
-      res =  await poolRegis.createPool(
-          loanDefaultDuration,
-          loanExpirationDuration,
-          100,
-          1000,
-          "sk.com",
-          true,
-          true
+      res = await poolRegis.createPool(
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        1000,
+        "sk.com",
+        true,
+        true
       );
       // console.log(res);
       poolId1 = res.logs[6].args.poolId.toNumber()
       console.log(poolId1, "poolId1")
       poolId = poolId1;
-      pool1Address =await poolRegis.getPoolAddress(poolId1);
+      pool1Address = await poolRegis.getPoolAddress(poolId1);
       console.log(pool1Address, "poolAdress")
       fundingpooladdress = pool1Address;
-    })    
+    })
 
-    it("should add Lender to the pool", async() => {
+    it("should add Lender to the pool", async () => {
       res = await poolRegis.lenderVerification(poolId1, accounts[1])
       assert.equal(res.isVerified_, false, "AddLender function not called but verified")
-      await poolRegis.addLender(poolId1, accounts[1], expirationTime, {from: accounts[0]} )
+      await poolRegis.addLender(poolId1, accounts[1], expirationTime, { from: accounts[0] })
       res = await poolRegis.lenderVerification(poolId1, accounts[1])
       assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVarification failed")
-    })  
+    })
 
-    it("should add Borrower to the pool", async() => {
-      await poolRegis.addBorrower(poolId1, accounts[2], expirationTime, {from: accounts[0]} )
+    it("should add Borrower to the pool", async () => {
+      await poolRegis.addBorrower(poolId1, accounts[2], expirationTime, { from: accounts[0] })
       res = await poolRegis.borrowerVerification(poolId1, accounts[2])
       assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVarification failed")
-    })    
+    })
 
-    it("should allow lender to supply funds to the pool", async () => {   
-      
+    it("should allow lender to supply funds to the pool", async () => {
+
       erc20 = await lendingToken.deployed()
-      fundingpoolInstance = await FundingPool.at(fundingpooladdress);  
+      fundingpoolInstance = await FundingPool.at(fundingpooladdress);
 
-      await erc20.transfer(lender, erc20Amount, {from : accounts[0]})  
+      await erc20.transfer(lender, erc20Amount, { from: accounts[0] })
 
       await erc20.approve(fundingpoolInstance.address, erc20Amount, {
         from: lender,
-      });      
+      });
       const tx = await fundingpoolInstance.supplyToPool(
         poolId,
         erc20.address,
@@ -96,14 +96,14 @@ contract("FundingPool", (accounts) => {
         loanDefaultDuration,
         expiration,
         { from: lender }
-      );      
+      );
       bidId = tx.logs[0].args.BidId.toNumber();
       // console.log(bidId, "bidid111");
 
-      await erc20.transfer(lender, 500, {from : accounts[0]}) 
+      await erc20.transfer(lender, 500, { from: accounts[0] })
       await erc20.approve(fundingpoolInstance.address, 500, {
         from: lender,
-      });    
+      });
 
       const tx1 = await fundingpoolInstance.supplyToPool(
         poolId,
@@ -112,7 +112,7 @@ contract("FundingPool", (accounts) => {
         loanDefaultDuration,
         expiration,
         { from: lender }
-      );      
+      );
       bidId1 = tx1.logs[0].args.BidId.toNumber();
       const balance = await erc20.balanceOf(lender);
       assert.equal(balance.toString(), 0, "Error")
@@ -132,7 +132,7 @@ contract("FundingPool", (accounts) => {
       console.log(expiration.toString())
       assert.equal(fundDetail.expiration, expiration.toString());
       assert.equal(fundDetail.state, 0); // BidState.PENDING
-    });    
+    });
 
     it("should not allow non-lender to supply funds to the pool", async () => {
       await erc20.approve(fundingpoolInstance.address, erc20Amount, {
@@ -149,14 +149,14 @@ contract("FundingPool", (accounts) => {
         ),
         "Not verified lender"
       );
-    });   
-    
+    });
+
     it("should not allow non-lender to cancel a bid", async () => {
       await truffleAssert.reverts(
         fundingpoolInstance.Withdraw(poolId, erc20.address, bidId, lender, { from: accounts[2] }),
         "You are not a Lender"
       );
-    });    
+    });
 
     it('should accept the bid and emit AcceptedBid event', async () => {
       const tx = await fundingpoolInstance.AcceptBid(
@@ -189,7 +189,7 @@ contract("FundingPool", (accounts) => {
       // );
       expect(fundDetail.acceptBidTimestamp).to.not.equal(moment.now());
       // assert.equal(bidid)
-    });    it('should revert if bid is not pending', async function () {
+    }); it('should revert if bid is not pending', async function () {
       // await fundingpoolInstance.AcceptBid(
       //   poolId,
       //   erc20.address,
@@ -207,11 +207,11 @@ contract("FundingPool", (accounts) => {
         ),
         'Bid must be pending'
       )
-    });    
+    });
 
     it('should accept the bid and emit RejectBid event', async () => {
       const balance = await erc20.balanceOf(lender);
-      console.log("bbb",balance.toString());
+      console.log("bbb", balance.toString());
       const tx = await fundingpoolInstance.RejectBid(
         poolId,
         erc20.address,
@@ -220,11 +220,11 @@ contract("FundingPool", (accounts) => {
       );
       // console.log(poolId)
       const balance1 = await erc20.balanceOf(lender);
-      console.log("bbb",balance1.toString());
+      console.log("bbb", balance1.toString());
       assert.equal(balance1.toString(), 500, "Bid not rejected Yet")
 
       await truffleAssert.reverts(
-         fundingpoolInstance.RejectBid(
+        fundingpoolInstance.RejectBid(
           poolId,
           erc20.address,
           bidId1,
@@ -243,7 +243,7 @@ contract("FundingPool", (accounts) => {
       //     expectedPaymentCycleAmount
       //   );    
 
-      
+
     });
 
     it("should not allow cancelling a bid that is not pending", async () => {
@@ -294,6 +294,6 @@ contract("FundingPool", (accounts) => {
     //   assert.equal(tx.logs[0].event, "BidCancelled", "Event name should be BidCancelled");
     //   assert.equal(tx.logs[0].args.bidId, bidId, "Bid ID should match");
     // });    
-  
+
   });
 })
