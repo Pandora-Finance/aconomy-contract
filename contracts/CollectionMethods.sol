@@ -20,10 +20,9 @@ contract CollectionMethods is
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
     address public collectionOwner;
-    address public piNFTAddress;
 
     // tokenId => collection royalties
-    mapping(uint256 => LibShare.Share[]) public RoyaltiesForValidator;
+    mapping(uint256 => LibShare.Share[]) internal RoyaltiesForValidator;
 
     // tokenId => (token contract => balance)
     mapping(uint256 => mapping(address => uint256)) erc20Balances;
@@ -41,6 +40,10 @@ contract CollectionMethods is
     mapping(uint256 => uint256) public withdrawnAmount;
 
     mapping(uint256 => address) public approvedValidator;
+
+    mapping(uint256 => address) public approvedInsurer;
+
+    mapping(uint256 => LibShare.Insurance) public tokenInsurance;
 
     event ERC20Added(
         address indexed _from,
@@ -96,14 +99,12 @@ contract CollectionMethods is
 
     function initialize(
         address _collectionOwner,
-        address _piNFTAddress,
         string memory _name,
         string memory _symbol
     ) external initializer {
         __ERC721_init(_name, _symbol);
         __ERC721URIStorage_init();
         collectionOwner = _collectionOwner;
-        piNFTAddress = _piNFTAddress;
     }
 
     modifier onlyOwnerOfToken(uint256 _tokenId) {
@@ -132,6 +133,22 @@ contract CollectionMethods is
         require(erc20Contracts[_tokenId].length == 0);
         approvedValidator[_tokenId] = _validator;
         emit ValidatorAdded(_tokenId, _validator);
+    }
+
+    function addInsurer(uint256 _tokenId, address _insurer)
+        external
+        onlyOwnerOfToken(_tokenId)
+    {
+        require(tokenInsurance[_tokenId].expiration < block.timestamp);
+        approvedInsurer[_tokenId] = _insurer;
+    }
+
+    function addInsurance(uint256 _tokenId, uint256 _time) external {
+        require(msg.sender == approvedInsurer[_tokenId]);
+        tokenInsurance[_tokenId] = LibShare.Insurance(
+            msg.sender,
+            block.timestamp + _time
+        );
     }
 
     // this function requires approval of tokens by _erc20Contract
@@ -249,6 +266,7 @@ contract CollectionMethods is
         }
         approvedValidator[_tokenId] = address(0);
         NFTowner[_tokenId] = address(0);
+        delete RoyaltiesForValidator[_tokenId];
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
@@ -277,7 +295,7 @@ contract CollectionMethods is
             return;
         }
         uint256 erc20Balance = erc20Balances[_tokenId][_erc20Contract];
-        require(erc20Balance >= _value, "balance");
+        require(erc20Balance >= _value);
         uint256 newERC20Balance = erc20Balance - _value;
         erc20Balances[_tokenId][_erc20Contract] = newERC20Balance;
         if (newERC20Balance == 0) {

@@ -19,9 +19,9 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     mapping(uint256 => address[]) erc20Contracts;
 
     // tokenId => royalties
-    mapping(uint256 => LibShare.Share[]) public royaltiesByTokenId;
+    mapping(uint256 => LibShare.Share[]) internal royaltiesByTokenId;
 
-    mapping(uint256 => LibShare.Share[]) public royaltiesForValidator;
+    mapping(uint256 => LibShare.Share[]) internal royaltiesForValidator;
 
     // tokenId => (token contract => token contract index)
     mapping(uint256 => mapping(address => uint256)) erc20ContractIndex;
@@ -33,6 +33,10 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     mapping(uint256 => uint256) withdrawnAmount;
 
     mapping(uint256 => address) public approvedValidator;
+
+    mapping(uint256 => address) public approvedInsurer;
+
+    mapping(uint256 => LibShare.Insurance) public tokenInsurance;
 
     event ERC20Added(
         address indexed _from,
@@ -164,6 +168,22 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit ValidatorAdded(_tokenId, _validator);
     }
 
+    function addInsurer(uint256 _tokenId, address _insurer)
+        external
+        onlyOwnerOfToken(_tokenId)
+    {
+        require(tokenInsurance[_tokenId].expiration < block.timestamp);
+        approvedInsurer[_tokenId] = _insurer;
+    }
+
+    function addInsurance(uint256 _tokenId, uint256 _time) external {
+        require(msg.sender == approvedInsurer[_tokenId]);
+        tokenInsurance[_tokenId] = LibShare.Insurance(
+            msg.sender,
+            block.timestamp + _time
+        );
+    }
+
     // this function requires approval of tokens by _erc20Contract
     // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
     function addERC20(
@@ -277,6 +297,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         }
         approvedValidator[_tokenId] = address(0);
         NFTowner[_tokenId] = address(0);
+        delete royaltiesForValidator[_tokenId];
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
@@ -338,7 +359,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             require(msg.sender == ownerOf(_tokenId));
             NFTowner[_tokenId] = msg.sender;
         }
-        require(NFTowner[_tokenId] == msg.sender, "not owner");
+        require(NFTowner[_tokenId] == msg.sender);
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(
             withdrawnAmount[_tokenId] + _amount <=

@@ -69,7 +69,6 @@ contract CollectionFactory {
         //Deploy collection Address
         address collectionAddress = LibCollection.deployCollectionAddress(
             msg.sender,
-            address(this),
             _name,
             _symbol,
             collectionMethodAddress

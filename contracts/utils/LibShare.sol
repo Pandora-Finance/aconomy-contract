@@ -7,4 +7,9 @@ library LibShare {
         address payable account;
         uint96 value;
     }
+
+    struct Insurance {
+        address insurer;
+        uint256 expiration;
+    }
 }
