@@ -277,6 +277,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         }
         approvedValidator[_tokenId] = address(0);
         NFTowner[_tokenId] = address(0);
+        delete royaltiesForValidator[_tokenId];
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address

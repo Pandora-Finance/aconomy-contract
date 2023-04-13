@@ -249,6 +249,7 @@ contract CollectionMethods is
         }
         approvedValidator[_tokenId] = address(0);
         NFTowner[_tokenId] = address(0);
+        delete RoyaltiesForValidator[_tokenId];
     }
 
     // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
