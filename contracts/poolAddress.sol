@@ -255,7 +255,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         if (loanDefaultDuration[_loanId] == 0) return false;
 
-        return (uint32(block.timestamp) - lastRepaidTimestamp(_loanId) >
+        return (uint32(block.timestamp) - (loan.loanDetails.acceptedTimestamp + loan.loanDetails.loanDuration) >
             loanDefaultDuration[_loanId]);
     }
 
