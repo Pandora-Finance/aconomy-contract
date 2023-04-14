@@ -462,7 +462,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         );
     }
 
-    function repayFullLoan(uint256 _loanId) public nonReentrant{
+    function repayFullLoan(uint256 _loanId) external nonReentrant{
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
