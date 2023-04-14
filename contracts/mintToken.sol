@@ -11,4 +11,8 @@ contract mintToken is ERC20 {
     function mint(address _recipient, uint256 _amount) external {
         _mint(_recipient, _amount);
     }
+
+    function getTime() external view returns(uint256) {
+        return block.timestamp;
+    }
 }
