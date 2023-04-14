@@ -52,7 +52,7 @@ contract("poolRegistry", async (accounts) => {
             true,
             true
         );
-        poolId1 = res.logs[6].args.poolId.toNumber()
+        poolId1 = res.logs[5].args.poolId.toNumber()
         console.log(poolId1, "poolId1")
         pool1Address = res.logs[4].args.poolAddress;
         console.log(pool1Address, "poolAdress")

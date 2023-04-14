@@ -57,7 +57,7 @@ contract("FundingPool", (accounts) => {
         true
       );
       // console.log(res);
-      poolId1 = res.logs[6].args.poolId.toNumber()
+      poolId1 = res.logs[5].args.poolId.toNumber()
       console.log(poolId1, "poolId1")
       poolId = poolId1;
       pool1Address = await poolRegis.getPoolAddress(poolId1);
