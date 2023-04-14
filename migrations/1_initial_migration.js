@@ -11,6 +11,7 @@ const NftLendingBorrowing = artifacts.require("NFTlendingBorrowing");
 const CollectionFactory = artifacts.require("CollectionFactory")
 const CollectionMethods = artifacts.require("CollectionMethods")
 const LibCollection = artifacts.require("LibCollection")
+const BPBDTL = artifacts.require("BokkyPooBahsDateTimeLibrary")
 
 
 module.exports = async function (deployer) {
@@ -51,6 +52,9 @@ module.exports = async function (deployer) {
   var poolRegis = await poolRegistry.deployed()
 
   await deployer.link(libCalc, [poolAddress, NftLendingBorrowing]);
+
+  await deployer.deploy(BPBDTL);
+  await deployer.link(BPBDTL, [poolAddress]);
   
   await deployer.deploy(poolAddress, poolRegis.address, aconomyfee.address)
 
