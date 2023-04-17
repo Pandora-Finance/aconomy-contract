@@ -223,42 +223,56 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.state, 3);
   })
 
-  // it("should view intallment amount", async () => {
-  //   await time.increase(100)
-  //   let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
-  //   console.log("full amount", bal.toNumber());
-  //   loanId1 = res.logs[0].args.loanId.toNumber()
-  //   let loan = await poolAddressInstance.loans(loanId1);
-  //   console.log(loan);
-  //   let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-  //   console.log('installment before 1 cycle', r.toString());
-  //   // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-  //   await time.increase(paymentCycleDuration)
-  //   r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-  //   console.log('installment after 1 cycle', r.toString());
-  //   await erc20.approve(poolAddressInstance.address, r + 10, { from: accounts[1] })
-  //   let result = await poolAddressInstance.repayYourLoan(loanId1, { from: accounts[1] });
-  //   console.log(result.logs[1].args.owedPrincipal.toNumber());
-  //   console.log(result.logs[1].args.duePrincipal.toNumber());
-  //   console.log(result.logs[1].args.interest.toNumber());
-  //   await time.increase(100)
-  //   r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-  //   console.log('installment after paying 1st cycle', r.toString());
+  it("should check that full repayment amount is 0", async () => {
+    let loan = await poolAddressInstance.loans(loanId1);
+    advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
+    let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
+    console.log(bal.toNumber())
+    assert.equal(bal, 0)
+  })
 
-  // })
+  it("should request another loan", async () => {
+    erc20 = await lendingToken.deployed()
+    //await erc20.mint(accounts[0], '10000000000')
+    poolAddressInstance = await PoolAddress.deployed();
+    res = await poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      1000000000,
+      loanDefaultDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    )
+    loanId1 = res.logs[0].args.loanId.toNumber()
+    let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber()
+    console.log(paymentCycleAmount, "pca")
+    assert.equal(loanId1, 1, "Unable to create loan: Wrong LoanId")
+  })
 
-  // it("should repay full amount", async () => {
-  //   let loan = await poolAddressInstance.loans(loanId1);
-  //   advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-  //   let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
-  //   console.log(bal.toNumber());
-  //   let b = await erc20.balanceOf(accounts[1]);
-  //   await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
-  //   await erc20.approve(poolAddressInstance.address, bal + 10, { from: accounts[1] })
-  //   let r = await poolAddressInstance.repayFullLoan(loanId1, { from: accounts[1] })
-  //   // console.log(res)
-  //   assert.equal(r.receipt.status, true, "Not able to repay loan")
-  // })
+  it("should Accept loan ", async () => {
+    await erc20.approve(poolAddressInstance.address, 1000000000)
+    let _balance1 = await erc20.balanceOf(accounts[0]);
+    console.log(_balance1.toNumber())
+    res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
+    _balance1 = await erc20.balanceOf(accounts[1]);
+    //console.log(_balance1.toNumber())
+    //Amount that the borrower will get is 999 after cutting fees and market charges
+    assert.equal(_balance1.toNumber(), 1077397144, "Not able to accept loan");
+  })
+
+  it("should repay full amount", async () => {
+    let loan = await poolAddressInstance.loans(loanId1);
+    advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
+    let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
+    console.log(bal.toNumber());
+    let b = await erc20.balanceOf(accounts[1]);
+    //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
+    await erc20.approve(poolAddressInstance.address, bal + 10, { from: accounts[1] })
+    let r = await poolAddressInstance.repayFullLoan(loanId1, { from: accounts[1] })
+    // console.log(res)
+    assert.equal(r.receipt.status, true, "Not able to repay loan")
+  })
 
   it("should check that full repayment amount is 0", async () => {
     let loan = await poolAddressInstance.loans(loanId1);

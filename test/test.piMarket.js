@@ -196,7 +196,7 @@ contract("PiMarket", async (accounts) => {
             const tokenId = tx1.logs[0].args.tokenId.toNumber();
             assert(tokenId === 1, "Failed to mint or wrong token Id");
 
-            piNFT.addValidator(tokenId, validator);
+            await piNFT.addValidator(tokenId, validator);
             await sampleERC20.approve(piNFT.address, 500, { from: validator });
             const tx = await piNFT.addERC20(
                 tokenId,

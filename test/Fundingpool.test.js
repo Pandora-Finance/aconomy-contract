@@ -209,7 +209,7 @@ contract("FundingPool", (accounts) => {
       )
     });
 
-    it('should accept the bid and emit RejectBid event', async () => {
+    it('should reject the bid and emit RejectBid event', async () => {
       const balance = await erc20.balanceOf(lender);
       console.log("bbb", balance.toString());
       const tx = await fundingpoolInstance.RejectBid(
