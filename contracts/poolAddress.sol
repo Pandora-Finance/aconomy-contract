@@ -90,6 +90,8 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             "Pool is closed"
         );
         require(_duration % 30 days == 0);
+        require(_APR >= 100, "apr too low");
+        require(_principal >= 10000, "principal too low");
 
         loanId_ = loanId;
 

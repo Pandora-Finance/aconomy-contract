@@ -96,6 +96,7 @@ contract poolRegistry is ReentrancyGuard {
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) external returns (uint256 poolId_) {
+        require(_apr >= 100, "given apr too low");
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
