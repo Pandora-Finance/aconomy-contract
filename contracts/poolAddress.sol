@@ -304,46 +304,6 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         }
     }
 
-    // function calculateNextDueDate(uint256 _loanId)
-    //     public
-    //     view
-    //     returns (uint32 dueDate_)
-    // {
-    //     Loan storage loan = loans[_loanId];
-    //     if (loans[_loanId].state != LoanState.ACCEPTED) return dueDate_;
-
-    //     uint32 LastRepaidTimestamp = lastRepaidTimestamp(_loanId);
-
-    //     // Calculate due date if payment cycle is set to monthly
-    //         // Calculate the cycle number the last repayment was made
-    //         uint256 lastPaymentCycle = BPBDTL.diffMonths(
-    //             loan.loanDetails.acceptedTimestamp,
-    //             LastRepaidTimestamp
-    //         );
-    //         if (
-    //             BPBDTL.getDay(LastRepaidTimestamp) >
-    //             BPBDTL.getDay(loan.loanDetails.acceptedTimestamp)
-    //         ) {
-    //             lastPaymentCycle += 2;
-    //         } else {
-    //             lastPaymentCycle += 1;
-    //         }
-
-    //         dueDate_ = uint32(
-    //             BPBDTL.addMonths(
-    //                 loan.loanDetails.acceptedTimestamp,
-    //                 lastPaymentCycle
-    //             )
-    //         );
-
-    //     uint32 endOfLoan = loan.loanDetails.acceptedTimestamp +
-    //         loan.loanDetails.loanDuration;
-    //     //if we are in the last payment cycle, the next due date is the end of loan duration
-    //     if (dueDate_ > endOfLoan) {
-    //         dueDate_ = endOfLoan;
-    //     }
-    // }
-
     function viewInstallmentAmount(uint256 _loanId) external view returns(uint256){
         uint32 LastRepaidTimestamp = lastRepaidTimestamp(_loanId);
         uint256 lastPaymentCycle = BPBDTL.diffMonths(
