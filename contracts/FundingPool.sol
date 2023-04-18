@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
+import { BokkyPooBahsDateTimeLibrary as BPBDTL } from "./Libraries/DateTimeLib.sol";
 
 contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     address public poolOwner;
@@ -72,6 +73,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 interest
     );
 
+    struct Installments {
+        uint256 monthlyCycleInterest;
+        uint32 installments;
+        uint32 installmentsPaid;
+    }
+
     struct FundDetail {
         uint256 amount;
         uint256 expiration; //After expiration time, if owner dose not accept bid then lender can withdraw the fund
@@ -83,6 +90,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 paymentCycleAmount;
         uint256 totalRepaidPrincipal;
         uint32 lastRepaidTimestamp;
+        Installments installment;
         RePayment Repaid;
     }
 
@@ -93,7 +101,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
     enum BidState {
         PENDING,
-        CANCELLED,
         ACCEPTED,
         PAID,
         WITHDRAWN,
@@ -123,6 +130,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         );
 
         require(_amount != 0, "You can't supply with zero amount");
+        require(_maxLoanDuration % 30 days == 0);
+        require(_amount >= 10000, "amount too low");
 
         address lender = msg.sender;
         require(_expiration > uint32(block.timestamp), "wrong timestamp");
@@ -139,6 +148,22 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.bidTimestamp = uint32(block.timestamp);
 
         fundDetail.state = BidState.PENDING;
+        fundDetail.installment.installments = _maxLoanDuration / 30 days;
+        fundDetail.installment.installmentsPaid = 0;
+
+        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        fundDetail.paymentCycleAmount = LibCalculations.payment(
+            _amount,
+            fundDetail.maxDuration,
+            paymentCycle,
+            fundDetail.interestRate
+        );
+
+        uint256 monthlyPrincipal = _amount / fundDetail.installment.installments;
+
+        fundDetail.installment.monthlyCycleInterest = fundDetail.paymentCycleAmount - monthlyPrincipal;
 
         address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
             _poolId
@@ -169,24 +194,16 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             revert("Bid must be pending");
         }
         fundDetail.acceptBidTimestamp = uint32(block.timestamp);
+        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
         uint256 amount = fundDetail.amount;
         fundDetail.state = BidState.ACCEPTED;
-        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
-            .getPaymentCycleDuration(_poolId);
-
-        fundDetail.paymentCycleAmount = LibCalculations.payment(
-            amount,
-            fundDetail.maxDuration,
-            paymentCycle,
-            fundDetail.interestRate
-        );
 
         address AconomyOwner = poolRegistry(poolRegistryAddress)
             .getAconomyOwner();
 
         //Aconomy Fee
         uint256 amountToAconomy = LibCalculations.percent(
-            fundDetail.amount,
+            amount,
             poolRegistry(poolRegistryAddress).getAconomyFee()
         );
 
@@ -236,7 +253,83 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit BidRejected(_lender, _bidId, _poolId, fundDetail.amount);
     }
 
-    function RepayInstallment(
+    function isPaymentLate(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+        ) public view returns (bool) {
+            FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) return false;
+        return uint32(block.timestamp) > calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender) + 7 days;
+    }
+
+    function calculateNextDueDate(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) public view returns (uint256 dueDate_) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) return dueDate_;
+
+        uint256 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        // Start with the original due date being 1 payment cycle since loan was accepted
+        dueDate_ = fundDetail.acceptBidTimestamp + paymentCycle;
+
+        // Calculate the cycle number the last repayment was made
+        uint32 delta = fundDetail.lastRepaidTimestamp -
+            fundDetail.acceptBidTimestamp;
+        if (delta > 0) {
+            uint256 repaymentCycle = (delta / paymentCycle);
+            dueDate_ += (repaymentCycle * paymentCycle);
+        }
+
+        //if we are in the last payment cycle, the next due date is the end of loan duration
+        if (
+            dueDate_ >
+            fundDetail.acceptBidTimestamp + fundDetail.maxDuration
+        ) {
+            dueDate_ =
+                fundDetail.acceptBidTimestamp +
+                fundDetail.maxDuration;
+        }
+    }
+
+    function viewInstallmentAmount(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) external view returns(uint256){
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        uint32 LastRepaidTimestamp = fundDetail.lastRepaidTimestamp;
+        uint256 lastPaymentCycle = BPBDTL.diffMonths(
+                fundDetail.acceptBidTimestamp,
+                LastRepaidTimestamp
+            );
+        uint256 monthsSinceStart = BPBDTL.diffMonths(
+                fundDetail.acceptBidTimestamp,
+                block.timestamp
+            );
+
+        if(monthsSinceStart > lastPaymentCycle) {
+            return fundDetail.paymentCycleAmount;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    function repayMonthlyInstallment(
         uint256 _poolId,
         address _ERC20Address,
         uint256 _bidId,
@@ -247,15 +340,24 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+            revert("Loan must be accepted");
         }
+        require(fundDetail.installment.installmentsPaid + 1 <= fundDetail.installment.installments);
+        require(block.timestamp > calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender));
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
+        if(fundDetail.installment.installmentsPaid + 1 == fundDetail.installment.installments) {
+            _repayFullAmount(_poolId, _ERC20Address, _bidId, _lender);
+        } else {
+            uint256 monthlyInterest = fundDetail.installment.monthlyCycleInterest;
+            uint256 monthlyDue = fundDetail.paymentCycleAmount;
+            uint256 due = monthlyDue - monthlyInterest;
+
         (
             uint256 owedAmount,
-            uint256 dueAmount,
+            ,
             uint256 interest
         ) = LibCalculations.calculateInstallmentAmount(
                 fundDetail.amount,
@@ -268,55 +370,106 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
                 fundDetail.acceptBidTimestamp,
                 fundDetail.maxDuration
             );
+
+            fundDetail.installment.installmentsPaid ++;
+
         _repayBid(
             _poolId,
             _ERC20Address,
             _bidId,
             _lender,
-            dueAmount,
-            interest,
+            due,
+            monthlyInterest,
             owedAmount + interest
         );
 
-        emit InstallmentRepaid(
-            _poolId,
-            _bidId,
-            owedAmount,
-            dueAmount,
-            interest
-        );
+            fundDetail.lastRepaidTimestamp = 
+                fundDetail.acceptBidTimestamp +
+                (fundDetail.installment.installmentsPaid * paymentCycle);
+            }
     }
 
-    function viewInstallmentAmount(
-        uint256 _poolId,
-        address _ERC20Address,
-        uint256 _bidId,
-        address _lender
-    ) public view returns (uint256) {
-        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
-            _ERC20Address
-        ][_bidId];
-        if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be accepted");
-        }
-        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
-            .getPaymentCycleDuration(_poolId);
+    // function RepayInstallment(
+    //     uint256 _poolId,
+    //     address _ERC20Address,
+    //     uint256 _bidId,
+    //     address _lender
+    // ) external nonReentrant {
+    //     require(poolOwner == msg.sender, "You are not the Pool Owner");
+    //     FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+    //         _ERC20Address
+    //     ][_bidId];
+    //     if (fundDetail.state != BidState.ACCEPTED) {
+    //         revert("Bid must be pending");
+    //     }
 
-        (, uint256 dueAmount, uint256 interest) = LibCalculations
-            .calculateInstallmentAmount(
-                fundDetail.amount,
-                fundDetail.Repaid.amount,
-                fundDetail.interestRate,
-                fundDetail.paymentCycleAmount,
-                paymentCycle,
-                fundDetail.lastRepaidTimestamp,
-                block.timestamp,
-                fundDetail.acceptBidTimestamp,
-                fundDetail.maxDuration
-            );
-        uint256 paymentAmount = dueAmount + interest;
-        return paymentAmount;
-    }
+    //     uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+    //         .getPaymentCycleDuration(_poolId);
+
+    //     (
+    //         uint256 owedAmount,
+    //         uint256 dueAmount,
+    //         uint256 interest
+    //     ) = LibCalculations.calculateInstallmentAmount(
+    //             fundDetail.amount,
+    //             fundDetail.Repaid.amount,
+    //             fundDetail.interestRate,
+    //             fundDetail.paymentCycleAmount,
+    //             paymentCycle,
+    //             fundDetail.lastRepaidTimestamp,
+    //             block.timestamp,
+    //             fundDetail.acceptBidTimestamp,
+    //             fundDetail.maxDuration
+    //         );
+    //     _repayBid(
+    //         _poolId,
+    //         _ERC20Address,
+    //         _bidId,
+    //         _lender,
+    //         dueAmount,
+    //         interest,
+    //         owedAmount + interest
+    //     );
+
+    //     emit InstallmentRepaid(
+    //         _poolId,
+    //         _bidId,
+    //         owedAmount,
+    //         dueAmount,
+    //         interest
+    //     );
+    // }
+
+    // function viewInstallmentAmount(
+    //     uint256 _poolId,
+    //     address _ERC20Address,
+    //     uint256 _bidId,
+    //     address _lender
+    // ) public view returns (uint256) {
+    //     FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+    //         _ERC20Address
+    //     ][_bidId];
+    //     if (fundDetail.state != BidState.ACCEPTED) {
+    //         revert("Bid must be accepted");
+    //     }
+    //     uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+    //         .getPaymentCycleDuration(_poolId);
+
+    //     (, uint256 dueAmount, uint256 interest) = LibCalculations
+    //         .calculateInstallmentAmount(
+    //             fundDetail.amount,
+    //             fundDetail.Repaid.amount,
+    //             fundDetail.interestRate,
+    //             fundDetail.paymentCycleAmount,
+    //             paymentCycle,
+    //             fundDetail.lastRepaidTimestamp,
+    //             block.timestamp,
+    //             fundDetail.acceptBidTimestamp,
+    //             fundDetail.maxDuration
+    //         );
+    //     uint256 paymentAmount = dueAmount + interest;
+    //     return paymentAmount;
+    // }
 
     function viewFullRepayAmount(
         uint256 _poolId,
@@ -327,8 +480,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
-        if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+        if (
+            fundDetail.state != BidState.ACCEPTED ||
+            fundDetail.state == BidState.PAID
+        ) {
+            return 0;
         }
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
@@ -347,6 +503,48 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             );
         uint256 paymentAmount = owedAmount + interest;
         return paymentAmount;
+    }
+
+    function _repayFullAmount(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender
+    ) private {
+        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+        if (fundDetail.state != BidState.ACCEPTED) {
+            revert("Bid must be pending");
+        }
+
+        uint32 paymentCycle = poolRegistry(poolRegistryAddress)
+            .getPaymentCycleDuration(_poolId);
+
+        (uint256 owedAmount, , uint256 interest) = LibCalculations
+            .calculateInstallmentAmount(
+                fundDetail.amount,
+                fundDetail.Repaid.amount,
+                fundDetail.interestRate,
+                fundDetail.paymentCycleAmount,
+                paymentCycle,
+                fundDetail.lastRepaidTimestamp,
+                block.timestamp,
+                fundDetail.acceptBidTimestamp,
+                fundDetail.maxDuration
+            );
+        _repayBid(
+            _poolId,
+            _ERC20Address,
+            _bidId,
+            _lender,
+            owedAmount,
+            interest,
+            owedAmount + interest
+        );
+
+        emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
     function RepayFullAmount(
