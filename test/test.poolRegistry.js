@@ -77,14 +77,14 @@ contract("poolRegistry", async (accounts) => {
     it("should add Lender to the pool", async () => {
         res = await poolRegis.lenderVerification(poolId1, accounts[0])
         assert.equal(res.isVerified_, false, "AddLender function not called but verified")
-        await poolRegis.addLender(poolId1, accounts[0], expirationTime, { from: accounts[0] })
+        await poolRegis.addLender(poolId1, accounts[0], { from: accounts[0] })
         res = await poolRegis.lenderVerification(poolId1, accounts[0])
         assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVerification failed")
     })
 
     it("should add Borrower to the pool", async () => {
 
-        await poolRegis.addBorrower(poolId1, accounts[1], expirationTime, { from: accounts[0] })
+        await poolRegis.addBorrower(poolId1, accounts[1], { from: accounts[0] })
         res = await poolRegis.borrowerVerification(poolId1, accounts[1])
         assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVerification failed")
     })

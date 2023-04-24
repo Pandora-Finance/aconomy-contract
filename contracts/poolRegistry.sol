@@ -82,6 +82,8 @@ contract poolRegistry is ReentrancyGuard {
     event SetloanExpirationTime(uint256 poolId, uint32 duration);
     event LenderAttestation(uint256 poolId, address lender);
     event BorrowerAttestation(uint256 poolId, address borrower);
+    event LenderRevocation(uint256 marketId, address lender);
+    event BorrowerRevocation(uint256 marketId, address borrower);
     event SetPoolURI(uint256 marketId, string uri);
     event SetAPR(uint256 marketId, uint16 APR);
     event poolClosed(uint256 poolId);
@@ -196,24 +198,35 @@ contract poolRegistry is ReentrancyGuard {
 
     function addLender(
         uint256 _poolId,
-        address _lenderAddress,
-        uint256 _expirationTime
+        address _lenderAddress
     ) external ownsPool(_poolId) {
-        _attestAddress(_poolId, _lenderAddress, _expirationTime, true);
+        _attestAddress(_poolId, _lenderAddress, true);
     }
 
     function addBorrower(
         uint256 _poolId,
-        address _borrowerAddress,
-        uint256 _expirationTime
+        address _borrowerAddress
     ) external ownsPool(_poolId) {
-        _attestAddress(_poolId, _borrowerAddress, _expirationTime, false);
+        _attestAddress(_poolId, _borrowerAddress, false);
+    }
+
+    function removeLender(
+        uint256 _poolId,
+        address _lenderAddress
+    ) external ownsPool(_poolId) {
+        _revokeAddress(_poolId, _lenderAddress, true);
+    }
+
+    function removeBorrower(
+        uint256 _poolId,
+        address _borrowerAddress
+    ) external ownsPool(_poolId) {
+        _revokeAddress(_poolId, _borrowerAddress, false);
     }
 
     function _attestAddress(
         uint256 _poolId,
         address _Address,
-        uint256 _expirationTime,
         bool _isLender
     )
         internal
@@ -228,7 +241,6 @@ contract poolRegistry is ReentrancyGuard {
         bytes32 uuid = attestationService.attest(
             _Address,
             _attestingSchemaId, // set by the modifier
-            _expirationTime,
             abi.encode(_poolId, _Address)
         );
 
@@ -262,6 +274,52 @@ contract poolRegistry is ReentrancyGuard {
             );
 
             emit BorrowerAttestation(_poolId, _Address);
+        }
+    }
+
+    function _revokeAddress(
+        uint256 _poolId,
+        address _address,
+        bool _isLender
+    ) internal virtual {
+        require(msg.sender == pools[_poolId].owner, "Not the pool owner");
+
+        bytes32 uuid = _revokeAddressVerification(
+            _poolId,
+            _address,
+            _isLender
+        );
+
+        attestationService.revoke(uuid);
+        // NOTE: Disabling the call to revoke the attestation on EAS contracts
+        //        tellerAS.revoke(uuid);
+    }
+
+    function _revokeAddressVerification(
+        uint256 _poolId,
+        address _Address,
+        bool _isLender
+    ) internal virtual returns (bytes32 uuid_) {
+        if (_isLender) {
+            uuid_ = pools[_poolId].lenderAttestationIds[
+                _Address
+            ];
+            // Remove lender address from market set
+            pools[_poolId].verifiedLendersForPool.remove(
+                _Address
+            );
+
+            emit LenderRevocation(_poolId, _Address);
+        } else {
+            uuid_ = pools[_poolId].borrowerAttestationIds[
+                _Address
+            ];
+            // Remove borrower address from market set
+            pools[_poolId].verifiedBorrowersForPool.remove(
+                _Address
+            );
+
+            emit BorrowerRevocation(_poolId, _Address);
         }
     }
 
