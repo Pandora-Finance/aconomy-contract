@@ -101,12 +101,12 @@ contract poolRegistry is ReentrancyGuard {
         poolId_ = ++poolCount;
 
         //Deploy Pool Address
-        address poolAddress = LibPool.deployPoolAddress(
+        address pooladdress = LibPool.deployPoolAddress(
             msg.sender,
             address(this),
             FundingPoolAddress
         );
-        pools[poolId_].poolAddress = poolAddress;
+        pools[poolId_].poolAddress = pooladdress;
         // Set the pool owner
         pools[poolId_].owner = msg.sender;
 
@@ -126,7 +126,7 @@ contract poolRegistry is ReentrancyGuard {
             pools[poolId_].borrowerAttestationRequired = true;
         }
 
-        emit poolCreated(msg.sender, poolAddress, poolId_);
+        emit poolCreated(msg.sender, pooladdress, poolId_);
     }
 
     function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
