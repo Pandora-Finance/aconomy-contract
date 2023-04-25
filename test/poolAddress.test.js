@@ -90,6 +90,7 @@ contract("PoolAddress", async (accounts) => {
       poolId1,
       1000000000,
       loanDefaultDuration,
+      loanExpirationDuration,
       100,
       accounts[1],
       { from: accounts[1] }
@@ -252,6 +253,7 @@ contract("PoolAddress", async (accounts) => {
       poolId1,
       1000000000,
       loanDefaultDuration,
+      loanExpirationDuration,
       100,
       accounts[1],
       { from: accounts[1] }

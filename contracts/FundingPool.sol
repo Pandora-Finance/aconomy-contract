@@ -193,6 +193,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         if (fundDetail.state != BidState.PENDING) {
             revert("Bid must be pending");
         }
+        require(
+            fundDetail.expiration >= uint32(block.timestamp),
+            "bid expired"
+        );
         fundDetail.acceptBidTimestamp = uint32(block.timestamp);
         fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
         uint256 amount = fundDetail.amount;

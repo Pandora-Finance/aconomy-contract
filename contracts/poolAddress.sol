@@ -71,6 +71,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         uint256 _poolId,
         uint256 _principal,
         uint32 _duration,
+        uint32 _expirationDuration,
         uint16 _APR,
         address _receiver
     ) public returns (uint256 loanId_) {
@@ -92,6 +93,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         require(_duration % 30 days == 0);
         require(_APR >= 100, "apr too low");
         require(_principal >= 10000, "principal too low");
+        require(_expirationDuration > 0);
 
         loanId_ = loanId;
 
@@ -117,8 +119,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         loanDefaultDuration[loanId] = poolRegistry(poolRegistryAddress)
             .getPaymentDefaultDuration(_poolId);
 
-        loanExpirationTime[loanId] = poolRegistry(poolRegistryAddress)
-            .getloanExpirationTime(_poolId);
+        loanExpirationDuration[loanId] = _expirationDuration;
 
         loan.terms.paymentCycleAmount = LibCalculations.payment(
             _principal,
@@ -251,10 +252,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         Loan storage loan = loans[_loanId];
 
         if (loan.state != LoanState.PENDING) return false;
-        if (loanExpirationTime[_loanId] == 0) return false;
+        if (loanExpirationDuration[_loanId] == 0) return false;
 
         return (uint32(block.timestamp) >
-            loan.loanDetails.timestamp + loanExpirationTime[_loanId]);
+            loan.loanDetails.timestamp + loanExpirationDuration[_loanId]);
     }
 
     function isLoanDefaulted(uint256 _loanId) public view returns (bool) {

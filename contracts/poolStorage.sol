@@ -66,7 +66,7 @@ abstract contract poolStorage {
     // Mapping of borrowers to borrower requests.
     mapping(address => uint256[]) public borrowerLoans;
     mapping(uint256 => uint32) public loanDefaultDuration;
-    mapping(uint256 => uint32) public loanExpirationTime;
+    mapping(uint256 => uint32) public loanExpirationDuration;
 
     // Mapping of amount filled by lenders.
     // Asset address => Lender address => Lend amount
