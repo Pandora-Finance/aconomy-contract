@@ -39,8 +39,11 @@ abstract contract poolStorage {
 
     struct Terms {
         uint256 paymentCycleAmount;
+        uint256 monthlyCycleInterest;
         uint32 paymentCycle;
         uint16 APR;
+        uint32 installments;
+        uint32 installmentsPaid;
     }
 
     struct Loan {

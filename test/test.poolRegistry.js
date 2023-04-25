@@ -52,7 +52,7 @@ contract("poolRegistry", async (accounts) => {
             true,
             true
         );
-        poolId1 = res.logs[6].args.poolId.toNumber()
+        poolId1 = res.logs[5].args.poolId.toNumber()
         console.log(poolId1, "poolId1")
         pool1Address = res.logs[4].args.poolAddress;
         console.log(pool1Address, "poolAdress")
@@ -148,16 +148,16 @@ contract("poolRegistry", async (accounts) => {
         //First Installment
         await time.increase(paymentCycleDuration + 1)
         console.log("rr", (await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber())
-        await erc20.approve(poolAddressInstance.address, 206000000, { from: accounts[0] })
-        res = await poolAddressInstance.repayYourLoan(loanId1, { from: accounts[0] })
+        await erc20.approve(poolAddressInstance.address, 205027661, { from: accounts[0] })
+        res = await poolAddressInstance.repayMonthlyInstallment(loanId1, { from: accounts[0] })
         console.log(res.logs[1])
         console.log(res.logs[0].args.Amount.toNumber())
 
         //Second installment
         await time.increase(1000)
-        await erc20.approve(poolAddressInstance.address, 80000, { from: accounts[1] })
-        res = await poolAddressInstance.repayYourLoan(loanId1, { from: accounts[1] })
-        console.log(res.logs[0].args.Amount.toNumber())
+        await expectRevert.unspecified(poolAddressInstance.repayMonthlyInstallment(loanId1, { from: accounts[1] }))
+        //res = await poolAddressInstance.repayMonthlyInstallment(loanId1, { from: accounts[1] })
+        //console.log(res.logs[0].args.Amount.toNumber())
 
 
         //Full loan Repay
@@ -170,7 +170,7 @@ contract("poolRegistry", async (accounts) => {
 
         assert((await poolAddressInstance.viewFullRepayAmount(loanId1)).toNumber() == 0, "Loan not fully repaid, viewFullRepayment")
         await erc20.approve(poolAddressInstance.address, 205000000, { from: accounts[0] })
-        await expectRevert(poolAddressInstance.repayYourLoan(loanId1, { from: accounts[0] }), "Loan must be accepted")
+        await expectRevert(poolAddressInstance.repayFullLoan(loanId1, { from: accounts[0] }), "Loan must be accepted")
 
 
     })

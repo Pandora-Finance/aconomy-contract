@@ -98,6 +98,7 @@ contract poolRegistry is ReentrancyGuard {
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) external returns (uint256 poolId_) {
+        require(_apr >= 100, "given apr too low");
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
@@ -112,7 +113,7 @@ contract poolRegistry is ReentrancyGuard {
         pools[poolId_].owner = msg.sender;
 
         setApr(poolId_, _apr);
-        setPaymentCycleDuration(poolId_, 30 days);
+        pools[poolId_].paymentCycleDuration = 30 days;
         setPaymentDefaultDuration(poolId_, _paymentDefaultDuration);
         setPoolFeePercent(poolId_, _poolFeePercent);
         setloanExpirationTime(poolId_, _loanExpirationTime);
@@ -138,16 +139,16 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
-    function setPaymentCycleDuration(uint256 _poolId, uint32 _duration)
-        public
-        ownsPool(_poolId)
-    {
-        if (_duration != pools[_poolId].paymentCycleDuration) {
-            pools[_poolId].paymentCycleDuration = _duration;
+    // function setPaymentCycleDuration(uint256 _poolId, uint32 _duration)
+    //     public
+    //     ownsPool(_poolId)
+    // {
+    //     if (_duration != pools[_poolId].paymentCycleDuration) {
+    //         pools[_poolId].paymentCycleDuration = _duration;
 
-            emit SetPaymentCycleDuration(_poolId, _duration);
-        }
-    }
+    //         emit SetPaymentCycleDuration(_poolId, _duration);
+    //     }
+    // }
 
     function setPoolURI(uint256 _poolId, string calldata _uri)
         public

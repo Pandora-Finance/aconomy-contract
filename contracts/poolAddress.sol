@@ -15,6 +15,7 @@ import "./Libraries/LibCalculations.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { BokkyPooBahsDateTimeLibrary as BPBDTL } from "./Libraries/DateTimeLib.sol";
 
 contract poolAddress is poolStorage, ReentrancyGuard {
     address poolRegistryAddress;
@@ -88,6 +89,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
             "Pool is closed"
         );
+        require(_duration % 30 days == 0);
+        require(_APR >= 100, "apr too low");
+        require(_principal >= 10000, "principal too low");
 
         loanId_ = loanId;
 
@@ -102,6 +106,8 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         loan.loanDetails.principal = _principal;
         loan.loanDetails.loanDuration = _duration;
         loan.loanDetails.timestamp = uint32(block.timestamp);
+        loan.terms.installments = _duration / 30 days;
+        loan.terms.installmentsPaid = 0;
 
         loan.terms.paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
@@ -120,6 +126,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             loan.terms.paymentCycle,
             _APR
         );
+
+        uint256 monthlyPrincipal = _principal / loan.terms.installments;
+
+        loan.terms.monthlyCycleInterest = loan.terms.paymentCycleAmount - monthlyPrincipal;
 
         loan.state = LoanState.PENDING;
 
@@ -265,7 +275,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
     function isPaymentLate(uint256 _loanId) public view returns (bool) {
         if (loans[_loanId].state != LoanState.ACCEPTED) return false;
-        return uint32(block.timestamp) > calculateNextDueDate(_loanId);
+        return uint32(block.timestamp) > calculateNextDueDate(_loanId) + 7 days;
     }
 
     function calculateNextDueDate(
@@ -281,7 +291,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         uint32 delta = lastRepaidTimestamp(_loanId) -
             loan.loanDetails.acceptedTimestamp;
         if (delta > 0) {
-            uint32 repaymentCycle = 1 + (delta / loan.terms.paymentCycle);
+            uint32 repaymentCycle = (delta / loan.terms.paymentCycle);
             dueDate_ += (repaymentCycle * loan.terms.paymentCycle);
         }
 
@@ -296,40 +306,92 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         }
     }
 
-    function repayYourLoan(uint256 _loanId) external nonReentrant {
+    function viewInstallmentAmount(uint256 _loanId) external view returns(uint256){
+        uint32 LastRepaidTimestamp = lastRepaidTimestamp(_loanId);
+        uint256 lastPaymentCycle = BPBDTL.diffMonths(
+                loans[_loanId].loanDetails.acceptedTimestamp,
+                LastRepaidTimestamp
+            );
+        uint256 monthsSinceStart = BPBDTL.diffMonths(
+                loans[_loanId].loanDetails.acceptedTimestamp,
+                block.timestamp
+            );
+
+        if(monthsSinceStart > lastPaymentCycle) {
+            return loans[_loanId].terms.paymentCycleAmount;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    function repayMonthlyInstallment(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        (
-            uint256 owedAmount,
-            uint256 dueAmount,
-            uint256 interest
-        ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
-        _repayLoan(
-            _loanId,
-            Payment({principal: dueAmount, interest: interest}),
-            owedAmount + interest
-        );
-        emit repaidAmounts(owedAmount, dueAmount, interest);
+        require(loans[_loanId].terms.installmentsPaid + 1 <= loans[_loanId].terms.installments);
+        require(block.timestamp > calculateNextDueDate(_loanId));
+
+        if(loans[_loanId].terms.installmentsPaid + 1 == loans[_loanId].terms.installments) {
+            _repayFullLoan(_loanId);
+        } else {
+            uint256 monthlyInterest = loans[_loanId].terms.monthlyCycleInterest;
+            uint256 monthlyDue = loans[_loanId].terms.paymentCycleAmount;
+            uint256 due = monthlyDue - monthlyInterest;
+
+            (
+                uint256 owedAmount,
+                ,
+                uint256 interest
+            ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+            loans[_loanId].terms.installmentsPaid ++;
+
+            _repayLoan(
+                _loanId,
+                Payment({principal: due, interest: monthlyInterest}),
+                owedAmount + interest
+            );
+            loans[_loanId].loanDetails.lastRepaidTimestamp = 
+                loans[_loanId].loanDetails.acceptedTimestamp +
+                (loans[_loanId].terms.installmentsPaid * loans[_loanId].terms.paymentCycle);
+            }
     }
 
-    function viewInstallmentAmount(
-        uint256 _loanId
-    ) public view returns (uint256) {
-        (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
-            loans[_loanId],
-            block.timestamp
-        );
 
-        uint256 paymentAmount = dueAmount + interest;
-        if (
-            loans[_loanId].state != LoanState.ACCEPTED ||
-            loans[_loanId].state == LoanState.PAID
-        ) {
-            paymentAmount = 0;
-        }
-        return paymentAmount;
-    }
+    // function repayYourLoan(uint256 _loanId) external nonReentrant {
+    //     if (loans[_loanId].state != LoanState.ACCEPTED) {
+    //         revert("Loan must be accepted");
+    //     }
+    //     (
+    //         uint256 owedAmount,
+    //         uint256 dueAmount,
+    //         uint256 interest
+    //     ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
+    //     _repayLoan(
+    //         _loanId,
+    //         Payment({principal: dueAmount, interest: interest}),
+    //         owedAmount + interest
+    //     );
+    //     emit repaidAmounts(owedAmount, dueAmount, interest);
+    // }
+
+    // function viewInstallmentAmount(
+    //     uint256 _loanId
+    // ) public view returns (uint256) {
+    //     (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
+    //         loans[_loanId],
+    //         block.timestamp
+    //     );
+
+    //     uint256 paymentAmount = dueAmount + interest;
+    //     if (
+    //         loans[_loanId].state != LoanState.ACCEPTED ||
+    //         loans[_loanId].state == LoanState.PAID
+    //     ) {
+    //         paymentAmount = 0;
+    //     }
+    //     return paymentAmount;
+    // }
 
     function viewFullRepayAmount(
         uint256 _loanId
@@ -349,7 +411,20 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return paymentAmount;
     }
 
-    function repayFullLoan(uint256 _loanId) external nonReentrant {
+    function _repayFullLoan(uint256 _loanId) private {
+        if (loans[_loanId].state != LoanState.ACCEPTED) {
+            revert("Loan must be accepted");
+        }
+        (uint256 owedPrincipal, , uint256 interest) = LibCalculations
+            .owedAmount(loans[_loanId], block.timestamp);
+        _repayLoan(
+            _loanId,
+            Payment({principal: owedPrincipal, interest: interest}),
+            owedPrincipal + interest
+        );
+    }
+
+    function repayFullLoan(uint256 _loanId) external nonReentrant{
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
