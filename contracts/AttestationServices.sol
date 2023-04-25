@@ -29,8 +29,6 @@ contract AttestationServices {
         address attester;
         // The time when the attestation was created (Unix timestamp).
         uint256 time;
-        // The time when the attestation expires (Unix timestamp).
-        uint256 expirationTime;
         // The time when the attestation was revoked (Unix timestamp).
         uint256 revocationTime;
         // Custom attestation data.
@@ -59,6 +57,13 @@ contract AttestationServices {
         bytes32 indexed schema
     );
 
+    event Revoked(
+        address indexed recipient,
+        address indexed attester,
+        bytes32 uuid,
+        bytes32 indexed schema
+    );
+
     function getASRegistry() external view returns (IAttestationRegistry) {
         return _asRegistry;
     }
@@ -66,22 +71,21 @@ contract AttestationServices {
     function attest(
         address recipient,
         bytes32 schema,
-        uint256 expirationTime,
         bytes calldata data
     ) public virtual returns (bytes32) {
-        return _attest(recipient, schema, expirationTime, data, msg.sender);
+        return _attest(recipient, schema, data, msg.sender);
+    }
+
+    function revoke(bytes32 uuid) public virtual {
+        _revoke(uuid, msg.sender);
     }
 
     function _attest(
         address recipient,
         bytes32 schema,
-        uint256 expirationTime,
         bytes calldata data,
         address attester
     ) private returns (bytes32) {
-        if (expirationTime <= block.timestamp) {
-            revert("InvalidExpirationTime");
-        }
 
         IAttestationRegistry.ASRecord memory asRecord = _asRegistry.getAS(
             schema
@@ -96,7 +100,6 @@ contract AttestationServices {
             recipient: recipient,
             attester: attester,
             time: block.timestamp,
-            expirationTime: expirationTime,
             revocationTime: 0,
             data: data
         });
@@ -113,6 +116,25 @@ contract AttestationServices {
         return _lastUUID;
     }
 
+    function _revoke(bytes32 uuid, address attester) private {
+        Attestation storage attestation = _db[uuid];
+        if (attestation.uuid == EMPTY_UUID) {
+            revert("Not found");
+        }
+
+        if (attestation.attester != attester) {
+            revert("Access denied");
+        }
+
+        if (attestation.revocationTime != 0) {
+            revert ("Already Revoked");
+        }
+
+        attestation.revocationTime = block.timestamp;
+
+        emit Revoked(attestation.recipient, attester, uuid, attestation.schema);
+    }
+
     function _getUUID(Attestation memory attestation)
         private
         view
@@ -125,7 +147,6 @@ contract AttestationServices {
                     attestation.recipient,
                     attestation.attester,
                     attestation.time,
-                    attestation.expirationTime,
                     attestation.data,
                     _attestationsCount
                 )
@@ -135,7 +156,6 @@ contract AttestationServices {
     function isAddressActive(bytes32 uuid) public view returns (bool) {
         return
             isAddressValid(uuid) &&
-            _db[uuid].expirationTime >= block.timestamp &&
             _db[uuid].revocationTime == 0;
     }
 
