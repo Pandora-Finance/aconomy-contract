@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
-import "../poolAddress.sol";
+import "../poolStorage.sol";
 
 library LibCalculations {
     using WadRayMath for uint256;
@@ -77,7 +77,7 @@ library LibCalculations {
         return numerator.wadDiv(denominator);
     }
 
-    function lastRepaidTimestamp(poolAddress.Loan storage _loan)
+    function lastRepaidTimestamp(poolStorage.Loan storage _loan)
         internal
         view
         returns (uint32)
@@ -121,7 +121,7 @@ library LibCalculations {
             );
     }
 
-    function owedAmount(poolAddress.Loan storage _loan, uint256 _timestamp)
+    function owedAmount(poolStorage.Loan storage _loan, uint256 _timestamp)
         internal
         view
         returns (

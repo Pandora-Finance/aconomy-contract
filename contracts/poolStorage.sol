@@ -17,7 +17,7 @@ abstract contract poolStorage {
 
     enum LoanState {
         PENDING,
-        CANCELLED,
+        LIQUIDATED,
         ACCEPTED,
         PAID
     }

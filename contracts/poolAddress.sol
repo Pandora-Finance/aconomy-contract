@@ -16,17 +16,20 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { BokkyPooBahsDateTimeLibrary as BPBDTL } from "./Libraries/DateTimeLib.sol";
+import "./CollateralController.sol";
 
 contract poolAddress is poolStorage, ReentrancyGuard {
     address poolRegistryAddress;
     address AconomyFeeAddress;
+    CollateralController public collateralController;
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    constructor(address _poolRegistry, address _AconomyFeeAddress) {
+    constructor(address _poolRegistry, address _AconomyFeeAddress, address _collateralController) {
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
+        collateralController = CollateralController(_collateralController);
     }
 
     modifier pendingLoan(uint256 _loanId) {
@@ -276,6 +279,25 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     function isPaymentLate(uint256 _loanId) public view returns (bool) {
         if (loans[_loanId].state != LoanState.ACCEPTED) return false;
         return uint32(block.timestamp) > calculateNextDueDate(_loanId) + 7 days;
+    }
+
+    function liquidateLoan(uint256 _loanId) external nonReentrant{
+        require(isLoanDefaulted(_loanId));
+
+        Loan storage loan = loans[_loanId];
+
+        (uint256 owedPrincipal, , uint256 interest) = LibCalculations
+            .owedAmount(loans[_loanId], block.timestamp);
+        _repayLoan(
+            _loanId,
+            Payment({principal: owedPrincipal, interest: interest}),
+            owedPrincipal + interest
+        );
+
+        loan.state = LoanState.LIQUIDATED;
+
+        // If loan is backed by collateral, withdraw and send to the liquidator
+        collateralController.liquidateCollateral(_loanId, msg.sender);
     }
 
     function calculateNextDueDate(
