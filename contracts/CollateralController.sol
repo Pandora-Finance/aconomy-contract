@@ -18,6 +18,10 @@ contract CollateralController is ReentrancyGuard{
     mapping(uint256 => Collateral) internal loanCollateral;
     mapping(uint256 => bool) public isLoanCollateralized;
 
+    event CollateralDeposited(uint256 loanId, address erc20contract, uint256 amount, address depositor);
+    event CollateralWithdrawn(uint256 loanId, address erc20Contract, uint256 amount, address withdrawer);
+    event CollateralLiquidated(uint256 loanId, address erc20Contract, uint256 amount, address liquidator);
+
     constructor(address _address) {
         _Address = _address;
     }
@@ -42,6 +46,8 @@ contract CollateralController is ReentrancyGuard{
         loanCollateral[_loanId] = collateral;
         isLoanCollateralized[_loanId] = true;
         IERC20(_contract).transferFrom(msg.sender, address(this), _amount);
+
+        emit CollateralDeposited(_loanId, _contract, _amount, msg.sender);
     }
 
     function withdrawCollateral(uint256 _loanId) external nonReentrant{
@@ -55,6 +61,13 @@ contract CollateralController is ReentrancyGuard{
         loanCollateral[_loanId].withdrawn = true;
 
         IERC20(loanCollateral[_loanId].collateralAddress).transfer(msg.sender, loanCollateral[_loanId].amount);
+
+        emit CollateralWithdrawn(
+            _loanId, 
+            loanCollateral[_loanId].collateralAddress, 
+            loanCollateral[_loanId].amount, 
+            msg.sender
+        );
     }
 
     function liquidateCollateral(uint256 _loanId, address _liquidator) external {
@@ -63,6 +76,13 @@ contract CollateralController is ReentrancyGuard{
         loanCollateral[_loanId].withdrawn = true;
         
         IERC20(loanCollateral[_loanId].collateralAddress).transfer(_liquidator, loanCollateral[_loanId].amount);
+
+        emit CollateralLiquidated(
+            _loanId, 
+            loanCollateral[_loanId].collateralAddress, 
+            loanCollateral[_loanId].amount, 
+            _liquidator
+        );
     }
 
 }

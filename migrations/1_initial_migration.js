@@ -42,7 +42,6 @@ module.exports = async function (deployer) {
   var collectionFactory = await CollectionFactory.deployed();
 
 
-
   await deployer.deploy(FundingPool);
   var fundingPool = await FundingPool.deployed();
 
@@ -57,8 +56,18 @@ module.exports = async function (deployer) {
   await deployer.link(BPBDTL, [poolAddress]);
   
   await deployer.deploy(poolAddress, poolRegis.address, aconomyfee.address)
+  var poolAdd = await poolAddress.deployed();
+  var collateral = await poolAdd.collateralController()
 
   await deployer.deploy(NftLendingBorrowing, aconomyfee.address)
+  var nftlendborr = await NftLendingBorrowing.deployed();
+
+  console.log("AconomyFee", aconomyfee.address);
+  console.log("FundingPool", fundingPool.address);
+  console.log("poolRegistry", poolRegis.address);
+  console.log("poolAddress", poolAdd.address);
+  console.log("CollateralController", collateral)
+  console.log("NFTlendingBorrowing", nftlendborr.address);
 
 
   await deployer.deploy(lendingToken, 100000000000)

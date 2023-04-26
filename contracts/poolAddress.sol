@@ -26,10 +26,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    constructor(address _poolRegistry, address _AconomyFeeAddress, address _collateralController) {
+    constructor(address _poolRegistry, address _AconomyFeeAddress) {
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
-        collateralController = CollateralController(_collateralController);
+        collateralController = new CollateralController(address(this));
     }
 
     modifier pendingLoan(uint256 _loanId) {
@@ -268,8 +268,8 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         if (loanDefaultDuration[_loanId] == 0) return false;
 
-        return (uint32(block.timestamp) - (loan.loanDetails.acceptedTimestamp + loan.loanDetails.loanDuration) >
-            loanDefaultDuration[_loanId]);
+        return ((int32(uint32(block.timestamp)) - int32(loan.loanDetails.acceptedTimestamp + loan.loanDetails.loanDuration)) >
+            int32(loanDefaultDuration[_loanId]));
     }
 
     function lastRepaidTimestamp(uint256 _loanId) public view returns (uint32) {
@@ -282,7 +282,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     }
 
     function liquidateLoan(uint256 _loanId) external nonReentrant{
-        require(isLoanDefaulted(_loanId));
+        require(isLoanDefaulted(_loanId), "not defaulted");
 
         Loan storage loan = loans[_loanId];
 
