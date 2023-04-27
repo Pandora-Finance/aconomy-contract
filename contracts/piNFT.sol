@@ -175,7 +175,9 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         require(msg.sender == approvedValidator[_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
-        require(erc20Contracts[_tokenId].length < 1);
+        if(erc20Contracts[_tokenId].length >= 1) {
+            require(_erc20Contract == erc20Contracts[_tokenId][0]);
+        }
         NFTowner[_tokenId] = ERC721.ownerOf(_tokenId);
         updateERC20(_tokenId, _erc20Contract, _value);
         setRoyaltiesForValidator(_tokenId, royalties);
