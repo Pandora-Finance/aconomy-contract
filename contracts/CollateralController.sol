@@ -32,6 +32,9 @@ contract CollateralController is ReentrancyGuard{
 
     function depositCollateral(uint256 _loanId, address _contract, uint256 _amount) external {
         (address borrower,,,,,,poolStorage.LoanState state) = poolStorage(_Address).loans(_loanId);
+        if(loanCollateral[_loanId].amount != 0) {
+            require(loanCollateral[_loanId].withdrawn == true, "withdraw before re deposit");
+        } 
         require(msg.sender == borrower);
         require(state == poolStorage.LoanState.PENDING);
         require(_contract != address(0));
