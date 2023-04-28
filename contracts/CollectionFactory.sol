@@ -94,7 +94,7 @@ contract CollectionFactory {
     function setRoyaltiesForCollection(
         uint256 _collectionId,
         LibShare.Share[] memory royalties
-    ) internal {
+    ) public collectionOwner(_collectionId){
         require(royalties.length <= 10, "Atmost 10 royalties can be added");
         delete royaltiesForCollection[_collectionId];
         uint256 sumRoyalties = 0;

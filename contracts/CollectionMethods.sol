@@ -188,8 +188,9 @@ contract CollectionMethods is
     function setRoyaltiesForValidator(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
-    ) internal {
-        require(royalties.length <= 10, "limit");
+    ) public {
+        require(msg.sender == approvedValidator[_tokenId]);
+        require(royalties.length <= 10);
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {

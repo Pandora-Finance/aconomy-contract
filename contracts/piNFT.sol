@@ -216,12 +216,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     function setRoyaltiesForValidator(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
-    ) internal {
+    ) public {
+        require(msg.sender == approvedValidator[_tokenId]);
         require(royalties.length <= 10, "> 10");
         delete royaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
-            require(royalties[i].account != address(0x0), "0 address");
+            require(royalties[i].account != address(0x0));
             require(royalties[i].value != 0, "royalty 0");
             royaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
