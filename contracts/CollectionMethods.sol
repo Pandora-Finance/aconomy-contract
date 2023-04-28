@@ -146,7 +146,7 @@ contract CollectionMethods is
         require(_erc20Contract != address(0), "zero");
         require(_value != 0);
         if(erc20Contracts[_tokenId].length >= 1) {
-            require(_erc20Contract == erc20Contracts[_tokenId][0]);
+            require(_erc20Contract == erc20Contracts[_tokenId][0], "invalid");
         }
         NFTowner[_tokenId] = ERC721Upgradeable.ownerOf(_tokenId);
         updateERC20(_tokenId, _erc20Contract, _value);
@@ -261,7 +261,7 @@ contract CollectionMethods is
         address _erc20Contract,
         uint256 _value
     ) private {
-        require(_to != address(0), "0 address");
+        require(_to != address(0));
         removeERC20(_tokenId, _erc20Contract, _value);
         require(
             IERC20(_erc20Contract).transfer(_to, _value),
