@@ -1,6 +1,7 @@
 const collectionFactory = artifacts.require("CollectionFactory");
 const SampleERC20 = artifacts.require("mintToken");
 const CollectionMethods = artifacts.require("CollectionMethods");
+const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract("CollectionFactory", (accounts) => {
   let CollectionFactory, sampleERC20, collectionInstance;
@@ -72,6 +73,21 @@ contract("CollectionFactory", (accounts) => {
     assert(validatorBal == 500, "Validators balance not reduced");
   });
 
+  it("should let validator add more ERC20 tokens to alice's NFT", async () => {
+    await sampleERC20.approve(collectionInstance.address, 200, { from: validator });
+    const tx = await collectionInstance.addERC20(0, sampleERC20.address, 200, [[validator, 200]], {
+      from: validator,
+    });
+    const tokenBal = await collectionInstance.viewBalance(0, sampleERC20.address);
+    const validatorBal = await sampleERC20.balanceOf(validator);
+    assert(tokenBal == 700, "Failed to add ERC20 tokens into NFT");
+    assert(validatorBal == 300, "Validators balance not reduced");
+  });
+
+  it("should not let validator add funds of a different erc20", async () => {
+    await expectRevert(collectionInstance.addERC20(0, accounts[5], 200, [[validator, 200]], {from: validator}), "invalid")
+  })
+
   it("should let alice transfer NFT to bob", async () => {
     await collectionInstance.transferAfterFunding(0, bob, { from: alice });
     assert.equal(await collectionInstance.ownerOf(0), bob, "Failed to transfer NFT");
@@ -92,6 +108,7 @@ contract("CollectionFactory", (accounts) => {
     assert.equal(await collectionInstance.ownerOf(0), collectionInstance.address);
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 500);
+    assert.equal(await sampleERC20.balanceOf(collectionInstance.address), 200);
   })
 
   it("should let alice repay erc20", async () => {

@@ -75,6 +75,21 @@ contract("PiNFT", (accounts) => {
     assert(validatorBal == 500, "Validators balance not reduced");
   });
 
+  it("should let the validator add more erc20 tokens of the same contract", async () => {
+    await sampleERC20.approve(piNFT.address, 200, { from: validator });
+    const tx = await piNFT.addERC20(0, sampleERC20.address, 200, [[validator, 200]], {
+      from: validator,
+    });
+    const tokenBal = await piNFT.viewBalance(0, sampleERC20.address);
+    const validatorBal = await sampleERC20.balanceOf(validator);
+    assert(tokenBal == 700, "Failed to add ERC20 tokens into NFT");
+    assert(validatorBal == 300, "Validators balance not reduced");
+  })
+
+  it("should not let validator add funds of a different erc20", async () => {
+    await expectRevert(piNFT.addERC20(0, accounts[5], 200, [[validator, 200]], {from: validator}), "invalid")
+  })
+
   it("should let alice transfer NFT to bob", async () => {
     await piNFT.transferAfterFunding(0, bob, { from: alice });
     assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
@@ -95,6 +110,7 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.ownerOf(0), piNFT.address);
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 500);
+    assert.equal(await sampleERC20.balanceOf(piNFT.address), 200);
   })
 
   it("should let alice repay erc20", async () => {
