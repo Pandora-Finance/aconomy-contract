@@ -116,6 +116,7 @@ contract("FundingPool", (accounts) => {
         erc20Amount,
         loanDefaultDuration,
         expiration,
+        1000,
         { from: lender }
       );
       bidId = tx.logs[0].args.BidId.toNumber();
@@ -132,6 +133,7 @@ contract("FundingPool", (accounts) => {
         10000,
         loanDefaultDuration,
         expiration,
+        1000,
         { from: lender }
       );
       bidId1 = tx1.logs[0].args.BidId.toNumber();
@@ -166,6 +168,7 @@ contract("FundingPool", (accounts) => {
           erc20Amount,
           maxLoanDuration,
           loanExpirationDuration,
+          1000,
           { from: nonLender }
         ),
         "Not verified lender"
@@ -433,6 +436,7 @@ contract("FundingPool", (accounts) => {
         erc20Amount,
         loanDefaultDuration,
         expiration,
+        1000,
         { from: lender }
       );
       bidId = tx.logs[0].args.BidId.toNumber();
