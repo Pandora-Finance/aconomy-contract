@@ -23,6 +23,7 @@ contract("PiNFT", (accounts) => {
 
   it("should mint an ERC721 token to alice", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    console.log(tx)
     await expectRevert(piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]), "overflow")
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");

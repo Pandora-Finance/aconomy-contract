@@ -6,7 +6,7 @@ module.exports = async function (deployer) {
   await deployer.deploy(LibMarket);
   await deployer.link(LibMarket, [PiMarket])
 
-  await deployer.deploy(PiMarket, "0x7852ef7e88f74138755883fee684abc50af3341e");
+  await deployer.deploy(PiMarket, "0xFF708C09221d5BA90eA3e3A3C42E2aBc8cA8aAc9");
   let market = await PiMarket.deployed();
   console.log("market:", market.address);
 };

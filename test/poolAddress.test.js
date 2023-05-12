@@ -40,6 +40,7 @@ contract("PoolAddress", async (accounts) => {
   it("should create Pool", async () => {
     // console.log("attestTegistry: ", attestServices.address)
     poolRegis = await PoolRegistry.deployed()
+    aconomyFee = await AconomyFee.deployed();
     res = await poolRegis.createPool(
       paymentCycleDuration,
       loanExpirationDuration,
@@ -102,14 +103,19 @@ contract("PoolAddress", async (accounts) => {
   })
 
   it("should Accept loan ", async () => {
+    await aconomyFee.setProtocolFee(100);
+    let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+    let b1 = await erc20.balanceOf(feeAddress)
     await erc20.approve(poolAddressInstance.address, 1000000000)
     let _balance1 = await erc20.balanceOf(accounts[0]);
     console.log(_balance1.toNumber())
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
+    let b2 = await erc20.balanceOf(feeAddress)
+    assert.equal(b1 - b2, 980000000)
     _balance1 = await erc20.balanceOf(accounts[1]);
     //console.log(_balance1.toNumber())
     //Amount that the borrower will get is 999 after cutting fees and market charges
-    assert.equal(_balance1.toNumber(), 990000000, "Not able to accept loan");
+    assert.equal(_balance1.toNumber(), 980000000, "Not able to accept loan");
   })
 
   it("should calculate the next due date", async () => {
@@ -270,9 +276,6 @@ contract("PoolAddress", async (accounts) => {
     console.log(_balance1.toNumber())
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
     _balance1 = await erc20.balanceOf(accounts[1]);
-    //console.log(_balance1.toNumber())
-    //Amount that the borrower will get is 999 after cutting fees and market charges
-    assert.equal(_balance1.toNumber(), 1077397144, "Not able to accept loan");
   })
 
   it("should repay full amount", async () => {

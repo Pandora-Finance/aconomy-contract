@@ -12,7 +12,7 @@ contract("PiMarket", async (accounts) => {
     let bob = accounts[2];
     let carl = accounts[3];
     let royaltyReceiver = accounts[3];
-    let feeReceiver = '0x7852ef7e88f74138755883fee684abc50af3341e';
+    let feeReceiver = '0xFF708C09221d5BA90eA3e3A3C42E2aBc8cA8aAc9';
     let bidder1 = accounts[5];
     let bidder2 = accounts[6];
 

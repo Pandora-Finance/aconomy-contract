@@ -68,6 +68,7 @@ contract("FundingPool", (accounts) => {
     it("should create Pool", async () => {
       //console.log("attestTegistry: ", attestServices.address)
       poolRegis = await PoolRegistry.deployed()
+      aconomyFee = await AconomyFee.deployed();
       res = await poolRegis.createPool(
         loanDefaultDuration,
         loanExpirationDuration,
@@ -183,6 +184,9 @@ contract("FundingPool", (accounts) => {
     });
 
     it('should accept the bid and emit AcceptedBid event', async () => {
+      await aconomyFee.setProtocolFee(100);
+      let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+      let b1 = await erc20.balanceOf(feeAddress)
       const tx = await fundingpoolInstance.AcceptBid(
         poolId,
         erc20.address,
@@ -190,7 +194,9 @@ contract("FundingPool", (accounts) => {
         lender,
         receiver
       );
+      let b2 = await erc20.balanceOf(feeAddress)
       console.log(poolId)
+      assert.equal(b2 - b1, 100)
       // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
       //   .to.emit(fundingpoolInstance, 'AcceptedBid')
       //   .withArgs(
