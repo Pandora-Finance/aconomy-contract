@@ -120,6 +120,13 @@ contract("NFTlendingBorrowing", async (accounts) => {
             1,
             0
         )
+        let nft = await nftLendBorrow.NFTdetails(1);
+        let bid = await nftLendBorrow.Bids(1,0);
+        assert.equal(nft.bidAccepted, true);
+        assert.equal(nft.listed, true);
+        assert.equal(nft.repaid, false);
+        assert.equal(bid.bidAccepted, true);
+        assert.equal(bid.withdrawn, false);
     })
 
     it("Should Reject Third Bid by NFT Owner", async () => {
@@ -154,6 +161,8 @@ contract("NFTlendingBorrowing", async (accounts) => {
             0
         )
         const amount = tx.logs[0].args.Amount.toNumber()
+        let nft = await nftLendBorrow.NFTdetails(1);
+        assert.equal(nft.listed, false)
     })
 
     it("Withdraw second Bid", async () => {
@@ -165,7 +174,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
         const res = await nftLendBorrow.withdraw(1, 1, { from: carl })
 
         assert(res.receipt.status == true, "Unable to withdraw bid")
-
+        let bid = await nftLendBorrow.Bids(1,1);
+        assert.equal(bid.bidAccepted, false);
+        assert.equal(bid.withdrawn, true);
     })
 
     it("Should remove the NFT from listing", async () => {
@@ -191,7 +202,5 @@ contract("NFTlendingBorrowing", async (accounts) => {
         let t = await nftLendBorrow.NFTdetails(2);
         assert.equal(t.listed, false);
     })
-
-
 
 });
