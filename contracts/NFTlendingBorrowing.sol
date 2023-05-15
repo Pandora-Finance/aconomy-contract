@@ -197,7 +197,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     function AcceptBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
         require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
-        require(!NFTdetails[_NFTid].bidAccepted);
+        require(!NFTdetails[_NFTid].bidAccepted, "bid already accepted");
         require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
         require(
             NFTdetails[_NFTid].tokenIdOwner == msg.sender,
@@ -280,6 +280,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     function Repay(uint256 _NFTid, uint256 _bidId) external nonReentrant {
         require(NFTdetails[_NFTid].bidAccepted, "Bid Not Accepted yet");
         require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
+        require(Bids[_NFTid][_bidId].bidAccepted, "Bid not Accepted");
         require(!NFTdetails[_NFTid].repaid, "Already Repaid");
 
         // Calculate percentage Amount
@@ -299,6 +300,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
 
         NFTdetails[_NFTid].repaid = true;
+        NFTdetails[_NFTid].listed = false;
 
         // transferring NFT to this address
         ERC721(NFTdetails[_NFTid].contractAddress).safeTransferFrom(
@@ -346,6 +348,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
                 ),
             "Only token owner can execute"
         );
+        require(NFTdetails[_NFTid].bidAccepted == false, "bid has been accepted");
         if (!NFTdetails[_NFTid].listed) {
             revert("It's aiready removed");
         }
