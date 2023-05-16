@@ -159,11 +159,12 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     // Get Collection Royalty
     function getCollectionRoyalty(
         address _collectionFactoryAddress,
-        uint256 _collectionId
+        address _collectionAddress
     ) public view returns (LibShare.Share[] memory) {
+        uint256 collectionId = CollectionFactory(_collectionFactoryAddress).addressToCollectionId(_collectionAddress);
         return
             CollectionFactory(_collectionFactoryAddress).getCollectionRoyalties(
-                _collectionId
+                collectionId
             );
     }
 
@@ -198,7 +199,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         if (_fromCollection) {
             royalties = getCollectionRoyalty(
                 collectionFactoryAddress,
-                meta.tokenId
+                meta.tokenContractAddress
             );
             validatorRoyalties = getCollectionValidatorRoyalty(
                 meta.tokenContractAddress,
@@ -326,7 +327,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         if (_fromCollection) {
             royalties = getCollectionRoyalty(
                 collectionFactoryAddress,
-                _tokenMeta[_saleId].tokenId
+                _tokenMeta[_saleId].tokenContractAddress
             );
             validatorRoyalties = getCollectionValidatorRoyalty(
                 _tokenMeta[_saleId].tokenContractAddress,

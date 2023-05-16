@@ -22,6 +22,8 @@ contract CollectionFactory {
     // collectionId => collwctionMeta
     mapping(uint256 => CollectionMeta) public collections;
 
+    mapping(address => uint256) public addressToCollectionId;
+
     // collectionId => royalties
     mapping(uint256 => LibShare.Share[]) public royaltiesForCollection;
 
@@ -85,6 +87,7 @@ contract CollectionFactory {
         );
 
         collections[collectionId_] = details;
+        addressToCollectionId[collectionAddress] = collectionId_;
         setRoyaltiesForCollection(collectionId_, royalties);
 
         emit CollectionCreated(collectionId_, collectionAddress);
