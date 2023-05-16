@@ -19,6 +19,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     Counters.Counter private _swapIdCounter;
 
     address internal feeAddress;
+    address public collectionFactoryAddress;
 
     struct TokenMeta {
         uint256 saleId;
@@ -72,9 +73,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     );
     event updatedSalePrice(uint256 saleId, uint256 Price);
 
-    constructor(address _feeAddress) {
+    constructor(address _feeAddress, address _collectionFactoryAddress) {
         require(_feeAddress != address(0), "Fee address cannot be zero");
+        require(_collectionFactoryAddress != address(0), "Address cannot be zero");
         feeAddress = _feeAddress;
+        collectionFactoryAddress = _collectionFactoryAddress;
     }
 
     modifier onlyOwnerOfToken(address _contractAddress, uint256 _tokenId) {
@@ -194,7 +197,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         LibShare.Share[] memory validatorRoyalties;
         if (_fromCollection) {
             royalties = getCollectionRoyalty(
-                meta.tokenContractAddress,
+                collectionFactoryAddress,
                 meta.tokenId
             );
             validatorRoyalties = getCollectionValidatorRoyalty(
@@ -322,7 +325,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         LibShare.Share[] memory validatorRoyalties;
         if (_fromCollection) {
             royalties = getCollectionRoyalty(
-                _tokenMeta[_saleId].tokenContractAddress,
+                collectionFactoryAddress,
                 _tokenMeta[_saleId].tokenId
             );
             validatorRoyalties = getCollectionValidatorRoyalty(

@@ -187,6 +187,7 @@ contract("FundingPool", (accounts) => {
       await aconomyFee.setProtocolFee(100);
       let feeAddress = await aconomyFee.getAconomyOwnerAddress();
       let b1 = await erc20.balanceOf(feeAddress)
+      console.log("owner1", b1.toString())
       const tx = await fundingpoolInstance.AcceptBid(
         poolId,
         erc20.address,
@@ -195,6 +196,7 @@ contract("FundingPool", (accounts) => {
         receiver
       );
       let b2 = await erc20.balanceOf(feeAddress)
+      console.log("owner2", b2.toString())
       console.log(poolId)
       assert.equal(b2 - b1, 100)
       // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
