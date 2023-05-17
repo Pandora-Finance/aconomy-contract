@@ -88,7 +88,7 @@ contract("PiMarket", async (accounts) => {
             let _balance1 = await sampleERC20.balanceOf(alice);
             let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
             let _balance3 = await sampleERC20.balanceOf(feeReceiver);
-            let _balance4 = await sampleERC20.balanceOf(bob);
+            let _balance4 = await sampleERC20.balanceOf(validator);
             // console.log("Balance",_balance4.toString(), _balance1.toString())
             await sampleERC20.approve(piMarket.address, 5000, { from: bob });
             result2 = await piMarket.BuyNFT(1, false, { from: bob });
@@ -108,6 +108,7 @@ contract("PiMarket", async (accounts) => {
             let balance1 = await sampleERC20.balanceOf(alice);
             let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
             let balance3 = await sampleERC20.balanceOf(feeReceiver);
+            let balance4 = await sampleERC20.balanceOf(validator);
             // let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
             // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
             assert.equal(
@@ -129,6 +130,12 @@ contract("PiMarket", async (accounts) => {
                 balance3 - _balance3,
                 (5000 * 100) / 10000,
                 "Failed to transfer fee amount"
+            );
+
+            assert.equal(
+                balance4 - _balance4,
+                (5000 * 200) / 10000,
+                "Failed to transfer validator amount"
             );
 
             meta = await piMarket._tokenMeta(1);
@@ -252,6 +259,7 @@ contract("PiMarket", async (accounts) => {
             let _balance1 = await sampleERC20.balanceOf(alice);
             let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
             let _balance3 = await sampleERC20.balanceOf(feeReceiver);
+            let _balance4 = await sampleERC20.balanceOf(validator);
 
             console.log("ss1", _balance1.toString())
 
@@ -262,6 +270,7 @@ contract("PiMarket", async (accounts) => {
             let balance1 = await sampleERC20.balanceOf(alice);
             let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
             let balance3 = await sampleERC20.balanceOf(feeReceiver);
+            let balance4 = await sampleERC20.balanceOf(validator);
             // let tt = BigNumber(_balance1).minus(BigNumber(balance1));
             // console.log("Alic Balance",balance1-_balance1);
             // console.log(BigNumber(balance2).minus(BigNumber(_balance2)));
@@ -282,6 +291,11 @@ contract("PiMarket", async (accounts) => {
                 balance3 - _balance3,
                 (7000 * 100) / 10000,
                 "Failed to transfer fee amount"
+            );
+            assert.equal(
+                balance4 - _balance4,
+                (7000 * 200) / 10000,
+                "Failed to transfer validator amount"
             );
         });
 

@@ -92,6 +92,7 @@ contract("PiMarket", async (accounts) => {
             let _balance1 = await web3.eth.getBalance(alice);
             let _balance2 = await web3.eth.getBalance(royaltyReceiver);
             let _balance3 = await web3.eth.getBalance(feeReceiver);
+            let _balance4 = await web3.eth.getBalance(validator);
 
             result2 = await piMarket.BuyNFT(1, true, { from: bob, value: 5000 });
             // console.log(result2.receipt.rawLogs)
@@ -104,6 +105,7 @@ contract("PiMarket", async (accounts) => {
             let balance1 = await web3.eth.getBalance(alice);
             let balance2 = await web3.eth.getBalance(royaltyReceiver);
             let balance3 = await web3.eth.getBalance(feeReceiver);
+            let balance4 = await web3.eth.getBalance(validator);
             let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
             console.log(balance1, " ", _balance1, " ", temp.toString())
             assert.equal(
@@ -125,6 +127,12 @@ contract("PiMarket", async (accounts) => {
                 BigNumber(balance3).minus(BigNumber(_balance3)),
                 (5000 * 100) / 10000,
                 "Failed to transfer fee amount"
+            );
+
+            assert.equal(
+                BigNumber(balance4).minus(BigNumber(_balance4)),
+                (5000 * 200) / 10000,
+                "Failed to transfer validator amount"
             );
 
             meta = await piMarket._tokenMeta(1);
@@ -238,6 +246,7 @@ contract("PiMarket", async (accounts) => {
             let _balance1 = await web3.eth.getBalance(alice);
             let _balance2 = await web3.eth.getBalance(royaltyReceiver);
             let _balance3 = await web3.eth.getBalance(feeReceiver);
+            let _balance4 = await web3.eth.getBalance(validator);
 
             console.log("Ball", _balance1.toString());
 
@@ -248,8 +257,9 @@ contract("PiMarket", async (accounts) => {
             let balance1 = await web3.eth.getBalance(alice);
             let balance2 = await web3.eth.getBalance(royaltyReceiver);
             let balance3 = await web3.eth.getBalance(feeReceiver);
+            let balance4 = await web3.eth.getBalance(validator);
             // assert.equal(
-            //     balance1-_balance1,
+            //     balance1 - _balance1,
             //   (7000 * 9200) / 10000,
             //   "Failed to transfer NFT amount"
             // );
@@ -263,6 +273,11 @@ contract("PiMarket", async (accounts) => {
                 BigNumber(balance3).minus(BigNumber(_balance3)),
                 (7000 * 100) / 10000,
                 "Failed to transfer fee amount"
+            );
+            assert.equal(
+                BigNumber(balance4).minus(BigNumber(_balance4)),
+                (7000 * 200) / 10000,
+                "Failed to transfer validator amount"
             );
         });
 
