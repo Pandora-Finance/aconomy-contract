@@ -85,6 +85,10 @@ contract("FundingPool", (accounts) => {
       pool1Address = await poolRegis.getPoolAddress(poolId1);
       console.log(pool1Address, "poolAdress")
       fundingpooladdress = pool1Address;
+      res = await poolRegis.lenderVerification(poolId1, accounts[0])
+      assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVarification failed")
+      res = await poolRegis.borrowerVerification(poolId1, accounts[0])
+      assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVarification failed")
     })
 
     it("should add Lender to the pool", async () => {

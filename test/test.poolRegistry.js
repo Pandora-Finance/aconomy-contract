@@ -57,6 +57,10 @@ contract("poolRegistry", async (accounts) => {
         console.log(poolId1, "poolId1")
         pool1Address = res.logs[4].args.poolAddress;
         console.log(pool1Address, "poolAdress")
+        res = await poolRegis.lenderVerification(poolId1, accounts[0])
+        assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVarification failed")
+        res = await poolRegis.borrowerVerification(poolId1, accounts[0])
+        assert.equal(res.isVerified_, true, "Borrower Not added to pool, borrowerVarification failed")
 
         // res =  await poolRegis.createPool(
         //     accounts[0],
@@ -76,10 +80,10 @@ contract("poolRegistry", async (accounts) => {
 
 
     it("should add Lender to the pool", async () => {
-        res = await poolRegis.lenderVerification(poolId1, accounts[0])
+        res = await poolRegis.lenderVerification(poolId1, accounts[9])
         assert.equal(res.isVerified_, false, "AddLender function not called but verified")
-        await poolRegis.addLender(poolId1, accounts[0], { from: accounts[0] })
-        res = await poolRegis.lenderVerification(poolId1, accounts[0])
+        await poolRegis.addLender(poolId1, accounts[9], { from: accounts[0] })
+        res = await poolRegis.lenderVerification(poolId1, accounts[9])
         assert.equal(res.isVerified_, true, "Lender Not added to pool, lenderVerification failed")
     })
 
