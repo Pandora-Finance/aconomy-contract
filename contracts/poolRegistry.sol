@@ -82,10 +82,10 @@ contract poolRegistry is ReentrancyGuard {
     event SetloanExpirationTime(uint256 poolId, uint32 duration);
     event LenderAttestation(uint256 poolId, address lender);
     event BorrowerAttestation(uint256 poolId, address borrower);
-    event LenderRevocation(uint256 marketId, address lender);
-    event BorrowerRevocation(uint256 marketId, address borrower);
-    event SetPoolURI(uint256 marketId, string uri);
-    event SetAPR(uint256 marketId, uint16 APR);
+    event LenderRevocation(uint256 poolId, address lender);
+    event BorrowerRevocation(uint256 poolId, address borrower);
+    event SetPoolURI(uint256 poolId, string uri);
+    event SetAPR(uint256 poolId, uint16 APR);
     event poolClosed(uint256 poolId);
 
     //Create Pool
@@ -122,10 +122,12 @@ contract poolRegistry is ReentrancyGuard {
         // Check if pool requires lender attestation to join
         if (_requireLenderAttestation) {
             pools[poolId_].lenderAttestationRequired = true;
+            addLender(poolId_, msg.sender);
         }
         // Check if pool requires borrower attestation to join
         if (_requireBorrowerAttestation) {
             pools[poolId_].borrowerAttestationRequired = true;
+            addBorrower(poolId_, msg.sender);
         }
 
         emit poolCreated(msg.sender, poolAddress, poolId_);
@@ -200,14 +202,14 @@ contract poolRegistry is ReentrancyGuard {
     function addLender(
         uint256 _poolId,
         address _lenderAddress
-    ) external ownsPool(_poolId) {
+    ) public ownsPool(_poolId) {
         _attestAddress(_poolId, _lenderAddress, true);
     }
 
     function addBorrower(
         uint256 _poolId,
         address _borrowerAddress
-    ) external ownsPool(_poolId) {
+    ) public ownsPool(_poolId) {
         _attestAddress(_poolId, _borrowerAddress, false);
     }
 
