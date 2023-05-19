@@ -177,10 +177,11 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         require(_value != 0);
         if(erc20Contracts[_tokenId].length >= 1) {
             require(_erc20Contract == erc20Contracts[_tokenId][0], "invalid");
+        } else {
+            setRoyaltiesForValidator(_tokenId, royalties);
         }
         NFTowner[_tokenId] = ERC721.ownerOf(_tokenId);
         updateERC20(_tokenId, _erc20Contract, _value);
-        setRoyaltiesForValidator(_tokenId, royalties);
         require(
             IERC20(_erc20Contract).transferFrom(
                 msg.sender,
@@ -216,7 +217,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     function setRoyaltiesForValidator(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
-    ) public {
+    ) internal {
         require(msg.sender == approvedValidator[_tokenId]);
         require(royalties.length <= 10, "> 10");
         delete royaltiesForValidator[_tokenId];
