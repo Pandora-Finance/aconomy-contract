@@ -16,7 +16,10 @@ contract AconomyFee is Ownable {
         return owner();
     }
 
-    // Set Aconomy Fee in percent
+    /**
+     * @notice Sets the protocol fee.
+     * @param newFee The value of the new fee percentage in bps.
+     */
     function setProtocolFee(uint16 newFee) public virtual onlyOwner {
         
         if (newFee == _AconomyFee) return;

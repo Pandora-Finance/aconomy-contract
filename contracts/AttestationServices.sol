@@ -68,6 +68,14 @@ contract AttestationServices {
         return _asRegistry;
     }
 
+     /**
+     * @dev Attests to a specific AS.
+     *
+     * @param recipient The recipient of the attestation.
+     * @param schema The UUID of the AS.
+     *
+     * @return The UUID of the new attestation.
+     */
     function attest(
         address recipient,
         bytes32 schema,
@@ -76,6 +84,11 @@ contract AttestationServices {
         return _attest(recipient, schema, data, msg.sender);
     }
 
+     /**
+     * @dev Revokes an existing attestation to a specific AS.
+     *
+     * @param uuid The UUID of the attestation to revoke.
+     */
     function revoke(bytes32 uuid) public virtual {
         _revoke(uuid, msg.sender);
     }
@@ -153,12 +166,26 @@ contract AttestationServices {
             );
     }
 
+    /**
+     * @dev Checks whether an attestation is active.
+     *
+     * @param uuid The UUID of the attestation to retrieve.
+     *
+     * @return Whether an attestation is active.
+     */
     function isAddressActive(bytes32 uuid) public view returns (bool) {
         return
             isAddressValid(uuid) &&
             _db[uuid].revocationTime == 0;
     }
 
+     /**
+     * @dev Checks whether an attestation exists.
+     *
+     * @param uuid The UUID of the attestation to retrieve.
+     *
+     * @return Whether an attestation exists.
+     */
     function isAddressValid(bytes32 uuid) public view returns (bool) {
         return _db[uuid].uuid != 0;
     }

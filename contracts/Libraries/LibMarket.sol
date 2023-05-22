@@ -6,6 +6,11 @@ import "../utils/LibShare.sol";
 import "../piMarket.sol";
 
 library LibMarket {
+
+    /**
+     * @notice Checks the requiments for a sale to go through.
+     * @param meta The metadata of the sale being bought.
+     */
     function checkSale(piMarket.TokenMeta storage meta) external view {
         require(meta.status);
         require(msg.sender != address(0) && msg.sender != meta.currentOwner);
@@ -20,6 +25,13 @@ library LibMarket {
         }
     }
 
+    /**
+     * @notice Executes the sale from the given sale metadata.
+     * @param meta The metadata of the sale being executed.
+     * @param feeAddress The address to which platform fees are sent.
+     * @param royalties The token or collection royalties.
+     * @param validatorRoyalties the piNFT validatorRoyalties.
+     */
     function executeSale(
         piMarket.TokenMeta storage meta,
         address feeAddress,
@@ -93,6 +105,11 @@ library LibMarket {
         }
     }
 
+    /**
+     * @notice Checks the requirments for submission of a bid.
+     * @param meta The metadata of the sale on which the bid is being placed.
+     * @param amount The amount being bidded.
+     */
     function checkBid(
         piMarket.TokenMeta storage meta,
         uint256 amount
@@ -108,6 +125,14 @@ library LibMarket {
         }
     }
 
+    /**
+     * @notice executes the the sale with a selected bid.
+     * @param meta The metadata of the sale being executed.
+     * @param bids The metadata of the bid being executed.
+     * @param royalties The token royalties.
+     * @param validatorRoyalties The piNFT validator royalties.
+     * @param feeAddress The address to which platform fees are sent.
+     */
     function executeBid(
         piMarket.TokenMeta storage meta,
         piMarket.BidOrder storage bids,
@@ -182,6 +207,11 @@ library LibMarket {
         }
     }
 
+    /**
+     * @notice Withdraws a selected bid as long as it has not been executed for a sale.
+     * @param meta The metadata of the sale for which the bid has been placed.
+     * @param bids The metadata of the bid being withdrawn.
+     */
     function withdrawBid(
         piMarket.TokenMeta storage meta,
         piMarket.BidOrder storage bids

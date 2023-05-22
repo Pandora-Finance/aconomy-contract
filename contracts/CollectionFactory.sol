@@ -10,6 +10,15 @@ import "./Libraries/LibCollection.sol";
 contract CollectionFactory {
     using Counters for Counters.Counter;
 
+    /**
+     * @notice Deatils for a collection.
+     * @param name The name of the collection.
+     * @param symbol The symbol of a collection.
+     * @param URI The collection uri.
+     * @param contractAddress the address of the deployed collection.
+     * @param owner The collection owner.
+     * @param description The collection description
+     */
     struct CollectionMeta {
         string name;
         string symbol;
@@ -58,7 +67,16 @@ contract CollectionFactory {
         _;
     }
 
-    // Create Collection
+    /**
+     * @notice Creates and deploys a collection and returns the collection Id.
+     * @dev Returned value is type uint256.
+     * @param _name The name of the collection.
+     * @param _symbol The symbol of the collection.
+     * @param _uri The collection uri.
+     * @param _description The collection description.
+     * @param royalties The collection royalties.
+     * @return collectionId_ .
+     */
     function createCollection(
         string memory _name,
         string memory _symbol,
@@ -93,7 +111,11 @@ contract CollectionFactory {
         emit CollectionCreated(collectionId_, collectionAddress);
     }
 
-    //Set Royalties for Collection
+    /**
+     * @notice Sets the collection royalties.
+     * @param _collectionId The id of the collection.
+     * @param royalties The royalties to be set for the collection.
+     */
     function setRoyaltiesForCollection(
         uint256 _collectionId,
         LibShare.Share[] memory royalties
@@ -115,6 +137,11 @@ contract CollectionFactory {
         emit CollectionRoyaltiesSet(_collectionId, royalties);
     }
 
+    /**
+     * @notice Sets the collection uri.
+     * @param _collectionId The id of the collection.
+     * @param _uri The uri to be set.
+     */
     function setCollectionURI(
         uint256 _collectionId,
         string calldata _uri
@@ -129,6 +156,11 @@ contract CollectionFactory {
         }
     }
 
+    /**
+     * @notice Sets the collection name.
+     * @param _collectionId The id of the collection.
+     * @param _name The name to be set.
+     */
     function setCollectionName(
         uint256 _collectionId,
         string memory _name
@@ -143,6 +175,11 @@ contract CollectionFactory {
         }
     }
 
+    /**
+     * @notice Sets the collection symbol.
+     * @param _collectionId The id of the collection.
+     * @param _symbol The collection symbol to be set.
+     */
     function setCollectionSymbol(
         uint256 _collectionId,
         string memory _symbol
@@ -157,6 +194,11 @@ contract CollectionFactory {
         }
     }
 
+    /**
+     * @notice Sets the collection description.
+     * @param _collectionId The id of the collection.
+     * @param _description The collection description to be set.
+     */
     function setCollectionDescription(
         uint256 _collectionId,
         string memory _description
@@ -171,6 +213,12 @@ contract CollectionFactory {
         }
     }
 
+    /**
+     * @notice Fetches the collection royalties.
+     * @dev Returns a LibShare.Share[] array.
+     * @param _collectionId The id of the collection.
+     * @return A LibShare.Share[] struct array of royalties.
+     */
     function getCollectionRoyalties(
         uint256 _collectionId
     ) external view returns (LibShare.Share[] memory) {
