@@ -369,7 +369,7 @@ contract CollectionMethods is
         return erc20Balances[_tokenId][_erc20Address];
     }
 
-     /**
+    /**
      * @notice Fetches the validator royalties.
      * @dev Returns a LibShare.Share[] array.
      * @param _tokenId The id of the token.
@@ -452,8 +452,7 @@ contract CollectionMethods is
         withdrawnAmount[_tokenId] -= _amount;
 
         if (withdrawnAmount[_tokenId] == 0) {
-            ERC721Upgradeable(address(this)).approve(msg.sender, _tokenId);
-            ERC721Upgradeable.safeTransferFrom(
+            ERC721Upgradeable(address(this)).safeTransferFrom(
                 address(this),
                 msg.sender,
                 _tokenId
@@ -479,6 +478,7 @@ contract CollectionMethods is
         require(ERC721Upgradeable.ownerOf(_tokenId) == msg.sender);
         require(msg.sender == NFTowner[_tokenId]);
         NFTowner[_tokenId] = _to;
+        //needs approval
         ERC721Upgradeable.safeTransferFrom(msg.sender, _to, _tokenId);
     }
 
