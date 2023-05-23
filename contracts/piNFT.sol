@@ -103,7 +103,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         _;
     }
 
-    // mints an ERC721 token to _to with _uri as token uri
+     /**
+     * @notice Mints an nft to a specified address.
+     * @param _to address to mint the piNFT to.
+     * @param _uri The uri of the piNFT.
+     * @param royalties The royalties being set for the token
+     */
     function mintNFT(
         address _to,
         string memory _uri,
@@ -119,6 +124,11 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         return tokenId_;
     }
 
+    /**
+     * @notice Checks and sets token royalties.
+     * @param _tokenId The Id of the token.
+     * @param royalties The royalties to be set.
+     */
     function _setRoyaltiesByTokenId(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
@@ -140,12 +150,24 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
 
+    /**
+     * @notice Fetches the token royalties.
+     * @dev Returns a LibShare.Share[] array.
+     * @param _tokenId The id of the token.
+     * @return A LibShare.Share[] struct array of royalties.
+     */
     function getRoyalties(
         uint256 _tokenId
     ) external view returns (LibShare.Share[] memory) {
         return royaltiesByTokenId[_tokenId];
     }
 
+    /**
+     * @notice Fetches the validator royalties.
+     * @dev Returns a LibShare.Share[] array.
+     * @param _tokenId The id of the token.
+     * @return A LibShare.Share[] struct array of royalties.
+     */
     function getValidatorRoyalties(
         uint256 _tokenId
     ) external view returns (LibShare.Share[] memory) {
@@ -162,7 +184,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     }
 
     // this function requires approval of tokens by _erc20Contract
-    // adds ERC20 tokens to the token with _tokenId(basically trasnfer ERC20 to this contract)
+    /**
+     * @notice Allows the validator to deposit funds to validate the piNFT.
+     * @param _tokenId The ID of the token.
+     * @param _erc20Contract The address of the funds being deposited.
+     * @param _value The amount of funds being deposited.
+     * @param royalties The validator royalties.
+     */
     function addERC20(
         uint256 _tokenId,
         address _erc20Contract,
@@ -190,7 +218,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit ERC20Added(msg.sender, _tokenId, _erc20Contract, _value);
     }
 
-    // update the mappings for a token on recieving ERC20 tokens
+     /**
+     * @notice Updates the ERC20 mappings.
+     * @param _tokenId The Id of the token.
+     * @param _erc20Contract The address of the erc20 funds being transferred.
+     * @param _value The amount of funds being transferred.
+     */
     function updateERC20(
         uint256 _tokenId,
         address _erc20Contract,
@@ -210,7 +243,11 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         erc20Balances[_tokenId][_erc20Contract] += _value;
     }
 
-    //Set Royalties for Validator
+     /**
+     * @notice Checks and sets validator royalties.
+     * @param _tokenId The Id of the token.
+     * @param royalties The royalties to be set.
+     */
     function setRoyaltiesForValidator(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
@@ -230,16 +267,28 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
 
+     /**
+     * @notice deletes the nft.
+     * @param _tokenId The Id of the token.
+     */
     function deleteNFT(uint256 _tokenId) external nonReentrant {
         require(NFTowner[_tokenId] == address(0));
         require(ownerOf(_tokenId) == msg.sender);
         _burn(_tokenId);
     }
 
+    /**
+     * @notice Allows the nft owner to redeem or burn the piNFT.
+     * @param _tokenId The Id of the token.
+     * @param _nftReceiver The receiver of the nft after the function call.
+     * @param _erc20Receiver The receiver of the validator funds after the function call.
+     * @param _erc20Contract The address of the deposited validator funds.
+     * @param burnNFT Boolean to determine redeeming or burning.
+     */
     function redeemOrBurnPiNFT(
         uint256 _tokenId,
-        address _nftReciever,
-        address _erc20Reciever,
+        address _nftReceiver,
+        address _erc20Receiver,
         address _erc20Contract,
         bool burnNFT
     ) external onlyOwnerOfToken(_tokenId) nonReentrant {
@@ -248,9 +297,9 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         uint256 _value = erc20Balances[_tokenId][_erc20Contract];
         if (burnNFT) {
-            require(_erc20Reciever != address(0));
-            require(_nftReciever == address(0));
-            _transferERC20(_tokenId, _erc20Reciever, _erc20Contract, _value);
+            require(_erc20Receiver != address(0));
+            require(_nftReceiver == address(0));
+            _transferERC20(_tokenId, _erc20Receiver, _erc20Contract, _value);
             ERC721.safeTransferFrom(
                 msg.sender,
                 approvedValidator[_tokenId],
@@ -260,26 +309,26 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             emit PiNFTBurnt(
                 _tokenId,
                 approvedValidator[_tokenId],
-                _erc20Reciever,
+                _erc20Receiver,
                 _erc20Contract,
                 _value
             );
         } else {
-            require(_nftReciever != address(0));
-            require(_erc20Reciever == address(0));
+            require(_nftReceiver != address(0));
+            require(_erc20Receiver == address(0));
             _transferERC20(
                 _tokenId,
                 approvedValidator[_tokenId],
                 _erc20Contract,
                 _value
             );
-            if (msg.sender != _nftReciever) {
-                ERC721.safeTransferFrom(msg.sender, _nftReciever, _tokenId);
+            if (msg.sender != _nftReceiver) {
+                ERC721.safeTransferFrom(msg.sender, _nftReceiver, _tokenId);
             }
 
             emit PiNFTRedeemed(
                 _tokenId,
-                _nftReciever,
+                _nftReceiver,
                 approvedValidator[_tokenId],
                 _erc20Contract,
                 _value
@@ -290,7 +339,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         delete royaltiesForValidator[_tokenId];
     }
 
-    // transfers the ERC 20 tokens from _tokenId(this contract) to _to address
+    /**
+     * @notice Transfers ERC20 to a specified account.
+     * @param _tokenId The Id of the token.
+     * @param _to The address to transfer the funds to.
+     * @param _erc20Contract The address of the funds being transferred.
+     * @param _value The amount of funds being transferred.
+     */
     function _transferERC20(
         uint256 _tokenId,
         address _to,
@@ -303,7 +358,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit ERC20Transferred(_tokenId, _to, _erc20Contract, _value);
     }
 
-    // update the mappings for a token when ERC20 tokens gets removed
+    /**
+     * @notice Updates the ERC20 mappings when removing funds.
+     * @param _tokenId The Id of the token.
+     * @param _erc20Contract The address of the funds being removed.
+     * @param _value The amount of funds being removed.
+     */
     function removeERC20(
         uint256 _tokenId,
         address _erc20Contract,
@@ -331,7 +391,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         }
     }
 
-    // view ERC 20 token balance of a token
+    /**
+     * @notice Returns the specified ERC20 balance of the token.
+     * @dev Returned value is type uint256.
+     * @param _tokenId The Id of the token.
+     * @param _erc20Address The address of the funds to be fetched.
+     * @return ERC20 balance of the token.
+     */
     function viewBalance(
         uint256 _tokenId,
         address _erc20Address
@@ -339,6 +405,12 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         return erc20Balances[_tokenId][_erc20Address];
     }
 
+    /**
+     * @notice Allows the nft owner to lock the piNFT in the contract and withdraw validator funds.
+     * @param _tokenId The Id of the token.
+     * @param _erc20Contract The address of the funds being withdrawn.
+     * @param _amount The amount of funds being withdrawn.
+     */
     function withdraw(
         uint256 _tokenId,
         address _erc20Contract,
@@ -371,12 +443,24 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         );
     }
 
+    /**
+     * @notice Fetches the withdrawn amount for a token.
+     * @dev Returns a uint256.
+     * @param _tokenId The id of the token.
+     * @return A uint256 of withdrawn amount.
+     */
     function viewWithdrawnAmount(
         uint256 _tokenId
     ) public view returns (uint256) {
         return withdrawnAmount[_tokenId];
     }
 
+    /**
+     * @notice Repays the withdrawn validator funds and transfers back token on full repayment.
+     * @param _tokenId The Id of the token.
+     * @param _erc20Contract The address of the funds to be repaid.
+     * @param _amount The amount to be repaid.
+     */
     function Repay(
         uint256 _tokenId,
         address _erc20Contract,
@@ -411,6 +495,11 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         );
     }
 
+    /**
+     * @notice Transfers the piNft after validator funding.
+     * @param _tokenId The Id of the token.
+     * @param _to The address to transfer to.
+     */
     function transferAfterFunding(
         uint256 _tokenId,
         address _to

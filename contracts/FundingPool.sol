@@ -14,6 +14,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     address public poolOwner;
     address public poolRegistryAddress;
 
+    /**
+     * @notice Initializer function.
+     * @param _poolOwner The pool owner's address.
+     * @param _poolRegistry The address of the poolRegistry contract.
+     */
     function initialize(address _poolOwner, address _poolRegistry)
         external
         initializer
@@ -111,7 +116,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     mapping(address => mapping(uint256 => mapping(address => mapping(uint256 => FundDetail))))
         public lenderPoolFundDetails;
 
-    //Supply to pool by lenders
+    /**
+     * @notice Allows a lender to supply funds to the pool owner.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the funds being supplied.
+     * @param _amount The amount of funds being supplied.
+     * @param _maxLoanDuration The duration of the loan after being accepted.
+     * @param _expiration The time stamp within which the loan has to be accepted.
+     * @param _APR The annual interest in bps
+     */
     function supplyToPool(
         uint256 _poolId,
         address _ERC20Address,
@@ -178,6 +191,14 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit SuppliedToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
     }
 
+    /**
+     * @notice Accepts the specified bid to supply to the pool.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the bid funds being accepted.
+     * @param _bidId The Id of the bid.
+     * @param _lender The address of the lender.
+     * @param _receiver The address of the funds receiver.
+     */
     function AcceptBid(
         uint256 _poolId,
         address _ERC20Address,
@@ -234,6 +255,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         );
     }
 
+    /**
+     * @notice Rejects the bid to supply to the pool.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the funds contract.
+     * @param _bidId The Id of the bid.
+     * @param _lender The address of the lender.
+     */
     function RejectBid(
         uint256 _poolId,
         address _ERC20Address,
@@ -256,6 +284,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit BidRejected(_lender, _bidId, _poolId, fundDetail.amount);
     }
 
+    /**
+     * @notice Checks if loan repayment is late.
+     * @dev Returned value is type boolean.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     * @return boolean of late payment.
+     */
     function isPaymentLate(
         uint256 _poolId,
         address _ERC20Address,
@@ -269,6 +306,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         return uint32(block.timestamp) > calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender) + 7 days;
     }
 
+    /**
+     * @notice Calculates and returns the next due date.
+     * @dev Returned value is type uint256.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     * @return dueDate_ unix time of due date in uint256.
+     */
     function calculateNextDueDate(
         uint256 _poolId,
         address _ERC20Address,
@@ -305,6 +351,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         }
     }
 
+    /**
+     * @notice Returns the installment amount to be paid at the called timestamp.
+     * @dev Returned value is type uint256.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     * @return installment amount in uint256.
+     */
     function viewInstallmentAmount(
         uint256 _poolId,
         address _ERC20Address,
@@ -332,6 +387,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         }
     }
 
+    /**
+     * @notice Repays the monthly installment.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     */
     function repayMonthlyInstallment(
         uint256 _poolId,
         address _ERC20Address,
@@ -474,6 +536,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     //     return paymentAmount;
     // }
 
+    /**
+     * @notice Returns the full amount to be repaid.
+     * @dev Returned value is type uint256.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     * @return Full amount to be paid in uint256.
+     */
     function viewFullRepayAmount(
         uint256 _poolId,
         address _ERC20Address,
@@ -508,6 +579,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         return paymentAmount;
     }
 
+    /**
+     * @notice Repays the full amount for the loan.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     */
     function _repayFullAmount(
         uint256 _poolId,
         address _ERC20Address,
@@ -550,6 +628,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
+     /**
+     * @notice Repays the full amount for the loan.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     */
     function RepayFullAmount(
         uint256 _poolId,
         address _ERC20Address,
@@ -592,6 +677,16 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
+     /**
+     * @notice Repays the specified amount for the loan.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     * @param _amount The amount being repaid.
+     * @param _interest The interest being repaid.
+     * @param _owedAmount The total owed amount at the called timestamp.
+     */
     function _repayBid(
         uint256 _poolId,
         address _ERC20Address,
@@ -631,6 +726,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
+     /**
+     * @notice Allows the lender to withdraw the loan bid if it is still pending.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the erc20 funds.
+     * @param _bidId The Id of the bid.
+     * @param _lender The lender address.
+     */
     function Withdraw(
         uint256 _poolId,
         address _ERC20Address,

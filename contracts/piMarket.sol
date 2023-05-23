@@ -88,11 +88,13 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         _;
     }
 
-    /*
-    @params
-    * _contractAddress if _fromCollection is true then collection contract Address and if false piNFT contract Address
-    */
-
+    /**
+     * @notice Puts an nft on sale.
+     * @param _contractAddress the address of the token contract.
+     * @param _tokenId The Id of the token.
+     * @param _price The price the token is to be listed at.
+     * @param _currency The currency being used.
+     */
     function sellNFT(
         address _contractAddress,
         uint256 _tokenId,
@@ -131,6 +133,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
+    /**
+     * @notice Edits the price of the sale.
+     * @param _saleId The Id of the sale.
+     * @param _price The new price being set.
+     */
     function editSalePrice(uint256 _saleId, uint256 _price) public {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
@@ -148,6 +155,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Retrieves the token royalty.
+     * @param _contractAddress the address of the token contract.
+     * @param _tokenId The Id of the token.
+     */
     function retrieveRoyalty(address _contractAddress, uint256 _tokenId)
         public
         view
@@ -156,7 +168,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getRoyalties(_tokenId);
     }
 
-    // Get Collection Royalty
+    /**
+     * @notice Fetches the collection royalty.
+     * @param _collectionFactoryAddress The address of the CollectionFactory.
+     * @param _collectionAddress The address of the collection.
+     */
     function getCollectionRoyalty(
         address _collectionFactoryAddress,
         address _collectionAddress
@@ -168,7 +184,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             );
     }
 
-    // Get Collection validator Royalty by collection TokenId
+    /**
+     * @notice Fetches the collection validator royalty.
+     * @param _collectionAddress The address of the collection.
+     * @param _tokenId The Id of the token.
+     */
     function getCollectionValidatorRoyalty(
         address _collectionAddress,
         uint256 _tokenId
@@ -179,7 +199,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             );
     }
 
-    // Retrieve validator Royality
+    /**
+     * @notice Retrieves the validator royalty.
+     * @param _contractAddress the address of the token contract.
+     * @param _tokenId The Id of the token.
+     */
     function retrieveValidatorRoyalty(
         address _contractAddress,
         uint256 _tokenId
@@ -187,6 +211,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return piNFT(_contractAddress).getValidatorRoyalties(_tokenId);
     }
 
+    /**
+     * @notice Allows a user to buy an nft on sale.
+     * @param _saleId The Id of the sale.
+     * @param _fromCollection A boolean indicating if the nft is from a priavte collection.
+     */
     function BuyNFT(uint256 _saleId, bool _fromCollection)
         external
         payable
@@ -230,6 +259,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit NFTBought(_saleId, msg.sender);
     }
 
+     /**
+     * @notice Cancels a sale.
+     * @param _saleId The Id of the sale.
+     */
     function cancelSale(uint256 _saleId) external nonReentrant {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
@@ -247,6 +280,14 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCancelled(_saleId);
     }
 
+    /**
+     * @notice Puts an nft on auction.
+     * @param _contractAddress the address of the token contract.
+     * @param _tokenId The Id of the token.
+     * @param _price The price the token is to be listed at.
+     * @param _bidTime The duration time of the auction.
+     * @param _currency The currency being used.
+     */
     function SellNFT_byBid(
         address _contractAddress,
         uint256 _tokenId,
@@ -288,6 +329,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
     }
 
+    /**
+     * @notice Places a bid on an auction sale.
+     * @param _saleId The Id of the sale.
+     * @param _bidPrice The amount being bidded
+     */
     function Bid(uint256 _saleId, uint256 _bidPrice) external payable {
         if(_tokenMeta[_saleId].currency == address(0)) {
             require(msg.value == _bidPrice);
@@ -316,6 +362,12 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidCreated(_saleId, Bids[_saleId].length - 1);
     }
 
+    /**
+     * @notice executes a sale with a specified bid.
+     * @param _saleId The Id of the sale.
+     * @param _bidOrderID The Id of the bid.
+     * @param _fromCollection Boolean indicating if the nft is from a private collection.
+     */
     function executeBidOrder(
         uint256 _saleId,
         uint256 _bidOrderID,
@@ -355,6 +407,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidExecuted(_saleId, _bidOrderID, Bids[_saleId][_bidOrderID].price);
     }
 
+    /**
+     * @notice executes a sale with a specified bid.
+     * @param _saleId The Id of the sale.
+     * @param _bidId The Id of the bid.
+     */
     function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
         external
         nonReentrant
@@ -363,14 +420,13 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit BidWithdrawn(_saleId, _bidId);
     }
 
-    // function transfer(TokenMeta storage token, address _to) internal {
-    //     token.currentOwner = _to;
-    //     token.status = false;
-    //     token.directSale = false;
-    //     token.bidSale = false;
-    // }
-
-    // who will be making request, his tokenId will be token1
+     /**
+     * @notice Makes a swap request.
+     * @param contractAddress1 The contract address of the first token.
+     * @param contractAddress2 The contract address of the second token.
+     * @param token1 The token Id of the token whose owner is making the request.
+     * @param token2 The token Id of the token being requested for the swap.
+     */
     function makeSwapRequest(
         address contractAddress1,
         address contractAddress2,
@@ -419,7 +475,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         return swapsId;
     }
 
-    // cancle swap by initiator
+    /**
+     * @notice Cancels a swap.
+     * @param _swapId The Id of the swap.
+     */
     function cancelSwap(uint256 _swapId) public nonReentrant {
         require(
             msg.sender == _swaps[_swapId].initiator,
@@ -436,7 +495,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit SwapCancelled(_swapId);
     }
 
-    // NFTcontractAddress will be of tokenId2
+    /**
+     * @notice Accepts and executes a swap.
+     * @param swapId The Id of the swap.
+     */
     function acceptSwapRequest(uint256 swapId) public nonReentrant {
         Swap storage swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
