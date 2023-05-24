@@ -66,6 +66,18 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         uint256 paymentCycleAmount
     );
 
+    /**
+     * @notice Lets a borrower request for a loan.
+     * @dev Returned value is type uint256.
+     * @param _lendingToken The address of the token being requested.
+     * @param _poolId The Id of the pool.
+     * @param _principal The principal amount being requested.
+     * @param _duration The duration of the loan.
+     * @param _expirationDuration The time in which the loan has to be accepted before it expires.
+     * @param _APR The annual interest percentage in bps.
+     * @param _receiver The receiver of the funds.
+     * @return loanId_ Id of the loan.
+     */
     function loanRequest(
         address _lendingToken,
         uint256 _poolId,
@@ -148,6 +160,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         loanId++;
     }
 
+    /**
+     * @notice Accepts the loan request.
+     * @param _loanId The Id of the loan.
+     */
     function AcceptLoan(
         uint256 _loanId
     )
@@ -248,6 +264,12 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         emit AcceptedLoanDetail(_loanId, "Borrower", amountToBorrower);
     }
 
+     /**
+     * @notice Checks if the loan has expired.
+     * @dev Return type is of boolean.
+     * @param _loanId The Id of the loan.
+     * @return boolean indicating if the loan is expired.
+     */
     function isLoanExpired(uint256 _loanId) public view returns (bool) {
         Loan storage loan = loans[_loanId];
 
@@ -258,6 +280,12 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             loan.loanDetails.timestamp + loanExpirationDuration[_loanId]);
     }
 
+    /**
+     * @notice Checks if the loan has defaulted.
+     * @dev Return type is of boolean.
+     * @param _loanId The Id of the loan.
+     * @return boolean indicating if the loan is defaulted.
+     */
     function isLoanDefaulted(uint256 _loanId) public view returns (bool) {
         Loan storage loan = loans[_loanId];
 
@@ -270,15 +298,33 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             int32(loanDefaultDuration[_loanId]));
     }
 
+    /**
+     * @notice Returns the last repaid timestamp of the loan.
+     * @dev Return type is of uint32.
+     * @param _loanId The Id of the loan.
+     * @return timestamp in uint32.
+     */
     function lastRepaidTimestamp(uint256 _loanId) public view returns (uint32) {
         return LibCalculations.lastRepaidTimestamp(loans[_loanId]);
     }
 
+    /**
+     * @notice Checks if the loan repayment is late.
+     * @dev Return type is of boolean.
+     * @param _loanId The Id of the loan.
+     * @return boolean indicating if the loan repayment is late.
+     */
     function isPaymentLate(uint256 _loanId) public view returns (bool) {
         if (loans[_loanId].state != LoanState.ACCEPTED) return false;
         return uint32(block.timestamp) > calculateNextDueDate(_loanId) + 7 days;
     }
 
+    /**
+     * @notice Calculates the next repayment due date.
+     * @dev Return type is of uint32.
+     * @param _loanId The Id of the loan.
+     * @return dueDate_ The timestamp of the next payment due date.
+     */
     function calculateNextDueDate(
         uint256 _loanId
     ) public view returns (uint32 dueDate_) {
@@ -307,6 +353,12 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Returns the installment amount to be paid at the called timestamp.
+     * @dev Return type is of uint256.
+     * @param _loanId The Id of the loan.
+     * @return uint256 of the installment amount to be paid.
+     */
     function viewInstallmentAmount(uint256 _loanId) external view returns(uint256){
         uint32 LastRepaidTimestamp = lastRepaidTimestamp(_loanId);
         uint256 lastPaymentCycle = BPBDTL.diffMonths(
@@ -326,6 +378,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Repays the monthly installment.
+     * @param _loanId The Id of the loan.
+     */
     function repayMonthlyInstallment(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
@@ -394,6 +450,12 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     //     return paymentAmount;
     // }
 
+    /**
+     * @notice Returns the full amount to be paid at the called timestamp.
+     * @dev Return type is of uint256.
+     * @param _loanId The Id of the loan.
+     * @return uint256 of the full amount to be paid.
+     */
     function viewFullRepayAmount(
         uint256 _loanId
     ) public view returns (uint256) {
@@ -412,6 +474,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return paymentAmount;
     }
 
+     /**
+     * @notice Repays the full amount to be paid at the called timestamp.
+     * @param _loanId The Id of the loan.
+     */
     function _repayFullLoan(uint256 _loanId) private {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
@@ -425,6 +491,10 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         );
     }
 
+    /**
+     * @notice Repays the full amount to be paid at the called timestamp.
+     * @param _loanId The Id of the loan.
+     */
     function repayFullLoan(uint256 _loanId) external nonReentrant{
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
@@ -438,6 +508,12 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         );
     }
 
+    /**
+     * @notice Repays the specified amount.
+     * @param _loanId The Id of the loan.
+     * @param _payment The amount being paid split into principal and interest.
+     * @param _owedAmount The total amount owed at the called timestamp.
+     */
     function _repayLoan(
         uint256 _loanId,
         Payment memory _payment,

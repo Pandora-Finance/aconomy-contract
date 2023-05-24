@@ -48,6 +48,23 @@ contract poolRegistry is ReentrancyGuard {
         _attestingSchemaId = bytes32(0);
     }
 
+    /**
+     * @notice Deatils for a pool.
+     * @param poolAddress The address of the pool.
+     * @param owner The owner of the pool.
+     * @param URI The pool uri.
+     * @param APR The desired apr of the pool.
+     * @param poolFeePercent The pool fees in bps.
+     * @param lenderAttestationRequired Boolean indicating the requirment of lender attestation.
+     * @param verifiedLendersForPool The verified lenders of the pool.
+     * @param lenderAttestationIds The Id's of the lender attestations.
+     * @param paymentCycleDuration The duration of a payment cycle.
+     * @param paymentDefaultDuration The duration after which the payment becomes defaulted.
+     * @param loanExpirationTime The desired time after which the loan expires.
+     * @param borrowerAttestationRequired Boolean indicating the requirment of borrower attestation.
+     * @param verifiedBorrowersForPool The verified borrowers of the pool.
+     * @param borrowerAttestationIds The Id's of the borrower attestations.
+     */
     struct poolDetail {
         address poolAddress;
         address owner;
@@ -88,7 +105,17 @@ contract poolRegistry is ReentrancyGuard {
     event SetAPR(uint256 poolId, uint16 APR);
     event poolClosed(uint256 poolId);
 
-    //Create Pool
+     /**
+     * @notice Creates a new pool.
+     * @param _paymentDefaultDuration Length of time in seconds before a loan is considered in default for non-payment.
+     * @param _loanExpirationTime Length of time in seconds before pending loan expire.
+     * @param _poolFeePercent The pool fee percentage in bps.
+     * @param _apr The desired pool apr.
+     * @param _uri The pool uri.
+     * @param _requireLenderAttestation Boolean that indicates if lenders require attestation to join pool.
+     * @param _requireBorrowerAttestation Boolean that indicates if borrowers require attestation to join pool.
+     * @return poolId_ The market ID of the newly created pool.
+     */
     function createPool(
         uint32 _paymentDefaultDuration,
         uint32 _loanExpirationTime,
@@ -133,6 +160,11 @@ contract poolRegistry is ReentrancyGuard {
         emit poolCreated(msg.sender, poolAddress, poolId_);
     }
 
+    /**
+     * @notice Sets the desired pool apr.
+     * @param _poolId The Id of the pool.
+     * @param _apr The apr to be set.
+     */
     function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
         if (_apr != pools[_poolId].APR) {
             pools[_poolId].APR = _apr;
@@ -152,6 +184,11 @@ contract poolRegistry is ReentrancyGuard {
     //     }
     // }
 
+     /**
+     * @notice Sets the pool uri.
+     * @param _poolId The Id of the pool.
+     * @param _uri The uri to be set.
+     */
     function setPoolURI(uint256 _poolId, string calldata _uri)
         public
         ownsPool(_poolId)
@@ -166,6 +203,11 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Sets the pool payment default duration.
+     * @param _poolId The Id of the pool.
+     * @param _duration The duration to be set.
+     */
     function setPaymentDefaultDuration(uint256 _poolId, uint32 _duration)
         public
         ownsPool(_poolId)
@@ -177,6 +219,11 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Sets the pool fee percent.
+     * @param _poolId The Id of the pool.
+     * @param _newPercent The new percent to be set.
+     */
     function setPoolFeePercent(uint256 _poolId, uint16 _newPercent)
         public
         ownsPool(_poolId)
@@ -188,6 +235,11 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Sets the desired loan expiration time.
+     * @param _poolId The Id of the pool.
+     * @param _duration the duration for expiration.
+     */
     function setloanExpirationTime(uint256 _poolId, uint32 _duration)
         public
         ownsPool(_poolId)
@@ -199,6 +251,12 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Adds a lender to the pool.
+     * @dev Only called by the pool owner
+     * @param _poolId The Id of the pool.
+     * @param _lenderAddress The address of the lender.
+     */
     function addLender(
         uint256 _poolId,
         address _lenderAddress
@@ -206,6 +264,12 @@ contract poolRegistry is ReentrancyGuard {
         _attestAddress(_poolId, _lenderAddress, true);
     }
 
+    /**
+     * @notice Adds a borrower to the pool.
+     * @dev Only called by the pool owner
+     * @param _poolId The Id of the pool.
+     * @param _borrowerAddress The address of the borrower.
+     */    
     function addBorrower(
         uint256 _poolId,
         address _borrowerAddress
@@ -213,6 +277,12 @@ contract poolRegistry is ReentrancyGuard {
         _attestAddress(_poolId, _borrowerAddress, false);
     }
 
+    /**
+     * @notice Removes a lender from the pool.
+     * @dev Only called by the pool owner
+     * @param _poolId The Id of the pool.
+     * @param _lenderAddress The address of the lender.
+     */
     function removeLender(
         uint256 _poolId,
         address _lenderAddress
@@ -220,6 +290,12 @@ contract poolRegistry is ReentrancyGuard {
         _revokeAddress(_poolId, _lenderAddress, true);
     }
 
+    /**
+     * @notice Removes a borrower from the pool.
+     * @dev Only called by the pool owner
+     * @param _poolId The Id of the pool.
+     * @param _borrowerAddress The address of the borrower.
+     */
     function removeBorrower(
         uint256 _poolId,
         address _borrowerAddress
@@ -227,6 +303,12 @@ contract poolRegistry is ReentrancyGuard {
         _revokeAddress(_poolId, _borrowerAddress, false);
     }
 
+    /**
+     * @notice Attests an address.
+     * @param _poolId The Id of the pool.
+     * @param _Address The address being attested.
+     * @param _isLender Boolean indicating if the address is a lender
+     */
     function _attestAddress(
         uint256 _poolId,
         address _Address,
@@ -250,6 +332,13 @@ contract poolRegistry is ReentrancyGuard {
         _attestAddressVerification(_poolId, _Address, uuid, _isLender);
     }
 
+    /**
+     * @notice Verifies the address in poolRegistry.
+     * @param _poolId The Id of the pool.
+     * @param _Address The address being attested.
+     * @param _uuid The uuid of the attestation.
+     * @param _isLender Boolean indicating if the address is a lender
+     */
     function _attestAddressVerification(
         uint256 _poolId,
         address _Address,
@@ -280,6 +369,12 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Revokes an address.
+     * @param _poolId The Id of the pool.
+     * @param _address The address being revoked.
+     * @param _isLender Boolean indicating if the address is a lender
+     */
     function _revokeAddress(
         uint256 _poolId,
         address _address,
@@ -298,6 +393,12 @@ contract poolRegistry is ReentrancyGuard {
         //        tellerAS.revoke(uuid);
     }
 
+    /**
+     * @notice Verifies the address being revoked in poolRegistry.
+     * @param _poolId The Id of the pool.
+     * @param _Address The address being revoked.
+     * @param _isLender Boolean indicating if the address is a lender
+     */
     function _revokeAddressVerification(
         uint256 _poolId,
         address _Address,
@@ -330,6 +431,13 @@ contract poolRegistry is ReentrancyGuard {
         return pools[_poolId].poolFeePercent;
     }
 
+    /**
+     * @notice Checks if the address is a verified borrower.
+     * @dev returns a boolean and byte32 uuid.
+     * @param _poolId The Id of the pool.
+     * @param _borrowerAddress The address being verified.
+     * @return isVerified_ boolean and byte32 uuid_.
+     */
     function borrowerVerification(uint256 _poolId, address _borrowerAddress)
         public
         view
@@ -344,6 +452,13 @@ contract poolRegistry is ReentrancyGuard {
             );
     }
 
+    /**
+     * @notice Checks if the address is a verified lender.
+     * @dev returns a boolean and byte32 uuid.
+     * @param _poolId The Id of the pool.
+     * @param _lenderAddress The address being verified.
+     * @return isVerified_ boolean and byte32 uuid_.
+     */
     function lenderVerification(uint256 _poolId, address _lenderAddress)
         public
         view
@@ -358,6 +473,15 @@ contract poolRegistry is ReentrancyGuard {
             );
     }
 
+    /**
+     * @notice Checks if the address is verified.
+     * @dev returns a boolean and byte32 uuid.
+     * @param _wltAddress The address being checked.
+     * @param _attestationRequired The need for attestation for the pool.
+     * @param _stakeholderAttestationIds The uuid's of the verified pool addresses
+     * @param _verifiedStakeholderForPool The addresses of the pool
+     * @return isVerified_ boolean and byte32 uuid_.
+     */
     function _isAddressVerified(
         address _wltAddress,
         bool _attestationRequired,
@@ -376,6 +500,10 @@ contract poolRegistry is ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Closes the pool specified.
+     * @param _poolId The Id of the pool.
+     */
     function closePool(uint256 _poolId) public ownsPool(_poolId) {
         if (!ClosedPools[_poolId]) {
             ClosedPools[_poolId] = true;

@@ -22,11 +22,26 @@ abstract contract poolStorage {
         PAID
     }
 
+    /**
+     * @notice Deatils for payment.
+     * @param principal The principal amount involved.
+     * @param interest The interest amount involved.
+     */
     struct Payment {
         uint256 principal;
         uint256 interest;
     }
 
+    /**
+     * @notice Deatils for a loan.
+     * @param lendingToken The lending token involved.
+     * @param principal The principal amount being borrowed.
+     * @param totalRepaid The total funds repaid.
+     * @param timestamp The timestamp the loan was created.
+     * @param acceptedTimestamp The timestamp the loan was accepted.
+     * @param lastRepaidTimestamp The timestamp of the last repayment.
+     * @param loanDuration The duration of the loan.
+     */
     struct LoanDetails {
         ERC20 lendingToken;
         uint256 principal;
@@ -37,6 +52,15 @@ abstract contract poolStorage {
         uint32 loanDuration;
     }
 
+    /**
+     * @notice The payment terms.
+     * @param paymentCycleAmount The amount to be paid every cycle.
+     * @param monthlyCycleInterest The interest to be paid every cycle.
+     * @param paymentCycle The duration of a payment cycle.
+     * @param APR The interest rate involved in bps.
+     * @param installments The total installments for the loan repayment.
+     * @param installmentsPaid The installments paid.
+     */
     struct Terms {
         uint256 paymentCycleAmount;
         uint256 monthlyCycleInterest;
@@ -46,6 +70,16 @@ abstract contract poolStorage {
         uint32 installmentsPaid;
     }
 
+     /**
+     * @notice The base loan struct.
+     * @param borrower The borrower of the loan.
+     * @param receiver The receiver of the loan funds.
+     * @param lender The lender of the loan funds.
+     * @param poolId The Id of the pool in which the loan was created.
+     * @param loanDetails The details of the loan.
+     * @param terms The terms of the loan.
+     * @param state The state of the loan.
+     */
     struct Loan {
         address borrower;
         address receiver;
