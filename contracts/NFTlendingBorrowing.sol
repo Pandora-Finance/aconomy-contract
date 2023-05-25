@@ -15,6 +15,19 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     using Counters for Counters.Counter;
     uint256 public NFTid;
     address AconomyFeeAddress;
+
+     /**
+     * @notice Deatils for a listed NFT.
+     * @param NFTtokenId The Id of the token.
+     * @param tokenIdOwner The owner of the nft.
+     * @param contractAddress The contract address.
+     * @param duration The expected duration.
+     * @param expectedAmount The expected amount.
+     * @param percent The expected interest percent in bps.
+     * @param listed Boolean indicating if the nft is listed.
+     * @param bidAccepted Boolean indicating if a bid has been accepted.
+     * @param repaid Boolean indicating if amount has been repaid.
+     */
     struct NFTdetail {
         uint256 NFTtokenId;
         address tokenIdOwner;
@@ -27,6 +40,18 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         bool repaid;
     }
 
+    /**
+     * @notice Deatils for a bid.
+     * @param bidId The Id of the bid.
+     * @param percent The interest percentage.
+     * @param duration The duration of the bid.
+     * @param expiration The duration within which bid has to be accepted.
+     * @param bidderAddress The address of the bidder.
+     * @param ERC20Address The address of the erc20 funds.
+     * @param Amount The amount of funds.
+     * @param withdrawn Boolean indicating if a bid has been withdrawn.
+     * @param bidAccepted Boolean indicating if the bid has been accepted.
+     */
     struct BidDetail {
         uint256 bidId;
         uint16 percent;

@@ -21,6 +21,20 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     address internal feeAddress;
     address public collectionFactoryAddress;
 
+    /**
+     * @notice Deatils for a sale.
+     * @param saleId The Id of the sale.
+     * @param tokenContractAddress The nft contract address.
+     * @param tokenId The Id of the token.
+     * @param price The price of the sale.
+     * @param directSale Boolean indicating if the sale is a direct sale.
+     * @param bidSale Boolean indicating if the sale is an auction.
+     * @param status Boolean indicating the status of the sale.
+     * @param bidStartTime Timestamp for the start time of the bid.
+     * @param bidEndTime Timestamp for the end time of the bid.
+     * @param currentOwner The current owner of the nft.
+     * @param currency The currency requested for the sale.
+     */
     struct TokenMeta {
         uint256 saleId;
         address tokenContractAddress;
@@ -35,6 +49,15 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address currency;
     }
 
+    /**
+     * @notice Deatils for a sale.
+     * @param bidId The Id of the bid
+     * @param saleId The Id of the sale.
+     * @param sellerAddress The address of the seller.
+     * @param buyerAddress The address of the buyer.
+     * @param price The price of the bid.
+     * @param withdrawn Boolean indicating if the bid has been withdrawn.
+     */
     struct BidOrder {
         uint256 bidId;
         uint256 saleId;
@@ -44,6 +67,16 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         bool withdrawn;
     }
 
+    /**
+     * @notice Deatils for a sale.
+     * @param initiatorNFTAddress The address of the initiator's nft contract.
+     * @param initiator The address of the initiator.
+     * @param initiatorNftId The Id of the initiator's token.
+     * @param requestedTokenOwner The address of the requested token's owner.
+     * @param requestedTokenId The Id of the requested token.
+     * @param requestedTokenAddress The address of the requested token's contract.
+     * @param status Boolean indicating the status of the swap.
+     */
     struct Swap {
         address initiatorNFTAddress;
         address initiator;
@@ -502,7 +535,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     function acceptSwapRequest(uint256 swapId) public nonReentrant {
         Swap storage swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
-        require(swap.requestedTokenOwner == msg.sender, "Only owner can accept swap");
+        require(swap.requestedTokenOwner == msg.sender, "Only requested owner can accept swap");
         if(ERC721(swap.initiatorNFTAddress).ownerOf(swap.initiatorNftId) == swap.initiator) {
             swap.status = false;
             revert("requesting token owner has changed");

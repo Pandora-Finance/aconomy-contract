@@ -78,12 +78,33 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 interest
     );
 
+    /**
+     * @notice Deatils for the installments.
+     * @param monthlyCycleInterest The interest to be paid every cycle.
+     * @param installments The total installments to be paid.
+     * @param installmentsPaid The total installments paid.
+     */
     struct Installments {
         uint256 monthlyCycleInterest;
         uint32 installments;
         uint32 installmentsPaid;
     }
 
+    /**
+     * @notice Deatils for a fund supply.
+     * @param amount The amount being funded.
+     * @param expiration The duration within which the fund bid should be accepted.
+     * @param maxDuration The bid loan duration.
+     * @param interestRate The interest rate in bps.
+     * @param state The state of the bid.
+     * @param bidTimestamp The timestamp the bid was created.
+     * @param acceptBidTimestamp The timestamp the bid was accepted.
+     * @param paymentCycleAmount The amount to be paid every cycle.
+     * @param totalRepaidPrincipal The total principal repaid.
+     * @param lastRepaidTimestamp The timestamp of the last repayment.
+     * @param installment The installment details.
+     * @param repaid The amount repaid.
+     */
     struct FundDetail {
         uint256 amount;
         uint256 expiration; //After expiration time, if owner dose not accept bid then lender can withdraw the fund
@@ -99,6 +120,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         RePayment Repaid;
     }
 
+    /**
+     * @notice Deatils for payment.
+     * @param amount The principal amount involved.
+     * @param interest The interest amount involved.
+     */
     struct RePayment {
         uint256 amount;
         uint256 interest;
