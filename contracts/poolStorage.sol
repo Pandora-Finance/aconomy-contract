@@ -50,6 +50,7 @@ abstract contract poolStorage {
         uint32 acceptedTimestamp;
         uint32 lastRepaidTimestamp;
         uint32 loanDuration;
+        uint16 protocolFee;
     }
 
     /**

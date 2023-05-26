@@ -111,6 +111,8 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         poolLoans[_poolId] = loanId_;
 
+        uint16 fee = AconomyFee(AconomyFeeAddress).protocolFee();
+
         // Create and store our loan into the mapping
         Loan storage loan = loans[loanId];
         loan.borrower = msg.sender;
@@ -120,6 +122,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         loan.loanDetails.principal = _principal;
         loan.loanDetails.loanDuration = _duration;
         loan.loanDetails.timestamp = uint32(block.timestamp);
+        loan.loanDetails.protocolFee = fee;
         loan.terms.installments = _duration / 30 days;
         loan.terms.installmentsPaid = 0;
 
@@ -198,7 +201,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         //Aconomy Fee
         amountToAconomy = LibCalculations.percent(
             loan.loanDetails.principal,
-            AconomyFee(AconomyFeeAddress).protocolFee()
+            loan.loanDetails.protocolFee
         );
 
         //Pool Fee
