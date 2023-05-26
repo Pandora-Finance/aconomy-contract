@@ -444,9 +444,22 @@ contract("PiMarket", async (accounts) => {
             );
         });
 
+        it("should cancel the swap if requested token owner has changed", async () => {
+            await collectionContract.safeTransferFrom(bob, carl, 4, {from: bob});
+            await collectionContract.approve(piMarket.address, 4, { from: carl });
+            await expectRevert(piMarket.acceptSwapRequest(0, { from: carl }), "requesting token owner has changed")
+            await collectionContract.safeTransferFrom(carl, bob, 4, {from: carl});
+        })
+
+        it("should not let an address that is not bob accept the swap request", async () => {
+            await expectRevert(piMarket.acceptSwapRequest(0, { from: carl }), "Only requested owner can accept swap")
+        })
+
 
         it("should let bob accept the swap request", async () => {
             await collectionContract.approve(piMarket.address, 4, { from: bob });
+            let res = await piMarket._swaps(0);
+            assert.equal(res.status, true);
             const result = await piMarket.acceptSwapRequest(0, { from: bob });
             assert.equal(
                 await collectionContract.ownerOf(3),
@@ -458,15 +471,21 @@ contract("PiMarket", async (accounts) => {
                 alice,
                 "Failed to Swap token with Id 4"
             );
+            res = await piMarket._swaps(0);
+            assert.equal(res.status, false);
         });
 
         it("should let alice cancle the swap request", async () => {
+            let res = await piMarket._swaps(1);
+            assert.equal(res.status, true);
             const result = await piMarket.cancelSwap(1, { from: alice });
             assert.equal(
                 await collectionContract.ownerOf(5),
                 alice,
                 "Failed to Swap token with Id 5"
             );
+            res = await piMarket._swaps(1);
+            assert.equal(res.status, false);
         });
     });
 });
