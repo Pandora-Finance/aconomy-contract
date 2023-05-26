@@ -87,6 +87,7 @@ contract("PoolAddress", async (accounts) => {
   })
 
   it("testing loan request function", async () => {
+    await aconomyFee.setProtocolFee(100);
     erc20 = await lendingToken.deployed()
     await erc20.mint(accounts[0], '10000000000')
     poolAddressInstance = await PoolAddress.deployed();
@@ -107,15 +108,18 @@ contract("PoolAddress", async (accounts) => {
   })
 
   it("should Accept loan ", async () => {
-    await aconomyFee.setProtocolFee(100);
+    await aconomyFee.transferOwnership(accounts[9]);
     let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+    assert.equal(feeAddress, accounts[9]);
     let b1 = await erc20.balanceOf(feeAddress)
+    console.log("fee 1", b1.toNumber())
     await erc20.approve(poolAddressInstance.address, 1000000000)
     let _balance1 = await erc20.balanceOf(accounts[0]);
     console.log(_balance1.toNumber())
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
     let b2 = await erc20.balanceOf(feeAddress)
-    assert.equal(b1 - b2, 980000000)
+    console.log("fee 2", b2.toNumber())
+    assert.equal(b2 - b1, 10000000)
     _balance1 = await erc20.balanceOf(accounts[1]);
     //console.log(_balance1.toNumber())
     //Amount that the borrower will get is 999 after cutting fees and market charges
