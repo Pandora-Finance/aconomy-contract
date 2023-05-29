@@ -70,7 +70,7 @@ contract("FundingPool", (accounts) => {
       poolRegis = await PoolRegistry.deployed()
       aconomyFee = await AconomyFee.deployed();
       await aconomyFee.setProtocolFee(100);
-      const feee = await aconomyFee.protocolFee;
+      const feee = await aconomyFee.protocolFee();
       console.log("protocolFee", feee.toString())
       res = await poolRegis.createPool(
         loanDefaultDuration,
@@ -195,7 +195,7 @@ contract("FundingPool", (accounts) => {
       let feeAddress = await aconomyFee.getAconomyOwnerAddress();
       await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
       assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
-      const feee = await aconomyFee.protocolFee;
+      const feee = await aconomyFee.protocolFee();
       console.log("protocolFee", feee.toString())
       let b1 = await erc20.balanceOf(feeAddress)
       console.log("owner1", b1.toString())
