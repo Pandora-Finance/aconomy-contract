@@ -49,6 +49,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
      * @param bidderAddress The address of the bidder.
      * @param ERC20Address The address of the erc20 funds.
      * @param Amount The amount of funds.
+     * @param protocolFee The protocol fee when creating a bid.
      * @param withdrawn Boolean indicating if a bid has been withdrawn.
      * @param bidAccepted Boolean indicating if the bid has been accepted.
      */
@@ -60,6 +61,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         address bidderAddress;
         address ERC20Address;
         uint256 Amount;
+        uint16 protocolFee;
         bool withdrawn;
         bool bidAccepted;
     }
@@ -225,6 +227,9 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         require(_bidAmount != 0, "You can't bid with zero Amount");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
+
+        uint16 fee = AconomyFee(AconomyFeeAddress).protocolFee();
+
         BidDetail memory bidDetail = BidDetail(
             Bids[_NFTid].length,
             _percent,
@@ -233,6 +238,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             msg.sender,
             _ERC20Address,
             _bidAmount,
+            fee,
             false,
             false
         );
@@ -272,7 +278,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         //Calculating Aconomy Fee
         uint256 amountToAconomy = LibCalculations.percent(
             Bids[_NFTid][_bidId].Amount,
-            AconomyFee(AconomyFeeAddress).protocolFee()
+            Bids[_NFTid][_bidId].protocolFee
         );
 
         // transfering Amount to NFT Owner

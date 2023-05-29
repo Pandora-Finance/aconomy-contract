@@ -83,11 +83,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
      * @param monthlyCycleInterest The interest to be paid every cycle.
      * @param installments The total installments to be paid.
      * @param installmentsPaid The total installments paid.
+     * @param protocolFee The protocol fee when creating the bid.
      */
     struct Installments {
         uint256 monthlyCycleInterest;
         uint32 installments;
         uint32 installmentsPaid;
+        uint16 protocolFee;
     }
 
     /**
@@ -173,10 +175,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         require(_maxLoanDuration % 30 days == 0);
         require(_amount >= 10000, "amount too low");
 
-        address lender = msg.sender;
+        uint16 fee = poolRegistry(poolRegistryAddress).getAconomyFee();
+
         require(_expiration > uint32(block.timestamp), "wrong timestamp");
         uint256 _bidId = bidId;
-        FundDetail storage fundDetail = lenderPoolFundDetails[lender][_poolId][
+        FundDetail storage fundDetail = lenderPoolFundDetails[msg.sender][_poolId][
             _ERC20Address
         ][_bidId];
         fundDetail.amount = _amount;
@@ -188,6 +191,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.state = BidState.PENDING;
         fundDetail.installment.installments = _maxLoanDuration / 30 days;
         fundDetail.installment.installmentsPaid = 0;
+        fundDetail.installment.protocolFee = fee;
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
@@ -209,12 +213,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
         // Send payment to the Pool
         require(
-            IERC20(_ERC20Address).transferFrom(lender, _poolAddress, _amount),
+            IERC20(_ERC20Address).transferFrom(msg.sender, _poolAddress, _amount),
             "Unable to tansfer to poolAddress"
         );
         bidId++;
 
-        emit SuppliedToPool(lender, _poolId, _bidId, _ERC20Address, _amount);
+        emit SuppliedToPool(msg.sender, _poolId, _bidId, _ERC20Address, _amount);
     }
 
     /**
@@ -254,7 +258,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         //Aconomy Fee
         uint256 amountToAconomy = LibCalculations.percent(
             amount,
-            poolRegistry(poolRegistryAddress).getAconomyFee()
+            fundDetail.installment.protocolFee
         );
 
         // transfering Amount to Owner
