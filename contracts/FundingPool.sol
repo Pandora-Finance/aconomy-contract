@@ -83,6 +83,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
      * @param monthlyCycleInterest The interest to be paid every cycle.
      * @param installments The total installments to be paid.
      * @param installmentsPaid The total installments paid.
+     * @param protocolFee The protocol fee when creating the bid.
      */
     struct Installments {
         uint256 monthlyCycleInterest;

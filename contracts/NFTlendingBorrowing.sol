@@ -49,6 +49,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
      * @param bidderAddress The address of the bidder.
      * @param ERC20Address The address of the erc20 funds.
      * @param Amount The amount of funds.
+     * @param protocolFee The protocol fee when creating a bid.
      * @param withdrawn Boolean indicating if a bid has been withdrawn.
      * @param bidAccepted Boolean indicating if the bid has been accepted.
      */

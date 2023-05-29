@@ -41,6 +41,7 @@ abstract contract poolStorage {
      * @param acceptedTimestamp The timestamp the loan was accepted.
      * @param lastRepaidTimestamp The timestamp of the last repayment.
      * @param loanDuration The duration of the loan.
+     * @param protocolFee The fee when creating a loan.
      */
     struct LoanDetails {
         ERC20 lendingToken;
