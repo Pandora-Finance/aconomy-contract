@@ -110,6 +110,7 @@ contract("PoolAddress", async (accounts) => {
   it("should Accept loan ", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
     let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+    await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
     assert.equal(feeAddress, accounts[9]);
     let b1 = await erc20.balanceOf(feeAddress)
     console.log("fee 1", b1.toNumber())
