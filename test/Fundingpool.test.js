@@ -69,6 +69,9 @@ contract("FundingPool", (accounts) => {
       //console.log("attestTegistry: ", attestServices.address)
       poolRegis = await PoolRegistry.deployed()
       aconomyFee = await AconomyFee.deployed();
+      await aconomyFee.setProtocolFee(100);
+      const feee = await aconomyFee.protocolFee;
+      console.log("protocolFee", feee.toString())
       res = await poolRegis.createPool(
         loanDefaultDuration,
         loanExpirationDuration,
@@ -188,8 +191,12 @@ contract("FundingPool", (accounts) => {
     });
 
     it('should accept the bid and emit AcceptedBid event', async () => {
-      await aconomyFee.setProtocolFee(100);
+      await aconomyFee.transferOwnership(accounts[9]);
       let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+      await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
+      assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
+      const feee = await aconomyFee.protocolFee;
+      console.log("protocolFee", feee.toString())
       let b1 = await erc20.balanceOf(feeAddress)
       console.log("owner1", b1.toString())
       const tx = await fundingpoolInstance.AcceptBid(
