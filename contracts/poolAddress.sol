@@ -464,7 +464,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
     ) public view returns (uint256) {
         (uint256 owedAmount, , uint256 interest) = LibCalculations.owedAmount(
             loans[_loanId],
-            block.timestamp
+            block.timestamp + 10 minutes
         );
 
         uint256 paymentAmount = owedAmount + interest;

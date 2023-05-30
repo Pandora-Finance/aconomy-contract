@@ -601,7 +601,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
                 fundDetail.paymentCycleAmount,
                 paymentCycle,
                 fundDetail.lastRepaidTimestamp,
-                block.timestamp,
+                block.timestamp + 10 minutes,
                 fundDetail.acceptBidTimestamp,
                 fundDetail.maxDuration
             );
