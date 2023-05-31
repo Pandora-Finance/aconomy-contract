@@ -33,8 +33,6 @@ contract("NFTlendingBorrowing", async (accounts) => {
         assert(tokenId === 0, "Failed to mint or wrong token Id");
         assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
 
-        await piNFT.approve(nftLendBorrow.address, 0)
-
         const tx1 = await nftLendBorrow.listNFTforBorrowing(
             tokenId,
             piNFT.address,
@@ -129,6 +127,8 @@ contract("NFTlendingBorrowing", async (accounts) => {
         let b1 = await sampleERC20.balanceOf(feeAddress)
         console.log("fee 1", b1.toNumber())
 
+        await piNFT.approve(nftLendBorrow.address, 0)
+
         const tx = await nftLendBorrow.AcceptBid(
             1,
             0
@@ -201,8 +201,6 @@ contract("NFTlendingBorrowing", async (accounts) => {
         const tokenId = tx.logs[0].args.tokenId.toNumber();
         assert(tokenId === 1, "Failed to mint or wrong token Id");
         assert.equal(await piNFT.balanceOf(alice), 2, "Failed to mint");
-
-        await piNFT.approve(nftLendBorrow.address, 1)
 
         const tx1 = await nftLendBorrow.listNFTforBorrowing(
             tokenId,
