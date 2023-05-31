@@ -12,6 +12,9 @@ const CollectionFactory = artifacts.require("CollectionFactory")
 const CollectionMethods = artifacts.require("CollectionMethods")
 const LibCollection = artifacts.require("LibCollection")
 const BPBDTL = artifacts.require("BokkyPooBahsDateTimeLibrary")
+require('dotenv').config()
+
+let walletAddress = process.env.WALLET_ADDRESS
 
 
 module.exports = async function (deployer) {
@@ -27,11 +30,6 @@ module.exports = async function (deployer) {
   var attestServices = await attestationServices.deployed()
 
 
-  await deployer.deploy(libCalc);
-  await deployer.link(libCalc, [libPool, FundingPool]);
-
-  await deployer.deploy(libPool);
-
   await deployer.deploy(LibCollection);
   await deployer.link(LibCollection, [CollectionFactory]);
 
@@ -41,6 +39,13 @@ module.exports = async function (deployer) {
   await deployer.deploy(CollectionFactory, CollectionMethod.address);
   var collectionFactory = await CollectionFactory.deployed();
 
+  await CollectionMethod.initialize(walletAddress, collectionFactory.address, "xyz", "xyz")
+
+
+  await deployer.deploy(libCalc);
+  await deployer.link(libCalc, [libPool, FundingPool]);
+
+  await deployer.deploy(libPool);
 
   await deployer.deploy(FundingPool);
   var fundingPool = await FundingPool.deployed();
@@ -49,6 +54,8 @@ module.exports = async function (deployer) {
 
   await deployer.deploy(poolRegistry, attestServices.address, aconomyfee.address, fundingPool.address)
   var poolRegis = await poolRegistry.deployed()
+
+  await fundingPool.initialize(walletAddress, poolRegis.address)
 
   await deployer.link(libCalc, [poolAddress, NftLendingBorrowing]);
 
