@@ -8,6 +8,7 @@ const AconomyFee = artifacts.require("AconomyFee")
 const PoolAddress = artifacts.require('poolAddress')
 const lendingToken = artifacts.require('mintToken')
 const poolAddress = artifacts.require("poolAddress")
+const truffleAssert = require('truffle-assertions');
 contract("PoolAddress", async (accounts) => {
   const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
   const loanDefaultDuration = moment.duration(180, 'days').asSeconds()
@@ -306,5 +307,71 @@ contract("PoolAddress", async (accounts) => {
     let bal = await poolAddressInstance.viewFullRepayAmount(loanId1)
     console.log(bal.toNumber())
     assert.equal(bal, 0)
+  })
+
+  it("should request another loan", async () => {
+    erc20 = await lendingToken.deployed()
+    //await erc20.mint(accounts[0], '10000000000')
+    poolAddressInstance = await PoolAddress.deployed();
+    res = await poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      1000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    )
+    loanId1 = res.logs[0].args.loanId.toNumber()
+    let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber()
+    console.log(paymentCycleAmount, "pca")
+    assert.equal(loanId1, 2, "Unable to create loan: Wrong LoanId")
+  })
+
+  it("should expire after the expiry deadline", async () => {
+    await time.increase(loanExpirationDuration + 1);
+    let r = await poolAddressInstance.isLoanExpired(loanId1);
+    assert.equal(r, true);
+  })
+
+  it("should not allow an expired loan to be accepted", async () => {
+    await truffleAssert.reverts(poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] }), "Loan has expired")
+  })
+
+  it("should request another loan", async () => {
+    erc20 = await lendingToken.deployed()
+    //await erc20.mint(accounts[0], '10000000000')
+    poolAddressInstance = await PoolAddress.deployed();
+    res = await poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      1000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    )
+    loanId1 = res.logs[0].args.loanId.toNumber()
+    let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber()
+    console.log(paymentCycleAmount, "pca")
+    assert.equal(loanId1, 3, "Unable to create loan: Wrong LoanId")
+  })
+
+  it("should Accept loan ", async () => {
+    await erc20.approve(poolAddressInstance.address, 1000000000)
+    let _balance1 = await erc20.balanceOf(accounts[0]);
+    console.log(_balance1.toNumber())
+    res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
+    _balance1 = await erc20.balanceOf(accounts[1]);
+  })
+
+  it("should show loan defaulted", async () => {
+    let r = await poolAddressInstance.isLoanDefaulted(loanId1);
+    assert.equal(r, false);
+    await time.increase(loanDefaultDuration + paymentCycleDuration + 1);
+    r = await poolAddressInstance.isLoanDefaulted(loanId1);
+    assert.equal(r, true);
   })
 })
