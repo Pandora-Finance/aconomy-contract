@@ -211,7 +211,8 @@ contract poolRegistry is ReentrancyGuard {
     function setPaymentDefaultDuration(uint256 _poolId, uint32 _duration)
         public
         ownsPool(_poolId)
-    {
+    {   
+        require(_duration != 0, "default duration cannot be 0");
         if (_duration != pools[_poolId].paymentDefaultDuration) {
             pools[_poolId].paymentDefaultDuration = _duration;
 

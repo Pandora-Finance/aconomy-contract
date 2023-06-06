@@ -83,19 +83,21 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
      * @param monthlyCycleInterest The interest to be paid every cycle.
      * @param installments The total installments to be paid.
      * @param installmentsPaid The total installments paid.
+     * @param defaultDuration The duration after which loan is defaulted
      * @param protocolFee The protocol fee when creating the bid.
      */
     struct Installments {
         uint256 monthlyCycleInterest;
         uint32 installments;
         uint32 installmentsPaid;
+        uint32 defaultDuration;
         uint16 protocolFee;
     }
 
     /**
      * @notice Deatils for a fund supply.
      * @param amount The amount being funded.
-     * @param expiration The duration within which the fund bid should be accepted.
+     * @param expiration The timestamp within which the fund bid should be accepted.
      * @param maxDuration The bid loan duration.
      * @param interestRate The interest rate in bps.
      * @param state The state of the bid.
@@ -207,6 +209,9 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
         fundDetail.installment.monthlyCycleInterest = fundDetail.paymentCycleAmount - monthlyPrincipal;
 
+        fundDetail.installment.defaultDuration = poolRegistry(poolRegistryAddress)
+            .getPaymentDefaultDuration(_poolId);
+
         address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
             _poolId
         );
@@ -312,6 +317,55 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             "unable to transfer to receiver"
         );
         emit BidRejected(_lender, _bidId, _poolId, fundDetail.amount);
+    }
+
+    /**
+     * @notice Checks if bid has expired.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the funds contract.
+     * @param _bidId The Id of the bid.
+     * @param _lender The address of the lender.
+     */
+    function isBidExpired(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender) 
+        public view returns (bool) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+
+        if (fundDetail.state != BidState.PENDING) return false;
+        if (fundDetail.expiration == 0) return false;
+
+        return (uint32(block.timestamp) > fundDetail.expiration);
+    }
+
+    /**
+     * @notice Checks if loan is defaulted.
+     * @param _poolId The Id of the pool.
+     * @param _ERC20Address The address of the funds contract.
+     * @param _bidId The Id of the bid.
+     * @param _lender The address of the lender.
+     */
+    function isLoanDefaulted(
+        uint256 _poolId,
+        address _ERC20Address,
+        uint256 _bidId,
+        address _lender) 
+        public view returns (bool) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+            _ERC20Address
+        ][_bidId];
+
+        // Make sure loan cannot be liquidated if it is not active
+        if (fundDetail.state != BidState.ACCEPTED) return false;
+
+        if (fundDetail.installment.defaultDuration == 0) return false;
+
+        return ((int32(uint32(block.timestamp)) - int32(fundDetail.acceptBidTimestamp + fundDetail.maxDuration)) >
+            int32(fundDetail.installment.defaultDuration));
     }
 
     /**
