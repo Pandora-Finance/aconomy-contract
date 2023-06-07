@@ -28,7 +28,7 @@ contract("FundingPool", (accounts) => {
   const erc20Amount = 10000;
   const maxLoanDuration = 90;
   const interestRate = 10;
-  const expiration = BigNumber(moment.now()).plus(3600); // expires in an hour 
+  let expiration;
 
 
   const paymentCycleDuration = moment.duration(30, 'days').asSeconds()
@@ -73,7 +73,7 @@ contract("FundingPool", (accounts) => {
       const feee = await aconomyFee.protocolFee();
       console.log("protocolFee", feee.toString())
       res = await poolRegis.createPool(
-        loanDefaultDuration,
+        loanExpirationDuration,
         loanExpirationDuration,
         100,
         1000,
@@ -109,7 +109,10 @@ contract("FundingPool", (accounts) => {
     })
 
     it("should allow lender to supply funds to the pool", async () => {
-
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600
       erc20 = await lendingToken.deployed()
       fundingpoolInstance = await FundingPool.at(fundingpooladdress);
 
@@ -128,7 +131,8 @@ contract("FundingPool", (accounts) => {
         { from: lender }
       );
       bidId = tx.logs[0].args.BidId.toNumber();
-      // console.log(bidId, "bidid111");
+      assert.equal(bidId, 0)
+      //console.log(bidId, "bidid111");
 
       await erc20.transfer(lender, 10000, { from: accounts[0] })
       await erc20.approve(fundingpoolInstance.address, 10000, {
@@ -145,6 +149,7 @@ contract("FundingPool", (accounts) => {
         { from: lender }
       );
       bidId1 = tx1.logs[0].args.BidId.toNumber();
+      assert.equal(bidId1, 1)
       const balance = await erc20.balanceOf(lender);
       assert.equal(balance.toString(), 0, "Error")
 
@@ -446,6 +451,10 @@ contract("FundingPool", (accounts) => {
     })
 
     it("should supply funds to pool again", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600
       await erc20.approve(fundingpoolInstance.address, erc20Amount, {
         from: lender,
       });
@@ -459,6 +468,7 @@ contract("FundingPool", (accounts) => {
         { from: lender }
       );
       bidId = tx.logs[0].args.BidId.toNumber();
+      assert.equal(bidId, 2)
     })
 
     it('should accept the bid', async () => {
@@ -506,6 +516,108 @@ contract("FundingPool", (accounts) => {
       let bal = await fundingpoolInstance.viewFullRepayAmount(poolId, erc20.address, bidId, lender)
       console.log(bal.toNumber())
       assert.equal(bal, 0)
+    })
+
+    it("should supply funds to pool again", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      const tx = await fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        erc20Amount,
+        loanDefaultDuration,
+        expiration,
+        1000,
+        { from: lender }
+      );
+      console.log(tx)
+      bidId = tx.logs[0].args.BidId.toNumber();
+      assert.equal(bidId, 3)
+
+    })
+
+    it('should show the bid has expired', async () => {
+      let r = await fundingpoolInstance.isBidExpired(poolId, erc20.address, bidId, lender);
+      let loan = await fundingpoolInstance.lenderPoolFundDetails(
+        lender,
+        poolId,
+        erc20.address,
+        bidId
+      );
+      console.log("expl", loan.expiration.toString())
+      console.log("exp", expiration.toString())
+      assert.equal(r, false);
+      advanceBlockAtTime(expiration + 10);
+      r = await fundingpoolInstance.isBidExpired(poolId, erc20.address, bidId, lender);
+      assert.equal(r, true);
+    });
+
+    it("should not allow expired bid to be accepted", async () => {
+      await truffleAssert.reverts(fundingpoolInstance.AcceptBid(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        receiver
+      ), "bid expired")
+    })
+
+    it("Should withdraw the expired bid", async () => {
+      let b1 = await erc20.balanceOf(lender);
+      await fundingpoolInstance.Withdraw(poolId, erc20.address, bidId, lender, { from: lender });
+      let b2 = await erc20.balanceOf(lender);
+      assert.equal(b2 - b1, 10000);
+      let loan = await fundingpoolInstance.lenderPoolFundDetails(
+        lender,
+        poolId,
+        erc20.address,
+        bidId
+      );
+      assert.equal(loan.state, 3);
+    })
+
+    it("should supply funds to pool again", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      const tx = await fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        erc20Amount,
+        loanDefaultDuration,
+        expiration,
+        1000,
+        { from: lender }
+      );
+      bidId = tx.logs[0].args.BidId.toNumber();
+      assert.equal(bidId, 4)
+    })
+
+    it('should accept the bid', async () => {
+      const tx = await fundingpoolInstance.AcceptBid(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        receiver
+      );
+    });
+
+    it("should show loan defaulted after default time", async () => {
+      let r = await fundingpoolInstance.isLoanDefaulted(poolId, erc20.address, bidId, lender);
+      assert.equal(r, false);
+      await time.increase(loanDefaultDuration + loanExpirationDuration + 1)
+      r = await fundingpoolInstance.isLoanDefaulted(poolId, erc20.address, bidId, lender);
+      assert.equal(r, true);
     })
 
   });
