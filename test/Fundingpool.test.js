@@ -613,9 +613,10 @@ contract("FundingPool", (accounts) => {
     });
 
     it("should show loan defaulted after default time", async () => {
+      await time.increase(loanDefaultDuration + loanExpirationDuration - 10)
       let r = await fundingpoolInstance.isLoanDefaulted(poolId, erc20.address, bidId, lender);
       assert.equal(r, false);
-      await time.increase(loanDefaultDuration + loanExpirationDuration + 1)
+      await time.increase(11)
       r = await fundingpoolInstance.isLoanDefaulted(poolId, erc20.address, bidId, lender);
       assert.equal(r, true);
     })

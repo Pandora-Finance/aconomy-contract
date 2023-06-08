@@ -368,9 +368,10 @@ contract("PoolAddress", async (accounts) => {
   })
 
   it("should show loan defaulted", async () => {
+    await time.increase(loanDefaultDuration + paymentCycleDuration - 10);
     let r = await poolAddressInstance.isLoanDefaulted(loanId1);
     assert.equal(r, false);
-    await time.increase(loanDefaultDuration + paymentCycleDuration + 1);
+    await time.increase(11);
     r = await poolAddressInstance.isLoanDefaulted(loanId1);
     assert.equal(r, true);
   })
