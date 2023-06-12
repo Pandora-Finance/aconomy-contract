@@ -14,8 +14,8 @@ const LibCollection = artifacts.require("LibCollection")
 const BPBDTL = artifacts.require("BokkyPooBahsDateTimeLibrary")
 require('dotenv').config()
 
-let walletAddress = process.env.WALLET_ADDRESS
-
+// let walletAddress = process.env.WALLET_ADDRESS
+let walletAddress = "0x69F83D29830616D54669E84636079851b547328E"
 
 module.exports = async function (deployer) {
 

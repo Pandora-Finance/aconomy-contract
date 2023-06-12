@@ -340,7 +340,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender) 
         public view returns (bool) {
-        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][_amount
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
 
@@ -490,7 +490,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
             // calculating AconomyFee
             uint256 amountToAconomy = LibCalculations.percent(
-                amount,
+                fundDetail.amount,
                 fundDetail.installment.protocolFee
             );
 
@@ -762,20 +762,22 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             owedAmount + interest
         );
 
-        address AconomyOwner = poolRegistry(poolRegistryAddress)
+        if(fundDetail.installment.installmentsPaid == 0) {
+            address AconomyOwner = poolRegistry(poolRegistryAddress)
             .getAconomyOwner();
 
-        // calculating AconomyFee
-        uint256 amountToAconomy = LibCalculations.percent(
-            amount,
-            fundDetail.installment.protocolFee
-        );
+            // calculating AconomyFee
+            uint256 amountToAconomy = LibCalculations.percent(
+                fundDetail.amount,
+                fundDetail.installment.protocolFee
+            );
 
-        // Transfering AconomyFee
-        require(
-            IERC20(_ERC20Address).transferFrom(msg.sender, AconomyOwner, amountToAconomy),
-            "Unable to tansfer to Aconomy"
-        );
+            // Transfering AconomyFee
+            require(
+                IERC20(_ERC20Address).transferFrom(msg.sender, AconomyOwner, amountToAconomy),
+                "Unable to tansfer to Aconomy"
+            );
+        }
 
 
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);

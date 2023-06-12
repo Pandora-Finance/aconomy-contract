@@ -13,6 +13,8 @@ const PoolAddress = artifacts.require('poolAddress')
 const lendingToken = artifacts.require('mintToken')
 const poolAddress = artifacts.require("poolAddress")
 
+const BN = require('bn.js');
+
 
 contract("FundingPool", (accounts) => {
   let fundingPool;
@@ -214,7 +216,7 @@ contract("FundingPool", (accounts) => {
       let b2 = await erc20.balanceOf(feeAddress)
       console.log("owner2", b2.toString())
       console.log(poolId)
-      assert.equal(b2 - b1, 100)
+      assert.equal(b2 - b1, 0)
       // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
       //   .to.emit(fundingpoolInstance, 'AcceptedBid')
       //   .withArgs(
@@ -317,7 +319,8 @@ contract("FundingPool", (accounts) => {
       r = await fundingpoolInstance.viewInstallmentAmount(poolId, erc20.address, bidId, lender);
       console.log('installment after 1 cycle', r.toString());
       //1
-      await erc20.approve(fundingpoolInstance.address, r)
+      let fee = new BN(10000).mul(new BN(2))
+      await erc20.approve(fundingpoolInstance.address, new BN(r).add(new BN(fee).div(new BN(100))))
       let result = await fundingpoolInstance.repayMonthlyInstallment(poolId, erc20.address, bidId, lender);
   
       loan = await fundingpoolInstance.lenderPoolFundDetails(
@@ -482,6 +485,19 @@ contract("FundingPool", (accounts) => {
     });
 
     it("should repay full amount", async () => {
+
+      // await aconomyFee.transferOwnership(accounts[9]);
+      let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+      await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
+      assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
+      const feee = await aconomyFee.protocolFee();
+      console.log("protocolFee", feee.toString())
+      let b1 = await erc20.balanceOf(feeAddress)
+      console.log("owner1", b1.toString())
+      
+
+
+
       let loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
         poolId,
@@ -495,6 +511,13 @@ contract("FundingPool", (accounts) => {
       //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
       await erc20.approve(fundingpoolInstance.address, bal + 10)
       let r = await fundingpoolInstance.RepayFullAmount(poolId, erc20.address, bidId, lender)
+
+      let b2 = await erc20.balanceOf(feeAddress)
+      console.log("owner2", b2.toString())
+      console.log(poolId)
+      assert.equal(b2 - b1, 200)
+
+
       loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
         poolId,
