@@ -257,14 +257,14 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 amount = fundDetail.amount;
         fundDetail.state = BidState.ACCEPTED;
 
-        address AconomyOwner = poolRegistry(poolRegistryAddress)
-            .getAconomyOwner();
+        // address AconomyOwner = poolRegistry(poolRegistryAddress)
+        //     .getAconomyOwner();
 
         //Aconomy Fee
-        uint256 amountToAconomy = LibCalculations.percent(
-            amount,
-            fundDetail.installment.protocolFee
-        );
+        // uint256 amountToAconomy = LibCalculations.percent(
+        //     amount,
+        //     fundDetail.installment.protocolFee
+        // );
 
         // transfering Amount to Owner
         require(
@@ -273,12 +273,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         );
 
         // transfering Amount to Protocol Owner
-        if (amountToAconomy != 0) {
-            require(
-                IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy),
-                "Unable to transfer to AconomyOwner"
-            );
-        }
+        // if (amountToAconomy != 0) {
+        //     require(
+        //         IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy),
+        //         "Unable to transfer to AconomyOwner"
+        //     );
+        // }
 
         emit BidAccepted(
             _lender,
@@ -355,7 +355,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender) 
         public view returns (bool) {
-        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][_amount
             _ERC20Address
         ][_bidId];
 
@@ -497,6 +497,25 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
+        
+
+        if(fundDetail.installment.installmentsPaid == 0) {
+            address AconomyOwner = poolRegistry(poolRegistryAddress)
+            .getAconomyOwner();
+
+            // calculating AconomyFee
+            uint256 amountToAconomy = LibCalculations.percent(
+                amount,
+                fundDetail.installment.protocolFee
+            );
+
+            // Transfering AconomyFee
+            require(
+                IERC20(_ERC20Address).transferFrom(msg.sender, AconomyOwner, amountToAconomy),
+                "Unable to tansfer to Aconomy"
+            );
+        }
+        
         if(fundDetail.installment.installmentsPaid + 1 == fundDetail.installment.installments) {
             _repayFullAmount(_poolId, _ERC20Address, _bidId, _lender);
         } else {
@@ -757,6 +776,22 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             interest,
             owedAmount + interest
         );
+
+        address AconomyOwner = poolRegistry(poolRegistryAddress)
+            .getAconomyOwner();
+
+        // calculating AconomyFee
+        uint256 amountToAconomy = LibCalculations.percent(
+            amount,
+            fundDetail.installment.protocolFee
+        );
+
+        // Transfering AconomyFee
+        require(
+            IERC20(_ERC20Address).transferFrom(msg.sender, AconomyOwner, amountToAconomy),
+            "Unable to tansfer to Aconomy"
+        );
+
 
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
