@@ -257,28 +257,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 amount = fundDetail.amount;
         fundDetail.state = BidState.ACCEPTED;
 
-        // address AconomyOwner = poolRegistry(poolRegistryAddress)
-        //     .getAconomyOwner();
-
-        //Aconomy Fee
-        // uint256 amountToAconomy = LibCalculations.percent(
-        //     amount,
-        //     fundDetail.installment.protocolFee
-        // );
 
         // transfering Amount to Owner
         require(
-            IERC20(_ERC20Address).transfer(_receiver, amount - amountToAconomy),
+            IERC20(_ERC20Address).transfer(_receiver, amount),
             "unable to transfer to receiver"
         );
 
-        // transfering Amount to Protocol Owner
-        // if (amountToAconomy != 0) {
-        //     require(
-        //         IERC20(_ERC20Address).transfer(AconomyOwner, amountToAconomy),
-        //         "Unable to transfer to AconomyOwner"
-        //     );
-        // }
 
         emit BidAccepted(
             _lender,
