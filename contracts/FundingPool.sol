@@ -438,6 +438,12 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
+        if (
+            fundDetail.state != BidState.ACCEPTED ||
+            fundDetail.state == BidState.PAID
+        ) {
+            return 0;
+        }
         uint32 LastRepaidTimestamp = fundDetail.lastRepaidTimestamp;
         uint256 lastPaymentCycle = BPBDTL.diffMonths(
                 fundDetail.acceptBidTimestamp,
@@ -448,8 +454,17 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
                 block.timestamp
             );
 
+        uint256 amountToAconomy = 0;
+        if(fundDetail.installment.installmentsPaid == 0) {
+            // calculating AconomyFee
+            amountToAconomy = LibCalculations.percent(
+                fundDetail.amount,
+                fundDetail.installment.protocolFee
+            );
+        }
+
         if(monthsSinceStart > lastPaymentCycle) {
-            return fundDetail.paymentCycleAmount;
+            return fundDetail.paymentCycleAmount + amountToAconomy;
         }
         else {
             return 0;
@@ -648,6 +663,16 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         ) {
             return 0;
         }
+
+        uint256 amountToAconomy = 0;
+        if(fundDetail.installment.installmentsPaid == 0) {
+            // calculating AconomyFee
+            amountToAconomy = LibCalculations.percent(
+                fundDetail.amount,
+                fundDetail.installment.protocolFee
+            );
+        }
+
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
@@ -664,7 +689,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
                 fundDetail.maxDuration
             );
         uint256 paymentAmount = owedAmount + interest;
-        return paymentAmount;
+        return paymentAmount + amountToAconomy;
     }
 
     /**
