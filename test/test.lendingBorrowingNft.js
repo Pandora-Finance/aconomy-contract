@@ -191,6 +191,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
             1,
             0
         )
+        let b2 = await sampleERC20.balanceOf(feeAddress)
+        console.log("fee 1", b2.toNumber())
+
         const amount = tx.logs[0].args.Amount.toNumber()
         console.log("Amount", amount)
         assert.equal(amount, 103, "false Amount")
