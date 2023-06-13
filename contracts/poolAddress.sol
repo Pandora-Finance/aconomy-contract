@@ -373,8 +373,31 @@ contract poolAddress is poolStorage, ReentrancyGuard {
                 block.timestamp
             );
 
+        uint256 amountToAconomy = 0;
+        uint256 amountToPool = 0;
+
+        if(loans[_loanId].terms.installmentsPaid == 0) {
+            //Aconomy Fee
+            amountToAconomy = LibCalculations.percent(
+                loans[_loanId].loanDetails.principal,
+                loans[_loanId].loanDetails.protocolFee
+            );
+
+            //Pool Fee
+            amountToPool = LibCalculations.percent(
+                loans[_loanId].loanDetails.principal,
+                poolRegistry(poolRegistryAddress).getPoolFee(loans[_loanId].poolId)
+            );
+        }
+        if (
+            loans[_loanId].state != LoanState.ACCEPTED ||
+            loans[_loanId].state == LoanState.PAID
+        ) {
+            return 0;
+        }
+
         if(monthsSinceStart > lastPaymentCycle) {
-            return loans[_loanId].terms.paymentCycleAmount;
+            return loans[_loanId].terms.paymentCycleAmount + amountToAconomy + amountToPool;
         }
         else {
             return 0;
@@ -409,7 +432,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             //Transfer Aconomy Fee
             if (amountToAconomy != 0) {
                 bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
-                    loan.lender,
+                    msg.sender,
                     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
                     amountToAconomy
                 );
@@ -420,7 +443,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             if (amountToPool != 0) {
                 bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
                     .transferFrom(
-                        loan.lender,
+                        msg.sender,
                         poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
                         amountToPool
                     );
@@ -503,14 +526,31 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             block.timestamp + 10 minutes
         );
 
+        uint256 amountToAconomy = 0;
+        uint256 amountToPool = 0;
+
+        if(loans[_loanId].terms.installmentsPaid == 0) {
+            //Aconomy Fee
+            amountToAconomy = LibCalculations.percent(
+                loans[_loanId].loanDetails.principal,
+                loans[_loanId].loanDetails.protocolFee
+            );
+
+            //Pool Fee
+            amountToPool = LibCalculations.percent(
+                loans[_loanId].loanDetails.principal,
+                poolRegistry(poolRegistryAddress).getPoolFee(loans[_loanId].poolId)
+            );
+        }
+
         uint256 paymentAmount = owedAmount + interest;
         if (
             loans[_loanId].state != LoanState.ACCEPTED ||
             loans[_loanId].state == LoanState.PAID
         ) {
-            paymentAmount = 0;
+            return 0;
         }
-        return paymentAmount;
+        return paymentAmount + amountToAconomy + amountToPool;
     }
 
      /**
@@ -563,7 +603,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             //Transfer Aconomy Fee
             if (amountToAconomy != 0) {
                 bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
-                    loan.lender,
+                    msg.sender,
                     AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
                     amountToAconomy
                 );
@@ -574,7 +614,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             if (amountToPool != 0) {
                 bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
                     .transferFrom(
-                        loan.lender,
+                        msg.sender,
                         poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
                         amountToPool
                     );
