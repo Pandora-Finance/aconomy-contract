@@ -1,9 +1,12 @@
-const { BN, ether, constants, expectEvent, shouldFail, time, expectRevert } = require('@openzeppelin/test-helpers');
+const { ether, constants, expectEvent, shouldFail, time, expectRevert } = require('@openzeppelin/test-helpers');
 const moment = require('moment');
 const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const NftLendingBorrowing = artifacts.require("NFTlendingBorrowing");
 const AconomyFee = artifacts.require("AconomyFee")
+
+const BN = require('bn.js');
+// const { assert } = require('ethers');
 
 
 contract("NFTlendingBorrowing", async (accounts) => {
@@ -25,8 +28,17 @@ contract("NFTlendingBorrowing", async (accounts) => {
 
     it("mint NFT and list for lending", async () => {
 
+        await aconomyFee.transferOwnership(accounts[9]);
+        let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+        await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
+        assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
+        let feee1 = await aconomyFee.protocolFee();
+        console.log("protocolFee", feee1.toString())
+
+        let b1 = await sampleERC20.balanceOf(feeAddress)
+        console.log("fee 1", b1.toNumber())
+
         const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
-        await aconomyFee.setProtocolFee(100);
         const feee = await aconomyFee.protocolFee();
         console.log("protocolFee", feee.toString())
         const tokenId = tx.logs[0].args.tokenId.toNumber();
@@ -74,7 +86,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
             1,
             100,
             sampleERC20.address,
-            10,
+            100,
             200,
             200,
             { from: bob }
@@ -117,15 +129,15 @@ contract("NFTlendingBorrowing", async (accounts) => {
     })
 
     it("Should Accept Bid", async () => {
-        await aconomyFee.transferOwnership(accounts[9]);
-        let feeAddress = await aconomyFee.getAconomyOwnerAddress();
-        await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
-        assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
-        const feee = await aconomyFee.protocolFee();
-        console.log("protocolFee", feee.toString())
+        // await aconomyFee.transferOwnership(accounts[9]);
+        // let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+        // await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
+        // assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
+        // const feee = await aconomyFee.protocolFee();
+        // console.log("protocolFee", feee.toString())
 
-        let b1 = await sampleERC20.balanceOf(feeAddress)
-        console.log("fee 1", b1.toNumber())
+        // let b1 = await sampleERC20.balanceOf(feeAddress)
+        // console.log("fee 1", b1.toNumber())
 
         await piNFT.approve(nftLendBorrow.address, 0)
 
@@ -133,9 +145,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
             1,
             0
         )
-        let b2 = await sampleERC20.balanceOf(feeAddress)
-        console.log("fee 2", b2.toNumber())
-        assert.equal(b2 - b1, 1)
+        // let b2 = await sampleERC20.balanceOf(feeAddress)
+        // console.log("fee 2", b2.toNumber())
+        // assert.equal(b2 - b1, 1)
         let nft = await nftLendBorrow.NFTdetails(1);
         let bid = await nftLendBorrow.Bids(1,0);
         assert.equal(nft.bidAccepted, true);
@@ -170,13 +182,27 @@ contract("NFTlendingBorrowing", async (accounts) => {
 
     it("Should Repay Bid", async () => {
 
+        let feeAddress = await aconomyFee.getAconomyOwnerAddress();
+        assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
+        const feee = await aconomyFee.protocolFee();
+        console.log("protocolFee", feee.toString())
 
-        await sampleERC20.approve(nftLendBorrow.address, 120)
+        let b1 = await sampleERC20.balanceOf(feeAddress)
+        console.log("fee 1", b1.toNumber())
+
+        let fee = new BN(100).mul(new BN(2))
+        console.log("feeeee",fee.toString());
+        
+        let aa = new BN(100).add(new BN(fee).div(new BN(100)))
+        console.log("ttl",aa.toString())
+        await sampleERC20.approve(nftLendBorrow.address, 103)
         const tx = await nftLendBorrow.Repay(
             1,
             0
         )
         const amount = tx.logs[0].args.Amount.toNumber()
+        console.log("Amount", amount)
+        assert.equal(amount, 103, "false Amount")
         let nft = await nftLendBorrow.NFTdetails(1);
         assert.equal(nft.listed, false)
     })

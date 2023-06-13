@@ -90,8 +90,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     event AcceptedBid(
         uint256 NFTid,
         uint256 BidId,
-        uint256 Amount,
-        uint256 ProtocolAmount
+        uint256 Amount
     );
 
     constructor(address _aconomyFee) {
@@ -272,34 +271,34 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         NFTdetails[_NFTid].bidAccepted = true;
         Bids[_NFTid][_bidId].bidAccepted = true;
 
-        address AconomyOwner = AconomyFee(AconomyFeeAddress)
-            .getAconomyOwnerAddress();
+        // address AconomyOwner = AconomyFee(AconomyFeeAddress)
+        //     .getAconomyOwnerAddress();
 
         //Calculating Aconomy Fee
-        uint256 amountToAconomy = LibCalculations.percent(
-            Bids[_NFTid][_bidId].Amount,
-            Bids[_NFTid][_bidId].protocolFee
-        );
+        // uint256 amountToAconomy = LibCalculations.percent(
+        //     Bids[_NFTid][_bidId].Amount,
+        //     Bids[_NFTid][_bidId].protocolFee
+        // );
 
         // transfering Amount to NFT Owner
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
                 msg.sender,
-                Bids[_NFTid][_bidId].Amount - amountToAconomy
+                Bids[_NFTid][_bidId].Amount
             ),
             "unable to transfer to receiver"
         );
 
         // transfering Amount to Protocol Owner
-        if (amountToAconomy != 0) {
-            require(
-                IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
-                    AconomyOwner,
-                    amountToAconomy
-                ),
-                "Unable to transfer to AconomyOwner"
-            );
-        }
+        // if (amountToAconomy != 0) {
+        //     require(
+        //         IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
+        //             AconomyOwner,
+        //             amountToAconomy
+        //         ),
+        //         "Unable to transfer to AconomyOwner"
+        //     );
+        // }
 
         //needs approval on frontend
         // transferring NFT to this address
@@ -312,8 +311,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit AcceptedBid(
             _NFTid,
             _bidId,
-            Bids[_NFTid][_bidId].Amount - amountToAconomy,
-            amountToAconomy
+            Bids[_NFTid][_bidId].Amount
         );
     }
 
@@ -372,6 +370,26 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "unable to transfer to bidder Address"
         );
 
+        address AconomyOwner = AconomyFee(AconomyFeeAddress)
+            .getAconomyOwnerAddress();
+
+        //Calculating Aconomy Fee
+        uint256 amountToAconomy = LibCalculations.percent(
+            Bids[_NFTid][_bidId].Amount,
+            Bids[_NFTid][_bidId].protocolFee
+        );
+
+        if (amountToAconomy != 0) {
+            require(
+                IERC20(Bids[_NFTid][_bidId].ERC20Address).transferFrom(
+                    msg.sender,
+                    AconomyOwner,
+                    amountToAconomy
+                ),
+                "Unable to transfer to AconomyOwner"
+            );
+        }
+
         NFTdetails[_NFTid].repaid = true;
         NFTdetails[_NFTid].listed = false;
 
@@ -384,7 +402,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit repaid(
             _NFTid,
             _bidId,
-            Bids[_NFTid][_bidId].Amount + percentageAmount
+            Bids[_NFTid][_bidId].Amount + percentageAmount + amountToAconomy
         );
     }
 

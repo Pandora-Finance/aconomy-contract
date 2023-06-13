@@ -198,45 +198,6 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         loan.lender = msg.sender;
 
-        // //Aconomy Fee
-        // amountToAconomy = LibCalculations.percent(
-        //     loan.loanDetails.principal,
-        //     loan.loanDetails.protocolFee
-        // );
-
-        // //Pool Fee
-        // amountToPool = LibCalculations.percent(
-        //     loan.loanDetails.principal,
-        //     poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
-        // );
-
-        // //Amount to Borrower
-        // amountToBorrower =
-        //     loan.loanDetails.principal -
-        //     amountToAconomy -
-        //     amountToPool;
-
-        // //Transfer Aconomy Fee
-        // if (amountToAconomy != 0) {
-        //     bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
-        //         loan.lender,
-        //         AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-        //         amountToAconomy
-        //     );
-        //     require(isSuccess, "Not able to tansfer to aconomy fee address");
-        // }
-
-        // //Transfer to Pool Owner
-        // if (amountToPool != 0) {
-        //     bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
-        //         .transferFrom(
-        //             loan.lender,
-        //             poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-        //             amountToPool
-        //         );
-        //     require(isSuccess2, "Not able to tansfer to pool owner");
-        // }
-
         //transfer funds to borrower
         bool isSuccess3 = IERC20(loan.loanDetails.lendingToken).transferFrom(
             loan.lender,

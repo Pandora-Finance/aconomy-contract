@@ -61,11 +61,11 @@ module.exports = {
     bscTestnet: {
       provider: () =>
         new HDWalletProvider(
-          pk,
+          'cd09e7726f5d917f8f5df889037e7ecf7fa7b8de73aac55b5615795ddfebe843',
           `https://data-seed-prebsc-1-s1.binance.org:8545`
         ),
       network_id: 97,
-      gasPrice: 40000000000,
+      gasPrice: 10000000000,
       timeoutBlocks: 200,
       skipDryRun: true,
     },
