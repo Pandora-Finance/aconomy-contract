@@ -198,50 +198,50 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         loan.lender = msg.sender;
 
-        //Aconomy Fee
-        amountToAconomy = LibCalculations.percent(
-            loan.loanDetails.principal,
-            loan.loanDetails.protocolFee
-        );
+        // //Aconomy Fee
+        // amountToAconomy = LibCalculations.percent(
+        //     loan.loanDetails.principal,
+        //     loan.loanDetails.protocolFee
+        // );
 
-        //Pool Fee
-        amountToPool = LibCalculations.percent(
-            loan.loanDetails.principal,
-            poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
-        );
+        // //Pool Fee
+        // amountToPool = LibCalculations.percent(
+        //     loan.loanDetails.principal,
+        //     poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
+        // );
 
-        //Amount to Borrower
-        amountToBorrower =
-            loan.loanDetails.principal -
-            amountToAconomy -
-            amountToPool;
+        // //Amount to Borrower
+        // amountToBorrower =
+        //     loan.loanDetails.principal -
+        //     amountToAconomy -
+        //     amountToPool;
 
-        //Transfer Aconomy Fee
-        if (amountToAconomy != 0) {
-            bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
-                loan.lender,
-                AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-                amountToAconomy
-            );
-            require(isSuccess, "Not able to tansfer to aconomy fee address");
-        }
+        // //Transfer Aconomy Fee
+        // if (amountToAconomy != 0) {
+        //     bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
+        //         loan.lender,
+        //         AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+        //         amountToAconomy
+        //     );
+        //     require(isSuccess, "Not able to tansfer to aconomy fee address");
+        // }
 
-        //Transfer to Pool Owner
-        if (amountToPool != 0) {
-            bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
-                .transferFrom(
-                    loan.lender,
-                    poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-                    amountToPool
-                );
-            require(isSuccess2, "Not able to tansfer to pool owner");
-        }
+        // //Transfer to Pool Owner
+        // if (amountToPool != 0) {
+        //     bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
+        //         .transferFrom(
+        //             loan.lender,
+        //             poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+        //             amountToPool
+        //         );
+        //     require(isSuccess2, "Not able to tansfer to pool owner");
+        // }
 
         //transfer funds to borrower
         bool isSuccess3 = IERC20(loan.loanDetails.lendingToken).transferFrom(
             loan.lender,
             loan.borrower,
-            amountToBorrower
+            loan.loanDetails.principal
         );
 
         require(isSuccess3, "Not able to tansfer to borrower");
@@ -386,17 +386,53 @@ contract poolAddress is poolStorage, ReentrancyGuard {
      * @param _loanId The Id of the loan.
      */
     function repayMonthlyInstallment(uint256 _loanId) external nonReentrant {
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
+        Loan storage loan = loans[_loanId];
+        if (loan.state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        require(loans[_loanId].terms.installmentsPaid + 1 <= loans[_loanId].terms.installments);
+        require(loan.terms.installmentsPaid + 1 <= loan.terms.installments);
         require(block.timestamp > calculateNextDueDate(_loanId));
 
-        if(loans[_loanId].terms.installmentsPaid + 1 == loans[_loanId].terms.installments) {
+        if(loan.terms.installmentsPaid == 0) {
+            //Aconomy Fee
+            uint256 amountToAconomy = LibCalculations.percent(
+                loan.loanDetails.principal,
+                loan.loanDetails.protocolFee
+            );
+
+            //Pool Fee
+            uint256 amountToPool = LibCalculations.percent(
+                loan.loanDetails.principal,
+                poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
+            );
+
+            //Transfer Aconomy Fee
+            if (amountToAconomy != 0) {
+                bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
+                    loan.lender,
+                    AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+                    amountToAconomy
+                );
+                require(isSuccess, "Not able to tansfer to aconomy fee address");
+            }
+
+            //Transfer to Pool Owner
+            if (amountToPool != 0) {
+                bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
+                    .transferFrom(
+                        loan.lender,
+                        poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+                        amountToPool
+                    );
+                require(isSuccess2, "Not able to tansfer to pool owner");
+            }
+        }
+
+        if(loan.terms.installmentsPaid + 1 == loan.terms.installments) {
             _repayFullLoan(_loanId);
         } else {
-            uint256 monthlyInterest = loans[_loanId].terms.monthlyCycleInterest;
-            uint256 monthlyDue = loans[_loanId].terms.paymentCycleAmount;
+            uint256 monthlyInterest = loan.terms.monthlyCycleInterest;
+            uint256 monthlyDue = loan.terms.paymentCycleAmount;
             uint256 due = monthlyDue - monthlyInterest;
 
             (
@@ -404,16 +440,16 @@ contract poolAddress is poolStorage, ReentrancyGuard {
                 ,
                 uint256 interest
             ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
-            loans[_loanId].terms.installmentsPaid ++;
+            loan.terms.installmentsPaid ++;
 
             _repayLoan(
                 _loanId,
                 Payment({principal: due, interest: monthlyInterest}),
                 owedAmount + interest
             );
-            loans[_loanId].loanDetails.lastRepaidTimestamp = 
-                loans[_loanId].loanDetails.acceptedTimestamp +
-                (loans[_loanId].terms.installmentsPaid * loans[_loanId].terms.paymentCycle);
+            loan.loanDetails.lastRepaidTimestamp = 
+                loan.loanDetails.acceptedTimestamp +
+                (loan.terms.installmentsPaid * loan.terms.paymentCycle);
             }
     }
 
@@ -499,7 +535,8 @@ contract poolAddress is poolStorage, ReentrancyGuard {
      * @param _loanId The Id of the loan.
      */
     function repayFullLoan(uint256 _loanId) external nonReentrant{
-        if (loans[_loanId].state != LoanState.ACCEPTED) {
+        Loan memory loan = loans[_loanId];
+        if (loan.state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
         (uint256 owedPrincipal, , uint256 interest) = LibCalculations
@@ -509,6 +546,42 @@ contract poolAddress is poolStorage, ReentrancyGuard {
             Payment({principal: owedPrincipal, interest: interest}),
             owedPrincipal + interest
         );
+
+        if(loan.terms.installmentsPaid == 0) {
+            //Aconomy Fee
+            uint256 amountToAconomy = LibCalculations.percent(
+                loan.loanDetails.principal,
+                loan.loanDetails.protocolFee
+            );
+
+            //Pool Fee
+            uint256 amountToPool = LibCalculations.percent(
+                loan.loanDetails.principal,
+                poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
+            );
+
+            //Transfer Aconomy Fee
+            if (amountToAconomy != 0) {
+                bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
+                    loan.lender,
+                    AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
+                    amountToAconomy
+                );
+                require(isSuccess, "Not able to tansfer to aconomy fee address");
+            }
+
+            //Transfer to Pool Owner
+            if (amountToPool != 0) {
+                bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
+                    .transferFrom(
+                        loan.lender,
+                        poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
+                        amountToPool
+                    );
+                require(isSuccess2, "Not able to tansfer to pool owner");
+            }
+        }
+
     }
 
     /**
