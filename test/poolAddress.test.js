@@ -121,11 +121,9 @@ contract("PoolAddress", async (accounts) => {
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
     let b2 = await erc20.balanceOf(feeAddress)
     console.log("fee 2", b2.toNumber())
-    // assert.equal(b2 - b1, 10000000)
     _balance1 = await erc20.balanceOf(accounts[1]);
-    //console.log(_balance1.toNumber())
-    //Amount that the borrower will get is 999 after cutting fees and market charges
-    // assert.equal(_balance1.toNumber(), 980000000, "Not able to accept loan");
+    console.log(_balance1.toNumber())
+    assert.equal(_balance1.toNumber(), 1000000000, "Not able to accept loan");
   })
 
   it("should calculate the next due date", async () => {
@@ -165,8 +163,14 @@ contract("PoolAddress", async (accounts) => {
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     console.log('installment after 1 cycle', r.toString());
     //1
+    let bal1 = await erc20.balanceOf(accounts[9]);
+    let bal3 = await erc20.balanceOf(accounts[0]);
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] })
     let result = await poolAddressInstance.repayMonthlyInstallment(loanId1, { from: accounts[1] });
+    let bal2 = await erc20.balanceOf(accounts[9]);
+    let bal4 = await erc20.balanceOf(accounts[0]);
+    assert.equal(bal2-bal1, 10000000)
+    assert.equal(bal4-bal3, (new BN(r).sub(new BN(10000000))).toString())
 
     loan = await poolAddressInstance.loans(loanId1);
     assert.equal(loan.loanDetails.lastRepaidTimestamp, 
@@ -295,8 +299,14 @@ contract("PoolAddress", async (accounts) => {
     console.log(bal.toNumber());
     let b = await erc20.balanceOf(accounts[1]);
     //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
-    await erc20.approve(poolAddressInstance.address, bal + 10, { from: accounts[1] })
+    let bal1 = await erc20.balanceOf(accounts[9]);
+    let bal3 = await erc20.balanceOf(accounts[0]);
+    await erc20.approve(poolAddressInstance.address, bal, { from: accounts[1] })
     let r = await poolAddressInstance.repayFullLoan(loanId1, { from: accounts[1] })
+    let bal2 = await erc20.balanceOf(accounts[9]);
+    let bal4 = await erc20.balanceOf(accounts[0]);
+    assert.equal(bal2-bal1, 20000000)
+    // assert.equal(bal4-bal3, (new BN(bal).sub(new BN(20000000))).toString())
     // console.log(res)
     assert.equal(r.receipt.status, true, "Not able to repay loan")
   })

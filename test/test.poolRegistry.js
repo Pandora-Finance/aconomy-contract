@@ -153,8 +153,9 @@ contract("poolRegistry", async (accounts) => {
 
         //First Installment
         await time.increase(paymentCycleDuration + 1)
+        let bal = await poolAddressInstance.viewInstallmentAmount(loanId1);
         console.log("rr", (await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber())
-        await erc20.approve(poolAddressInstance.address, 205027661, { from: accounts[0] })
+        await erc20.approve(poolAddressInstance.address, bal, { from: accounts[0] })
         res = await poolAddressInstance.repayMonthlyInstallment(loanId1, { from: accounts[0] })
         console.log(res.logs[1])
         console.log(res.logs[0].args.Amount.toNumber())
