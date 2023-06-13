@@ -304,6 +304,7 @@ contract("FundingPool", (accounts) => {
     });
 
     it("should view and pay 1st intallment amount", async () => {
+      let feeAddress = await aconomyFee.getAconomyOwnerAddress();
       loanId1 = bidId
       let loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
@@ -316,12 +317,14 @@ contract("FundingPool", (accounts) => {
       console.log('installment before 1 cycle', r.toString());
       // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
       await time.increase(paymentCycleDuration)
+      let b1 = await erc20.balanceOf(feeAddress)
       r = await fundingpoolInstance.viewInstallmentAmount(poolId, erc20.address, bidId, lender);
       console.log('installment after 1 cycle', r.toString());
       //1
-      let fee = new BN(10000).mul(new BN(2))
-      await erc20.approve(fundingpoolInstance.address, new BN(r).add(new BN(fee).div(new BN(100))))
+      await erc20.approve(fundingpoolInstance.address, r)
       let result = await fundingpoolInstance.repayMonthlyInstallment(poolId, erc20.address, bidId, lender);
+      let b2 = await erc20.balanceOf(feeAddress)
+      assert.equal(b2 - b1, 100)
   
       loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
@@ -494,9 +497,6 @@ contract("FundingPool", (accounts) => {
       console.log("protocolFee", feee.toString())
       let b1 = await erc20.balanceOf(feeAddress)
       console.log("owner1", b1.toString())
-      
-
-
 
       let loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
@@ -509,7 +509,7 @@ contract("FundingPool", (accounts) => {
       console.log(bal.toNumber());
       let b = await erc20.balanceOf(accounts[1]);
       //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
-      await erc20.approve(fundingpoolInstance.address, bal + 10)
+      await erc20.approve(fundingpoolInstance.address, bal)
       let r = await fundingpoolInstance.RepayFullAmount(poolId, erc20.address, bidId, lender)
 
       let b2 = await erc20.balanceOf(feeAddress)
