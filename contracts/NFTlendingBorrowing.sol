@@ -271,14 +271,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         NFTdetails[_NFTid].bidAccepted = true;
         Bids[_NFTid][_bidId].bidAccepted = true;
 
-        // address AconomyOwner = AconomyFee(AconomyFeeAddress)
-        //     .getAconomyOwnerAddress();
-
-        //Calculating Aconomy Fee
-        // uint256 amountToAconomy = LibCalculations.percent(
-        //     Bids[_NFTid][_bidId].Amount,
-        //     Bids[_NFTid][_bidId].protocolFee
-        // );
 
         // transfering Amount to NFT Owner
         require(
@@ -289,16 +281,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "unable to transfer to receiver"
         );
 
-        // transfering Amount to Protocol Owner
-        // if (amountToAconomy != 0) {
-        //     require(
-        //         IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
-        //             AconomyOwner,
-        //             amountToAconomy
-        //         ),
-        //         "Unable to transfer to AconomyOwner"
-        //     );
-        // }
 
         //needs approval on frontend
         // transferring NFT to this address

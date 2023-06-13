@@ -129,15 +129,6 @@ contract("NFTlendingBorrowing", async (accounts) => {
     })
 
     it("Should Accept Bid", async () => {
-        // await aconomyFee.transferOwnership(accounts[9]);
-        // let feeAddress = await aconomyFee.getAconomyOwnerAddress();
-        // await aconomyFee.setProtocolFee(200,{ from: accounts[9] });
-        // assert.equal(feeAddress, accounts[9],"Wrong Protocol Owner");
-        // const feee = await aconomyFee.protocolFee();
-        // console.log("protocolFee", feee.toString())
-
-        // let b1 = await sampleERC20.balanceOf(feeAddress)
-        // console.log("fee 1", b1.toNumber())
 
         await piNFT.approve(nftLendBorrow.address, 0)
 
