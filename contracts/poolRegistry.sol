@@ -229,7 +229,7 @@ contract poolRegistry is ReentrancyGuard {
         public
         ownsPool(_poolId)
     {
-        require(_newPercent <= 10000, "invalid percent");
+        require(_newPercent <= 1000, "cannot exceed 10%");
         if (_newPercent != pools[_poolId].poolFeePercent) {
             pools[_poolId].poolFeePercent = _newPercent;
             emit SetPoolFee(_poolId, _newPercent);
