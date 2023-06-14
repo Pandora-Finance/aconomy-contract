@@ -58,7 +58,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on sale", async () => {
             await collectionContract.approve(piMarket.address, 0);
-            const result = await piMarket.sellNFT(collectionContract.address, 0, 5000, sampleERC20.address);
+            const result = await piMarket.sellNFT(collectionContract.address, 0, 50000, sampleERC20.address);
             assert.equal(
                 await collectionContract.ownerOf(0),
                 piMarket.address,
@@ -67,20 +67,20 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should edit the price after listing on sale", async () => {
-            const tx = await piMarket.editSalePrice(1, 6000, { from: alice });
-            await expectRevert(piMarket.editSalePrice(1, 6000, { from: bob }), "You are not the owner");
+            const tx = await piMarket.editSalePrice(1, 60000, { from: alice });
+            await expectRevert(piMarket.editSalePrice(1, 60000, { from: bob }), "You are not the owner");
             let price = tx.logs[0].args.Price.toNumber()
             console.log("newPrice", price);
             assert.equal(
                 price,
-                6000,
+                60000,
                 "Price not updated"
             );
-            const tx1 = await piMarket.editSalePrice(1, 5000, { from: alice });
+            const tx1 = await piMarket.editSalePrice(1, 50000, { from: alice });
             let newPrice = tx1.logs[0].args.Price.toNumber()
             assert.equal(
                 newPrice,
-                5000,
+                50000,
                 "Price is still 6000"
             );
         })
@@ -88,14 +88,14 @@ contract("PiMarket", async (accounts) => {
         it("should let bob buy piNFT", async () => {
             let meta = await piMarket._tokenMeta(1);
             assert.equal(meta.status, true);
-            await sampleERC20.mint(bob, 5000);
+            await sampleERC20.mint(bob, 50000);
 
             let _balance1 = await sampleERC20.balanceOf(alice);
             let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
             let _balance3 = await sampleERC20.balanceOf(feeReceiver);
             let _balance4 = await sampleERC20.balanceOf(validator);
             // console.log("Balance",_balance4.toString(), _balance1.toString())
-            await sampleERC20.approve(piMarket.address, 5000, { from: bob });
+            await sampleERC20.approve(piMarket.address, 50000, { from: bob });
             result2 = await piMarket.BuyNFT(1, true, { from: bob });
             // console.log(result2.receipt.rawLogs)
             assert.equal(await collectionContract.ownerOf(0), bob);
@@ -118,13 +118,13 @@ contract("PiMarket", async (accounts) => {
             // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
             assert.equal(
                 (balance1 - _balance1),
-                (5000 * 9200) / 10000,
+                (50000 * 9200) / 10000,
                 "Failed to transfer NFT amount"
             );
 
             assert.equal(
                 balance2 - _balance2,
-                (5000 * 500) / 10000,
+                (50000 * 500) / 10000,
                 "Failed to transfer royalty amount"
             );
 
@@ -133,13 +133,13 @@ contract("PiMarket", async (accounts) => {
             // console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
             assert.equal(
                 balance3 - _balance3,
-                (5000 * 100) / 10000,
+                (50000 * 100) / 10000,
                 "Failed to transfer fee amount"
             );
 
             assert.equal(
                 balance4 - _balance4,
-                (5000 * 200) / 10000,
+                (50000 * 200) / 10000,
                 "Failed to transfer validator amount"
             );
 
@@ -199,7 +199,7 @@ contract("PiMarket", async (accounts) => {
             //100 sale royalty
             assert.equal(
                 await sampleERC20.balanceOf(validator),
-                1100,
+                2000,
                 "Failed to transfer ERC20 tokens to validator"
             );
             assert.equal(
@@ -234,7 +234,7 @@ contract("PiMarket", async (accounts) => {
 
         it("should let alice place piNFT on auction", async () => {
             await collectionContract.approve(piMarket.address, 1);
-            const tx = await piMarket.SellNFT_byBid(collectionContract.address, 1, 5000, 300, sampleERC20.address);
+            const tx = await piMarket.SellNFT_byBid(collectionContract.address, 1, 50000, 300, sampleERC20.address);
             assert.equal(
                 await collectionContract.ownerOf(1),
                 piMarket.address,
@@ -245,15 +245,15 @@ contract("PiMarket", async (accounts) => {
         });
 
         it("should let bidders place bid on piNFT", async () => {
-            await sampleERC20.mint(bidder1, 13000);
-            await sampleERC20.mint(bidder2, 6500);
+            await sampleERC20.mint(bidder1, 130000);
+            await sampleERC20.mint(bidder2, 65000);
 
-            await sampleERC20.approve(piMarket.address, 6000, { from: bidder1 })
-            await piMarket.Bid(3, 6000, { from: bidder1, value: 6000 });
-            await sampleERC20.approve(piMarket.address, 6500, { from: bidder2 })
-            await piMarket.Bid(3, 6500, { from: bidder2, value: 6500 });
-            await sampleERC20.approve(piMarket.address, 7000, { from: bidder1 })
-            await piMarket.Bid(3, 7000, { from: bidder1, value: 7000 });
+            await sampleERC20.approve(piMarket.address, 60000, { from: bidder1 })
+            await piMarket.Bid(3, 60000, { from: bidder1, value: 60000 });
+            await sampleERC20.approve(piMarket.address, 65000, { from: bidder2 })
+            await piMarket.Bid(3, 65000, { from: bidder2, value: 65000 });
+            await sampleERC20.approve(piMarket.address, 70000, { from: bidder1 })
+            await piMarket.Bid(3, 70000, { from: bidder1, value: 70000 });
 
             result = await piMarket.Bids(3, 2);
             assert.equal(result.buyerAddress, bidder1);
@@ -282,30 +282,30 @@ contract("PiMarket", async (accounts) => {
 
             assert.equal(
                 balance1 - _balance1,
-                (7000 * 9200) / 10000,
+                (70000 * 9200) / 10000,
                 "Failed to transfer NFT amount"
             );
-            console.log("Get Token", (7000 * 9200) / 10000);
+            console.log("Get Token", (70000 * 9200) / 10000);
             assert.equal(
                 balance2 - _balance2,
-                (7000 * 500) / 10000,
+                (70000 * 500) / 10000,
                 "Failed to transfer royalty amount"
             );
             assert.equal(
                 balance3 - _balance3,
-                (7000 * 100) / 10000,
+                (70000 * 100) / 10000,
                 "Failed to transfer fee amount"
             );
             assert.equal(
                 balance4 - _balance4,
-                (7000 * 200) / 10000,
+                (70000 * 200) / 10000,
                 "Failed to transfer validator amount"
             );
         });
 
         it("should let other bidders withdraw their bids", async () => {
             result = await sampleERC20.balanceOf(piMarket.address);
-            assert.equal(result, 12500);
+            assert.equal(result, 125000);
             await piMarket.withdrawBidMoney(3, 0, { from: bidder1 });
             await piMarket.withdrawBidMoney(3, 1, { from: bidder2 });
             result = await sampleERC20.balanceOf(piMarket.address);
@@ -325,7 +325,7 @@ contract("PiMarket", async (accounts) => {
             //140 bid royalty
             assert.equal(
                 await sampleERC20.balanceOf(validator),
-                2240,
+                4400,
                 "Failed to transfer ERC20 tokens to validator"
             );
             assert.equal(
