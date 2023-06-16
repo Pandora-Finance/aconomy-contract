@@ -47,9 +47,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx1 = await nftLendBorrow.listNFTforBorrowing(
       tokenId,
       piNFT.address,
-      2000,
+      200,
       300,
-      300
+      2000
     );
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
     assert(NFTid === 1, "Failed to list NFT for Lending");
@@ -72,25 +72,25 @@ contract("NFTlendingBorrowing", async (accounts) => {
       "Not the owner"
     );
     const Duration = tx.logs[0].args.Duration.toNumber();
-    assert(Duration == 200, "Percent should be 1000");
+    assert(Duration == 200, "Duration should be 200")
   });
 
   it("let alice Set new Expected Amount", async () => {
-    const tx = await nftLendBorrow.setExpectedAmount(1, 200, { from: alice });
+    const tx = await nftLendBorrow.setExpectedAmount(1, 1000, { from: alice });
     await expectRevert(
-      nftLendBorrow.setExpectedAmount(1, 200, { from: bob }),
+      nftLendBorrow.setExpectedAmount(1, 1000, { from: bob }),
       "Not the owner"
     );
     const expectedAmount = tx.logs[0].args.expectedAmount.toNumber();
-    assert(expectedAmount == 200, "Percent should be 1000");
+    assert(expectedAmount == 1000, "Amount should be 1000");
   });
 
   it("Bid for NFT", async () => {
-    await sampleERC20.mint(bob, 200);
-    await sampleERC20.approve(nftLendBorrow.address, 200, { from: bob });
+    await sampleERC20.mint(bob, 1000);
+    await sampleERC20.approve(nftLendBorrow.address, 1000, { from: bob });
     const tx = await nftLendBorrow.Bid(
       1,
-      100,
+      1000,
       sampleERC20.address,
       10,
       200,
@@ -100,11 +100,11 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const BidId = tx.logs[0].args.BidId.toNumber();
     assert(BidId == 0, "Bid not placed successfully");
 
-    await sampleERC20.mint(carl, 200);
-    await sampleERC20.approve(nftLendBorrow.address, 200, { from: carl });
+    await sampleERC20.mint(carl, 1000);
+    await sampleERC20.approve(nftLendBorrow.address, 1000, { from: carl });
     const tx2 = await nftLendBorrow.Bid(
       1,
-      100,
+      1000,
       sampleERC20.address,
       10,
       200,
@@ -115,11 +115,11 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const BidId2 = tx2.logs[0].args.BidId.toNumber();
     assert(BidId2 == 1, "Bid not placed successfully");
 
-    await sampleERC20.mint(carl, 200);
-    await sampleERC20.approve(nftLendBorrow.address, 200, { from: carl });
+    await sampleERC20.mint(carl, 1000);
+    await sampleERC20.approve(nftLendBorrow.address, 1000, { from: carl });
     const tx3 = await nftLendBorrow.Bid(
       1,
-      100,
+      1000,
       sampleERC20.address,
       10,
       200,
@@ -147,7 +147,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx = await nftLendBorrow.AcceptBid(1, 0);
     let b2 = await sampleERC20.balanceOf(feeAddress);
     console.log("fee 2", b2.toNumber());
-    assert.equal(b2 - b1, 1);
+    assert.equal(b2 - b1, 10);
     let nft = await nftLendBorrow.NFTdetails(1);
     let bid = await nftLendBorrow.Bids(1, 0);
     assert.equal(nft.bidAccepted, true);
@@ -160,14 +160,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
   it("Should Reject Third Bid by NFT Owner", async () => {
     const newBalance1 = await sampleERC20.balanceOf(carl);
     console.log("dd", newBalance1.toString());
-    assert.equal(newBalance1.toString(), 200, "carl balance must be 300");
+    assert.equal(newBalance1.toString(), 0, "carl balance must be 300");
 
     const tx = await nftLendBorrow.rejectBid(1, 2);
     let Bid = await nftLendBorrow.Bids(1, 2);
     assert.equal(Bid.withdrawn, true, "Mapping Not changed");
     const newBalance = await sampleERC20.balanceOf(carl);
     console.log("dd", newBalance.toString());
-    assert.equal(newBalance.toString(), 300, "carl balance must be 300");
+    assert.equal(newBalance.toString(), 1000, "carl balance must be 300");
   });
 
   it("Withdraw Third Bid", async () => {
@@ -178,7 +178,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
   });
 
   it("Should Repay Bid", async () => {
-    await sampleERC20.approve(nftLendBorrow.address, 120);
+    await sampleERC20.approve(nftLendBorrow.address, 1020);
     const tx = await nftLendBorrow.Repay(1, 0);
     const amount = tx.logs[0].args.Amount.toNumber();
     let nft = await nftLendBorrow.NFTdetails(1);
@@ -211,9 +211,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx1 = await nftLendBorrow.listNFTforBorrowing(
       tokenId,
       piNFT.address,
-      1000,
       200,
-      200
+      200,
+      1000
     );
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
 

@@ -135,6 +135,8 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             _contractAddress != address(0),
             "you can't do this with zero address"
         );
+        require(_percent >= 10, "interest percent should be greater than 0.1%");
+        require(_expectedAmount >= 1000, "amount should be greater than 1000");
 
         _NFTid = ++NFTid;
 
@@ -164,6 +166,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         uint256 _NFTid,
         uint16 _percent
     ) public NFTOwner(_NFTid) {
+        require(_percent >= 10, "interest percent should be greater than 0.1%");
         if (_percent != NFTdetails[_NFTid].percent) {
             NFTdetails[_NFTid].percent = _percent;
 
@@ -196,6 +199,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         uint256 _NFTid,
         uint256 _expectedAmount
     ) public NFTOwner(_NFTid) {
+        require(_expectedAmount >= 1000, "amount should be greater than 1000");
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
@@ -225,6 +229,8 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "you can't do this with zero address"
         );
         require(_bidAmount != 0, "You can't bid with zero Amount");
+        require(_bidAmount >= 1000, "bid amount too low");
+        require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
 
