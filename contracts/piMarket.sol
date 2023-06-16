@@ -108,7 +108,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
     constructor(address _feeAddress, address _collectionFactoryAddress) {
         require(_feeAddress != address(0), "Fee address cannot be zero");
-        require(_collectionFactoryAddress != address(0), "Address cannot be zero");
+        require(
+            _collectionFactoryAddress != address(0),
+            "Address cannot be zero"
+        );
         feeAddress = _feeAddress;
         collectionFactoryAddress = _collectionFactoryAddress;
     }
@@ -193,11 +196,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
      * @param _contractAddress the address of the token contract.
      * @param _tokenId The Id of the token.
      */
-    function retrieveRoyalty(address _contractAddress, uint256 _tokenId)
-        public
-        view
-        returns (LibShare.Share[] memory)
-    {
+    function retrieveRoyalty(
+        address _contractAddress,
+        uint256 _tokenId
+    ) public view returns (LibShare.Share[] memory) {
         return piNFT(_contractAddress).getRoyalties(_tokenId);
     }
 
@@ -210,7 +212,8 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address _collectionFactoryAddress,
         address _collectionAddress
     ) public view returns (LibShare.Share[] memory) {
-        uint256 collectionId = CollectionFactory(_collectionFactoryAddress).addressToCollectionId(_collectionAddress);
+        uint256 collectionId = CollectionFactory(_collectionFactoryAddress)
+            .addressToCollectionId(_collectionAddress);
         return
             CollectionFactory(_collectionFactoryAddress).getCollectionRoyalties(
                 collectionId
@@ -249,11 +252,10 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
      * @param _saleId The Id of the sale.
      * @param _fromCollection A boolean indicating if the nft is from a priavte collection.
      */
-    function BuyNFT(uint256 _saleId, bool _fromCollection)
-        external
-        payable
-        nonReentrant
-    {
+    function BuyNFT(
+        uint256 _saleId,
+        bool _fromCollection
+    ) external payable nonReentrant {
         TokenMeta memory meta = _tokenMeta[_saleId];
 
         LibShare.Share[] memory royalties;
@@ -280,7 +282,12 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
 
         LibMarket.checkSale(_tokenMeta[_saleId]);
 
-        LibMarket.executeSale(_tokenMeta[_saleId], feeAddress, royalties, validatorRoyalties);
+        LibMarket.executeSale(
+            _tokenMeta[_saleId],
+            feeAddress,
+            royalties,
+            validatorRoyalties
+        );
 
         //transfer(_tokenMeta[_saleId], msg.sender);
 
@@ -292,7 +299,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         emit NFTBought(_saleId, msg.sender);
     }
 
-     /**
+    /**
      * @notice Cancels a sale.
      * @param _saleId The Id of the sale.
      */
@@ -368,18 +375,22 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
      * @param _bidPrice The amount being bidded
      */
     function Bid(uint256 _saleId, uint256 _bidPrice) external payable {
-        if(_tokenMeta[_saleId].currency == address(0)) {
+        if (_tokenMeta[_saleId].currency == address(0)) {
             require(msg.value == _bidPrice);
         }
-        
+
         LibMarket.checkBid(_tokenMeta[_saleId], _bidPrice);
 
         require(block.timestamp <= _tokenMeta[_saleId].bidEndTime);
         _tokenMeta[_saleId].price = _bidPrice;
         //  require(_timeOfAuction[_saleId] >= block.timestamp,"Auction Over");
 
-        if(_tokenMeta[_saleId].currency != address(0)) {
-            IERC20(_tokenMeta[_saleId].currency).transferFrom(msg.sender, address(this), _bidPrice);
+        if (_tokenMeta[_saleId].currency != address(0)) {
+            IERC20(_tokenMeta[_saleId].currency).transferFrom(
+                msg.sender,
+                address(this),
+                _bidPrice
+            );
         }
 
         BidOrder memory bid = BidOrder(
@@ -406,7 +417,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         uint256 _bidOrderID,
         bool _fromCollection
     ) external nonReentrant {
-
         LibShare.Share[] memory royalties;
         LibShare.Share[] memory validatorRoyalties;
         if (_fromCollection) {
@@ -429,7 +439,13 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             );
         }
 
-        LibMarket.executeBid(_tokenMeta[_saleId], Bids[_saleId][_bidOrderID], royalties, validatorRoyalties, feeAddress);
+        LibMarket.executeBid(
+            _tokenMeta[_saleId],
+            Bids[_saleId][_bidOrderID],
+            royalties,
+            validatorRoyalties,
+            feeAddress
+        );
 
         ERC721(_tokenMeta[_saleId].tokenContractAddress).safeTransferFrom(
             address(this),
@@ -437,7 +453,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             _tokenMeta[_saleId].tokenId
         );
 
-        emit BidExecuted(_saleId, _bidOrderID, Bids[_saleId][_bidOrderID].price);
+        emit BidExecuted(
+            _saleId,
+            _bidOrderID,
+            Bids[_saleId][_bidOrderID].price
+        );
     }
 
     /**
@@ -445,15 +465,15 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
      * @param _saleId The Id of the sale.
      * @param _bidId The Id of the bid.
      */
-    function withdrawBidMoney(uint256 _saleId, uint256 _bidId)
-        external
-        nonReentrant
-    {
+    function withdrawBidMoney(
+        uint256 _saleId,
+        uint256 _bidId
+    ) external nonReentrant {
         LibMarket.withdrawBid(_tokenMeta[_saleId], Bids[_saleId][_bidId]);
         emit BidWithdrawn(_saleId, _bidId);
     }
 
-     /**
+    /**
      * @notice Makes a swap request.
      * @param contractAddress1 The contract address of the first token.
      * @param contractAddress2 The contract address of the second token.
@@ -535,10 +555,15 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     function acceptSwapRequest(uint256 swapId) public nonReentrant {
         Swap storage swap = _swaps[swapId];
         require(swap.status, "token must be on swap");
-        require(ERC721(swap.requestedTokenAddress).ownerOf(swap.requestedTokenId) == swap.requestedTokenOwner, 
+        require(
+            ERC721(swap.requestedTokenAddress).ownerOf(swap.requestedTokenId) ==
+                swap.requestedTokenOwner,
             "requesting token owner has changed"
         );
-        require(swap.requestedTokenOwner == msg.sender, "Only requested owner can accept swap");
+        require(
+            swap.requestedTokenOwner == msg.sender,
+            "Only requested owner can accept swap"
+        );
         ERC721(swap.initiatorNFTAddress).safeTransferFrom(
             address(this),
             msg.sender,

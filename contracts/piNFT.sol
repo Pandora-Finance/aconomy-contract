@@ -103,7 +103,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         _;
     }
 
-     /**
+    /**
      * @notice Mints an nft to a specified address.
      * @param _to address to mint the piNFT to.
      * @param _uri The uri of the piNFT.
@@ -218,7 +218,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit ERC20Added(msg.sender, _tokenId, _erc20Contract, _value);
     }
 
-     /**
+    /**
      * @notice Updates the ERC20 mappings.
      * @param _tokenId The Id of the token.
      * @param _erc20Contract The address of the erc20 funds being transferred.
@@ -243,7 +243,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         erc20Balances[_tokenId][_erc20Contract] += _value;
     }
 
-     /**
+    /**
      * @notice Checks and sets validator royalties.
      * @param _tokenId The Id of the token.
      * @param royalties The royalties to be set.
@@ -267,7 +267,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
 
-     /**
+    /**
      * @notice deletes the nft.
      * @param _tokenId The Id of the token.
      */

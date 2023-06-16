@@ -105,7 +105,7 @@ contract poolRegistry is ReentrancyGuard {
     event SetAPR(uint256 poolId, uint16 APR);
     event poolClosed(uint256 poolId);
 
-     /**
+    /**
      * @notice Creates a new pool.
      * @param _paymentDefaultDuration Length of time in seconds before a loan is considered in default for non-payment.
      * @param _loanExpirationTime Length of time in seconds before pending loan expire.
@@ -184,15 +184,15 @@ contract poolRegistry is ReentrancyGuard {
     //     }
     // }
 
-     /**
+    /**
      * @notice Sets the pool uri.
      * @param _poolId The Id of the pool.
      * @param _uri The uri to be set.
      */
-    function setPoolURI(uint256 _poolId, string calldata _uri)
-        public
-        ownsPool(_poolId)
-    {
+    function setPoolURI(
+        uint256 _poolId,
+        string calldata _uri
+    ) public ownsPool(_poolId) {
         if (
             keccak256(abi.encodePacked(_uri)) !=
             keccak256(abi.encodePacked(pools[_poolId].URI))
@@ -208,10 +208,10 @@ contract poolRegistry is ReentrancyGuard {
      * @param _poolId The Id of the pool.
      * @param _duration The duration to be set.
      */
-    function setPaymentDefaultDuration(uint256 _poolId, uint32 _duration)
-        public
-        ownsPool(_poolId)
-    {   
+    function setPaymentDefaultDuration(
+        uint256 _poolId,
+        uint32 _duration
+    ) public ownsPool(_poolId) {
         require(_duration != 0, "default duration cannot be 0");
         if (_duration != pools[_poolId].paymentDefaultDuration) {
             pools[_poolId].paymentDefaultDuration = _duration;
@@ -225,10 +225,10 @@ contract poolRegistry is ReentrancyGuard {
      * @param _poolId The Id of the pool.
      * @param _newPercent The new percent to be set.
      */
-    function setPoolFeePercent(uint256 _poolId, uint16 _newPercent)
-        public
-        ownsPool(_poolId)
-    {
+    function setPoolFeePercent(
+        uint256 _poolId,
+        uint16 _newPercent
+    ) public ownsPool(_poolId) {
         require(_newPercent <= 10000, "invalid percent");
         if (_newPercent != pools[_poolId].poolFeePercent) {
             pools[_poolId].poolFeePercent = _newPercent;
@@ -241,10 +241,10 @@ contract poolRegistry is ReentrancyGuard {
      * @param _poolId The Id of the pool.
      * @param _duration the duration for expiration.
      */
-    function setloanExpirationTime(uint256 _poolId, uint32 _duration)
-        public
-        ownsPool(_poolId)
-    {
+    function setloanExpirationTime(
+        uint256 _poolId,
+        uint32 _duration
+    ) public ownsPool(_poolId) {
         if (_duration != pools[_poolId].loanExpirationTime) {
             pools[_poolId].loanExpirationTime = _duration;
 
@@ -270,7 +270,7 @@ contract poolRegistry is ReentrancyGuard {
      * @dev Only called by the pool owner
      * @param _poolId The Id of the pool.
      * @param _borrowerAddress The address of the borrower.
-     */    
+     */
     function addBorrower(
         uint256 _poolId,
         address _borrowerAddress
@@ -383,11 +383,7 @@ contract poolRegistry is ReentrancyGuard {
     ) internal virtual {
         require(msg.sender == pools[_poolId].owner, "Not the pool owner");
 
-        bytes32 uuid = _revokeAddressVerification(
-            _poolId,
-            _address,
-            _isLender
-        );
+        bytes32 uuid = _revokeAddressVerification(_poolId, _address, _isLender);
 
         attestationService.revoke(uuid);
         // NOTE: Disabling the call to revoke the attestation on EAS contracts
@@ -406,23 +402,15 @@ contract poolRegistry is ReentrancyGuard {
         bool _isLender
     ) internal virtual returns (bytes32 uuid_) {
         if (_isLender) {
-            uuid_ = pools[_poolId].lenderAttestationIds[
-                _Address
-            ];
+            uuid_ = pools[_poolId].lenderAttestationIds[_Address];
             // Remove lender address from market set
-            pools[_poolId].verifiedLendersForPool.remove(
-                _Address
-            );
+            pools[_poolId].verifiedLendersForPool.remove(_Address);
 
             emit LenderRevocation(_poolId, _Address);
         } else {
-            uuid_ = pools[_poolId].borrowerAttestationIds[
-                _Address
-            ];
+            uuid_ = pools[_poolId].borrowerAttestationIds[_Address];
             // Remove borrower address from market set
-            pools[_poolId].verifiedBorrowersForPool.remove(
-                _Address
-            );
+            pools[_poolId].verifiedBorrowersForPool.remove(_Address);
 
             emit BorrowerRevocation(_poolId, _Address);
         }
@@ -439,11 +427,10 @@ contract poolRegistry is ReentrancyGuard {
      * @param _borrowerAddress The address being verified.
      * @return isVerified_ boolean and byte32 uuid_.
      */
-    function borrowerVerification(uint256 _poolId, address _borrowerAddress)
-        public
-        view
-        returns (bool isVerified_, bytes32 uuid_)
-    {
+    function borrowerVerification(
+        uint256 _poolId,
+        address _borrowerAddress
+    ) public view returns (bool isVerified_, bytes32 uuid_) {
         return
             _isAddressVerified(
                 _borrowerAddress,
@@ -460,11 +447,10 @@ contract poolRegistry is ReentrancyGuard {
      * @param _lenderAddress The address being verified.
      * @return isVerified_ boolean and byte32 uuid_.
      */
-    function lenderVerification(uint256 _poolId, address _lenderAddress)
-        public
-        view
-        returns (bool isVerified_, bytes32 uuid_)
-    {
+    function lenderVerification(
+        uint256 _poolId,
+        address _lenderAddress
+    ) public view returns (bool isVerified_, bytes32 uuid_) {
         return
             _isAddressVerified(
                 _lenderAddress,
@@ -517,27 +503,21 @@ contract poolRegistry is ReentrancyGuard {
         return ClosedPools[_poolId];
     }
 
-    function getPaymentCycleDuration(uint256 _poolId)
-        public
-        view
-        returns (uint32)
-    {
+    function getPaymentCycleDuration(
+        uint256 _poolId
+    ) public view returns (uint32) {
         return pools[_poolId].paymentCycleDuration;
     }
 
-    function getPaymentDefaultDuration(uint256 _poolId)
-        public
-        view
-        returns (uint32)
-    {
+    function getPaymentDefaultDuration(
+        uint256 _poolId
+    ) public view returns (uint32) {
         return pools[_poolId].paymentDefaultDuration;
     }
 
-    function getloanExpirationTime(uint256 poolId)
-        public
-        view
-        returns (uint32)
-    {
+    function getloanExpirationTime(
+        uint256 poolId
+    ) public view returns (uint32) {
         return pools[poolId].loanExpirationTime;
     }
 
@@ -554,7 +534,7 @@ contract poolRegistry is ReentrancyGuard {
     }
 
     function getAconomyFee() public view returns (uint16) {
-        return AconomyFee(AconomyFeeAddress).protocolFee();
+        return AconomyFee(AconomyFeeAddress).AconomyPoolFee();
     }
 
     function getAconomyOwner() public view returns (address) {

@@ -72,7 +72,7 @@ abstract contract poolStorage {
         uint32 installmentsPaid;
     }
 
-     /**
+    /**
      * @notice The base loan struct.
      * @param borrower The borrower of the loan.
      * @param receiver The receiver of the loan funds.

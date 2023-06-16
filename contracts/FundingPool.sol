@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
-import { BokkyPooBahsDateTimeLibrary as BPBDTL } from "./Libraries/DateTimeLib.sol";
+import {BokkyPooBahsDateTimeLibrary as BPBDTL} from "./Libraries/DateTimeLib.sol";
 
 contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     address public poolOwner;
@@ -19,10 +19,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
      * @param _poolOwner The pool owner's address.
      * @param _poolRegistry The address of the poolRegistry contract.
      */
-    function initialize(address _poolOwner, address _poolRegistry)
-        external
-        initializer
-    {
+    function initialize(
+        address _poolOwner,
+        address _poolRegistry
+    ) external initializer {
         poolOwner = _poolOwner;
         poolRegistryAddress = _poolRegistry;
     }
@@ -181,9 +181,9 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
         require(_expiration > uint32(block.timestamp), "wrong timestamp");
         uint256 _bidId = bidId;
-        FundDetail storage fundDetail = lenderPoolFundDetails[msg.sender][_poolId][
-            _ERC20Address
-        ][_bidId];
+        FundDetail storage fundDetail = lenderPoolFundDetails[msg.sender][
+            _poolId
+        ][_ERC20Address][_bidId];
         fundDetail.amount = _amount;
         fundDetail.expiration = _expiration;
         fundDetail.maxDuration = _maxLoanDuration;
@@ -205,12 +205,16 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             fundDetail.interestRate
         );
 
-        uint256 monthlyPrincipal = _amount / fundDetail.installment.installments;
+        uint256 monthlyPrincipal = _amount /
+            fundDetail.installment.installments;
 
-        fundDetail.installment.monthlyCycleInterest = fundDetail.paymentCycleAmount - monthlyPrincipal;
+        fundDetail.installment.monthlyCycleInterest =
+            fundDetail.paymentCycleAmount -
+            monthlyPrincipal;
 
-        fundDetail.installment.defaultDuration = poolRegistry(poolRegistryAddress)
-            .getPaymentDefaultDuration(_poolId);
+        fundDetail.installment.defaultDuration = poolRegistry(
+            poolRegistryAddress
+        ).getPaymentDefaultDuration(_poolId);
 
         address _poolAddress = poolRegistry(poolRegistryAddress).getPoolAddress(
             _poolId
@@ -218,12 +222,22 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
         // Send payment to the Pool
         require(
-            IERC20(_ERC20Address).transferFrom(msg.sender, _poolAddress, _amount),
+            IERC20(_ERC20Address).transferFrom(
+                msg.sender,
+                _poolAddress,
+                _amount
+            ),
             "Unable to tansfer to poolAddress"
         );
         bidId++;
 
-        emit SuppliedToPool(msg.sender, _poolId, _bidId, _ERC20Address, _amount);
+        emit SuppliedToPool(
+            msg.sender,
+            _poolId,
+            _bidId,
+            _ERC20Address,
+            _amount
+        );
     }
 
     /**
@@ -330,8 +344,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _poolId,
         address _ERC20Address,
         uint256 _bidId,
-        address _lender) 
-        public view returns (bool) {
+        address _lender
+    ) public view returns (bool) {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -353,8 +367,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _poolId,
         address _ERC20Address,
         uint256 _bidId,
-        address _lender) 
-        public view returns (bool) {
+        address _lender
+    ) public view returns (bool) {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -364,7 +378,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
 
         if (fundDetail.installment.defaultDuration == 0) return false;
 
-        return ((int32(uint32(block.timestamp)) - int32(fundDetail.acceptBidTimestamp + fundDetail.maxDuration)) >
+        return ((int32(uint32(block.timestamp)) -
+            int32(fundDetail.acceptBidTimestamp + fundDetail.maxDuration)) >
             int32(fundDetail.installment.defaultDuration));
     }
 
@@ -382,12 +397,15 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-        ) public view returns (bool) {
-            FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
+    ) public view returns (bool) {
+        FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) return false;
-        return uint32(block.timestamp) > calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender) + 7 days;
+        return
+            uint32(block.timestamp) >
+            calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender) +
+                7 days;
     }
 
     /**
@@ -425,13 +443,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         }
 
         //if we are in the last payment cycle, the next due date is the end of loan duration
-        if (
-            dueDate_ >
-            fundDetail.acceptBidTimestamp + fundDetail.maxDuration
-        ) {
-            dueDate_ =
-                fundDetail.acceptBidTimestamp +
-                fundDetail.maxDuration;
+        if (dueDate_ > fundDetail.acceptBidTimestamp + fundDetail.maxDuration) {
+            dueDate_ = fundDetail.acceptBidTimestamp + fundDetail.maxDuration;
         }
     }
 
@@ -449,24 +462,23 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _ERC20Address,
         uint256 _bidId,
         address _lender
-    ) external view returns(uint256){
+    ) external view returns (uint256) {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
         uint32 LastRepaidTimestamp = fundDetail.lastRepaidTimestamp;
         uint256 lastPaymentCycle = BPBDTL.diffMonths(
-                fundDetail.acceptBidTimestamp,
-                LastRepaidTimestamp
-            );
+            fundDetail.acceptBidTimestamp,
+            LastRepaidTimestamp
+        );
         uint256 monthsSinceStart = BPBDTL.diffMonths(
-                fundDetail.acceptBidTimestamp,
-                block.timestamp
-            );
+            fundDetail.acceptBidTimestamp,
+            block.timestamp
+        );
 
-        if(monthsSinceStart > lastPaymentCycle) {
+        if (monthsSinceStart > lastPaymentCycle) {
             return fundDetail.paymentCycleAmount;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -491,51 +503,59 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         if (fundDetail.state != BidState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        require(fundDetail.installment.installmentsPaid + 1 <= fundDetail.installment.installments);
-        require(block.timestamp > calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender));
+        require(
+            fundDetail.installment.installmentsPaid + 1 <=
+                fundDetail.installment.installments
+        );
+        require(
+            block.timestamp >
+                calculateNextDueDate(_poolId, _ERC20Address, _bidId, _lender)
+        );
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
             .getPaymentCycleDuration(_poolId);
 
-        if(fundDetail.installment.installmentsPaid + 1 == fundDetail.installment.installments) {
+        if (
+            fundDetail.installment.installmentsPaid + 1 ==
+            fundDetail.installment.installments
+        ) {
             _repayFullAmount(_poolId, _ERC20Address, _bidId, _lender);
         } else {
-            uint256 monthlyInterest = fundDetail.installment.monthlyCycleInterest;
+            uint256 monthlyInterest = fundDetail
+                .installment
+                .monthlyCycleInterest;
             uint256 monthlyDue = fundDetail.paymentCycleAmount;
             uint256 due = monthlyDue - monthlyInterest;
 
-        (
-            uint256 owedAmount,
-            ,
-            uint256 interest
-        ) = LibCalculations.calculateInstallmentAmount(
-                fundDetail.amount,
-                fundDetail.Repaid.amount,
-                fundDetail.interestRate,
-                fundDetail.paymentCycleAmount,
-                paymentCycle,
-                fundDetail.lastRepaidTimestamp,
-                block.timestamp,
-                fundDetail.acceptBidTimestamp,
-                fundDetail.maxDuration
+            (uint256 owedAmount, , uint256 interest) = LibCalculations
+                .calculateInstallmentAmount(
+                    fundDetail.amount,
+                    fundDetail.Repaid.amount,
+                    fundDetail.interestRate,
+                    fundDetail.paymentCycleAmount,
+                    paymentCycle,
+                    fundDetail.lastRepaidTimestamp,
+                    block.timestamp,
+                    fundDetail.acceptBidTimestamp,
+                    fundDetail.maxDuration
+                );
+
+            fundDetail.installment.installmentsPaid++;
+
+            _repayBid(
+                _poolId,
+                _ERC20Address,
+                _bidId,
+                _lender,
+                due,
+                monthlyInterest,
+                owedAmount + interest
             );
 
-            fundDetail.installment.installmentsPaid ++;
-
-        _repayBid(
-            _poolId,
-            _ERC20Address,
-            _bidId,
-            _lender,
-            due,
-            monthlyInterest,
-            owedAmount + interest
-        );
-
-            fundDetail.lastRepaidTimestamp = 
+            fundDetail.lastRepaidTimestamp =
                 fundDetail.acceptBidTimestamp +
                 (fundDetail.installment.installmentsPaid * paymentCycle);
-            }
+        }
     }
 
     // function RepayInstallment(
@@ -712,7 +732,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
-     /**
+    /**
      * @notice Repays the full amount for the loan.
      * @param _poolId The Id of the pool.
      * @param _ERC20Address The address of the erc20 funds.
@@ -761,7 +781,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         emit FullAmountRepaid(_poolId, _bidId, owedAmount, interest);
     }
 
-     /**
+    /**
      * @notice Repays the specified amount for the loan.
      * @param _poolId The Id of the pool.
      * @param _ERC20Address The address of the erc20 funds.
@@ -810,7 +830,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
-     /**
+    /**
      * @notice Allows the lender to withdraw the loan bid if it is still pending.
      * @param _poolId The Id of the pool.
      * @param _ERC20Address The address of the erc20 funds.

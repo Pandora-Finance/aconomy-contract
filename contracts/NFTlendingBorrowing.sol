@@ -16,7 +16,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     uint256 public NFTid;
     address AconomyFeeAddress;
 
-     /**
+    /**
      * @notice Deatils for a listed NFT.
      * @param NFTtokenId The Id of the token.
      * @param tokenIdOwner The owner of the nft.
@@ -155,15 +155,15 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit NFTlisted(_NFTid, _tokenId, _contractAddress);
     }
 
-     /**
+    /**
      * @notice Sets the expected percentage.
      * @param _NFTid The Id of the NFTDetail
      * @param _percent The interest percentage expected.
      */
-    function setPercent(uint256 _NFTid, uint16 _percent)
-        public
-        NFTOwner(_NFTid)
-    {
+    function setPercent(
+        uint256 _NFTid,
+        uint16 _percent
+    ) public NFTOwner(_NFTid) {
         if (_percent != NFTdetails[_NFTid].percent) {
             NFTdetails[_NFTid].percent = _percent;
 
@@ -171,15 +171,15 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         }
     }
 
-     /**
+    /**
      * @notice Sets the expected duration.
      * @param _NFTid The Id of the NFTDetail
      * @param _duration The duration expected.
      */
-    function setDurationTime(uint256 _NFTid, uint32 _duration)
-        public
-        NFTOwner(_NFTid)
-    {
+    function setDurationTime(
+        uint256 _NFTid,
+        uint32 _duration
+    ) public NFTOwner(_NFTid) {
         if (_duration != NFTdetails[_NFTid].duration) {
             NFTdetails[_NFTid].duration = _duration;
 
@@ -187,15 +187,15 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         }
     }
 
-     /**
+    /**
      * @notice Sets the expected loan amount.
      * @param _NFTid The Id of the NFTDetail
      * @param _expectedAmount The expected amount.
      */
-    function setExpectedAmount(uint256 _NFTid, uint256 _expectedAmount)
-        public
-        NFTOwner(_NFTid)
-    {
+    function setExpectedAmount(
+        uint256 _NFTid,
+        uint256 _expectedAmount
+    ) public NFTOwner(_NFTid) {
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
@@ -203,7 +203,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         }
     }
 
-     /**
+    /**
      * @notice Allows a user to bid a loan for an nft.
      * @param _NFTid The Id of the NFTDetail.
      * @param _bidAmount The amount being bidded.
@@ -228,7 +228,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
 
-        uint16 fee = AconomyFee(AconomyFeeAddress).protocolFee();
+        uint16 fee = AconomyFee(AconomyFeeAddress).AconomyNFTLendBorrowFee();
 
         BidDetail memory bidDetail = BidDetail(
             Bids[_NFTid].length,
@@ -317,7 +317,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
     }
 
-     /**
+    /**
      * @notice Rejects the specified bid.
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
@@ -345,7 +345,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
     }
 
-     /**
+    /**
      * @notice Repays the loan amount.
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
@@ -388,7 +388,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         );
     }
 
-     /**
+    /**
      * @notice Withdraws the bid amount after expiration.
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
@@ -404,9 +404,9 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
             "Your Bid has been Accepted"
         );
         require(
-                block.timestamp > Bids[_NFTid][_bidId].expiration,
-                "Can't withdraw Bid before expiration"
-            );
+            block.timestamp > Bids[_NFTid][_bidId].expiration,
+            "Can't withdraw Bid before expiration"
+        );
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
                 msg.sender,
@@ -418,7 +418,7 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         emit Withdrawn(_NFTid, _bidId, Bids[_NFTid][_bidId].Amount);
     }
 
-     /**
+    /**
      * @notice Removes the nft from listing.
      * @param _NFTid The Id of the NFTDetail
      */
@@ -430,7 +430,10 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
                 ),
             "Only token owner can execute"
         );
-        require(NFTdetails[_NFTid].bidAccepted == false, "bid has been accepted");
+        require(
+            NFTdetails[_NFTid].bidAccepted == false,
+            "bid has been accepted"
+        );
         if (!NFTdetails[_NFTid].listed) {
             revert("It's aiready removed");
         }

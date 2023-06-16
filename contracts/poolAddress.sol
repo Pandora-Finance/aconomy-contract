@@ -15,7 +15,7 @@ import "./Libraries/LibCalculations.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { BokkyPooBahsDateTimeLibrary as BPBDTL } from "./Libraries/DateTimeLib.sol";
+import {BokkyPooBahsDateTimeLibrary as BPBDTL} from "./Libraries/DateTimeLib.sol";
 
 contract poolAddress is poolStorage, ReentrancyGuard {
     address poolRegistryAddress;
@@ -111,7 +111,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         poolLoans[_poolId] = loanId_;
 
-        uint16 fee = AconomyFee(AconomyFeeAddress).protocolFee();
+        uint16 fee = AconomyFee(AconomyFeeAddress).AconomyPoolFee();
 
         // Create and store our loan into the mapping
         Loan storage loan = loans[loanId];
@@ -145,7 +145,9 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         uint256 monthlyPrincipal = _principal / loan.terms.installments;
 
-        loan.terms.monthlyCycleInterest = loan.terms.paymentCycleAmount - monthlyPrincipal;
+        loan.terms.monthlyCycleInterest =
+            loan.terms.paymentCycleAmount -
+            monthlyPrincipal;
 
         loan.state = LoanState.PENDING;
 
@@ -267,7 +269,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         emit AcceptedLoanDetail(_loanId, "Borrower", amountToBorrower);
     }
 
-     /**
+    /**
      * @notice Checks if the loan has expired.
      * @dev Return type is of boolean.
      * @param _loanId The Id of the loan.
@@ -297,8 +299,11 @@ contract poolAddress is poolStorage, ReentrancyGuard {
 
         if (loanDefaultDuration[_loanId] == 0) return false;
 
-        return ((int32(uint32(block.timestamp)) - int32(loan.loanDetails.acceptedTimestamp + loan.loanDetails.loanDuration)) >
-            int32(loanDefaultDuration[_loanId]));
+        return ((int32(uint32(block.timestamp)) -
+            int32(
+                loan.loanDetails.acceptedTimestamp +
+                    loan.loanDetails.loanDuration
+            )) > int32(loanDefaultDuration[_loanId]));
     }
 
     /**
@@ -362,21 +367,22 @@ contract poolAddress is poolStorage, ReentrancyGuard {
      * @param _loanId The Id of the loan.
      * @return uint256 of the installment amount to be paid.
      */
-    function viewInstallmentAmount(uint256 _loanId) external view returns(uint256){
+    function viewInstallmentAmount(
+        uint256 _loanId
+    ) external view returns (uint256) {
         uint32 LastRepaidTimestamp = lastRepaidTimestamp(_loanId);
         uint256 lastPaymentCycle = BPBDTL.diffMonths(
-                loans[_loanId].loanDetails.acceptedTimestamp,
-                LastRepaidTimestamp
-            );
+            loans[_loanId].loanDetails.acceptedTimestamp,
+            LastRepaidTimestamp
+        );
         uint256 monthsSinceStart = BPBDTL.diffMonths(
-                loans[_loanId].loanDetails.acceptedTimestamp,
-                block.timestamp
-            );
+            loans[_loanId].loanDetails.acceptedTimestamp,
+            block.timestamp
+        );
 
-        if(monthsSinceStart > lastPaymentCycle) {
+        if (monthsSinceStart > lastPaymentCycle) {
             return loans[_loanId].terms.paymentCycleAmount;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -389,34 +395,37 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
-        require(loans[_loanId].terms.installmentsPaid + 1 <= loans[_loanId].terms.installments);
+        require(
+            loans[_loanId].terms.installmentsPaid + 1 <=
+                loans[_loanId].terms.installments
+        );
         require(block.timestamp > calculateNextDueDate(_loanId));
 
-        if(loans[_loanId].terms.installmentsPaid + 1 == loans[_loanId].terms.installments) {
+        if (
+            loans[_loanId].terms.installmentsPaid + 1 ==
+            loans[_loanId].terms.installments
+        ) {
             _repayFullLoan(_loanId);
         } else {
             uint256 monthlyInterest = loans[_loanId].terms.monthlyCycleInterest;
             uint256 monthlyDue = loans[_loanId].terms.paymentCycleAmount;
             uint256 due = monthlyDue - monthlyInterest;
 
-            (
-                uint256 owedAmount,
-                ,
-                uint256 interest
-            ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
-            loans[_loanId].terms.installmentsPaid ++;
+            (uint256 owedAmount, , uint256 interest) = LibCalculations
+                .owedAmount(loans[_loanId], block.timestamp);
+            loans[_loanId].terms.installmentsPaid++;
 
             _repayLoan(
                 _loanId,
                 Payment({principal: due, interest: monthlyInterest}),
                 owedAmount + interest
             );
-            loans[_loanId].loanDetails.lastRepaidTimestamp = 
+            loans[_loanId].loanDetails.lastRepaidTimestamp =
                 loans[_loanId].loanDetails.acceptedTimestamp +
-                (loans[_loanId].terms.installmentsPaid * loans[_loanId].terms.paymentCycle);
-            }
+                (loans[_loanId].terms.installmentsPaid *
+                    loans[_loanId].terms.paymentCycle);
+        }
     }
-
 
     // function repayYourLoan(uint256 _loanId) external nonReentrant {
     //     if (loans[_loanId].state != LoanState.ACCEPTED) {
@@ -477,7 +486,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
         return paymentAmount;
     }
 
-     /**
+    /**
      * @notice Repays the full amount to be paid at the called timestamp.
      * @param _loanId The Id of the loan.
      */
@@ -498,7 +507,7 @@ contract poolAddress is poolStorage, ReentrancyGuard {
      * @notice Repays the full amount to be paid at the called timestamp.
      * @param _loanId The Id of the loan.
      */
-    function repayFullLoan(uint256 _loanId) external nonReentrant{
+    function repayFullLoan(uint256 _loanId) external nonReentrant {
         if (loans[_loanId].state != LoanState.ACCEPTED) {
             revert("Loan must be accepted");
         }
