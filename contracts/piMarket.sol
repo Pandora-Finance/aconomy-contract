@@ -138,6 +138,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address _currency
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         _saleIdCounter.increment();
+        require(_price >= 10000, "price too low");
         require(
             _contractAddress != address(0),
             "you can't do this with zero address"
@@ -180,6 +181,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             "You are not the owner"
         );
         require(_tokenMeta[_saleId].status, "You can't edit");
+        require(_price >= 10000, "price too low");
         if (_tokenMeta[_saleId].bidSale) {
             require(Bids[_saleId].length == 0, "Bid has started");
         }
@@ -339,7 +341,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
             _contractAddress != address(0),
             "you can't do this with zero address"
         );
-        require(_price != 0);
+        require(_price >= 10000, "price too low");
         require(_bidTime != 0);
         _saleIdCounter.increment();
 
