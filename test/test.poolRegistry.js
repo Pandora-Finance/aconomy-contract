@@ -41,8 +41,8 @@ contract("poolRegistry", async (accounts) => {
 
   it("should set Aconomyfee", async () => {
     aconomyFee = await AconomyFee.deployed();
-    await aconomyFee.setProtocolFee(200);
-    let protocolFee = await aconomyFee.protocolFee();
+    await aconomyFee.setAconomyPoolFee(200);
+    let protocolFee = await aconomyFee.AconomyPoolFee();
     let aconomyFeeOwner = await aconomyFee.getAconomyOwnerAddress();
     assert.equal(aconomyFeeOwner, accounts[0], "wrong Aconomy fee owner");
     assert.equal(protocolFee.toNumber(), 200, "Wrong set Protocol Fee");

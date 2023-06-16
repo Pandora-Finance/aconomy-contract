@@ -3,6 +3,7 @@ const CollectionFactory = artifacts.require("CollectionFactory");
 const CollectionMethods = artifacts.require("CollectionMethods");
 const SampleERC20 = artifacts.require("mintToken");
 const PiMarket = artifacts.require("piMarket");
+const AconomyFee = artifacts.require("AconomyFee");
 const {
   BN,
   constants,
@@ -28,6 +29,9 @@ contract("PiMarket", async (accounts) => {
     it("should create a piNFT with 500 erc20 tokens to carl", async () => {
       factory = await CollectionFactory.deployed();
       sampleERC20 = await SampleERC20.deployed();
+      aconomyFee = await AconomyFee.deployed();
+      await aconomyFee.setAconomyPiMarketFee(100);
+      await aconomyFee.transferOwnership(feeReceiver);
       await sampleERC20.mint(validator, 1000);
       await factory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
         [royaltyReceiver, 500],

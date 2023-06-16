@@ -2,6 +2,7 @@ const BigNumber = require("big-number");
 const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const PiMarket = artifacts.require("piMarket");
+const AconomyFee = artifacts.require("AconomyFee");
 const {
   BN,
   constants,
@@ -26,6 +27,9 @@ contract("PiMarket", async (accounts) => {
 
   describe("Direct Sale", () => {
     it("should create a piNFT with 500 erc20 tokens to carl", async () => {
+      aconomyFee = await AconomyFee.deployed();
+      await aconomyFee.setAconomyPiMarketFee(100);
+      await aconomyFee.transferOwnership(feeReceiver);
       piNFT = await PiNFT.deployed();
       sampleERC20 = await SampleERC20.deployed();
       await sampleERC20.mint(validator, 1000);

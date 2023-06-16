@@ -1,5 +1,6 @@
 const PiMarket = artifacts.require("piMarket");
 const LibMarket = artifacts.require("LibMarket");
+const aconomyFee = artifacts.require("AconomyFee")
 
 const CollectionFactory = artifacts.require("CollectionFactory")
 const CollectionMethods = artifacts.require("CollectionMethods")
@@ -10,8 +11,9 @@ module.exports = async function (deployer) {
   await deployer.link(LibMarket, [PiMarket])
 
   let collectionFactory = await CollectionFactory.deployed();
+  var aconomyfee = await aconomyFee.deployed();
 
-  await deployer.deploy(PiMarket, "0xFF708C09221d5BA90eA3e3A3C42E2aBc8cA8aAc9", collectionFactory.address);
+  await deployer.deploy(PiMarket, aconomyfee.address, collectionFactory.address);
   let market = await PiMarket.deployed();
   console.log("market:", market.address);
 };

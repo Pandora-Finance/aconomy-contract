@@ -37,8 +37,8 @@ contract("NFTlendingBorrowing", async (accounts) => {
 
   it("mint NFT and list for lending", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
-    await aconomyFee.setProtocolFee(100);
-    const feee = await aconomyFee.protocolFee();
+    await aconomyFee.setAconomyNFTLendBorrowFee(100);
+    const feee = await aconomyFee.AconomyNFTLendBorrowFee();
     console.log("protocolFee", feee.toString());
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
@@ -134,9 +134,9 @@ contract("NFTlendingBorrowing", async (accounts) => {
   it("Should Accept Bid", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
     let feeAddress = await aconomyFee.getAconomyOwnerAddress();
-    await aconomyFee.setProtocolFee(200, { from: accounts[9] });
+    await aconomyFee.setAconomyNFTLendBorrowFee(200, { from: accounts[9] });
     assert.equal(feeAddress, accounts[9], "Wrong Protocol Owner");
-    const feee = await aconomyFee.protocolFee();
+    const feee = await aconomyFee.AconomyNFTLendBorrowFee();
     console.log("protocolFee", feee.toString());
 
     let b1 = await sampleERC20.balanceOf(feeAddress);
