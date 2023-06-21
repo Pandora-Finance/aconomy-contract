@@ -6,12 +6,12 @@ import "./Libraries/LibPool.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./Libraries/LibCalculations.sol";
 import "./poolRegistry.sol";
 import {BokkyPooBahsDateTimeLibrary as BPBDTL} from "./Libraries/DateTimeLib.sol";
 
-contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
-    address public poolOwner;
+contract FundingPool is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
     address public poolRegistryAddress;
 
     /**
@@ -23,7 +23,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _poolOwner,
         address _poolRegistry
     ) external initializer {
-        poolOwner = _poolOwner;
+        __Ownable_init();
+        transferOwnership(_poolOwner);
         poolRegistryAddress = _poolRegistry;
     }
 
@@ -256,7 +257,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _lender,
         address _receiver
     ) external nonReentrant {
-        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(owner() == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -318,7 +319,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender
     ) external nonReentrant {
-        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(owner() == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -497,7 +498,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender
     ) external nonReentrant {
-        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(owner() == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -565,7 +566,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     //     uint256 _bidId,
     //     address _lender
     // ) external nonReentrant {
-    //     require(poolOwner == msg.sender, "You are not the Pool Owner");
+    //     require(owner() == msg.sender, "You are not the Pool Owner");
     //     FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
     //         _ERC20Address
     //     ][_bidId];
@@ -697,7 +698,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender
     ) private {
-        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(owner() == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -746,7 +747,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _bidId,
         address _lender
     ) external nonReentrant {
-        require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(owner() == msg.sender, "You are not the Pool Owner");
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];

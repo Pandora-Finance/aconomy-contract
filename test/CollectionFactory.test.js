@@ -124,11 +124,10 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should not let validator add funds of a different erc20", async () => {
-    await expectRevert(
+    await expectRevert.unspecified(
       collectionInstance.addERC20(0, accounts[5], 200, [[validator, 200]], {
         from: validator,
-      }),
-      "invalid"
+      })
     );
   });
 

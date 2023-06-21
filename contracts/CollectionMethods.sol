@@ -2,12 +2,12 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./Libraries/LibCollection.sol";
 import "./utils/LibShare.sol";
 
@@ -15,11 +15,11 @@ contract CollectionMethods is
     Initializable,
     ERC721URIStorageUpgradeable,
     IERC721ReceiverUpgradeable,
-    ReentrancyGuardUpgradeable
+    ReentrancyGuardUpgradeable,
+    OwnableUpgradeable
 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    address public collectionOwner;
     address public collectionFactoryAddress;
 
     // tokenId => collection royalties
@@ -106,7 +106,8 @@ contract CollectionMethods is
     ) external initializer {
         __ERC721_init(_name, _symbol);
         __ERC721URIStorage_init();
-        collectionOwner = _collectionOwner;
+        __Ownable_init();
+        transferOwnership(_collectionOwner);
         collectionFactoryAddress = _collectionFactoryAddress;
     }
 
@@ -121,7 +122,7 @@ contract CollectionMethods is
      * @param _uri The uri of the piNFT.
      */
     function mintNFT(address _to, string memory _uri) public {
-        require(msg.sender == collectionOwner);
+        require(msg.sender == owner());
         require(_to != address(0));
         uint256 tokenId_ = _tokenIdCounter.current();
         _safeMint(_to, tokenId_);
@@ -158,10 +159,10 @@ contract CollectionMethods is
         LibShare.Share[] memory royalties
     ) public {
         require(msg.sender == approvedValidator[_tokenId]);
-        require(_erc20Contract != address(0), "zero");
+        require(_erc20Contract != address(0));
         require(_value != 0);
         if (erc20Contracts[_tokenId].length >= 1) {
-            require(_erc20Contract == erc20Contracts[_tokenId][0], "invalid");
+            require(_erc20Contract == erc20Contracts[_tokenId][0]);
         } else {
             setRoyaltiesForValidator(_tokenId, royalties);
         }
@@ -218,11 +219,11 @@ contract CollectionMethods is
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
             require(royalties[i].account != address(0x0));
-            require(royalties[i].value != 0, "Royalty 0");
+            require(royalties[i].value != 0);
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4000);
 
         emit RoyaltiesSet(_tokenId, royalties);
     }
@@ -337,7 +338,7 @@ contract CollectionMethods is
             return;
         }
         uint256 erc20Balance = erc20Balances[_tokenId][_erc20Contract];
-        require(erc20Balance >= _value, "balance");
+        require(erc20Balance >= _value);
         uint256 newERC20Balance = erc20Balance - _value;
         erc20Balances[_tokenId][_erc20Contract] = newERC20Balance;
         if (newERC20Balance == 0) {
