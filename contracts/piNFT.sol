@@ -6,9 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "./AconomyERC2771Context.sol";
 import "./utils/LibShare.sol";
 
-contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
+contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard, AconomyERC2771Context {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -92,13 +93,14 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
 
     constructor(
         string memory _name,
-        string memory _symbol
-    ) ERC721(_name, _symbol) {}
+        string memory _symbol,
+        address tfGelato
+    ) ERC721(_name, _symbol)
+    AconomyERC2771Context(tfGelato) {}
 
     modifier onlyOwnerOfToken(uint256 _tokenId) {
         require(
-            msg.sender == ERC721.ownerOf(_tokenId),
-            "Only token owner can execute"
+            msg.sender == ERC721.ownerOf(_tokenId)
         );
         _;
     }
@@ -125,6 +127,21 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     }
 
     /**
+     * @notice Lazy Mints an nft to a specified address.
+     * @param _to address to mint the piNFT to.
+     * @param _uri The uri of the piNFT.
+     * @param royalties The royalties being set for the token
+     */
+    function lazyMintNFT(
+        address _to,
+        string memory _uri,
+        LibShare.Share[] memory royalties
+    ) external returns (uint256) {
+        require(isTrustedForwarder(msg.sender));
+        return mintNFT(_to, _uri, royalties);
+    }
+
+    /**
      * @notice Checks and sets token royalties.
      * @param _tokenId The Id of the token.
      * @param royalties The royalties to be set.
@@ -133,19 +150,18 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) internal {
-        require(royalties.length <= 10, "> 10");
+        require(royalties.length <= 10);
         delete royaltiesByTokenId[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
             require(
-                royalties[i].account != address(0x0),
-                "Royalty not present"
+                royalties[i].account != address(0x0)
             );
-            require(royalties[i].value != 0, "value 0");
+            require(royalties[i].value != 0);
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4000);
 
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
@@ -201,7 +217,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         require(_erc20Contract != address(0));
         require(_value != 0);
         if (erc20Contracts[_tokenId].length >= 1) {
-            require(_erc20Contract == erc20Contracts[_tokenId][0], "invalid");
+            require(_erc20Contract == erc20Contracts[_tokenId][0]);
         } else {
             setRoyaltiesForValidator(_tokenId, royalties);
         }
@@ -253,16 +269,16 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         LibShare.Share[] memory royalties
     ) internal {
         require(msg.sender == approvedValidator[_tokenId]);
-        require(royalties.length <= 10, "> 10");
+        require(royalties.length <= 10);
         delete royaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
             require(royalties[i].account != address(0x0));
-            require(royalties[i].value != 0, "royalty 0");
+            require(royalties[i].value != 0);
             royaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4000);
 
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
@@ -354,7 +370,7 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
     ) private {
         require(_to != address(0));
         removeERC20(_tokenId, _erc20Contract, _value);
-        require(IERC20(_erc20Contract).transfer(_to, _value), "failed");
+        require(IERC20(_erc20Contract).transfer(_to, _value));
         emit ERC20Transferred(_tokenId, _to, _erc20Contract, _value);
     }
 
@@ -420,13 +436,13 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
             require(msg.sender == ownerOf(_tokenId));
             NFTowner[_tokenId] = msg.sender;
         }
-        require(NFTowner[_tokenId] == msg.sender, "not owner");
+        require(NFTowner[_tokenId] == msg.sender);
         require(erc20Balances[_tokenId][_erc20Contract] != 0);
         require(
             withdrawnAmount[_tokenId] + _amount <=
                 erc20Balances[_tokenId][_erc20Contract]
         );
-        require(IERC20(_erc20Contract).transfer(msg.sender, _amount), "failed");
+        require(IERC20(_erc20Contract).transfer(msg.sender, _amount));
 
         //needs approval on frontend
         // transferring NFT to this address
@@ -509,6 +525,26 @@ contract piNFT is ERC721URIStorage, IERC721Receiver, ReentrancyGuard {
         NFTowner[_tokenId] = _to;
         //needs approval
         ERC721.safeTransferFrom(msg.sender, _to, _tokenId);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(AconomyERC2771Context, Context)
+        returns (address sender)
+    {
+        return AconomyERC2771Context._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(AconomyERC2771Context, Context)
+        returns (bytes calldata)
+    {
+       return AconomyERC2771Context._msgData();
     }
 
     function onERC721Received(
