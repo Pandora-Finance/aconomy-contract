@@ -54,9 +54,11 @@ contract CollectionFactory {
     );
 
     address collectionMethodAddress;
+    address public piNFTMethodsAddress;
 
-    constructor(address _collectionMethodAddress) {
+    constructor(address _collectionMethodAddress, address _piNFTMethodsAddress) {
         collectionMethodAddress = _collectionMethodAddress;
+        piNFTMethodsAddress = _piNFTMethodsAddress;
     }
 
     modifier collectionOwner(uint256 _collectionId) {
