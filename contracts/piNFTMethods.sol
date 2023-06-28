@@ -5,14 +5,19 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./utils/LibShare.sol";
 import "./piNFT.sol";
 import "./CollectionMethods.sol";
+import "./AconomyERC2771Context.sol";
 
 contract piNFTMethods is
     ReentrancyGuardUpgradeable,
-    IERC721ReceiverUpgradeable
-{
+    AconomyERC2771Context,
+    IERC721ReceiverUpgradeable,
+    UUPSUpgradeable
+{   
+    //STORAGE START ----------------------------------------------------------------------
     // collectionAddress => tokenId => (token contract => balance)
     mapping(address => mapping(uint256 => mapping(address => uint256)))
         internal erc20Balances;
@@ -31,6 +36,7 @@ contract piNFTMethods is
 
     // collectionAddress => TokenId => validator
     mapping(address => mapping(uint256 => address)) public approvedValidator;
+    //STORAGE END -------------------------------------------------------------------------
 
     event ERC20Added(
         address collectionAddress,
@@ -87,6 +93,37 @@ contract piNFTMethods is
         address validator
     );
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
+
+    function initialize(address trustedForwarder) public initializer {
+        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init();
+        AconomyERC2771Context_init(trustedForwarder);
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(AconomyERC2771Context)
+        returns (address sender)
+    {
+        return AconomyERC2771Context._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(AconomyERC2771Context)
+        returns (bytes calldata)
+    {
+       return AconomyERC2771Context._msgData();
+    }
+
     function addValidator(
         address _collectionAddress,
         uint256 _tokenId,
@@ -95,6 +132,21 @@ contract piNFTMethods is
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender
+        );
+        require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
+        approvedValidator[_collectionAddress][_tokenId] = _validator;
+        emit ValidatorAdded(_collectionAddress, _tokenId, _validator);
+    }
+
+    function lazyAddValidator(
+        address _collectionAddress,
+        uint256 _tokenId,
+        address _validator
+    ) external {
+        require(isTrustedForwarder(msg.sender));
+        require(
+            IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
+                AconomyERC2771Context._msgSender()
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
         approvedValidator[_collectionAddress][_tokenId] = _validator;
@@ -513,4 +565,6 @@ contract piNFTMethods is
     ) public virtual override returns (bytes4) {
         return this.onERC721Received.selector;
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

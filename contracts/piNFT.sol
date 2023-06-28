@@ -8,10 +8,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./AconomyERC2771Context.sol";
 import "./utils/LibShare.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./piNFTMethods.sol";
 
-contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context, UUPSUpgradeable {
+contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
     address public piNFTMethodsAddress;
@@ -187,7 +186,4 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context, UUPS
     {
        return AconomyERC2771Context._msgData();
     }
-
-    ///@dev required by the OZ UUPS module
-   function _authorizeUpgrade(address) internal override onlyOwner {}
 }

@@ -14,6 +14,7 @@ contract AconomyERC2771Context is OwnableUpgradeable {
 
     function AconomyERC2771Context_init(address tfGelato) internal initializer{
         trustedForwarders[tfGelato] = true;
+        __Ownable_init();
     }
 
     function isTrustedForwarder(address forwarder)

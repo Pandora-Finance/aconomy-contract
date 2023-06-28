@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./piNFT.sol";
@@ -13,13 +15,13 @@ import "./CollectionMethods.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibMarket.sol";
 
-contract piMarket is ERC721Holder, ReentrancyGuard {
+contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
+
+    //STORAGE START ---------------------------------------------------------------------------------
+
     Counters.Counter internal _saleIdCounter;
     Counters.Counter private _swapIdCounter;
-
-    address internal feeAddress;
-    address public collectionFactoryAddress;
 
     /**
      * @notice Deatils for a sale.
@@ -87,9 +89,13 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         bool status;
     }
 
+    address internal feeAddress;
+    address public collectionFactoryAddress;
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
     mapping(uint256 => Swap) public _swaps;
+
+    //STORAGE END -------------------------------------------------------------------------------------
 
     event SaleCreated(uint256 tokenId, address tokenContract, uint256 saleId);
     event NFTBought(uint256 saleId, address buyer);
@@ -106,12 +112,20 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
     );
     event updatedSalePrice(uint256 saleId, uint256 Price);
 
-    constructor(address _feeAddress, address _collectionFactoryAddress) {
-        require(_feeAddress != address(0), "Fee address cannot be zero");
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
+
+    function initialize(address _feeAddress, address _collectionFactoryAddress) public initializer {
+        require(_feeAddress != address(0));
         require(
-            _collectionFactoryAddress != address(0),
-            "Address cannot be zero"
+            _collectionFactoryAddress != address(0)
         );
+        __ReentrancyGuard_init();
+        __ERC721Holder_init();
+        __Ownable_init();
+        __UUPSUpgradeable_init();
         feeAddress = _feeAddress;
         collectionFactoryAddress = _collectionFactoryAddress;
     }
@@ -140,8 +154,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         _saleIdCounter.increment();
         require(_price >= 10000, "price too low");
         require(
-            _contractAddress != address(0),
-            "you can't do this with zero address"
+            _contractAddress != address(0)
         );
 
         //needs approval on frontend
@@ -338,8 +351,7 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         address _currency
     ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant {
         require(
-            _contractAddress != address(0),
-            "you can't do this with zero address"
+            _contractAddress != address(0)
         );
         require(_price >= 10000, "price too low");
         require(_bidTime != 0);
@@ -494,13 +506,11 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         returns (uint256)
     {
         require(
-            contractAddress1 != address(0),
-            "you can't do this with zero address"
+            contractAddress1 != address(0)
         );
 
         require(
-            contractAddress2 != address(0),
-            "you can't do this with zero address"
+            contractAddress2 != address(0)
         );
         address token2Owner = ERC721(contractAddress2).ownerOf(token2);
         require(token2Owner != msg.sender, "Cannot Swap Between Your Tokens");
@@ -579,4 +589,6 @@ contract piMarket is ERC721Holder, ReentrancyGuard {
         swap.status = false;
         emit SwapAccepted(swapId);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

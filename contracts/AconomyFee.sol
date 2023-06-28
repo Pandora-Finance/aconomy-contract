@@ -12,19 +12,19 @@ contract AconomyFee is Ownable {
     event SetAconomyPiMarketFee(uint16 newFee, uint16 oldFee);
     event SetAconomyNFTLendBorrowFee(uint16 newFee, uint16 oldFee);
 
-    function AconomyPoolFee() public view virtual returns (uint16) {
+    function AconomyPoolFee() public view returns (uint16) {
         return _AconomyPoolFee;
     }
 
-    function AconomyPiMarketFee() public view virtual returns (uint16) {
+    function AconomyPiMarketFee() public view returns (uint16) {
         return _AconomyPiMarketFee;
     }
 
-    function AconomyNFTLendBorrowFee() public view virtual returns (uint16) {
+    function AconomyNFTLendBorrowFee() public view returns (uint16) {
         return _AconomyNFTLendBorrowFee;
     }
 
-    function getAconomyOwnerAddress() public view virtual returns (address) {
+    function getAconomyOwnerAddress() public view returns (address) {
         return owner();
     }
 
@@ -32,7 +32,7 @@ contract AconomyFee is Ownable {
      * @notice Sets the protocol fee.
      * @param newFee The value of the new fee percentage in bps.
      */
-    function setAconomyPoolFee(uint16 newFee) public virtual onlyOwner {
+    function setAconomyPoolFee(uint16 newFee) public onlyOwner {
         if (newFee == _AconomyPoolFee) return;
 
         uint16 oldFee = _AconomyPoolFee;
@@ -40,7 +40,7 @@ contract AconomyFee is Ownable {
         emit SetAconomyFee(newFee, oldFee);
     }
 
-    function setAconomyPiMarketFee(uint16 newFee) public virtual onlyOwner {
+    function setAconomyPiMarketFee(uint16 newFee) public onlyOwner {
         if (newFee == _AconomyPiMarketFee) return;
 
         uint16 oldFee = _AconomyPiMarketFee;
@@ -50,7 +50,7 @@ contract AconomyFee is Ownable {
 
     function setAconomyNFTLendBorrowFee(
         uint16 newFee
-    ) public virtual onlyOwner {
+    ) public onlyOwner {
         if (newFee == _AconomyNFTLendBorrowFee) return;
 
         uint16 oldFee = _AconomyNFTLendBorrowFee;

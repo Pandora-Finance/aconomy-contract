@@ -1,3 +1,5 @@
+const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const attestationRegistry = artifacts.require("AttestationRegistry");
 const attestationServices = artifacts.require("AttestationServices");
 const poolRegistry = artifacts.require("poolRegistry");
@@ -30,8 +32,10 @@ module.exports = async function (deployer) {
   await deployer.deploy(attestationServices, attestRegistry.address)
   var attestServices = await attestationServices.deployed()
 
-  await deployer.deploy(piNFTMethods);
-  var piNftMethods = await piNFTMethods.deployed();
+  var piNftMethods = await deployProxy(piNFTMethods, ["0xd8253782c45a12053594b9deB72d8e8aB2Fca54c"], {
+    initializer: "initialize",
+    kind: "uups",
+  });
 
 
   await deployer.deploy(LibCollection);
@@ -40,11 +44,13 @@ module.exports = async function (deployer) {
   await deployer.deploy(CollectionMethods);
   var CollectionMethod = await CollectionMethods.deployed();
 
-  await deployer.deploy(CollectionFactory, CollectionMethod.address, piNftMethods.address);
-  var collectionFactory = await CollectionFactory.deployed();
+  var collectionFactory = await deployProxy(CollectionFactory, [CollectionMethod.address, piNftMethods.address], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  });
 
   await CollectionMethod.initialize(walletAddress, collectionFactory.address, "xyz", "xyz")
-
 
   await deployer.deploy(libCalc);
   await deployer.link(libCalc, [libPool, FundingPool]);
@@ -56,8 +62,11 @@ module.exports = async function (deployer) {
 
   await deployer.link(libPool, [poolRegistry]);
 
-  await deployer.deploy(poolRegistry, attestServices.address, aconomyfee.address, fundingPool.address)
-  var poolRegis = await poolRegistry.deployed()
+  var poolRegis = await deployProxy(poolRegistry, [attestServices.address, aconomyfee.address, fundingPool.address], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  });
 
   await fundingPool.initialize(walletAddress, poolRegis.address)
 
@@ -65,12 +74,18 @@ module.exports = async function (deployer) {
 
   await deployer.deploy(BPBDTL);
   await deployer.link(BPBDTL, [poolAddress]);
-  
-  await deployer.deploy(poolAddress, poolRegis.address, aconomyfee.address)
-  var pooladdress = await poolAddress.deployed();
 
-  await deployer.deploy(NftLendingBorrowing, aconomyfee.address)
-  var lending = await NftLendingBorrowing.deployed();
+  var pooladdress = await deployProxy(poolAddress, [poolRegis.address, aconomyfee.address], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  });
+
+  var lending = await deployProxy(NftLendingBorrowing, [aconomyfee.address], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  });
 
   console.log("AconomyFee : ", aconomyfee.address)
   console.log("CollectionMethods : ", CollectionMethod.address)

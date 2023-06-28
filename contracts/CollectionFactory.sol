@@ -3,12 +3,16 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibCollection.sol";
 
-contract CollectionFactory {
+contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     using Counters for Counters.Counter;
+
+    //STORAGE START -------------------------------------------------------------------------------------
 
     /**
      * @notice Deatils for a collection.
@@ -37,6 +41,10 @@ contract CollectionFactory {
     mapping(uint256 => LibShare.Share[]) public royaltiesForCollection;
 
     uint256 public collectionId;
+    address collectionMethodAddress;
+    address public piNFTMethodsAddress;
+
+    //STORAGE END ------------------------------------------------------------------------------------------
 
     event CollectionURISet(uint256 collectionId, string uri);
 
@@ -53,10 +61,14 @@ contract CollectionFactory {
         LibShare.Share[] royalties
     );
 
-    address collectionMethodAddress;
-    address public piNFTMethodsAddress;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
 
-    constructor(address _collectionMethodAddress, address _piNFTMethodsAddress) {
+    function initialize(address _collectionMethodAddress, address _piNFTMethodsAddress) public initializer {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
         collectionMethodAddress = _collectionMethodAddress;
         piNFTMethodsAddress = _piNFTMethodsAddress;
     }
@@ -67,6 +79,10 @@ contract CollectionFactory {
             "Not the owner"
         );
         _;
+    }
+
+    function changeCollectionMethodImplementation(address newCollectionMethods) external onlyOwner {
+        collectionMethodAddress = newCollectionMethods;
     }
 
     /**
@@ -226,4 +242,6 @@ contract CollectionFactory {
     ) external view returns (LibShare.Share[] memory) {
         return royaltiesForCollection[_collectionId];
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

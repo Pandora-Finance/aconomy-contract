@@ -2,17 +2,20 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
 
-contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
+contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
+
+    //STORAGE START ---------------------------------------------------------------------------
+
     uint256 public NFTid;
     address AconomyFeeAddress;
 
@@ -72,6 +75,8 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
     // NFTid => Bid[]
     mapping(uint256 => BidDetail[]) public Bids;
 
+    //STORAGE END ----------------------------------------------------------------------------
+
     // Events
     event AppliedBid(uint256 BidId, uint256 NFTid);
     event PercentSet(uint256 NFTid, uint16 Percent);
@@ -94,7 +99,16 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
         uint256 ProtocolAmount
     );
 
-    constructor(address _aconomyFee) {
+   /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
+
+    function initialize(address _aconomyFee) public initializer {
+        __ReentrancyGuard_init();
+        __ERC721Holder_init();
+        __Ownable_init();
+        __UUPSUpgradeable_init();
         AconomyFeeAddress = _aconomyFee;
     }
 
@@ -448,4 +462,6 @@ contract NFTlendingBorrowing is ERC721Holder, ReentrancyGuard {
 
         emit NFTRemoved(_NFTid);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

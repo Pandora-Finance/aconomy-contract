@@ -1,3 +1,5 @@
+const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const piNFTMethods = artifacts.require("piNFTMethods");

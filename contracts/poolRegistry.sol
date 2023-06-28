@@ -5,48 +5,28 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibPool.sol";
 import "./AttestationServices.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract poolRegistry is ReentrancyGuard {
+contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    modifier ownsPool(uint256 _poolId) {
-        require(pools[_poolId].owner == msg.sender, "Not the owner");
-        _;
-    }
+    //STORAGE START ------------------------------------------------------------------------------------
 
     AttestationServices public attestationService;
     bytes32 public lenderAttestationSchemaId;
     bytes32 public borrowerAttestationSchemaId;
     bytes32 private _attestingSchemaId;
     address public AconomyFeeAddress;
-    address FundingPoolAddress;
+    address public FundingPoolAddress;
+    //poolId => close or open
+    mapping(uint256 => bool) private ClosedPools;
 
-    constructor(
-        AttestationServices _attestationServices,
-        address _AconomyFee,
-        address _FundingPoolAddress
-    ) {
-        FundingPoolAddress = _FundingPoolAddress;
-        attestationService = _attestationServices;
-        AconomyFeeAddress = _AconomyFee;
-
-        lenderAttestationSchemaId = _attestationServices
-            .getASRegistry()
-            .register("(uint256 poolId, address lenderAddress)");
-        borrowerAttestationSchemaId = _attestationServices
-            .getASRegistry()
-            .register("(uint256 poolId, address borrowerAddress)");
-    }
-
-    modifier lenderOrBorrowerSchema(bytes32 schemaId) {
-        _attestingSchemaId = schemaId;
-        _;
-        _attestingSchemaId = bytes32(0);
-    }
+    uint256 public poolCount;
 
     /**
      * @notice Deatils for a pool.
@@ -81,13 +61,51 @@ contract poolRegistry is ReentrancyGuard {
         EnumerableSet.AddressSet verifiedBorrowersForPool;
         mapping(address => bytes32) borrowerAttestationIds;
     }
-
     //poolId => poolDetail
     mapping(uint256 => poolDetail) internal pools;
-    //poolId => close or open
-    mapping(uint256 => bool) private ClosedPools;
 
-    uint256 public poolCount;
+    //STORAGE END ------------------------------------------------------------------------------------------
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
+
+    function initialize(
+        AttestationServices _attestationServices,
+        address _AconomyFee,
+        address _FundingPoolAddress
+    ) public initializer {
+        __ReentrancyGuard_init();
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+        FundingPoolAddress = _FundingPoolAddress;
+        attestationService = _attestationServices;
+        AconomyFeeAddress = _AconomyFee;
+
+        lenderAttestationSchemaId = _attestationServices
+            .getASRegistry()
+            .register("(uint256 poolId, address lenderAddress)");
+        borrowerAttestationSchemaId = _attestationServices
+            .getASRegistry()
+            .register("(uint256 poolId, address borrowerAddress)");
+    }
+
+    modifier lenderOrBorrowerSchema(bytes32 schemaId) {
+        _attestingSchemaId = schemaId;
+        _;
+        _attestingSchemaId = bytes32(0);
+    }
+
+    modifier ownsPool(uint256 _poolId) {
+        require(pools[_poolId].owner == msg.sender, "Not the owner");
+        _;
+    }
+
+    function changeFundingPoolImplementation(address newFundingPool) external onlyOwner {
+        FundingPoolAddress = newFundingPool;
+    }
+
     event poolCreated(
         address indexed owner,
         address poolAddress,
@@ -540,4 +558,6 @@ contract poolRegistry is ReentrancyGuard {
     function getAconomyOwner() public view returns (address) {
         return AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress();
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
