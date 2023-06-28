@@ -1,10 +1,11 @@
 const collectionFactory = artifacts.require("CollectionFactory");
 const SampleERC20 = artifacts.require("mintToken");
 const CollectionMethods = artifacts.require("CollectionMethods");
+const piNFTMethods = artifacts.require("piNFTMethods");
 const { expectRevert } = require("@openzeppelin/test-helpers");
 
 contract("CollectionFactory", (accounts) => {
-  let CollectionFactory, sampleERC20, collectionInstance;
+  let CollectionFactory, sampleERC20, collectionInstance, piNftMethods;
   let alice = accounts[0];
   let validator = accounts[1];
   let bob = accounts[2];
@@ -13,6 +14,7 @@ contract("CollectionFactory", (accounts) => {
   it("should deploy the contracts", async () => {
     CollectionFactory = await collectionFactory.deployed();
     sampleERC20 = await SampleERC20.deployed();
+    piNftMethods = await piNFTMethods.deployed();
     assert(
       CollectionFactory !== undefined,
       "CollectionFactory contract was not deployed"
@@ -75,15 +77,16 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should allow alice to add a validator to the nft", async () => {
-    await collectionInstance.addValidator(0, validator);
-    assert.equal(await collectionInstance.approvedValidator(0), validator);
+    await piNftMethods.addValidator(collectionInstance.address, 0, validator);
+    assert.equal(await piNftMethods.approvedValidator(collectionInstance.address, 0), validator);
   });
 
   it("should let validator add ERC20 tokens to alice's NFT", async () => {
-    await sampleERC20.approve(collectionInstance.address, 500, {
+    await sampleERC20.approve(piNftMethods.address, 500, {
       from: validator,
     });
-    const tx = await collectionInstance.addERC20(
+    const tx = await piNftMethods.addERC20(
+      collectionInstance.address,
       0,
       sampleERC20.address,
       500,
@@ -92,7 +95,8 @@ contract("CollectionFactory", (accounts) => {
         from: validator,
       }
     );
-    const tokenBal = await collectionInstance.viewBalance(
+    const tokenBal = await piNftMethods.viewBalance(
+      collectionInstance.address,
       0,
       sampleERC20.address
     );
@@ -102,10 +106,11 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let validator add more ERC20 tokens to alice's NFT", async () => {
-    await sampleERC20.approve(collectionInstance.address, 200, {
+    await sampleERC20.approve(piNftMethods.address, 200, {
       from: validator,
     });
-    const tx = await collectionInstance.addERC20(
+    const tx = await piNftMethods.addERC20(
+      collectionInstance.address,
       0,
       sampleERC20.address,
       200,
@@ -114,7 +119,8 @@ contract("CollectionFactory", (accounts) => {
         from: validator,
       }
     );
-    const tokenBal = await collectionInstance.viewBalance(
+    const tokenBal = await piNftMethods.viewBalance(
+      collectionInstance.address,
       0,
       sampleERC20.address
     );
@@ -125,7 +131,7 @@ contract("CollectionFactory", (accounts) => {
 
   it("should not let validator add funds of a different erc20", async () => {
     await expectRevert(
-      collectionInstance.addERC20(0, accounts[5], 200, [[validator, 200]], {
+      piNftMethods.addERC20(collectionInstance.address, 0, accounts[5], 200, [[validator, 200]], {
         from: validator,
       }),
       "invalid"
@@ -133,7 +139,8 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let alice transfer NFT to bob", async () => {
-    await collectionInstance.transferAfterFunding(0, bob, { from: alice });
+    await collectionInstance.approve(piNftMethods.address, 0, {from: alice});
+    await piNftMethods.transferAfterFunding(collectionInstance.address, 0, bob, { from: alice });
     assert.equal(
       await collectionInstance.ownerOf(0),
       bob,
@@ -142,7 +149,8 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let bob transfer NFT to alice", async () => {
-    await collectionInstance.transferAfterFunding(0, alice, { from: bob });
+    await collectionInstance.approve(piNftMethods.address, 0, {from: bob});
+    await piNftMethods.transferAfterFunding(collectionInstance.address, 0, alice, { from: bob });
     assert.equal(
       await collectionInstance.ownerOf(0),
       alice,
@@ -152,42 +160,44 @@ contract("CollectionFactory", (accounts) => {
 
   it("should let alice withdraw erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
-    await collectionInstance.withdraw(0, sampleERC20.address, 300);
+    await collectionInstance.approve(piNftMethods.address, 0, {from: alice});
+    await piNftMethods.withdraw(collectionInstance.address, 0, sampleERC20.address, 300);
     assert.equal(
       await collectionInstance.ownerOf(0),
-      collectionInstance.address
+      piNftMethods.address
     );
     let bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 300);
-    await collectionInstance.withdraw(0, sampleERC20.address, 200);
+    await piNftMethods.withdraw(collectionInstance.address, 0, sampleERC20.address, 200);
     assert.equal(
       await collectionInstance.ownerOf(0),
-      collectionInstance.address
+      piNftMethods.address
     );
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 500);
-    assert.equal(await sampleERC20.balanceOf(collectionInstance.address), 200);
+    assert.equal(await sampleERC20.balanceOf(piNftMethods.address), 200);
   });
 
   it("should let alice repay erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
-    await sampleERC20.approve(collectionInstance.address, 300);
-    await collectionInstance.Repay(0, sampleERC20.address, 300);
+    await sampleERC20.approve(piNftMethods.address, 300);
+    await piNftMethods.Repay(collectionInstance.address, 0, sampleERC20.address, 300);
     assert.equal(
       await collectionInstance.ownerOf(0),
-      collectionInstance.address
+      piNftMethods.address
     );
     let bal = await sampleERC20.balanceOf(alice);
     assert.equal(_bal - bal, 300);
-    await sampleERC20.approve(collectionInstance.address, 200);
-    await collectionInstance.Repay(0, sampleERC20.address, 200);
+    await sampleERC20.approve(piNftMethods.address, 200);
+    await piNftMethods.Repay(collectionInstance.address, 0, sampleERC20.address, 200);
     assert.equal(await collectionInstance.ownerOf(0), alice);
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(_bal - bal, 500);
   });
 
   it("should redeem CollectionFactory", async () => {
-    await collectionInstance.redeemOrBurnPiNFT(
+    await piNftMethods.redeemOrBurnPiNFT(
+      collectionInstance.address,
       0,
       alice,
       "0x0000000000000000000000000000000000000000",
@@ -209,11 +219,12 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let validator add ERC20 tokens to bob's NFT", async () => {
-    await sampleERC20.approve(collectionInstance.address, 500, {
+    await sampleERC20.approve(piNftMethods.address, 500, {
       from: validator,
     });
-    await collectionInstance.addValidator(0, validator, { from: bob });
-    const tx = await collectionInstance.addERC20(
+    await piNftMethods.addValidator(collectionInstance.address, 0, validator, { from: bob });
+    const tx = await piNftMethods.addERC20(
+      collectionInstance.address,
       0,
       sampleERC20.address,
       500,
@@ -222,7 +233,8 @@ contract("CollectionFactory", (accounts) => {
         from: validator,
       }
     );
-    const tokenBal = await collectionInstance.viewBalance(
+    const tokenBal = await piNftMethods.viewBalance(
+      collectionInstance.address,
       0,
       sampleERC20.address
     );
@@ -233,7 +245,9 @@ contract("CollectionFactory", (accounts) => {
 
   it("should let bob burn CollectionFactory", async () => {
     assert.equal(await sampleERC20.balanceOf(bob), 0);
-    await collectionInstance.redeemOrBurnPiNFT(
+    await collectionInstance.approve(piNftMethods.address, 0, {from: bob});
+    await piNftMethods.redeemOrBurnPiNFT(
+      collectionInstance.address,
       0,
       "0x0000000000000000000000000000000000000000",
       bob,
@@ -245,7 +259,7 @@ contract("CollectionFactory", (accounts) => {
     );
     const bobBal = await sampleERC20.balanceOf(bob);
     assert.equal(
-      await collectionInstance.viewBalance(0, sampleERC20.address),
+      await piNftMethods.viewBalance(collectionInstance.address, 0, sampleERC20.address),
       0,
       "Failed to remove ERC20 tokens from NFT"
     );

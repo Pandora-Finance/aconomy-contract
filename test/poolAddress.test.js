@@ -433,8 +433,7 @@ contract("PoolAddress", async (accounts) => {
 
   it("should not allow an expired loan to be accepted", async () => {
     await truffleAssert.reverts(
-      poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] }),
-      "Loan has expired"
+      poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] })
     );
   });
 

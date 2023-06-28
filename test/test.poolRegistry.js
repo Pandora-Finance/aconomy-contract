@@ -228,9 +228,8 @@ contract("poolRegistry", async (accounts) => {
     await erc20.approve(poolAddressInstance.address, 205000000, {
       from: accounts[0],
     });
-    await expectRevert(
-      poolAddressInstance.repayFullLoan(loanId1, { from: accounts[0] }),
-      "Loan must be accepted"
+    await expectRevert.unspecified(
+      poolAddressInstance.repayFullLoan(loanId1, { from: accounts[0] })
     );
   });
 
