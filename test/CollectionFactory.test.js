@@ -22,6 +22,16 @@ contract("CollectionFactory", (accounts) => {
     assert(sampleERC20 !== undefined, "SampleERC20 contract was not deployed");
   });
 
+  it("should not create collection if the contract is paused", async () => {
+    await CollectionFactory.pause();
+    await expectRevert.unspecified(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [royaltyReciever, 500],
+      ])
+    );
+    await CollectionFactory.unpause();
+  })
+
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
       [royaltyReciever, 500],

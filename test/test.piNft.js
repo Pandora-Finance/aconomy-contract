@@ -35,6 +35,14 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
   });
 
+  it("should not mint if the contract is paused", async () => {
+    await piNFT.pause();
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]])
+    );
+    await piNFT.unpause();
+  })
+
   it("should Royality must be less 4000", async () => {
     await expectRevert(
       piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]),

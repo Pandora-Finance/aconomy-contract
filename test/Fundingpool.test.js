@@ -345,7 +345,7 @@ contract("FundingPool", (accounts) => {
       );
       console.log("installment before 1 cycle", r.toString());
       // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-      await time.increase(paymentCycleDuration);
+      await time.increase(paymentCycleDuration + 5);
       r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
         erc20.address,

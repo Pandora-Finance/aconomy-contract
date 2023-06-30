@@ -102,6 +102,22 @@ contract("poolRegistry", async (accounts) => {
     // poolId2 = res.logs[0].args.poolId.toNumber()
   });
 
+  it("should not create if the contract is paused", async () => {
+    await poolRegis.pause();
+    await expectRevert.unspecified(
+      poolRegis.createPool(
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        1000,
+        "sk.com",
+        true,
+        true
+      )
+    );
+    await poolRegis.unpause();
+  })
+
   it("should add Lender to the pool", async () => {
     res = await poolRegis.lenderVerification(poolId1, accounts[9]);
     assert.equal(

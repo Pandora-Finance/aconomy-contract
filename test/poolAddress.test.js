@@ -162,6 +162,23 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loanId1, 0, "Unable to create loan: Wrong LoanId");
   });
 
+  it("should not request if the contract is paused", async () => {
+    await poolAddressInstance.pause();
+    await expectRevert.unspecified(
+      poolAddressInstance.loanRequest(
+        erc20.address,
+        poolId1,
+        1000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        accounts[1],
+        { from: accounts[1] }
+      )
+    );
+    await poolAddressInstance.unpause();
+  })
+
   it("should Accept loan ", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
     let feeAddress = await aconomyFee.getAconomyOwnerAddress();
@@ -215,7 +232,7 @@ contract("PoolAddress", async (accounts) => {
     let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     console.log("installment before 1 cycle", r.toString());
     // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-    await time.increase(paymentCycleDuration);
+    await time.increase(paymentCycleDuration + 5);
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     console.log("installment after 1 cycle", r.toString());
     //1

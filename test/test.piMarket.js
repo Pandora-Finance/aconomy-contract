@@ -66,6 +66,19 @@ contract("PiMarket", async (accounts) => {
       assert.equal(await piNFT.ownerOf(0), alice, "Failed to transfer piNFT");
     });
 
+    it("should not put on sale if the contract is paused", async () => {
+      await piMarket.pause();
+      await expectRevert.unspecified(
+        piMarket.sellNFT(
+          piNFT.address,
+          0,
+          50000,
+          "0x0000000000000000000000000000000000000000"
+        )
+      );
+      await piMarket.unpause();
+    })
+
     it("should let alice place piNFT on sale", async () => {
       await piNFT.approve(piMarket.address, 0);
       const result = await piMarket.sellNFT(
