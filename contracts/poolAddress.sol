@@ -6,15 +6,17 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./poolRegistry.sol";
 import "./poolStorage.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
+import "./Libraries/LibPoolAddress.sol";
 import {BokkyPooBahsDateTimeLibrary as BPBDTL} from "./Libraries/DateTimeLib.sol";
 
-contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
 
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -31,6 +33,14 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
         loanId = 0;
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     event loanAccepted(uint256 indexed loanId, address indexed lender);
@@ -76,7 +86,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
         uint32 _expirationDuration,
         uint16 _APR,
         address _receiver
-    ) public returns (uint256 loanId_) {
+    ) public whenNotPaused returns (uint256 loanId_) {
         require(
             _lendingToken != address(0)
         );
@@ -160,6 +170,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
         uint256 _loanId
     )
         external
+        whenNotPaused
         nonReentrant
         returns (
             uint256 amountToAconomy,
@@ -168,71 +179,11 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
         )
     {
         Loan storage loan = loans[_loanId];
-
-        (bool isVerified, ) = poolRegistry(poolRegistryAddress)
-            .lenderVerification(loan.poolId, msg.sender);
-
-        require(isVerified, "Not verified lender");
-        require(loans[_loanId].state == LoanState.PENDING);
-        require(
-            !poolRegistry(poolRegistryAddress).ClosedPool(loan.poolId)
-        );
         require(!isLoanExpired(_loanId));
 
-        loan.loanDetails.acceptedTimestamp = uint32(block.timestamp);
-        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
-
-        loan.state = LoanState.ACCEPTED;
-
-        loan.lender = msg.sender;
-
-        //Aconomy Fee
-        amountToAconomy = LibCalculations.percent(
-            loan.loanDetails.principal,
-            loan.loanDetails.protocolFee
-        );
-
-        //Pool Fee
-        amountToPool = LibCalculations.percent(
-            loan.loanDetails.principal,
-            poolRegistry(poolRegistryAddress).getPoolFee(loan.poolId)
-        );
-
-        //Amount to Borrower
-        amountToBorrower =
-            loan.loanDetails.principal -
-            amountToAconomy -
-            amountToPool;
-
-        //Transfer Aconomy Fee
-        if (amountToAconomy != 0) {
-            bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
-                loan.lender,
-                AconomyFee(AconomyFeeAddress).getAconomyOwnerAddress(),
-                amountToAconomy
-            );
-            require(isSuccess);
-        }
-
-        //Transfer to Pool Owner
-        if (amountToPool != 0) {
-            bool isSuccess2 = IERC20(loan.loanDetails.lendingToken)
-                .transferFrom(
-                    loan.lender,
-                    poolRegistry(poolRegistryAddress).getPoolOwner(loan.poolId),
-                    amountToPool
-                );
-            require(isSuccess2);
-        }
-
-        //transfer funds to borrower
-        bool isSuccess3 = IERC20(loan.loanDetails.lendingToken).transferFrom(
-            loan.lender,
-            loan.borrower,
-            amountToBorrower
-        );
-
-        require(isSuccess3);
+        (amountToAconomy, amountToPool, amountToBorrower) 
+            = 
+        LibPoolAddress.acceptLoan(loan, poolRegistryAddress, AconomyFeeAddress);
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -376,7 +327,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
      * @notice Repays the monthly installment.
      * @param _loanId The Id of the loan.
      */
-    function repayMonthlyInstallment(uint256 _loanId) external nonReentrant {
+    function repayMonthlyInstallment(uint256 _loanId) external whenNotPaused nonReentrant {
         require(loans[_loanId].state == LoanState.ACCEPTED);
         require(
             loans[_loanId].terms.installmentsPaid + 1 <=
@@ -488,7 +439,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, OwnableUpgradea
      * @notice Repays the full amount to be paid at the called timestamp.
      * @param _loanId The Id of the loan.
      */
-    function repayFullLoan(uint256 _loanId) external nonReentrant {
+    function repayFullLoan(uint256 _loanId) external nonReentrant whenNotPaused{
         require(loans[_loanId].state == LoanState.ACCEPTED);
         (uint256 owedPrincipal, , uint256 interest) = LibCalculations
             .owedAmount(loans[_loanId], block.timestamp);
