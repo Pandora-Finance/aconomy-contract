@@ -145,7 +145,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Con
     function setRoyaltiesForValidator(
         uint256 _tokenId,
         LibShare.Share[] memory royalties
-    ) public {
+    ) external {
         require(msg.sender == piNFTMethodsAddress);
         require(royalties.length <= 10);
         delete royaltiesForValidator[_tokenId];
