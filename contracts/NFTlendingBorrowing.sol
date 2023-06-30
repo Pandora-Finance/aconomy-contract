@@ -6,12 +6,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgra
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
 
-contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
 
     //STORAGE START ---------------------------------------------------------------------------
@@ -112,6 +113,14 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
         AconomyFeeAddress = _aconomyFee;
     }
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     modifier onlyOwnerOfToken(address _contractAddress, uint256 _tokenId) {
         require(
             msg.sender == ERC721(_contractAddress).ownerOf(_tokenId),
@@ -142,15 +151,15 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
     )
         external
         onlyOwnerOfToken(_contractAddress, _tokenId)
+        whenNotPaused
         nonReentrant
         returns (uint256 _NFTid)
     {
         require(
-            _contractAddress != address(0),
-            "you can't do this with zero address"
+            _contractAddress != address(0)
         );
-        require(_percent >= 10, "interest percent should be greater than 0.1%");
-        require(_expectedAmount >= 1000, "amount should be greater than 1000");
+        require(_percent >= 10);
+        require(_expectedAmount >= 1000);
 
         _NFTid = ++NFTid;
 
@@ -179,7 +188,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
     function setPercent(
         uint256 _NFTid,
         uint16 _percent
-    ) public NFTOwner(_NFTid) {
+    ) public whenNotPaused NFTOwner(_NFTid) {
         require(_percent >= 10, "interest percent should be greater than 0.1%");
         if (_percent != NFTdetails[_NFTid].percent) {
             NFTdetails[_NFTid].percent = _percent;
@@ -196,7 +205,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
     function setDurationTime(
         uint256 _NFTid,
         uint32 _duration
-    ) public NFTOwner(_NFTid) {
+    ) public whenNotPaused NFTOwner(_NFTid) {
         if (_duration != NFTdetails[_NFTid].duration) {
             NFTdetails[_NFTid].duration = _duration;
 
@@ -212,8 +221,8 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
     function setExpectedAmount(
         uint256 _NFTid,
         uint256 _expectedAmount
-    ) public NFTOwner(_NFTid) {
-        require(_expectedAmount >= 1000, "amount should be greater than 1000");
+    ) public whenNotPaused NFTOwner(_NFTid) {
+        require(_expectedAmount >= 1000);
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
@@ -237,10 +246,9 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
         uint16 _percent,
         uint32 _duration,
         uint256 _expiration
-    ) external nonReentrant {
+    ) external whenNotPaused nonReentrant {
         require(
-            _ERC20Address != address(0),
-            "you can't do this with zero address"
+            _ERC20Address != address(0)
         );
         require(_bidAmount != 0, "You can't bid with zero Amount");
         require(_bidAmount >= 1000, "bid amount too low");
@@ -279,7 +287,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
      */
-    function AcceptBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+    function AcceptBid(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
         require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
         require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
         require(!NFTdetails[_NFTid].bidAccepted, "bid already accepted");
@@ -342,7 +350,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
      */
-    function rejectBid(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+    function rejectBid(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
         require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
         require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
         require(
@@ -370,7 +378,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
      */
-    function Repay(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+    function Repay(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
         require(NFTdetails[_NFTid].bidAccepted, "Bid Not Accepted yet");
         require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
         require(Bids[_NFTid][_bidId].bidAccepted, "Bid not Accepted");
@@ -413,7 +421,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
      * @param _NFTid The Id of the NFTDetail
      * @param _bidId The Id of the bid.
      */
-    function withdraw(uint256 _NFTid, uint256 _bidId) external nonReentrant {
+    function withdraw(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
         require(
             Bids[_NFTid][_bidId].bidderAddress == msg.sender,
             "You can't withdraw this Bid"
@@ -442,7 +450,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Ree
      * @notice Removes the nft from listing.
      * @param _NFTid The Id of the NFTDetail
      */
-    function removeNFTfromList(uint256 _NFTid) external {
+    function removeNFTfromList(uint256 _NFTid) external whenNotPaused{
         require(
             msg.sender ==
                 ERC721(NFTdetails[_NFTid].contractAddress).ownerOf(

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./utils/LibShare.sol";
 import "./piNFT.sol";
 import "./CollectionMethods.sol";
@@ -14,6 +15,7 @@ import "./AconomyERC2771Context.sol";
 contract piNFTMethods is
     ReentrancyGuardUpgradeable,
     AconomyERC2771Context,
+    PausableUpgradeable,
     IERC721ReceiverUpgradeable,
     UUPSUpgradeable
 {   
@@ -108,7 +110,7 @@ contract piNFTMethods is
         internal
         view
         virtual
-        override(AconomyERC2771Context)
+        override(AconomyERC2771Context, ContextUpgradeable)
         returns (address sender)
     {
         return AconomyERC2771Context._msgSender();
@@ -118,17 +120,25 @@ contract piNFTMethods is
         internal
         view
         virtual
-        override(AconomyERC2771Context)
+        override(AconomyERC2771Context, ContextUpgradeable)
         returns (bytes calldata)
     {
        return AconomyERC2771Context._msgData();
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     function addValidator(
         address _collectionAddress,
         uint256 _tokenId,
         address _validator
-    ) external {
+    ) external whenNotPaused{
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender
@@ -142,7 +152,7 @@ contract piNFTMethods is
         address _collectionAddress,
         uint256 _tokenId,
         address _validator
-    ) external {
+    ) external whenNotPaused{
         require(isTrustedForwarder(msg.sender));
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
@@ -168,7 +178,7 @@ contract piNFTMethods is
         address _erc20Contract,
         uint256 _value,
         LibShare.Share[] memory royalties
-    ) public {
+    ) public whenNotPaused{
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
@@ -329,7 +339,7 @@ contract piNFTMethods is
         address _erc20Receiver,
         address _erc20Contract,
         bool burnNFT
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender
@@ -426,7 +436,7 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _amount
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         if (withdrawnAmount[_collectionAddress][_tokenId] == 0) {
             require(
                 msg.sender ==
@@ -492,7 +502,7 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _amount
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(
             NFTowner[_collectionAddress][_tokenId] == msg.sender,
             "not owner"
@@ -542,7 +552,7 @@ contract piNFTMethods is
         address _collectionAddress,
         uint256 _tokenId,
         address _to
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender

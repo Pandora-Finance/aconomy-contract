@@ -4,13 +4,14 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./AconomyERC2771Context.sol";
 import "./utils/LibShare.sol";
 import "./piNFTMethods.sol";
 
-contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
+contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Context {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
     address public piNFTMethodsAddress;
@@ -43,6 +44,14 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
         piNFTMethodsAddress = _piNFTMethodsAddress;
      }
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     /**
      * @notice Mints an nft to a specified address.
      * @param _to address to mint the piNFT to.
@@ -53,7 +62,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
         address _to,
         string memory _uri,
         LibShare.Share[] memory royalties
-    ) public returns (uint256) {
+    ) public whenNotPaused returns (uint256) {
         require(_to != address(0));
         uint256 tokenId_ = _tokenIdCounter.current();
         _setRoyaltiesByTokenId(tokenId_, royalties);
@@ -74,7 +83,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
         address _to,
         string memory _uri,
         LibShare.Share[] memory royalties
-    ) external returns (uint256) {
+    ) external whenNotPaused returns (uint256) {
         require(isTrustedForwarder(msg.sender));
         return mintNFT(_to, _uri, royalties);
     }
@@ -161,7 +170,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, AconomyERC2771Context {
      * @notice deletes the nft.
      * @param _tokenId The Id of the token.
      */
-    function deleteNFT(uint256 _tokenId) external nonReentrant {
+    function deleteNFT(uint256 _tokenId) external whenNotPaused nonReentrant {
         require(piNFTMethods(piNFTMethodsAddress).NFTowner(address(this), _tokenId) == address(0));
         require(ownerOf(_tokenId) == msg.sender);
         _burn(_tokenId);

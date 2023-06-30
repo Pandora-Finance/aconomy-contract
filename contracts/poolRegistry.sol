@@ -6,12 +6,13 @@ import "./AconomyFee.sol";
 import "./Libraries/LibPool.sol";
 import "./AttestationServices.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -78,6 +79,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
     ) public initializer {
         __ReentrancyGuard_init();
         __Ownable_init();
+        __Pausable_init();
         __UUPSUpgradeable_init();
         FundingPoolAddress = _FundingPoolAddress;
         attestationService = _attestationServices;
@@ -89,6 +91,14 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
         borrowerAttestationSchemaId = _attestationServices
             .getASRegistry()
             .register("(uint256 poolId, address borrowerAddress)");
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     modifier lenderOrBorrowerSchema(bytes32 schemaId) {
@@ -142,7 +152,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
         string calldata _uri,
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
-    ) external returns (uint256 poolId_) {
+    ) external whenNotPaused returns (uint256 poolId_) {
         require(_apr >= 100, "given apr too low");
         // Increment pool ID counter
         poolId_ = ++poolCount;
@@ -279,7 +289,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
     function addLender(
         uint256 _poolId,
         address _lenderAddress
-    ) public ownsPool(_poolId) {
+    ) public whenNotPaused ownsPool(_poolId) {
         _attestAddress(_poolId, _lenderAddress, true);
     }
 
@@ -292,7 +302,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
     function addBorrower(
         uint256 _poolId,
         address _borrowerAddress
-    ) public ownsPool(_poolId) {
+    ) public whenNotPaused ownsPool(_poolId) {
         _attestAddress(_poolId, _borrowerAddress, false);
     }
 
@@ -305,7 +315,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
     function removeLender(
         uint256 _poolId,
         address _lenderAddress
-    ) external ownsPool(_poolId) {
+    ) external whenNotPaused ownsPool(_poolId) {
         _revokeAddress(_poolId, _lenderAddress, true);
     }
 
@@ -318,7 +328,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
     function removeBorrower(
         uint256 _poolId,
         address _borrowerAddress
-    ) external ownsPool(_poolId) {
+    ) external whenNotPaused ownsPool(_poolId) {
         _revokeAddress(_poolId, _borrowerAddress, false);
     }
 
@@ -509,7 +519,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, OwnableUpgradeable, UUPSUpg
      * @notice Closes the pool specified.
      * @param _poolId The Id of the pool.
      */
-    function closePool(uint256 _poolId) public ownsPool(_poolId) {
+    function closePool(uint256 _poolId) public whenNotPaused ownsPool(_poolId) {
         if (!ClosedPools[_poolId]) {
             ClosedPools[_poolId] = true;
 

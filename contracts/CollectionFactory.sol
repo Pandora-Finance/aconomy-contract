@@ -5,11 +5,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibCollection.sol";
 
-contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
+contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable{
     using Counters for Counters.Counter;
 
     //STORAGE START -------------------------------------------------------------------------------------
@@ -73,6 +74,14 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
         piNFTMethodsAddress = _piNFTMethodsAddress;
     }
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     modifier collectionOwner(uint256 _collectionId) {
         require(
             collections[_collectionId].owner == msg.sender,
@@ -101,7 +110,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
         string calldata _uri,
         string memory _description,
         LibShare.Share[] memory royalties
-    ) public returns (uint256 collectionId_) {
+    ) public whenNotPaused returns (uint256 collectionId_) {
         collectionId_ = ++collectionId;
 
         //Deploy collection Address
@@ -137,7 +146,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     function setRoyaltiesForCollection(
         uint256 _collectionId,
         LibShare.Share[] memory royalties
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         require(royalties.length <= 10, "Atmost 10 royalties can be added");
         delete royaltiesForCollection[_collectionId];
         uint256 sumRoyalties = 0;
@@ -163,7 +172,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     function setCollectionURI(
         uint256 _collectionId,
         string calldata _uri
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_uri)) !=
             keccak256(abi.encodePacked(collections[_collectionId].URI))
@@ -182,7 +191,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     function setCollectionName(
         uint256 _collectionId,
         string memory _name
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_name)) !=
             keccak256(abi.encodePacked(collections[_collectionId].name))
@@ -201,7 +210,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     function setCollectionSymbol(
         uint256 _collectionId,
         string memory _symbol
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_symbol)) !=
             keccak256(abi.encodePacked(collections[_collectionId].symbol))
@@ -220,7 +229,7 @@ contract CollectionFactory is OwnableUpgradeable, UUPSUpgradeable{
     function setCollectionDescription(
         uint256 _collectionId,
         string memory _description
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_description)) !=
             keccak256(abi.encodePacked(collections[_collectionId].description))
