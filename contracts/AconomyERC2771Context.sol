@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract AconomyERC2771Context is OwnableUpgradeable {
     mapping(address => bool) public trustedForwarders;
 
-    function AconomyERC2771Context_init(address tfGelato) internal initializer{
+    function AconomyERC2771Context_init(address tfGelato) internal onlyInitializing{
         trustedForwarders[tfGelato] = true;
         __Ownable_init();
     }

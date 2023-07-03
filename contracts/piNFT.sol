@@ -2,16 +2,17 @@
 pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./AconomyERC2771Context.sol";
 import "./utils/LibShare.sol";
 import "./piNFTMethods.sol";
 
-contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Context {
+contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable, AconomyERC2771Context, UUPSUpgradeable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
     address public piNFTMethodsAddress;
@@ -33,14 +34,22 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Con
 
     event TokenMinted(uint256 tokenId, address to);
 
-    constructor(
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
+
+     function initialize(
         string memory _name,
         string memory _symbol,
         address _piNFTMethodsAddress,
         address tfGelato
-    ) ERC721(_name, _symbol)
-     {
+     ) public initializer {
+        __ERC721_init(_name, _symbol);
         AconomyERC2771Context_init(tfGelato);
+        __ERC721URIStorage_init();
+        __Pausable_init();
+        __ReentrancyGuard_init();
         piNFTMethodsAddress = _piNFTMethodsAddress;
      }
 
@@ -180,7 +189,7 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Con
         internal
         view
         virtual
-        override(AconomyERC2771Context, Context)
+        override(AconomyERC2771Context, ContextUpgradeable)
         returns (address sender)
     {
         return AconomyERC2771Context._msgSender();
@@ -190,9 +199,11 @@ contract piNFT is ERC721URIStorage, ReentrancyGuard, Pausable, AconomyERC2771Con
         internal
         view
         virtual
-        override(AconomyERC2771Context, Context)
+        override(AconomyERC2771Context, ContextUpgradeable)
         returns (bytes calldata)
     {
        return AconomyERC2771Context._msgData();
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }
