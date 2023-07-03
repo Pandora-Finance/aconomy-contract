@@ -1,9 +1,4 @@
 const {
-  BN,
-  ether,
-  constants,
-  expectEvent,
-  shouldFail,
   time,
   expectRevert,
 } = require("@openzeppelin/test-helpers");
@@ -54,6 +49,25 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
     assert(NFTid === 1, "Failed to list NFT for Lending");
   });
+
+  it("should not put on borrow if the contract is paused", async () => {
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    await nftLendBorrow.pause();
+    await expectRevert(
+      nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        piNFT.address,
+        200,
+        300,
+        2000,
+        { from: alice }
+      ),
+      "paused"
+    );
+    await nftLendBorrow.unpause();
+  })
+  
 
   it("let alice Set new percent fee", async () => {
     const tx = await nftLendBorrow.setPercent(1, 1000, { from: alice });
@@ -205,8 +219,8 @@ contract("NFTlendingBorrowing", async (accounts) => {
   it("Should remove the NFT from listing", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     const tokenId = tx.logs[0].args.tokenId.toNumber();
-    assert(tokenId === 1, "Failed to mint or wrong token Id");
-    assert.equal(await piNFT.balanceOf(alice), 2, "Failed to mint");
+    assert(tokenId === 2, "Failed to mint or wrong token Id");
+    assert.equal(await piNFT.balanceOf(alice), 3, "Failed to mint");
 
     const tx1 = await nftLendBorrow.listNFTforBorrowing(
       tokenId,
@@ -222,4 +236,6 @@ contract("NFTlendingBorrowing", async (accounts) => {
     let t = await nftLendBorrow.NFTdetails(2);
     assert.equal(t.listed, false);
   });
+
+
 });
