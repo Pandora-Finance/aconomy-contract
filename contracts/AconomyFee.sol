@@ -8,7 +8,7 @@ contract AconomyFee is Ownable {
     uint16 public _AconomyPiMarketFee;
     uint16 public _AconomyNFTLendBorrowFee;
 
-    event SetAconomyFee(uint16 newFee, uint16 oldFee);
+    event SetAconomyPoolFee(uint16 newFee, uint16 oldFee);
     event SetAconomyPiMarketFee(uint16 newFee, uint16 oldFee);
     event SetAconomyNFTLendBorrowFee(uint16 newFee, uint16 oldFee);
 
@@ -37,7 +37,7 @@ contract AconomyFee is Ownable {
 
         uint16 oldFee = _AconomyPoolFee;
         _AconomyPoolFee = newFee;
-        emit SetAconomyFee(newFee, oldFee);
+        emit SetAconomyPoolFee(newFee, oldFee);
     }
 
     function setAconomyPiMarketFee(uint16 newFee) public onlyOwner {
@@ -45,7 +45,7 @@ contract AconomyFee is Ownable {
 
         uint16 oldFee = _AconomyPiMarketFee;
         _AconomyPiMarketFee = newFee;
-        emit SetAconomyFee(newFee, oldFee);
+        emit SetAconomyPiMarketFee(newFee, oldFee);
     }
 
     function setAconomyNFTLendBorrowFee(
