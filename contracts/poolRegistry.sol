@@ -281,6 +281,36 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
     }
 
     /**
+     * @notice Change the details of existing pool.
+     * @param _poolId The Id of the existing pool.
+     * @param _paymentDefaultDuration Length of time in seconds before a loan is considered in default for non-payment.
+     * @param _loanExpirationTime Length of time in seconds before pending loan expire.
+     * @param _poolFeePercent The pool fee percentage in bps.
+     * @param _apr The desired pool apr.
+     * @param _uri The pool uri.
+     * @param _requireLenderAttestation Boolean that indicates if lenders require attestation to join pool.
+     * @param _requireBorrowerAttestation Boolean that indicates if borrowers require attestation to join pool.
+     */
+    function changePoolSetting(
+        uint256 _poolId,
+        uint32 _paymentDefaultDuration,
+        uint32 _loanExpirationTime,
+        uint16 _poolFeePercent,
+        uint16 _apr,
+        string calldata _uri,
+        bool _requireLenderAttestation,
+        bool _requireBorrowerAttestation
+    ) public ownsPool(_poolId) {
+        setApr(_poolId, _apr);
+        setPaymentDefaultDuration(_poolId, _paymentDefaultDuration);
+        setPoolFeePercent(_poolId, _poolFeePercent);
+        setloanExpirationTime(_poolId, _loanExpirationTime);
+        setPoolURI(_poolId, _uri);
+        pools[_poolId].lenderAttestationRequired = _requireLenderAttestation;
+        pools[_poolId].borrowerAttestationRequired = _requireBorrowerAttestation;
+    }
+
+    /**
      * @notice Adds a lender to the pool.
      * @dev Only called by the pool owner
      * @param _poolId The Id of the pool.
