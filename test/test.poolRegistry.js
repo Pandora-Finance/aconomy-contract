@@ -114,7 +114,7 @@ contract("poolRegistry", async (accounts) => {
       false,
       false
     );
-    
+
     poolId2 = res.logs[5].args.poolId.toNumber();
     console.log(poolId2, "poolId2");
     pool1Address = res.logs[4].args.poolAddress;
@@ -131,27 +131,17 @@ contract("poolRegistry", async (accounts) => {
       true,
       "Borrower Not added to pool, borrowerVarification failed"
     );
-
   });
 
-
   it("should verify the details of pool2", async () => {
-    let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2)
+    let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2);
     // console.log("aaa",DefaultDuration.toString())
 
-    assert.equal(
-      DefaultDuration,
-      211111111,
-      "Default Duration is not changed"
-    );
+    assert.equal(DefaultDuration, 211111111, "Default Duration is not changed");
 
-    let ExpirationTime = await poolRegis.getloanExpirationTime(poolId2)
+    let ExpirationTime = await poolRegis.getloanExpirationTime(poolId2);
     // console.log("aaa111",ExpirationTime.toString())
-    assert.equal(
-      ExpirationTime,
-      2111111222,
-      "Expiration Time is not changed"
-    );
+    assert.equal(ExpirationTime, 2111111222, "Expiration Time is not changed");
 
     res = await poolRegis.lenderVerification(poolId2, accounts[2]);
     assert.equal(
@@ -165,9 +155,7 @@ contract("poolRegistry", async (accounts) => {
       true,
       "Borrower is added to pool, borrowerVarification failed"
     );
-    
-  })
-
+  });
 
   it("should change the setting of new pool", async () => {
     res = await poolRegis.changePoolSetting(
@@ -181,29 +169,21 @@ contract("poolRegistry", async (accounts) => {
       true
     );
 
-    let apr = await poolRegis.getPoolApr(poolId2)
+    let apr = await poolRegis.getPoolApr(poolId2);
     assert.equal(
       apr,
       2000,
       "Lender is added to pool, lenderVarification failed"
     );
 
-    let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2)
+    let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2);
     // console.log("aaa",DefaultDuration.toString())
 
-    assert.equal(
-      DefaultDuration,
-      11111111,
-      "Default Duration is not changed"
-    );
+    assert.equal(DefaultDuration, 11111111, "Default Duration is not changed");
 
-    let ExpirationTime = await poolRegis.getloanExpirationTime(poolId2)
+    let ExpirationTime = await poolRegis.getloanExpirationTime(poolId2);
     // console.log("aaa111",ExpirationTime.toString())
-    assert.equal(
-      ExpirationTime,
-      111111222,
-      "Expiration Time is not changed"
-    );
+    assert.equal(ExpirationTime, 111111222, "Expiration Time is not changed");
 
     res = await poolRegis.lenderVerification(poolId2, accounts[2]);
     assert.equal(
@@ -217,7 +197,7 @@ contract("poolRegistry", async (accounts) => {
       false,
       "Borrower is added to pool, borrowerVarification failed"
     );
-  })
+  });
 
   it("should not create if the contract is paused", async () => {
     await poolRegis.pause();
@@ -233,7 +213,7 @@ contract("poolRegistry", async (accounts) => {
       )
     );
     await poolRegis.unpause();
-  })
+  });
 
   it("should add Lender to the pool", async () => {
     res = await poolRegis.lenderVerification(poolId1, accounts[9]);
