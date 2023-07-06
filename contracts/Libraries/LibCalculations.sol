@@ -2,7 +2,6 @@
 pragma solidity 0.8.11;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
