@@ -21,5 +21,5 @@ module.exports = async function (deployer) {
     unsafeAllow: ["external-library-linking"],
   });
 
-  console.log("market:", market.address);
+  console.log("piMarket:", market.address);
 };

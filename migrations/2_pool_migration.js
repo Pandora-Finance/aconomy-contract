@@ -92,6 +92,8 @@ module.exports = async function (deployer) {
   });
 
   console.log("AconomyFee : ", aconomyfee.address)
+  console.log("AttestationRegistry : ", attestRegistry.address)
+  console.log("AttestationServices : ", attestServices.address)
   console.log("CollectionMethods : ", CollectionMethod.address)
   console.log("CollectionFactory : ", collectionFactory.address)
   console.log("FundingPool : ", fundingPool.address)
