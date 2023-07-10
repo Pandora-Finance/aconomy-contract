@@ -101,7 +101,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
         );
         require(_duration % 30 days == 0);
         require(_APR >= 100);
-        require(_principal >= 10000);
+        require(_principal >= 10000000000);
         require(_expirationDuration > 0);
 
         loanId_ = loanId;

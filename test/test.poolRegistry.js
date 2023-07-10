@@ -249,7 +249,7 @@ contract("poolRegistry", async (accounts) => {
     res = await poolAddressInstance.loanRequest(
       erc20.address,
       poolId1,
-      1000000000,
+      10000000000,
       loanDuration,
       expiration,
       1000,
@@ -280,7 +280,7 @@ contract("poolRegistry", async (accounts) => {
   });
 
   it("should Accept loan ", async () => {
-    await erc20.approve(poolAddressInstance.address, 1000000000);
+    await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
     // console.log(_balance1.toNumber())
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
@@ -297,11 +297,11 @@ contract("poolRegistry", async (accounts) => {
 
     //First Installment
     await time.increase(paymentCycleDuration + 1);
+    let rr = await poolAddressInstance.viewInstallmentAmount(loanId1)
     console.log(
-      "rr",
-      (await poolAddressInstance.viewInstallmentAmount(loanId1)).toNumber()
+      rr.toNumber()
     );
-    await erc20.approve(poolAddressInstance.address, 205027661, {
+    await erc20.approve(poolAddressInstance.address, rr, {
       from: accounts[0],
     });
     res = await poolAddressInstance.repayMonthlyInstallment(loanId1, {
@@ -321,7 +321,8 @@ contract("poolRegistry", async (accounts) => {
     //console.log(res.logs[0].args.Amount.toNumber())
 
     //Full loan Repay
-    await erc20.approve(poolAddressInstance.address, 900000000, {
+    let b = await poolAddressInstance.viewFullRepayAmount(loanId1)
+    await erc20.approve(poolAddressInstance.address, b, {
       from: accounts[0],
     });
     res = await poolAddressInstance.repayFullLoan(loanId1, {

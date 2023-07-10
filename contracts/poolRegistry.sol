@@ -153,7 +153,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         bool _requireLenderAttestation,
         bool _requireBorrowerAttestation
     ) external whenNotPaused returns (uint256 poolId_) {
-        require(_apr >= 100, "given apr too low");
         // Increment pool ID counter
         poolId_ = ++poolCount;
 
@@ -194,6 +193,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
      * @param _apr The apr to be set.
      */
     function setApr(uint256 _poolId, uint16 _apr) public ownsPool(_poolId) {
+        require(_apr >= 100, "given apr too low");
         if (_apr != pools[_poolId].APR) {
             pools[_poolId].APR = _apr;
 
@@ -273,6 +273,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         uint256 _poolId,
         uint32 _duration
     ) public ownsPool(_poolId) {
+        require(_duration != 0);
         if (_duration != pools[_poolId].loanExpirationTime) {
             pools[_poolId].loanExpirationTime = _duration;
 

@@ -159,7 +159,7 @@ contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgra
             royaltiesForCollection[_collectionId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "Sum of Royalties > 100%");
+        require(sumRoyalties <= 4000, "Sum of Royalties > 40%");
 
         emit CollectionRoyaltiesSet(_collectionId, royalties);
     }

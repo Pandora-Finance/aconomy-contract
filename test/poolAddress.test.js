@@ -149,7 +149,7 @@ contract("PoolAddress", async (accounts) => {
     res = await poolAddressInstance.loanRequest(
       erc20.address,
       poolId1,
-      1000000000,
+      10000000000,
       loanDefaultDuration,
       loanExpirationDuration,
       100,
@@ -168,7 +168,7 @@ contract("PoolAddress", async (accounts) => {
       poolAddressInstance.loanRequest(
         erc20.address,
         poolId1,
-        1000000000,
+        10000000000,
         loanDefaultDuration,
         loanExpirationDuration,
         100,
@@ -186,17 +186,17 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(feeAddress, accounts[9]);
     let b1 = await erc20.balanceOf(feeAddress);
     console.log("fee 1", b1.toNumber());
-    await erc20.approve(poolAddressInstance.address, 1000000000);
+    await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
     console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
     let b2 = await erc20.balanceOf(feeAddress);
     console.log("fee 2", b2.toNumber());
-    assert.equal(b2 - b1, 10000000);
+    assert.equal(b2 - b1, 100000000);
     _balance1 = await erc20.balanceOf(accounts[1]);
     //console.log(_balance1.toNumber())
     //Amount that the borrower will get is 999 after cutting fees and market charges
-    assert.equal(_balance1.toNumber(), 980000000, "Not able to accept loan");
+    assert.equal(_balance1.toNumber(), 9800000000, "Not able to accept loan");
   });
 
   it("should calculate the next due date", async () => {
@@ -336,10 +336,10 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), false);
     //6
     await time.increase(paymentCycleDuration);
-    await erc20.mint(accounts[1], "100000000");
+    await erc20.mint(accounts[1], "1000000000");
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     let full = await poolAddressInstance.viewFullRepayAmount(loanId1);
-    await erc20.approve(poolAddressInstance.address, full + 100, {
+    await erc20.approve(poolAddressInstance.address, full, {
       from: accounts[1],
     });
     console.log("full", full.toString());
@@ -372,7 +372,7 @@ contract("PoolAddress", async (accounts) => {
     res = await poolAddressInstance.loanRequest(
       erc20.address,
       poolId1,
-      1000000000,
+      10000000000,
       loanDefaultDuration,
       loanExpirationDuration,
       100,
@@ -386,7 +386,7 @@ contract("PoolAddress", async (accounts) => {
   });
 
   it("should Accept loan ", async () => {
-    await erc20.approve(poolAddressInstance.address, 1000000000);
+    await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
     console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
@@ -402,7 +402,7 @@ contract("PoolAddress", async (accounts) => {
     console.log(bal.toNumber());
     let b = await erc20.balanceOf(accounts[1]);
     //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
-    await erc20.approve(poolAddressInstance.address, bal + 10, {
+    await erc20.approve(poolAddressInstance.address, bal, {
       from: accounts[1],
     });
     let r = await poolAddressInstance.repayFullLoan(loanId1, {
@@ -429,7 +429,7 @@ contract("PoolAddress", async (accounts) => {
     res = await poolAddressInstance.loanRequest(
       erc20.address,
       poolId1,
-      1000000000,
+      10000000000,
       loanDefaultDuration,
       loanExpirationDuration,
       100,
@@ -461,7 +461,7 @@ contract("PoolAddress", async (accounts) => {
     res = await poolAddressInstance.loanRequest(
       erc20.address,
       poolId1,
-      1000000000,
+      10000000000,
       loanDefaultDuration,
       loanExpirationDuration,
       100,
@@ -475,7 +475,7 @@ contract("PoolAddress", async (accounts) => {
   });
 
   it("should Accept loan ", async () => {
-    await erc20.approve(poolAddressInstance.address, 1000000000);
+    await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
     console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });

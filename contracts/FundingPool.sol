@@ -176,7 +176,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         require(_amount != 0, "You can't supply with zero amount");
         require(_maxLoanDuration % 30 days == 0);
         require(_APR >= 100, "apr too low");
-        require(_amount >= 10000, "amount too low");
+        require(_amount >= 10000000000, "amount too low");
 
         uint16 fee = poolRegistry(poolRegistryAddress).getAconomyFee();
 
