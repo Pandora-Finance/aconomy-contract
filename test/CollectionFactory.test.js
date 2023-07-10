@@ -30,7 +30,7 @@ contract("CollectionFactory", (accounts) => {
       ])
     );
     await CollectionFactory.unpause();
-  })
+  });
 
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
@@ -88,7 +88,10 @@ contract("CollectionFactory", (accounts) => {
 
   it("should allow alice to add a validator to the nft", async () => {
     await piNftMethods.addValidator(collectionInstance.address, 0, validator);
-    assert.equal(await piNftMethods.approvedValidator(collectionInstance.address, 0), validator);
+    assert.equal(
+      await piNftMethods.approvedValidator(collectionInstance.address, 0),
+      validator
+    );
   });
 
   it("should let validator add ERC20 tokens to alice's NFT", async () => {
@@ -141,16 +144,28 @@ contract("CollectionFactory", (accounts) => {
 
   it("should not let validator add funds of a different erc20", async () => {
     await expectRevert(
-      piNftMethods.addERC20(collectionInstance.address, 0, accounts[5], 200, [[validator, 200]], {
-        from: validator,
-      }),
+      piNftMethods.addERC20(
+        collectionInstance.address,
+        0,
+        accounts[5],
+        200,
+        [[validator, 200]],
+        {
+          from: validator,
+        }
+      ),
       "invalid"
     );
   });
 
   it("should let alice transfer NFT to bob", async () => {
-    await collectionInstance.approve(piNftMethods.address, 0, {from: alice});
-    await piNftMethods.transferAfterFunding(collectionInstance.address, 0, bob, { from: alice });
+    await collectionInstance.approve(piNftMethods.address, 0, { from: alice });
+    await piNftMethods.transferAfterFunding(
+      collectionInstance.address,
+      0,
+      bob,
+      { from: alice }
+    );
     assert.equal(
       await collectionInstance.ownerOf(0),
       bob,
@@ -159,8 +174,13 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let bob transfer NFT to alice", async () => {
-    await collectionInstance.approve(piNftMethods.address, 0, {from: bob});
-    await piNftMethods.transferAfterFunding(collectionInstance.address, 0, alice, { from: bob });
+    await collectionInstance.approve(piNftMethods.address, 0, { from: bob });
+    await piNftMethods.transferAfterFunding(
+      collectionInstance.address,
+      0,
+      alice,
+      { from: bob }
+    );
     assert.equal(
       await collectionInstance.ownerOf(0),
       alice,
@@ -170,19 +190,23 @@ contract("CollectionFactory", (accounts) => {
 
   it("should let alice withdraw erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
-    await collectionInstance.approve(piNftMethods.address, 0, {from: alice});
-    await piNftMethods.withdraw(collectionInstance.address, 0, sampleERC20.address, 300);
-    assert.equal(
-      await collectionInstance.ownerOf(0),
-      piNftMethods.address
+    await collectionInstance.approve(piNftMethods.address, 0, { from: alice });
+    await piNftMethods.withdraw(
+      collectionInstance.address,
+      0,
+      sampleERC20.address,
+      300
     );
+    assert.equal(await collectionInstance.ownerOf(0), piNftMethods.address);
     let bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 300);
-    await piNftMethods.withdraw(collectionInstance.address, 0, sampleERC20.address, 200);
-    assert.equal(
-      await collectionInstance.ownerOf(0),
-      piNftMethods.address
+    await piNftMethods.withdraw(
+      collectionInstance.address,
+      0,
+      sampleERC20.address,
+      200
     );
+    assert.equal(await collectionInstance.ownerOf(0), piNftMethods.address);
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 500);
     assert.equal(await sampleERC20.balanceOf(piNftMethods.address), 200);
@@ -191,15 +215,22 @@ contract("CollectionFactory", (accounts) => {
   it("should let alice repay erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
     await sampleERC20.approve(piNftMethods.address, 300);
-    await piNftMethods.Repay(collectionInstance.address, 0, sampleERC20.address, 300);
-    assert.equal(
-      await collectionInstance.ownerOf(0),
-      piNftMethods.address
+    await piNftMethods.Repay(
+      collectionInstance.address,
+      0,
+      sampleERC20.address,
+      300
     );
+    assert.equal(await collectionInstance.ownerOf(0), piNftMethods.address);
     let bal = await sampleERC20.balanceOf(alice);
     assert.equal(_bal - bal, 300);
     await sampleERC20.approve(piNftMethods.address, 200);
-    await piNftMethods.Repay(collectionInstance.address, 0, sampleERC20.address, 200);
+    await piNftMethods.Repay(
+      collectionInstance.address,
+      0,
+      sampleERC20.address,
+      200
+    );
     assert.equal(await collectionInstance.ownerOf(0), alice);
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(_bal - bal, 500);
@@ -232,7 +263,9 @@ contract("CollectionFactory", (accounts) => {
     await sampleERC20.approve(piNftMethods.address, 500, {
       from: validator,
     });
-    await piNftMethods.addValidator(collectionInstance.address, 0, validator, { from: bob });
+    await piNftMethods.addValidator(collectionInstance.address, 0, validator, {
+      from: bob,
+    });
     const tx = await piNftMethods.addERC20(
       collectionInstance.address,
       0,
@@ -255,7 +288,7 @@ contract("CollectionFactory", (accounts) => {
 
   it("should let bob burn CollectionFactory", async () => {
     assert.equal(await sampleERC20.balanceOf(bob), 0);
-    await collectionInstance.approve(piNftMethods.address, 0, {from: bob});
+    await collectionInstance.approve(piNftMethods.address, 0, { from: bob });
     await piNftMethods.redeemOrBurnPiNFT(
       collectionInstance.address,
       0,
@@ -269,7 +302,11 @@ contract("CollectionFactory", (accounts) => {
     );
     const bobBal = await sampleERC20.balanceOf(bob);
     assert.equal(
-      await piNftMethods.viewBalance(collectionInstance.address, 0, sampleERC20.address),
+      await piNftMethods.viewBalance(
+        collectionInstance.address,
+        0,
+        sampleERC20.address
+      ),
       0,
       "Failed to remove ERC20 tokens from NFT"
     );

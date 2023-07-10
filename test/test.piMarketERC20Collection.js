@@ -45,7 +45,12 @@ contract("PiMarket", async (accounts) => {
       const tokenId = tx1.logs[0].args.tokenId.toNumber();
       assert(tokenId === 0, "Failed to mint or wrong token Id");
 
-      await piNftMethods.addValidator(collectionContract.address, tokenId, validator, { from: carl });
+      await piNftMethods.addValidator(
+        collectionContract.address,
+        tokenId,
+        validator,
+        { from: carl }
+      );
       await sampleERC20.approve(piNftMethods.address, 500, {
         from: validator,
       });
@@ -173,35 +178,47 @@ contract("PiMarket", async (accounts) => {
     });
 
     it("should let bob withdraw funds from the NFT", async () => {
-      await collectionContract.approve(piNftMethods.address, 0, {from:bob});
-      await piNftMethods.withdraw(collectionContract.address, 0, sampleERC20.address, 200, {
-        from: bob,
-      });
+      await collectionContract.approve(piNftMethods.address, 0, { from: bob });
+      await piNftMethods.withdraw(
+        collectionContract.address,
+        0,
+        sampleERC20.address,
+        200,
+        {
+          from: bob,
+        }
+      );
       let balance = await sampleERC20.balanceOf(bob);
       assert.equal(balance.toNumber(), 200);
-      assert.equal(
-        await collectionContract.ownerOf(0),
-        piNftMethods.address
-      );
+      assert.equal(await collectionContract.ownerOf(0), piNftMethods.address);
     });
 
     it("should let bob withdraw more funds from the NFT", async () => {
-      await piNftMethods.withdraw(collectionContract.address, 0, sampleERC20.address, 100, {
-        from: bob,
-      });
+      await piNftMethods.withdraw(
+        collectionContract.address,
+        0,
+        sampleERC20.address,
+        100,
+        {
+          from: bob,
+        }
+      );
       let balance = await sampleERC20.balanceOf(bob);
       assert.equal(balance.toNumber(), 300);
-      assert.equal(
-        await collectionContract.ownerOf(0),
-        piNftMethods.address
-      );
+      assert.equal(await collectionContract.ownerOf(0), piNftMethods.address);
     });
 
     it("should let bob repay funds to the NFT", async () => {
       await sampleERC20.approve(piNftMethods.address, 300, { from: bob });
-      await piNftMethods.Repay(collectionContract.address, 0, sampleERC20.address, 300, {
-        from: bob,
-      });
+      await piNftMethods.Repay(
+        collectionContract.address,
+        0,
+        sampleERC20.address,
+        300,
+        {
+          from: bob,
+        }
+      );
       assert.equal(await sampleERC20.balanceOf(bob), 0);
       assert.equal(await collectionContract.ownerOf(0), bob);
     });
@@ -231,7 +248,7 @@ contract("PiMarket", async (accounts) => {
     });
 
     it("should let bob redeem piNFT", async () => {
-      await collectionContract.approve(piNftMethods.address, 0, {from: bob});
+      await collectionContract.approve(piNftMethods.address, 0, { from: bob });
       await piNftMethods.redeemOrBurnPiNFT(
         collectionContract.address,
         0,
@@ -245,7 +262,11 @@ contract("PiMarket", async (accounts) => {
       );
       const validatorBal = await sampleERC20.balanceOf(validator);
       assert.equal(
-        await piNftMethods.viewBalance(collectionContract.address, 0, sampleERC20.address),
+        await piNftMethods.viewBalance(
+          collectionContract.address,
+          0,
+          sampleERC20.address
+        ),
         0,
         "Failed to remove ERC20 tokens from NFT"
       );
@@ -272,7 +293,11 @@ contract("PiMarket", async (accounts) => {
       const tokenId = tx1.logs[0].args.tokenId.toNumber();
       assert(tokenId === 1, "Failed to mint or wrong token Id");
 
-      await piNftMethods.addValidator(collectionContract.address, tokenId, validator);
+      await piNftMethods.addValidator(
+        collectionContract.address,
+        tokenId,
+        validator
+      );
       await sampleERC20.approve(piNftMethods.address, 500, {
         from: validator,
       });
@@ -375,7 +400,9 @@ contract("PiMarket", async (accounts) => {
     });
 
     it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
-      await collectionContract.approve(piNftMethods.address, 1, {from: bidder1})
+      await collectionContract.approve(piNftMethods.address, 1, {
+        from: bidder1,
+      });
       await piNftMethods.redeemOrBurnPiNFT(
         collectionContract.address,
         1,
@@ -389,7 +416,11 @@ contract("PiMarket", async (accounts) => {
       );
       const validatorBal = await sampleERC20.balanceOf(validator);
       assert.equal(
-        await piNftMethods.viewBalance(collectionContract.address, 1, sampleERC20.address),
+        await piNftMethods.viewBalance(
+          collectionContract.address,
+          1,
+          sampleERC20.address
+        ),
         0,
         "Failed to remove ERC20 tokens from NFT"
       );

@@ -177,7 +177,7 @@ contract("PoolAddress", async (accounts) => {
       )
     );
     await poolAddressInstance.unpause();
-  })
+  });
 
   it("should Accept loan ", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
