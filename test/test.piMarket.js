@@ -410,16 +410,29 @@ contract("PiMarket", async (accounts) => {
     });
 
     it("should let bidders place bid on piNFT", async () => {
+      await piMarket.Bid(4, 60000, { from: bidder2, value: 60000 });
       await piMarket.Bid(4, 70000, { from: bidder1, value: 70000 });
 
-      result = await piMarket.Bids(4, 0);
+      result = await piMarket.Bids(4, 1);
       assert.equal(result.buyerAddress, bidder1);
     });
 
+    it("should let bidder2 withdraw the bid", async () => {
+      await piMarket.withdrawBidMoney(4, 0, { from: bidder2 });
+      result = await piMarket.Bids(4, 0);
+      assert.equal(result.withdrawn, true);
+    })
+
+    it("should not allow owner to accept withdrawn bid", async () => {
+      await expectRevert.unspecified(
+        piMarket.executeBidOrder(4, 0, false)
+      )
+    })
+
     it("should let highest bidder withdraw after auction expires", async () => {
       await time.increase(400);
-      await piMarket.withdrawBidMoney(4, 0, { from: bidder1 });
-      result = await piMarket.Bids(4, 0);
+      await piMarket.withdrawBidMoney(4, 1, { from: bidder1 });
+      result = await piMarket.Bids(4, 1);
       assert.equal(result.withdrawn, true);
     });
   });
