@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
+import "./Libraries/LibNFTLendingBorrowing.sol";
 
 contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
     using Counters for Counters.Counter;
@@ -53,6 +54,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
      * @param bidderAddress The address of the bidder.
      * @param ERC20Address The address of the erc20 funds.
      * @param Amount The amount of funds.
+     * @param acceptedTimestamp The unix timestamp at which bid has been accepted.
      * @param protocolFee The protocol fee when creating a bid.
      * @param withdrawn Boolean indicating if a bid has been withdrawn.
      * @param bidAccepted Boolean indicating if the bid has been accepted.
@@ -65,6 +67,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
         address bidderAddress;
         address ERC20Address;
         uint256 Amount;
+        uint256 acceptedTimestamp;
         uint16 protocolFee;
         bool withdrawn;
         bool bidAccepted;
@@ -159,7 +162,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
             _contractAddress != address(0)
         );
         require(_percent >= 10);
-        require(_expectedAmount >= 1000);
+        require(_expectedAmount >= 100000000000);
 
         _NFTid = ++NFTid;
 
@@ -222,7 +225,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
         uint256 _NFTid,
         uint256 _expectedAmount
     ) public whenNotPaused NFTOwner(_NFTid) {
-        require(_expectedAmount >= 1000);
+        require(_expectedAmount >= 100000000000);
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
@@ -251,7 +254,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
             _ERC20Address != address(0)
         );
         require(_bidAmount != 0, "You can't bid with zero Amount");
-        require(_bidAmount >= 1000, "bid amount too low");
+        require(_bidAmount >= 100000000000, "bid amount too low");
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
@@ -266,6 +269,7 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
             msg.sender,
             _ERC20Address,
             _bidAmount,
+            0,
             fee,
             false,
             false
@@ -288,17 +292,18 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
      * @param _bidId The Id of the bid.
      */
     function AcceptBid(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
-        require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
-        require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
-        require(!NFTdetails[_NFTid].bidAccepted, "bid already accepted");
-        require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
-        require(
-            NFTdetails[_NFTid].tokenIdOwner == msg.sender,
-            "You can't Accept This Bid"
-        );
+        // require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
+        // require(NFTdetails[_NFTid].listed, "It's not listed for Borrowing");
+        // require(!NFTdetails[_NFTid].bidAccepted, "bid already accepted");
+        // require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
+        // require(
+        //     NFTdetails[_NFTid].tokenIdOwner == msg.sender,
+        //     "You can't Accept This Bid"
+        // );
 
-        NFTdetails[_NFTid].bidAccepted = true;
-        Bids[_NFTid][_bidId].bidAccepted = true;
+        // NFTdetails[_NFTid].bidAccepted = true;
+        // Bids[_NFTid][_bidId].bidAccepted = true;
+        // Bids[_NFTid][_bidId].acceptedTimestamp = block.timestamp;
 
         address AconomyOwner = AconomyFee(AconomyFeeAddress)
             .getAconomyOwnerAddress();
@@ -309,33 +314,35 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
             Bids[_NFTid][_bidId].protocolFee
         );
 
-        // transfering Amount to NFT Owner
-        require(
-            IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
-                msg.sender,
-                Bids[_NFTid][_bidId].Amount - amountToAconomy
-            ),
-            "unable to transfer to receiver"
-        );
+        LibNFTLendingBorrowing.acceptBid(NFTdetails[_NFTid], Bids[_NFTid][_bidId], amountToAconomy, AconomyOwner);
 
-        // transfering Amount to Protocol Owner
-        if (amountToAconomy != 0) {
-            require(
-                IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
-                    AconomyOwner,
-                    amountToAconomy
-                ),
-                "Unable to transfer to AconomyOwner"
-            );
-        }
+        // // transfering Amount to NFT Owner
+        // require(
+        //     IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
+        //         msg.sender,
+        //         Bids[_NFTid][_bidId].Amount - amountToAconomy
+        //     ),
+        //     "unable to transfer to receiver"
+        // );
 
-        //needs approval on frontend
-        // transferring NFT to this address
-        ERC721(NFTdetails[_NFTid].contractAddress).safeTransferFrom(
-            msg.sender,
-            address(this),
-            NFTdetails[_NFTid].NFTtokenId
-        );
+        // // transfering Amount to Protocol Owner
+        // if (amountToAconomy != 0) {
+        //     require(
+        //         IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
+        //             AconomyOwner,
+        //             amountToAconomy
+        //         ),
+        //         "Unable to transfer to AconomyOwner"
+        //     );
+        // }
+
+        // //needs approval on frontend
+        // // transferring NFT to this address
+        // ERC721(NFTdetails[_NFTid].contractAddress).safeTransferFrom(
+        //     msg.sender,
+        //     address(this),
+        //     NFTdetails[_NFTid].NFTtokenId
+        // );
 
         emit AcceptedBid(
             _NFTid,
@@ -351,26 +358,38 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
      * @param _bidId The Id of the bid.
      */
     function rejectBid(uint256 _NFTid, uint256 _bidId) external whenNotPaused nonReentrant {
-        require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
-        require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
-        require(
-            NFTdetails[_NFTid].tokenIdOwner == msg.sender,
-            "You can't Accept This Bid"
-        );
-        Bids[_NFTid][_bidId].withdrawn = true;
-        require(
-            IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
-                Bids[_NFTid][_bidId].bidderAddress,
-                Bids[_NFTid][_bidId].Amount
-            ),
-            "unable to transfer to bidder Address"
-        );
+        // require(!Bids[_NFTid][_bidId].withdrawn, "Already withdrawn");
+        // require(!Bids[_NFTid][_bidId].bidAccepted, "Bid Already Accepted");
+        // require(
+        //     NFTdetails[_NFTid].tokenIdOwner == msg.sender,
+        //     "You can't Accept This Bid"
+        // );
+        // Bids[_NFTid][_bidId].withdrawn = true;
+        // require(
+        //     IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
+        //         Bids[_NFTid][_bidId].bidderAddress,
+        //         Bids[_NFTid][_bidId].Amount
+        //     ),
+        //     "unable to transfer to bidder Address"
+        // );
+
+        LibNFTLendingBorrowing.RejectBid(NFTdetails[_NFTid], Bids[_NFTid][_bidId]);
+
         emit BidRejected(
             _NFTid,
             _bidId,
             Bids[_NFTid][_bidId].bidderAddress,
             Bids[_NFTid][_bidId].Amount
         );
+    }
+
+    function viewRepayAmount(uint256 _NFTid, uint256 _bidId) external view returns(uint256) {
+        uint256 percentageAmount = LibCalculations.calculateInterest(
+            Bids[_NFTid][_bidId].Amount,
+            Bids[_NFTid][_bidId].percent,
+            (block.timestamp - Bids[_NFTid][_bidId].acceptedTimestamp) + 10 minutes
+        );
+        return Bids[_NFTid][_bidId].Amount + percentageAmount;
     }
 
     /**
@@ -385,9 +404,10 @@ contract NFTlendingBorrowing is ERC721HolderUpgradeable, OwnableUpgradeable, Pau
         require(!NFTdetails[_NFTid].repaid, "Already Repaid");
 
         // Calculate percentage Amount
-        uint256 percentageAmount = LibCalculations.percent(
+        uint256 percentageAmount = LibCalculations.calculateInterest(
             Bids[_NFTid][_bidId].Amount,
-            Bids[_NFTid][_bidId].percent
+            Bids[_NFTid][_bidId].percent,
+            block.timestamp - Bids[_NFTid][_bidId].acceptedTimestamp
         );
 
         // transfering Amount to Bidder

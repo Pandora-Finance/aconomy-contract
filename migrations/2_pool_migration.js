@@ -16,6 +16,7 @@ const LibCollection = artifacts.require("LibCollection")
 const BPBDTL = artifacts.require("BokkyPooBahsDateTimeLibrary")
 const piNFTMethods = artifacts.require("piNFTMethods");
 const LibPoolAddress = artifacts.require("LibPoolAddress");
+const LibNFTLendingBorrowing = artifacts.require("LibNFTLendingBorrowing");
 require('dotenv').config()
 
 let walletAddress = process.env.WALLET_ADDRESS
@@ -54,7 +55,10 @@ module.exports = async function (deployer) {
   await CollectionMethod.initialize(walletAddress, collectionFactory.address, "xyz", "xyz")
 
   await deployer.deploy(libCalc);
-  await deployer.link(libCalc, [libPool, FundingPool]);
+  await deployer.link(libCalc, [libPool, FundingPool, LibNFTLendingBorrowing]);
+
+  await deployer.deploy(LibNFTLendingBorrowing);
+  await deployer.link(LibNFTLendingBorrowing, [NftLendingBorrowing]);
 
   await deployer.deploy(libPool);
 
