@@ -164,9 +164,7 @@ contract("poolRegistry", async (accounts) => {
       111111222,
       200,
       2000,
-      "srs.com",
-      true,
-      true
+      "srs.com"
     );
 
     let apr = await poolRegis.getPoolApr(poolId2);
@@ -188,13 +186,13 @@ contract("poolRegistry", async (accounts) => {
     res = await poolRegis.lenderVerification(poolId2, accounts[2]);
     assert.equal(
       res.isVerified_,
-      false,
+      true,
       "Lender is added to pool, lenderVarification failed"
     );
     res = await poolRegis.borrowerVerification(poolId2, accounts[2]);
     assert.equal(
       res.isVerified_,
-      false,
+      true,
       "Borrower is added to pool, borrowerVarification failed"
     );
   });

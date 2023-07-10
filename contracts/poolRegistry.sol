@@ -288,8 +288,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
      * @param _poolFeePercent The pool fee percentage in bps.
      * @param _apr The desired pool apr.
      * @param _uri The pool uri.
-     * @param _requireLenderAttestation Boolean that indicates if lenders require attestation to join pool.
-     * @param _requireBorrowerAttestation Boolean that indicates if borrowers require attestation to join pool.
      */
     function changePoolSetting(
         uint256 _poolId,
@@ -297,17 +295,13 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         uint32 _loanExpirationTime,
         uint16 _poolFeePercent,
         uint16 _apr,
-        string calldata _uri,
-        bool _requireLenderAttestation,
-        bool _requireBorrowerAttestation
+        string calldata _uri
     ) public ownsPool(_poolId) {
         setApr(_poolId, _apr);
         setPaymentDefaultDuration(_poolId, _paymentDefaultDuration);
         setPoolFeePercent(_poolId, _poolFeePercent);
         setloanExpirationTime(_poolId, _loanExpirationTime);
         setPoolURI(_poolId, _uri);
-        pools[_poolId].lenderAttestationRequired = _requireLenderAttestation;
-        pools[_poolId].borrowerAttestationRequired = _requireBorrowerAttestation;
     }
 
     /**
