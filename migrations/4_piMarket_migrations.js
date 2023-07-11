@@ -1,3 +1,5 @@
+const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const PiMarket = artifacts.require("piMarket");
 const LibMarket = artifacts.require("LibMarket");
 const aconomyFee = artifacts.require("AconomyFee")
@@ -13,7 +15,11 @@ module.exports = async function (deployer) {
   let collectionFactory = await CollectionFactory.deployed();
   var aconomyfee = await aconomyFee.deployed();
 
-  await deployer.deploy(PiMarket, aconomyfee.address, collectionFactory.address);
-  let market = await PiMarket.deployed();
-  console.log("market:", market.address);
+  var market = await deployProxy(PiMarket, [aconomyfee.address, collectionFactory.address], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  });
+
+  console.log("piMarket:", market.address);
 };

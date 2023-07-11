@@ -3,11 +3,15 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract poolStorage {
+contract poolStorage is Initializable{
     using EnumerableSet for EnumerableSet.UintSet;
+
+    //STORAGE START -------------------------------------------------------------------------------------------
+
     // Current number of loans.
-    uint256 public loanId = 0;
+    uint256 public loanId;
 
     // Mapping of loanId to loan information.
     mapping(uint256 => Loan) public loans;
@@ -107,4 +111,9 @@ abstract contract poolStorage {
     // Mapping of amount filled by lenders.
     // Asset address => Lender address => Lend amount
     mapping(address => mapping(address => uint256)) public lenderLendAmount;
+
+    address public poolRegistryAddress;
+    address public AconomyFeeAddress;
+
+    //STORAGE END -----------------------------------------------------------------------------------------
 }

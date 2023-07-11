@@ -2,7 +2,6 @@
 pragma solidity 0.8.11;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
@@ -185,5 +184,10 @@ library LibCalculations {
         // Calculate accrued amount due since last repayment
         uint256 Amount = (maxCycleOwed * owedTime) / _paymentCycle;
         duePrincipal_ = Math.min(Amount - interest_, owedPrincipal_);
+    }
+
+    function calculateInterest(uint256 _owedPrincipal, uint16 _interestRate, uint256 _owedTime) internal pure returns(uint256 _interest) {
+        uint256 interestInAYear = percent(_owedPrincipal, _interestRate);
+        _interest = (interestInAYear * _owedTime) / 365 days;
     }
 }

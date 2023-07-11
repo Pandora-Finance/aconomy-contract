@@ -24,7 +24,7 @@ contract("FundingPool", (accounts) => {
   const paymentDefaultDuration = 7;
   const feePercent = 1;
   let poolId;
-  const erc20Amount = 10000;
+  const erc20Amount = 10000000000;
   const maxLoanDuration = 90;
   const interestRate = 10;
   let expiration;
@@ -162,15 +162,15 @@ contract("FundingPool", (accounts) => {
       assert.equal(bidId, 0);
       //console.log(bidId, "bidid111");
 
-      await erc20.transfer(lender, 10000, { from: accounts[0] });
-      await erc20.approve(fundingpoolInstance.address, 10000, {
+      await erc20.transfer(lender, 10000000000, { from: accounts[0] });
+      await erc20.approve(fundingpoolInstance.address, 10000000000, {
         from: lender,
       });
 
       const tx1 = await fundingpoolInstance.supplyToPool(
         poolId,
         erc20.address,
-        10000,
+        10000000000,
         loanDefaultDuration,
         expiration,
         1000,
@@ -244,7 +244,7 @@ contract("FundingPool", (accounts) => {
       let b2 = await erc20.balanceOf(feeAddress);
       console.log("owner2", b2.toString());
       console.log(poolId);
-      assert.equal(b2 - b1, 100);
+      assert.equal(b2 - b1, 100000000);
       // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
       //   .to.emit(fundingpoolInstance, 'AcceptedBid')
       //   .withArgs(
@@ -300,7 +300,7 @@ contract("FundingPool", (accounts) => {
       // console.log(poolId)
       const balance1 = await erc20.balanceOf(lender);
       console.log("bbb", balance1.toString());
-      assert.equal(balance1.toString(), 10000, "Bid not rejected Yet");
+      assert.equal(balance1.toString(), 10000000000, "Bid not rejected Yet");
 
       await truffleAssert.reverts(
         fundingpoolInstance.RejectBid(poolId, erc20.address, bidId1, lender, {
@@ -345,7 +345,7 @@ contract("FundingPool", (accounts) => {
       );
       console.log("installment before 1 cycle", r.toString());
       // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-      await time.increase(paymentCycleDuration);
+      await time.increase(paymentCycleDuration + 5);
       r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
         erc20.address,
@@ -758,7 +758,7 @@ contract("FundingPool", (accounts) => {
         from: lender,
       });
       let b2 = await erc20.balanceOf(lender);
-      assert.equal(b2 - b1, 10000);
+      assert.equal(b2 - b1, 10000000000);
       let loan = await fundingpoolInstance.lenderPoolFundDetails(
         lender,
         poolId,

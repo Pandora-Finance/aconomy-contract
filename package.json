@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@openzeppelin/truffle-upgrades": "^1.19.0",
     "truffle-plugin-verify": "^0.6.1"
   },
   "dependencies": {

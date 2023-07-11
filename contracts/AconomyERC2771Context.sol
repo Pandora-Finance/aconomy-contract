@@ -3,17 +3,18 @@
 
 pragma solidity 0.8.11;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @dev Context variant with ERC2771 support.
  */
 // copied from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
-contract AconomyERC2771Context is Ownable {
+contract AconomyERC2771Context is OwnableUpgradeable {
     mapping(address => bool) public trustedForwarders;
 
-    constructor(address tfGelato) {
+    function AconomyERC2771Context_init(address tfGelato) internal onlyInitializing{
         trustedForwarders[tfGelato] = true;
+        __Ownable_init();
     }
 
     function isTrustedForwarder(address forwarder)

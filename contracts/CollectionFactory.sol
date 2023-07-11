@@ -3,12 +3,17 @@ pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibCollection.sol";
 
-contract CollectionFactory {
+contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable{
     using Counters for Counters.Counter;
+
+    //STORAGE START -------------------------------------------------------------------------------------
 
     /**
      * @notice Deatils for a collection.
@@ -37,6 +42,10 @@ contract CollectionFactory {
     mapping(uint256 => LibShare.Share[]) public royaltiesForCollection;
 
     uint256 public collectionId;
+    address collectionMethodAddress;
+    address public piNFTMethodsAddress;
+
+    //STORAGE END ------------------------------------------------------------------------------------------
 
     event CollectionURISet(uint256 collectionId, string uri);
 
@@ -53,10 +62,24 @@ contract CollectionFactory {
         LibShare.Share[] royalties
     );
 
-    address collectionMethodAddress;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(){
+        _disableInitializers();
+    }
 
-    constructor(address _collectionMethodAddress) {
+    function initialize(address _collectionMethodAddress, address _piNFTMethodsAddress) public initializer {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
         collectionMethodAddress = _collectionMethodAddress;
+        piNFTMethodsAddress = _piNFTMethodsAddress;
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     modifier collectionOwner(uint256 _collectionId) {
@@ -65,6 +88,10 @@ contract CollectionFactory {
             "Not the owner"
         );
         _;
+    }
+
+    function changeCollectionMethodImplementation(address newCollectionMethods) external onlyOwner {
+        collectionMethodAddress = newCollectionMethods;
     }
 
     /**
@@ -83,7 +110,7 @@ contract CollectionFactory {
         string calldata _uri,
         string memory _description,
         LibShare.Share[] memory royalties
-    ) public returns (uint256 collectionId_) {
+    ) public whenNotPaused returns (uint256 collectionId_) {
         collectionId_ = ++collectionId;
 
         //Deploy collection Address
@@ -119,7 +146,7 @@ contract CollectionFactory {
     function setRoyaltiesForCollection(
         uint256 _collectionId,
         LibShare.Share[] memory royalties
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         require(royalties.length <= 10, "Atmost 10 royalties can be added");
         delete royaltiesForCollection[_collectionId];
         uint256 sumRoyalties = 0;
@@ -132,7 +159,7 @@ contract CollectionFactory {
             royaltiesForCollection[_collectionId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "Sum of Royalties > 100%");
+        require(sumRoyalties <= 4000, "Sum of Royalties > 40%");
 
         emit CollectionRoyaltiesSet(_collectionId, royalties);
     }
@@ -145,7 +172,7 @@ contract CollectionFactory {
     function setCollectionURI(
         uint256 _collectionId,
         string calldata _uri
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_uri)) !=
             keccak256(abi.encodePacked(collections[_collectionId].URI))
@@ -164,7 +191,7 @@ contract CollectionFactory {
     function setCollectionName(
         uint256 _collectionId,
         string memory _name
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_name)) !=
             keccak256(abi.encodePacked(collections[_collectionId].name))
@@ -183,7 +210,7 @@ contract CollectionFactory {
     function setCollectionSymbol(
         uint256 _collectionId,
         string memory _symbol
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_symbol)) !=
             keccak256(abi.encodePacked(collections[_collectionId].symbol))
@@ -202,7 +229,7 @@ contract CollectionFactory {
     function setCollectionDescription(
         uint256 _collectionId,
         string memory _description
-    ) public collectionOwner(_collectionId) {
+    ) public whenNotPaused collectionOwner(_collectionId) {
         if (
             keccak256(abi.encodePacked(_description)) !=
             keccak256(abi.encodePacked(collections[_collectionId].description))
@@ -224,4 +251,6 @@ contract CollectionFactory {
     ) external view returns (LibShare.Share[] memory) {
         return royaltiesForCollection[_collectionId];
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

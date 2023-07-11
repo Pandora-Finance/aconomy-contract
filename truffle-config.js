@@ -21,6 +21,7 @@ require('dotenv').config()
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const pk = process.env.PK
+const goerli = process.env.GOERLI_INFURA
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
@@ -51,12 +52,14 @@ module.exports = {
     goerli: {
       provider: function () {
         return new HDWalletProvider(
-          'c2a2e257c108692e2b879dde8b9ad2b13dcbef9c7229c646f9f8ee32f1b22ed3',
-          `https://goerli.infura.io/v3/3c7b140952bb485d96cd06904ae06727`
+          pk,
+          `https://goerli.infura.io/v3/${goerli}`
         );
       },
       network_id: 5,
-      gas: 20000000,
+      gasPrice: 10000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true,
     },
     bscTestnet: {
       provider: () =>
@@ -65,7 +68,7 @@ module.exports = {
           `https://data-seed-prebsc-1-s1.binance.org:8545`
         ),
       network_id: 97,
-      gasPrice: 10000000000,
+      gasPrice: 15000000000,
       timeoutBlocks: 200,
       skipDryRun: true,
     },
