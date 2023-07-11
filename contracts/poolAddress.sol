@@ -361,40 +361,6 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
         }
     }
 
-    // function repayYourLoan(uint256 _loanId) external nonReentrant {
-    //     if (loans[_loanId].state != LoanState.ACCEPTED) {
-    //         revert("Loan must be accepted");
-    //     }
-    //     (
-    //         uint256 owedAmount,
-    //         uint256 dueAmount,
-    //         uint256 interest
-    //     ) = LibCalculations.owedAmount(loans[_loanId], block.timestamp);
-    //     _repayLoan(
-    //         _loanId,
-    //         Payment({principal: dueAmount, interest: interest}),
-    //         owedAmount + interest
-    //     );
-    //     emit repaidAmounts(owedAmount, dueAmount, interest);
-    // }
-
-    // function viewInstallmentAmount(
-    //     uint256 _loanId
-    // ) public view returns (uint256) {
-    //     (, uint256 dueAmount, uint256 interest) = LibCalculations.owedAmount(
-    //         loans[_loanId],
-    //         block.timestamp
-    //     );
-
-    //     uint256 paymentAmount = dueAmount + interest;
-    //     if (
-    //         loans[_loanId].state != LoanState.ACCEPTED ||
-    //         loans[_loanId].state == LoanState.PAID
-    //     ) {
-    //         paymentAmount = 0;
-    //     }
-    //     return paymentAmount;
-    // }
 
     /**
      * @notice Returns the full amount to be paid at the called timestamp.

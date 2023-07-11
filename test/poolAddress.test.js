@@ -70,9 +70,9 @@ contract("PoolAddress", async (accounts) => {
       true
     );
     poolId1 = res.logs[5].args.poolId.toNumber();
-    console.log(poolId1, "poolId1");
+    // console.log(poolId1, "poolId1");
     pool1Address = res.logs[4].args.poolAddress;
-    console.log(pool1Address, "poolAdress");
+    // console.log(pool1Address, "poolAdress");
     res = await poolRegis.lenderVerification(poolId1, accounts[0]);
     assert.equal(
       res.isVerified_,
@@ -158,7 +158,7 @@ contract("PoolAddress", async (accounts) => {
     );
     loanId1 = res.logs[0].args.loanId.toNumber();
     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
-    console.log(paymentCycleAmount, "pca");
+    // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 0, "Unable to create loan: Wrong LoanId");
   });
 
@@ -185,13 +185,13 @@ contract("PoolAddress", async (accounts) => {
     await aconomyFee.setAconomyPoolFee(200, { from: accounts[9] });
     assert.equal(feeAddress, accounts[9]);
     let b1 = await erc20.balanceOf(feeAddress);
-    console.log("fee 1", b1.toNumber());
+    // console.log("fee 1", b1.toNumber());
     await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
-    console.log(_balance1.toNumber());
+    // console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
     let b2 = await erc20.balanceOf(feeAddress);
-    console.log("fee 2", b2.toNumber());
+    // console.log("fee 2", b2.toNumber());
     assert.equal(b2 - b1, 100000000);
     _balance1 = await erc20.balanceOf(accounts[1]);
     //console.log(_balance1.toNumber())
@@ -201,15 +201,15 @@ contract("PoolAddress", async (accounts) => {
 
   it("should calculate the next due date", async () => {
     loanId1 = res.logs[0].args.loanId.toNumber();
-    console.log(loanId1);
+    // console.log(loanId1);
     let now = await erc20.getTime();
     // console.log("now before increase", now.toString())
     // await time.increase(paymentCycleDuration)
     let r = await poolAddressInstance.calculateNextDueDate(loanId1);
-    console.log("due", r.toString());
+    // console.log("due", r.toString());
     now = await erc20.getTime();
-    console.log("now", now.toString());
-    console.log("difference", r - now);
+    // console.log("now", now.toString());
+    // console.log("difference", r - now);
     assert.equal(r - now, 2592000);
   });
 
@@ -228,13 +228,13 @@ contract("PoolAddress", async (accounts) => {
   it("should view and pay 1st intallment amount", async () => {
     loanId1 = res.logs[0].args.loanId.toNumber();
     let loan = await poolAddressInstance.loans(loanId1);
-    console.log(loan);
+    // console.log(loan);
     let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-    console.log("installment before 1 cycle", r.toString());
+    // console.log("installment before 1 cycle", r.toString());
     // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
     await time.increase(paymentCycleDuration + 5);
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-    console.log("installment after 1 cycle", r.toString());
+    // console.log("installment after 1 cycle", r.toString());
     //1
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
     let result = await poolAddressInstance.repayMonthlyInstallment(loanId1, {
@@ -248,14 +248,14 @@ contract("PoolAddress", async (accounts) => {
         BigNumber(loan.terms.paymentCycle).multiply(1)
       )
     );
-    console.log(result.logs[0].args.Amount.toString());
+    // console.log(result.logs[0].args.Amount.toString());
     assert.equal(
       result.logs[0].args.Amount.toString(),
       loan.terms.paymentCycleAmount
     );
     await time.increase(100);
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-    console.log("installment after paying 1st cycle", r.toString());
+    // console.log("installment after paying 1st cycle", r.toString());
   });
 
   it("should continue paying installments after skipping a cycle", async () => {
@@ -263,10 +263,10 @@ contract("PoolAddress", async (accounts) => {
     let loan = await poolAddressInstance.loans(loanId1);
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), false);
     let now = await erc20.getTime();
-    console.log(now.toString());
+    // console.log(now.toString());
     await time.increase(paymentCycleDuration + paymentCycleDuration + 604800);
     now = await erc20.getTime();
-    console.log(now.toString());
+    // console.log(now.toString());
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), true);
     //2
     let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
@@ -342,7 +342,7 @@ contract("PoolAddress", async (accounts) => {
     await erc20.approve(poolAddressInstance.address, full, {
       from: accounts[1],
     });
-    console.log("full", full.toString());
+    // console.log("full", full.toString());
     await poolAddressInstance.repayMonthlyInstallment(loanId1, {
       from: accounts[1],
     });
@@ -361,7 +361,7 @@ contract("PoolAddress", async (accounts) => {
       loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20
     );
     let bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
-    console.log(bal.toNumber());
+    // console.log(bal.toNumber());
     assert.equal(bal, 0);
   });
 
@@ -381,14 +381,14 @@ contract("PoolAddress", async (accounts) => {
     );
     loanId1 = res.logs[0].args.loanId.toNumber();
     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
-    console.log(paymentCycleAmount, "pca");
+    // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 1, "Unable to create loan: Wrong LoanId");
   });
 
   it("should Accept loan ", async () => {
     await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
-    console.log(_balance1.toNumber());
+    // console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
     _balance1 = await erc20.balanceOf(accounts[1]);
   });
@@ -399,7 +399,7 @@ contract("PoolAddress", async (accounts) => {
       loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20
     );
     let bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
-    console.log(bal.toNumber());
+    // console.log(bal.toNumber());
     let b = await erc20.balanceOf(accounts[1]);
     //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
     await erc20.approve(poolAddressInstance.address, bal, {
@@ -418,7 +418,7 @@ contract("PoolAddress", async (accounts) => {
       loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20
     );
     let bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
-    console.log(bal.toNumber());
+    // console.log(bal.toNumber());
     assert.equal(bal, 0);
   });
 
@@ -438,7 +438,7 @@ contract("PoolAddress", async (accounts) => {
     );
     loanId1 = res.logs[0].args.loanId.toNumber();
     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
-    console.log(paymentCycleAmount, "pca");
+    // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 2, "Unable to create loan: Wrong LoanId");
   });
 
@@ -470,14 +470,14 @@ contract("PoolAddress", async (accounts) => {
     );
     loanId1 = res.logs[0].args.loanId.toNumber();
     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
-    console.log(paymentCycleAmount, "pca");
+    // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 3, "Unable to create loan: Wrong LoanId");
   });
 
   it("should Accept loan ", async () => {
     await erc20.approve(poolAddressInstance.address, 10000000000);
     let _balance1 = await erc20.balanceOf(accounts[0]);
-    console.log(_balance1.toNumber());
+    // console.log(_balance1.toNumber());
     res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
     _balance1 = await erc20.balanceOf(accounts[1]);
   });

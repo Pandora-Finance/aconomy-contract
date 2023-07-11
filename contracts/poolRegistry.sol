@@ -201,16 +201,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         }
     }
 
-    // function setPaymentCycleDuration(uint256 _poolId, uint32 _duration)
-    //     public
-    //     ownsPool(_poolId)
-    // {
-    //     if (_duration != pools[_poolId].paymentCycleDuration) {
-    //         pools[_poolId].paymentCycleDuration = _duration;
-
-    //         emit SetPaymentCycleDuration(_poolId, _duration);
-    //     }
-    // }
 
     /**
      * @notice Sets the pool uri.
@@ -403,7 +393,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
             // Store the lender attestation ID for the pool ID
             pools[_poolId].lenderAttestationIds[_Address] = _uuid;
             // Add lender address to pool set
-            //    (bool isSuccess ) =  pools[_poolId].verifiedLendersForPool.add(_Address);
             require(
                 pools[_poolId].verifiedLendersForPool.add(_Address),
                 "add lender to poolfailed"
@@ -439,8 +428,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         bytes32 uuid = _revokeAddressVerification(_poolId, _address, _isLender);
 
         attestationService.revoke(uuid);
-        // NOTE: Disabling the call to revoke the attestation on EAS contracts
-        //        tellerAS.revoke(uuid);
     }
 
     /**

@@ -79,7 +79,7 @@ contract("FundingPool", (accounts) => {
       aconomyFee = await AconomyFee.deployed();
       await aconomyFee.setAconomyPoolFee(100);
       const feee = await aconomyFee.AconomyPoolFee();
-      console.log("protocolFee", feee.toString());
+      // console.log("protocolFee", feee.toString());
       res = await poolRegis.createPool(
         loanExpirationDuration,
         loanExpirationDuration,
@@ -91,10 +91,10 @@ contract("FundingPool", (accounts) => {
       );
       // console.log(res);
       poolId1 = res.logs[5].args.poolId.toNumber();
-      console.log(poolId1, "poolId1");
+      // console.log(poolId1, "poolId1");
       poolId = poolId1;
       pool1Address = await poolRegis.getPoolAddress(poolId1);
-      console.log(pool1Address, "poolAdress");
+      // console.log(pool1Address, "poolAdress");
       fundingpooladdress = pool1Address;
       res = await poolRegis.lenderVerification(poolId1, accounts[0]);
       assert.equal(
@@ -189,11 +189,11 @@ contract("FundingPool", (accounts) => {
         erc20.address,
         bidId
       );
-      console.log(fundDetail);
+      // console.log(fundDetail);
       assert.equal(fundDetail.amount, erc20Amount);
       assert.equal(fundDetail.maxDuration, loanDefaultDuration);
       assert.equal(fundDetail.interestRate, 1000);
-      console.log(expiration.toString());
+      // console.log(expiration.toString());
       assert.equal(fundDetail.expiration, expiration.toString());
       assert.equal(fundDetail.state, 0); // BidState.PENDING
     });
@@ -231,9 +231,9 @@ contract("FundingPool", (accounts) => {
       await aconomyFee.setAconomyPoolFee(200, { from: accounts[9] });
       assert.equal(feeAddress, accounts[9], "Wrong Protocol Owner");
       const feee = await aconomyFee.AconomyPoolFee();
-      console.log("protocolFee", feee.toString());
+      // console.log("protocolFee", feee.toString());
       let b1 = await erc20.balanceOf(feeAddress);
-      console.log("owner1", b1.toString());
+      // console.log("owner1", b1.toString());
       const tx = await fundingpoolInstance.AcceptBid(
         poolId,
         erc20.address,
@@ -242,8 +242,8 @@ contract("FundingPool", (accounts) => {
         receiver
       );
       let b2 = await erc20.balanceOf(feeAddress);
-      console.log("owner2", b2.toString());
-      console.log(poolId);
+      // console.log("owner2", b2.toString());
+      // console.log(poolId);
       assert.equal(b2 - b1, 100000000);
       // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
       //   .to.emit(fundingpoolInstance, 'AcceptedBid')
@@ -290,7 +290,7 @@ contract("FundingPool", (accounts) => {
 
     it("should reject the bid and emit RejectBid event", async () => {
       const balance = await erc20.balanceOf(lender);
-      console.log("bbb", balance.toString());
+      // console.log("bbb", balance.toString());
       const tx = await fundingpoolInstance.RejectBid(
         poolId,
         erc20.address,
@@ -299,7 +299,7 @@ contract("FundingPool", (accounts) => {
       );
       // console.log(poolId)
       const balance1 = await erc20.balanceOf(lender);
-      console.log("bbb", balance1.toString());
+      // console.log("bbb", balance1.toString());
       assert.equal(balance1.toString(), 10000000000, "Bid not rejected Yet");
 
       await truffleAssert.reverts(
@@ -336,14 +336,14 @@ contract("FundingPool", (accounts) => {
         erc20.address,
         bidId
       );
-      console.log(loan);
+      // console.log(loan);
       let r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
         erc20.address,
         bidId,
         lender
       );
-      console.log("installment before 1 cycle", r.toString());
+      // console.log("installment before 1 cycle", r.toString());
       // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
       await time.increase(paymentCycleDuration + 5);
       r = await fundingpoolInstance.viewInstallmentAmount(
@@ -352,7 +352,7 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      console.log("installment after 1 cycle", r.toString());
+      // console.log("installment after 1 cycle", r.toString());
       //1
       await erc20.approve(fundingpoolInstance.address, r);
       let result = await fundingpoolInstance.repayMonthlyInstallment(
@@ -368,7 +368,7 @@ contract("FundingPool", (accounts) => {
         erc20.address,
         bidId
       );
-      console.log(result.logs[0].args.PaidAmount);
+      // console.log(result.logs[0].args.PaidAmount);
       assert.equal(
         result.logs[0].args.PaidAmount.toString(),
         loan.paymentCycleAmount
@@ -380,7 +380,7 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      console.log("installment after paying 1st cycle", r.toString());
+      // console.log("installment after paying 1st cycle", r.toString());
     });
 
     it("should continue paying installments after skipping a cycle", async () => {
@@ -401,10 +401,10 @@ contract("FundingPool", (accounts) => {
         false
       );
       let now = await erc20.getTime();
-      console.log(now.toString());
+      // console.log(now.toString());
       await time.increase(paymentCycleDuration + paymentCycleDuration + 604800);
       now = await erc20.getTime();
-      console.log(now.toString());
+      // console.log(now.toString());
       assert.equal(
         await fundingpoolInstance.isPaymentLate(
           poolId,
@@ -569,7 +569,7 @@ contract("FundingPool", (accounts) => {
         lender
       );
       await erc20.approve(fundingpoolInstance.address, full + 100);
-      console.log("full", full.toString());
+      // console.log("full", full.toString());
       await fundingpoolInstance.repayMonthlyInstallment(
         poolId,
         erc20.address,
@@ -604,7 +604,7 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      console.log(bal.toNumber());
+      // console.log(bal.toNumber());
       assert.equal(bal, 0);
     });
 
@@ -653,7 +653,7 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      console.log(bal.toNumber());
+      // console.log(bal.toNumber());
       let b = await erc20.balanceOf(accounts[1]);
       //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
       await erc20.approve(fundingpoolInstance.address, bal + 10);
@@ -687,7 +687,7 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      console.log(bal.toNumber());
+      // console.log(bal.toNumber());
       assert.equal(bal, 0);
     });
 
@@ -708,7 +708,7 @@ contract("FundingPool", (accounts) => {
         1000,
         { from: lender }
       );
-      console.log(tx);
+      // console.log(tx);
       bidId = tx.logs[0].args.BidId.toNumber();
       assert.equal(bidId, 3);
     });
@@ -726,8 +726,8 @@ contract("FundingPool", (accounts) => {
         erc20.address,
         bidId
       );
-      console.log("expl", loan.expiration.toString());
-      console.log("exp", expiration.toString());
+      // console.log("expl", loan.expiration.toString());
+      // console.log("exp", expiration.toString());
       assert.equal(r, false);
       advanceBlockAtTime(expiration + 10);
       r = await fundingpoolInstance.isBidExpired(

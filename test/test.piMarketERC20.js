@@ -93,7 +93,7 @@ contract("PiMarket", async (accounts) => {
         "You are not the owner"
       );
       let price = tx.logs[0].args.Price.toNumber();
-      console.log("newPrice", price);
+      // console.log("newPrice", price);
       assert.equal(price, 60000, "Price not updated");
       const tx1 = await piMarket.editSalePrice(1, 50000, { from: alice });
       let newPrice = tx1.logs[0].args.Price.toNumber();
@@ -309,7 +309,7 @@ contract("PiMarket", async (accounts) => {
       let _balance3 = await sampleERC20.balanceOf(feeReceiver);
       let _balance4 = await sampleERC20.balanceOf(validator);
 
-      console.log("ss1", _balance1.toString());
+      // console.log("ss1", _balance1.toString());
 
       await piMarket.executeBidOrder(3, 2, false, { from: alice });
       result = await piNFT.ownerOf(1);
@@ -329,7 +329,7 @@ contract("PiMarket", async (accounts) => {
         (70000 * 9200) / 10000,
         "Failed to transfer NFT amount"
       );
-      console.log("Get Token", (7000 * 9200) / 10000);
+      // console.log("Get Token", (7000 * 9200) / 10000);
       assert.equal(
         balance2 - _balance2,
         (70000 * 500) / 10000,

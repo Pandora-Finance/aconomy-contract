@@ -31,7 +31,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     await aconomyFee.setAconomyNFTLendBorrowFee(100);
     const feee = await aconomyFee.AconomyNFTLendBorrowFee();
-    console.log("protocolFee", feee.toString());
+    // console.log("protocolFee", feee.toString());
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
@@ -155,16 +155,16 @@ contract("NFTlendingBorrowing", async (accounts) => {
     await aconomyFee.setAconomyNFTLendBorrowFee(200, { from: accounts[9] });
     assert.equal(feeAddress, accounts[9], "Wrong Protocol Owner");
     const feee = await aconomyFee.AconomyNFTLendBorrowFee();
-    console.log("protocolFee", feee.toString());
+    // console.log("protocolFee", feee.toString());
 
     let b1 = await sampleERC20.balanceOf(feeAddress);
-    console.log("fee 1", b1.toNumber());
+    // console.log("fee 1", b1.toNumber());
 
     await piNFT.approve(nftLendBorrow.address, 0);
 
     const tx = await nftLendBorrow.AcceptBid(1, 0);
     let b2 = await sampleERC20.balanceOf(feeAddress);
-    console.log("fee 2", b2.toNumber());
+    // console.log("fee 2", b2.toNumber());
     assert.equal(b2 - b1, 1000000000);
     let nft = await nftLendBorrow.NFTdetails(1);
     let bid = await nftLendBorrow.Bids(1, 0);
@@ -177,14 +177,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
 
   it("Should Reject Third Bid by NFT Owner", async () => {
     const newBalance1 = await sampleERC20.balanceOf(carl);
-    console.log("dd", newBalance1.toString());
+    // console.log("dd", newBalance1.toString());
     assert.equal(newBalance1.toString(), 0, "carl balance must be 0");
 
     const tx = await nftLendBorrow.rejectBid(1, 2);
     let Bid = await nftLendBorrow.Bids(1, 2);
     assert.equal(Bid.withdrawn, true, "Mapping Not changed");
     const newBalance = await sampleERC20.balanceOf(carl);
-    console.log("dd", newBalance.toString());
+    // console.log("dd", newBalance.toString());
     assert.equal(
       newBalance.toString(),
       100000000000,

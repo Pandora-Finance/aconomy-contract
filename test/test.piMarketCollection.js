@@ -109,7 +109,7 @@ contract("PiMarket", async (accounts) => {
         "You are not the owner"
       );
       let price = tx.logs[0].args.Price.toNumber();
-      console.log("newPrice", price);
+      // console.log("newPrice", price);
       assert.equal(price, 60000, "Price not updated");
       const tx1 = await piMarket.editSalePrice(1, 50000, { from: alice });
       let newPrice = tx1.logs[0].args.Price.toNumber();
@@ -138,7 +138,7 @@ contract("PiMarket", async (accounts) => {
       let balance3 = await web3.eth.getBalance(feeReceiver);
       let balance4 = await web3.eth.getBalance(validator);
       let temp = BigNumber(balance1).minus(BigNumber(_balance1));
-      console.log(balance1, " ", _balance1, " ", temp.toString());
+      // console.log(balance1, " ", _balance1, " ", temp.toString());
       assert.equal(
         BigNumber(balance1).minus(BigNumber(_balance1)),
         (50000 * 9200) / 10000,
@@ -153,7 +153,7 @@ contract("PiMarket", async (accounts) => {
 
       // console.log(Number(web3.utils.toBN(balance2)-(web3.utils.toBN(_balance2))))
 
-      console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
+      // console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
       assert.equal(
         BigNumber(balance3).minus(BigNumber(_balance3)),
         (50000 * 100) / 10000,
@@ -336,7 +336,7 @@ contract("PiMarket", async (accounts) => {
       let _balance3 = await web3.eth.getBalance(feeReceiver);
       let _balance4 = await web3.eth.getBalance(validator);
 
-      console.log("Ball", _balance1.toString());
+      // console.log("Ball", _balance1.toString());
 
       await piMarket.executeBidOrder(3, 2, true, { from: alice });
       result = await collectionContract.ownerOf(1);
@@ -351,7 +351,7 @@ contract("PiMarket", async (accounts) => {
       //   (7000 * 9200) / 10000,
       //   "Failed to transfer NFT amount"
       // );
-      console.log("ccc", (70000 * 9200) / 10000);
+      // console.log("ccc", (70000 * 9200) / 10000);
       assert.equal(
         BigNumber(balance2).minus(BigNumber(_balance2)),
         (70000 * 500) / 10000,

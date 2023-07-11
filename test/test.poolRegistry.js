@@ -72,9 +72,9 @@ contract("poolRegistry", async (accounts) => {
       true
     );
     poolId1 = res.logs[5].args.poolId.toNumber();
-    console.log(poolId1, "poolId1");
+    // console.log(poolId1, "poolId1");
     pool1Address = res.logs[4].args.poolAddress;
-    console.log(pool1Address, "poolAdress");
+    // console.log(pool1Address, "poolAdress");
     res = await poolRegis.lenderVerification(poolId1, accounts[0]);
     assert.equal(
       res.isVerified_,
@@ -116,9 +116,9 @@ contract("poolRegistry", async (accounts) => {
     );
 
     poolId2 = res.logs[5].args.poolId.toNumber();
-    console.log(poolId2, "poolId2");
+    // console.log(poolId2, "poolId2");
     pool1Address = res.logs[4].args.poolAddress;
-    console.log(pool1Address, "poolAdress");
+    // console.log(pool1Address, "poolAdress");
     res = await poolRegis.lenderVerification(poolId2, accounts[0]);
     assert.equal(
       res.isVerified_,
@@ -262,7 +262,7 @@ contract("poolRegistry", async (accounts) => {
 
     //  let res2 = await poolAddressInstance.calculateNextDueDate(loanId1)
     //  console.log(res2.toNumber())
-    console.log(paymentCycleAmount, "pca");
+    // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 0, "Unable to create loan: Wrong LoanId");
 
     //pool2
@@ -298,17 +298,17 @@ contract("poolRegistry", async (accounts) => {
     //First Installment
     await time.increase(paymentCycleDuration + 1);
     let rr = await poolAddressInstance.viewInstallmentAmount(loanId1)
-    console.log(
-      rr.toNumber()
-    );
+    // console.log(
+    //   rr.toNumber()
+    // );
     await erc20.approve(poolAddressInstance.address, rr, {
       from: accounts[0],
     });
     res = await poolAddressInstance.repayMonthlyInstallment(loanId1, {
       from: accounts[0],
     });
-    console.log(res.logs[1]);
-    console.log(res.logs[0].args.Amount.toNumber());
+    // console.log(res.logs[1]);
+    // console.log(res.logs[0].args.Amount.toNumber());
 
     //Second installment
     await time.increase(1000);
@@ -328,7 +328,7 @@ contract("poolRegistry", async (accounts) => {
     res = await poolAddressInstance.repayFullLoan(loanId1, {
       from: accounts[0],
     });
-    console.log(res.logs[0].args.Amount.toNumber());
+    // console.log(res.logs[0].args.Amount.toNumber());
 
     //Full loan repaid, should revert.
     await time.increase(paymentCycleDuration + 1);
@@ -345,21 +345,4 @@ contract("poolRegistry", async (accounts) => {
     );
   });
 
-  //     it("should repay some amount of lone ", async() => {
-  //          // Approve loan amount and transfer it to the borrower
-  //   await erc20.approve(poolAddressInstance.address, 500, { from: accounts[1] });
-  //   await poolAddressInstance.borrow(500, { from: accounts[2] });
-
-  //   // Check loan status before repayment
-  //   let loanBefore = await poolAddressInstance.loans(loanId1);
-  //   assert.equal(loanBefore.status, "active", "Loan status should be active before repayment");
-
-  //   // Repay full loan amount
-  //   await erc20.approve(poolAddressInstance.address, loanAmount, { from: borrower });
-  //   await poolAddressInstance.repayYourLoan(loanId1, { from: borrower });
-
-  //   // Check loan status after repayment
-  //   let loanAfter = await poolAddressInstance.loans(loanId1);
-  //   assert.equal(loanAfter.status, "repaid", "Loan status should be repaid after full repayment");
-  //     })
 });
