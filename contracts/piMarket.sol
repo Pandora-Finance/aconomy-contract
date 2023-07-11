@@ -16,7 +16,13 @@ import "./CollectionMethods.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibMarket.sol";
 
-contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract piMarket is
+    ERC721HolderUpgradeable,
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     using Counters for Counters.Counter;
 
     //STORAGE START ---------------------------------------------------------------------------------
@@ -114,15 +120,16 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
     event updatedSalePrice(uint256 saleId, uint256 Price);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
-    function initialize(address _feeAddress, address _collectionFactoryAddress) public initializer {
+    function initialize(
+        address _feeAddress,
+        address _collectionFactoryAddress
+    ) public initializer {
         require(_feeAddress != address(0));
-        require(
-            _collectionFactoryAddress != address(0)
-        );
+        require(_collectionFactoryAddress != address(0));
         __ReentrancyGuard_init();
         __ERC721Holder_init();
         __Ownable_init();
@@ -159,12 +166,15 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
         uint256 _tokenId,
         uint256 _price,
         address _currency
-    ) external onlyOwnerOfToken(_contractAddress, _tokenId) whenNotPaused nonReentrant {
+    )
+        external
+        onlyOwnerOfToken(_contractAddress, _tokenId)
+        whenNotPaused
+        nonReentrant
+    {
         _saleIdCounter.increment();
         require(_price >= 10000);
-        require(
-            _contractAddress != address(0)
-        );
+        require(_contractAddress != address(0));
 
         //needs approval on frontend
         ERC721(_contractAddress).safeTransferFrom(
@@ -197,7 +207,10 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
      * @param _saleId The Id of the sale.
      * @param _price The new price being set.
      */
-    function editSalePrice(uint256 _saleId, uint256 _price) public whenNotPaused{
+    function editSalePrice(
+        uint256 _saleId,
+        uint256 _price
+    ) public whenNotPaused {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
             "You are not the owner"
@@ -327,7 +340,7 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
      * @notice Cancels a sale.
      * @param _saleId The Id of the sale.
      */
-    function cancelSale(uint256 _saleId) external nonReentrant whenNotPaused{
+    function cancelSale(uint256 _saleId) external nonReentrant whenNotPaused {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
             "Only owner can cancel sale"
@@ -358,10 +371,13 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
         uint256 _price,
         uint256 _bidTime,
         address _currency
-    ) external onlyOwnerOfToken(_contractAddress, _tokenId) nonReentrant whenNotPaused{
-        require(
-            _contractAddress != address(0)
-        );
+    )
+        external
+        onlyOwnerOfToken(_contractAddress, _tokenId)
+        nonReentrant
+        whenNotPaused
+    {
+        require(_contractAddress != address(0));
         require(_price >= 10000, "price too low");
         require(_bidTime != 0);
         _saleIdCounter.increment();
@@ -397,7 +413,10 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
      * @param _saleId The Id of the sale.
      * @param _bidPrice The amount being bidded
      */
-    function Bid(uint256 _saleId, uint256 _bidPrice) external payable whenNotPaused{
+    function Bid(
+        uint256 _saleId,
+        uint256 _bidPrice
+    ) external payable whenNotPaused {
         if (_tokenMeta[_saleId].currency == address(0)) {
             require(msg.value == _bidPrice);
         }
@@ -515,13 +534,9 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
         whenNotPaused
         returns (uint256)
     {
-        require(
-            contractAddress1 != address(0)
-        );
+        require(contractAddress1 != address(0));
 
-        require(
-            contractAddress2 != address(0)
-        );
+        require(contractAddress2 != address(0));
         address token2Owner = ERC721(contractAddress2).ownerOf(token2);
         require(token2Owner != msg.sender);
         uint256 swapsId = _swapIdCounter.current();
@@ -555,9 +570,7 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
      * @param _swapId The Id of the swap.
      */
     function cancelSwap(uint256 _swapId) public whenNotPaused nonReentrant {
-        require(
-            msg.sender == _swaps[_swapId].initiator
-        );
+        require(msg.sender == _swaps[_swapId].initiator);
         require(_swaps[_swapId].status);
         _swaps[_swapId].status = false;
         ERC721(_swaps[_swapId].initiatorNFTAddress).safeTransferFrom(
@@ -573,7 +586,9 @@ contract piMarket is ERC721HolderUpgradeable, ReentrancyGuardUpgradeable, Pausab
      * @notice Accepts and executes a swap.
      * @param swapId The Id of the swap.
      */
-    function acceptSwapRequest(uint256 swapId) public whenNotPaused nonReentrant {
+    function acceptSwapRequest(
+        uint256 swapId
+    ) public whenNotPaused nonReentrant {
         Swap storage swap = _swaps[swapId];
         require(swap.status);
         require(

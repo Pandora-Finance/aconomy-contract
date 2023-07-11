@@ -77,7 +77,11 @@ contract CollectionMethods is
         uint256 _tokenId,
         LibShare.Share[] memory royalties
     ) external {
-        require(msg.sender == CollectionFactory(collectionFactoryAddress).piNFTMethodsAddress());
+        require(
+            msg.sender ==
+                CollectionFactory(collectionFactoryAddress)
+                    .piNFTMethodsAddress()
+        );
         require(royalties.length <= 10);
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
@@ -93,7 +97,11 @@ contract CollectionMethods is
     }
 
     function deleteValidatorRoyalties(uint256 _tokenId) external {
-        require(msg.sender == CollectionFactory(collectionFactoryAddress).piNFTMethodsAddress());
+        require(
+            msg.sender ==
+                CollectionFactory(collectionFactoryAddress)
+                    .piNFTMethodsAddress()
+        );
         delete RoyaltiesForValidator[_tokenId];
     }
 
@@ -102,8 +110,15 @@ contract CollectionMethods is
      * @param _tokenId The Id of the token.
      */
     function deleteNFT(uint256 _tokenId) external nonReentrant {
-        address piNFTMethodsAddress = CollectionFactory(collectionFactoryAddress).piNFTMethodsAddress();
-        require(piNFTMethods(piNFTMethodsAddress).NFTowner(address(this), _tokenId) == address(0));
+        address piNFTMethodsAddress = CollectionFactory(
+            collectionFactoryAddress
+        ).piNFTMethodsAddress();
+        require(
+            piNFTMethods(piNFTMethodsAddress).NFTowner(
+                address(this),
+                _tokenId
+            ) == address(0)
+        );
         require(ownerOf(_tokenId) == msg.sender);
         _burn(_tokenId);
     }

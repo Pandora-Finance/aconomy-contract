@@ -12,7 +12,13 @@ import "./AconomyERC2771Context.sol";
 import "./utils/LibShare.sol";
 import "./piNFTMethods.sol";
 
-contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable, AconomyERC2771Context, UUPSUpgradeable {
+contract piNFT is
+    ERC721URIStorageUpgradeable,
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable,
+    AconomyERC2771Context,
+    UUPSUpgradeable
+{
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
     address public piNFTMethodsAddress;
@@ -35,23 +41,23 @@ contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, Pausa
     event TokenMinted(uint256 tokenId, address to);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
-     function initialize(
+    function initialize(
         string memory _name,
         string memory _symbol,
         address _piNFTMethodsAddress,
         address tfGelato
-     ) public initializer {
+    ) public initializer {
         __ERC721_init(_name, _symbol);
         AconomyERC2771Context_init(tfGelato);
         __ERC721URIStorage_init();
         __Pausable_init();
         __ReentrancyGuard_init();
         piNFTMethodsAddress = _piNFTMethodsAddress;
-     }
+    }
 
     function pause() external onlyOwner {
         _pause();
@@ -110,9 +116,7 @@ contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, Pausa
         delete royaltiesByTokenId[_tokenId];
         uint256 sumRoyalties = 0;
         for (uint256 i = 0; i < royalties.length; i++) {
-            require(
-                royalties[i].account != address(0x0)
-            );
+            require(royalties[i].account != address(0x0));
             require(royalties[i].value != 0);
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
@@ -180,7 +184,12 @@ contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, Pausa
      * @param _tokenId The Id of the token.
      */
     function deleteNFT(uint256 _tokenId) external whenNotPaused nonReentrant {
-        require(piNFTMethods(piNFTMethodsAddress).NFTowner(address(this), _tokenId) == address(0));
+        require(
+            piNFTMethods(piNFTMethodsAddress).NFTowner(
+                address(this),
+                _tokenId
+            ) == address(0)
+        );
         require(ownerOf(_tokenId) == msg.sender);
         _burn(_tokenId);
     }
@@ -202,7 +211,7 @@ contract piNFT is ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable, Pausa
         override(AconomyERC2771Context, ContextUpgradeable)
         returns (bytes calldata)
     {
-       return AconomyERC2771Context._msgData();
+        return AconomyERC2771Context._msgData();
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

@@ -12,7 +12,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract poolRegistry is
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -68,7 +73,7 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
     //STORAGE END ------------------------------------------------------------------------------------------
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
@@ -112,7 +117,9 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
         _;
     }
 
-    function changeFundingPoolImplementation(address newFundingPool) external onlyOwner {
+    function changeFundingPoolImplementation(
+        address newFundingPool
+    ) external onlyOwner {
         FundingPoolAddress = newFundingPool;
     }
 
@@ -200,7 +207,6 @@ contract poolRegistry is ReentrancyGuardUpgradeable, PausableUpgradeable, Ownabl
             emit SetAPR(_poolId, _apr);
         }
     }
-
 
     /**
      * @notice Sets the pool uri.

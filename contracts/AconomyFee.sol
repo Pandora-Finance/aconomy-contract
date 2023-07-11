@@ -48,9 +48,7 @@ contract AconomyFee is Ownable {
         emit SetAconomyPiMarketFee(newFee, oldFee);
     }
 
-    function setAconomyNFTLendBorrowFee(
-        uint16 newFee
-    ) public onlyOwner {
+    function setAconomyNFTLendBorrowFee(uint16 newFee) public onlyOwner {
         if (newFee == _AconomyNFTLendBorrowFee) return;
 
         uint16 oldFee = _AconomyNFTLendBorrowFee;

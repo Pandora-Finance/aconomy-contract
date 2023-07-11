@@ -16,17 +16,25 @@ import "./Libraries/LibCalculations.sol";
 import "./Libraries/LibPoolAddress.sol";
 import {BokkyPooBahsDateTimeLibrary as BPBDTL} from "./Libraries/DateTimeLib.sol";
 
-contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
-
+contract poolAddress is
+    poolStorage,
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.UintSet;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
-    function initialize(address _poolRegistry, address _AconomyFeeAddress) public initializer{
+    function initialize(
+        address _poolRegistry,
+        address _AconomyFeeAddress
+    ) public initializer {
         __ReentrancyGuard_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
@@ -87,18 +95,12 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
         uint16 _APR,
         address _receiver
     ) public whenNotPaused returns (uint256 loanId_) {
-        require(
-            _lendingToken != address(0)
-        );
-        require(
-            _receiver != address(0)
-        );
+        require(_lendingToken != address(0));
+        require(_receiver != address(0));
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .borrowerVerification(_poolId, msg.sender);
         require(isVerified);
-        require(
-            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId)
-        );
+        require(!poolRegistry(poolRegistryAddress).ClosedPool(_poolId));
         require(_duration % 30 days == 0);
         require(_APR >= 100);
         require(_principal >= 10000000000);
@@ -181,9 +183,8 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
         Loan storage loan = loans[_loanId];
         require(!isLoanExpired(_loanId));
 
-        (amountToAconomy, amountToPool, amountToBorrower) 
-            = 
-        LibPoolAddress.acceptLoan(loan, poolRegistryAddress, AconomyFeeAddress);
+        (amountToAconomy, amountToPool, amountToBorrower) = LibPoolAddress
+            .acceptLoan(loan, poolRegistryAddress, AconomyFeeAddress);
 
         // Record Amount filled by lenders
         lenderLendAmount[address(loan.loanDetails.lendingToken)][
@@ -194,9 +195,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
             .principal;
 
         // Store Borrower's active loan
-        require(
-            borrowerActiveLoans[loan.borrower].add(_loanId)
-        );
+        require(borrowerActiveLoans[loan.borrower].add(_loanId));
 
         emit loanAccepted(_loanId, loan.lender);
 
@@ -327,7 +326,9 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
      * @notice Repays the monthly installment.
      * @param _loanId The Id of the loan.
      */
-    function repayMonthlyInstallment(uint256 _loanId) external whenNotPaused nonReentrant {
+    function repayMonthlyInstallment(
+        uint256 _loanId
+    ) external whenNotPaused nonReentrant {
         require(loans[_loanId].state == LoanState.ACCEPTED);
         require(
             loans[_loanId].terms.installmentsPaid + 1 <=
@@ -360,7 +361,6 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
                     loans[_loanId].terms.paymentCycle);
         }
     }
-
 
     /**
      * @notice Returns the full amount to be paid at the called timestamp.
@@ -405,7 +405,9 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
      * @notice Repays the full amount to be paid at the called timestamp.
      * @param _loanId The Id of the loan.
      */
-    function repayFullLoan(uint256 _loanId) external nonReentrant whenNotPaused{
+    function repayFullLoan(
+        uint256 _loanId
+    ) external nonReentrant whenNotPaused {
         require(loans[_loanId].state == LoanState.ACCEPTED);
         (uint256 owedPrincipal, , uint256 interest) = LibCalculations
             .owedAmount(loans[_loanId], block.timestamp);
@@ -436,9 +438,7 @@ contract poolAddress is poolStorage, ReentrancyGuardUpgradeable, PausableUpgrade
             loan.state = LoanState.PAID;
 
             // Remove borrower's active loan
-            require(
-                borrowerActiveLoans[loan.borrower].remove(_loanId)
-            );
+            require(borrowerActiveLoans[loan.borrower].remove(_loanId));
 
             emit LoanRepaid(_loanId, paymentAmount);
         } else {

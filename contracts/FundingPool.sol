@@ -559,7 +559,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         }
     }
 
-
     /**
      * @notice Returns the full amount to be repaid.
      * @dev Returned value is type uint256.

@@ -18,7 +18,7 @@ contract piNFTMethods is
     PausableUpgradeable,
     IERC721ReceiverUpgradeable,
     UUPSUpgradeable
-{   
+{
     //STORAGE START ----------------------------------------------------------------------
     // collectionAddress => tokenId => (token contract => balance)
     mapping(address => mapping(uint256 => mapping(address => uint256)))
@@ -96,7 +96,7 @@ contract piNFTMethods is
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
@@ -123,7 +123,7 @@ contract piNFTMethods is
         override(AconomyERC2771Context, ContextUpgradeable)
         returns (bytes calldata)
     {
-       return AconomyERC2771Context._msgData();
+        return AconomyERC2771Context._msgData();
     }
 
     function pause() external onlyOwner {
@@ -138,7 +138,7 @@ contract piNFTMethods is
         address _collectionAddress,
         uint256 _tokenId,
         address _validator
-    ) external whenNotPaused{
+    ) external whenNotPaused {
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender
@@ -152,7 +152,7 @@ contract piNFTMethods is
         address _collectionAddress,
         uint256 _tokenId,
         address _validator
-    ) external whenNotPaused{
+    ) external whenNotPaused {
         require(isTrustedForwarder(msg.sender));
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
@@ -178,7 +178,7 @@ contract piNFTMethods is
         address _erc20Contract,
         uint256 _value,
         LibShare.Share[] memory royalties
-    ) public whenNotPaused{
+    ) public whenNotPaused {
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);

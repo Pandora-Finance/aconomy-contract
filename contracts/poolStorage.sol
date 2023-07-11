@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract poolStorage is Initializable{
+contract poolStorage is Initializable {
     using EnumerableSet for EnumerableSet.UintSet;
 
     //STORAGE START -------------------------------------------------------------------------------------------

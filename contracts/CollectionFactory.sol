@@ -10,7 +10,11 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./utils/LibShare.sol";
 import "./Libraries/LibCollection.sol";
 
-contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable{
+contract CollectionFactory is
+    OwnableUpgradeable,
+    PausableUpgradeable,
+    UUPSUpgradeable
+{
     using Counters for Counters.Counter;
 
     //STORAGE START -------------------------------------------------------------------------------------
@@ -63,11 +67,14 @@ contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgra
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor(){
+    constructor() {
         _disableInitializers();
     }
 
-    function initialize(address _collectionMethodAddress, address _piNFTMethodsAddress) public initializer {
+    function initialize(
+        address _collectionMethodAddress,
+        address _piNFTMethodsAddress
+    ) public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
         collectionMethodAddress = _collectionMethodAddress;
@@ -90,7 +97,9 @@ contract CollectionFactory is OwnableUpgradeable, PausableUpgradeable, UUPSUpgra
         _;
     }
 
-    function changeCollectionMethodImplementation(address newCollectionMethods) external onlyOwner {
+    function changeCollectionMethodImplementation(
+        address newCollectionMethods
+    ) external onlyOwner {
         collectionMethodAddress = newCollectionMethods;
     }
 
