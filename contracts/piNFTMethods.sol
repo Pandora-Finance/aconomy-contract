@@ -38,6 +38,14 @@ contract piNFTMethods is
 
     // collectionAddress => TokenId => validator
     mapping(address => mapping(uint256 => address)) public approvedValidator;
+
+    struct Commission {
+        LibShare.Share commission;
+        bool isValid;
+    }
+
+    // collection Address => tokenId => commission
+    mapping (address => mapping(uint256 => Commission)) public validatorCommissions;
     //STORAGE END -------------------------------------------------------------------------
 
     event ERC20Added(
@@ -177,11 +185,13 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _value,
+        uint96 _commission,
         LibShare.Share[] memory royalties
     ) public whenNotPaused {
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
+        require(_commission <= 1000);
         if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
             require(
                 _erc20Contract ==
@@ -193,6 +203,9 @@ contract piNFTMethods is
                 _tokenId,
                 royalties
             );
+            LibShare.Share memory _Commission = LibShare.Share(payable(msg.sender),_commission);
+            validatorCommissions[_collectionAddress][_tokenId].commission = _Commission;
+            validatorCommissions[_collectionAddress][_tokenId].isValid = true;
         }
         NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
             _collectionAddress
