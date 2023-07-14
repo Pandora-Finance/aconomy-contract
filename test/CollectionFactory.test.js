@@ -103,6 +103,7 @@ contract("CollectionFactory", (accounts) => {
       0,
       sampleERC20.address,
       500,
+      500,
       [[validator, 200]],
       {
         from: validator,
@@ -116,6 +117,10 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 500);
   });
 
   it("should let validator add more ERC20 tokens to alice's NFT", async () => {
@@ -127,6 +132,7 @@ contract("CollectionFactory", (accounts) => {
       0,
       sampleERC20.address,
       200,
+      0,
       [[validator, 200]],
       {
         from: validator,
@@ -140,6 +146,10 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 700, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 300, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 500);
   });
 
   it("should not let validator add funds of a different erc20", async () => {
@@ -149,6 +159,7 @@ contract("CollectionFactory", (accounts) => {
         0,
         accounts[5],
         200,
+        500,
         [[validator, 200]],
         {
           from: validator,
@@ -248,6 +259,10 @@ contract("CollectionFactory", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await collectionInstance.ownerOf(0), alice);
+    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    assert(commission.isValid == false);
+    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(commission.commission.value == 0);
   });
 
   it("should transfer NFT to bob", async () => {
@@ -271,6 +286,7 @@ contract("CollectionFactory", (accounts) => {
       0,
       sampleERC20.address,
       500,
+      600,
       [[validator, 200]],
       {
         from: validator,
@@ -284,6 +300,10 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 600);
   });
 
   it("should let bob burn CollectionFactory", async () => {
@@ -320,5 +340,9 @@ contract("CollectionFactory", (accounts) => {
       validator,
       "Failed to transfer NFT to alice"
     );
+    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    assert(commission.isValid == false);
+    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(commission.commission.value == 0);
   });
 });

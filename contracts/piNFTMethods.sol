@@ -20,6 +20,8 @@ contract piNFTMethods is
     UUPSUpgradeable
 {
     //STORAGE START ----------------------------------------------------------------------
+    address public piMarketAddress;
+
     // collectionAddress => tokenId => (token contract => balance)
     mapping(address => mapping(uint256 => mapping(address => uint256)))
         internal erc20Balances;
@@ -39,13 +41,13 @@ contract piNFTMethods is
     // collectionAddress => TokenId => validator
     mapping(address => mapping(uint256 => address)) public approvedValidator;
 
-    struct Commission {
+    // collection Address => tokenId => commission
+    mapping (address => mapping(uint256 => Commission)) public validatorCommissions;
+
+     struct Commission {
         LibShare.Share commission;
         bool isValid;
     }
-
-    // collection Address => tokenId => commission
-    mapping (address => mapping(uint256 => Commission)) public validatorCommissions;
     //STORAGE END -------------------------------------------------------------------------
 
     event ERC20Added(
@@ -112,6 +114,10 @@ contract piNFTMethods is
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
         AconomyERC2771Context_init(trustedForwarder);
+    }
+
+    function setPiMarket(address _piMarket) external onlyOwner {
+        piMarketAddress = _piMarket;
     }
 
     function _msgSender()
@@ -191,7 +197,6 @@ contract piNFTMethods is
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
-        require(_commission <= 1000);
         if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
             require(
                 _erc20Contract ==
@@ -199,12 +204,13 @@ contract piNFTMethods is
                 "invalid"
             );
         } else {
+            require(_commission <= 1000);
             piNFT(_collectionAddress).setRoyaltiesForValidator(
                 _tokenId,
                 royalties
             );
-            LibShare.Share memory _Commission = LibShare.Share(payable(msg.sender),_commission);
-            validatorCommissions[_collectionAddress][_tokenId].commission = _Commission;
+            LibShare.Share memory commissionShare = LibShare.Share(payable(msg.sender), _commission);
+            validatorCommissions[_collectionAddress][_tokenId].commission = commissionShare;
             validatorCommissions[_collectionAddress][_tokenId].isValid = true;
         }
         NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
@@ -418,6 +424,7 @@ contract piNFTMethods is
         }
         approvedValidator[_collectionAddress][_tokenId] = address(0);
         NFTowner[_collectionAddress][_tokenId] = address(0);
+        delete validatorCommissions[_collectionAddress][_tokenId];
         piNFT(_collectionAddress).deleteValidatorRoyalties(_tokenId);
     }
 
@@ -578,6 +585,11 @@ contract piNFTMethods is
             _to,
             _tokenId
         );
+    }
+
+    function paidCommission(address _collection, uint256 _tokenId) external {
+        require(msg.sender == piMarketAddress);
+        validatorCommissions[_collection][_tokenId].isValid = false;
     }
 
     function onERC721Received(
