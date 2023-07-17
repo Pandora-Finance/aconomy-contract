@@ -47,6 +47,7 @@ contract("PiMarket", async (accounts) => {
         tokenId,
         sampleERC20.address,
         500,
+        1000,
         [[validator, 200]],
         {
           from: validator,
@@ -59,6 +60,10 @@ contract("PiMarket", async (accounts) => {
         sampleERC20.address
       );
       assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+      assert(commission.isValid == true);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
     });
 
     it("should deploy the marketplace contract", async () => {
@@ -132,7 +137,7 @@ contract("PiMarket", async (accounts) => {
       // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
       assert.equal(
         balance1 - _balance1,
-        (50000 * 9200) / 10000,
+        (50000 * 8200) / 10000,
         "Failed to transfer NFT amount"
       );
 
@@ -153,12 +158,16 @@ contract("PiMarket", async (accounts) => {
 
       assert.equal(
         balance4 - _balance4,
-        (50000 * 200) / 10000,
+        (50000 * 1200) / 10000,
         "Failed to transfer validator amount"
       );
 
       meta = await piMarket._tokenMeta(1);
       assert.equal(meta.status, false);
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
     });
 
     it("should let bob withdraw funds from the NFT", async () => {
@@ -189,6 +198,88 @@ contract("PiMarket", async (accounts) => {
       assert.equal(await piNFT.ownerOf(0), bob);
     });
 
+    it("should let bob place piNFT on sale", async () => {
+      await piNFT.approve(piMarket.address, 0, {from: bob});
+      const result = await piMarket.sellNFT(
+        piNFT.address,
+        0,
+        50000,
+        sampleERC20.address,
+        {from: bob}
+      );
+      assert.equal(
+        await piNFT.ownerOf(0),
+        piMarket.address,
+        "Failed to put piNFT on Sale"
+      );
+    });
+
+    it("should let alice buy piNFT", async () => {
+      let meta = await piMarket._tokenMeta(2);
+      assert.equal(meta.status, true);
+      //await sampleERC20.mint(bob, 50000);
+
+      let _balance1 = await sampleERC20.balanceOf(bob);
+      let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+      let _balance3 = await sampleERC20.balanceOf(feeReceiver);
+      let _balance4 = await sampleERC20.balanceOf(validator);
+      // console.log("Balance",_balance4.toString(), _balance1.toString())
+      await sampleERC20.approve(piMarket.address, 50000, { from: alice });
+      result2 = await piMarket.BuyNFT(2, false, { from: alice });
+      // console.log(result2.receipt.rawLogs)
+      assert.equal(await piNFT.ownerOf(0), alice);
+
+      /*validator 200
+            royalties 500
+            fee 100
+            total = 800
+
+            mean alic should get 10000 - 800 = 9200 = 92%
+
+            */
+
+      let balance1 = await sampleERC20.balanceOf(bob);
+      let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+      let balance3 = await sampleERC20.balanceOf(feeReceiver);
+      let balance4 = await sampleERC20.balanceOf(validator);
+      // let temp = (BigNumber(balance1).minus(BigNumber(_balance1)))
+      // console.log("NewBalance",balance1.toString(), " ", _balance1.toString())
+      assert.equal(
+        balance1 - _balance1,
+        (50000 * 9200) / 10000,
+        "Failed to transfer NFT amount"
+      );
+
+      assert.equal(
+        balance2 - _balance2,
+        (50000 * 500) / 10000,
+        "Failed to transfer royalty amount"
+      );
+
+      // console.log(Number(web3.utils.toBN(balance2)-(web3.utils.toBN(_balance2))))
+
+      // console.log(Number(BigNumber(balance3).minus(BigNumber(_balance3))));
+      assert.equal(
+        balance3 - _balance3,
+        (50000 * 100) / 10000,
+        "Failed to transfer fee amount"
+      );
+
+      assert.equal(
+        balance4 - _balance4,
+        (50000 * 200) / 10000,
+        "Failed to transfer validator amount"
+      );
+
+      meta = await piMarket._tokenMeta(2);
+      assert.equal(meta.status, false);
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
+      await piNFT.safeTransferFrom(alice, bob, 0, {from: alice})
+    });
+
     it("should let bob place piNFT on sale again", async () => {
       await piNFT.approve(piMarket.address, 0, { from: bob });
       const result = await piMarket.sellNFT(
@@ -208,8 +299,8 @@ contract("PiMarket", async (accounts) => {
     });
 
     it("should let bob cancel sale", async () => {
-      await piMarket.cancelSale(2, { from: bob });
-      meta = await piMarket._tokenMeta(2);
+      await piMarket.cancelSale(3, { from: bob });
+      meta = await piMarket._tokenMeta(3);
       assert.equal(meta.status, false);
     });
 
@@ -235,7 +326,7 @@ contract("PiMarket", async (accounts) => {
       //100 sale royalty
       assert.equal(
         await sampleERC20.balanceOf(validator),
-        2000,
+        8000,
         "Failed to transfer ERC20 tokens to validator"
       );
       assert.equal(
@@ -243,6 +334,10 @@ contract("PiMarket", async (accounts) => {
         alice,
         "Failed to transfer NFT to alice"
       );
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+      assert(commission.commission.value == 0);
     });
   });
 
@@ -263,11 +358,16 @@ contract("PiMarket", async (accounts) => {
         tokenId,
         sampleERC20.address,
         500,
+        1000,
         [[validator, 200]],
         {
           from: validator,
         }
       );
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 1);
+      assert(commission.isValid == true);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
     });
 
     it("should let alice place piNFT on auction", async () => {
@@ -284,7 +384,7 @@ contract("PiMarket", async (accounts) => {
         piMarket.address,
         "Failed to put piNFT on Auction"
       );
-      const result = await piMarket._tokenMeta(3);
+      const result = await piMarket._tokenMeta(4);
       assert.equal(result.bidSale, true);
     });
 
@@ -293,13 +393,13 @@ contract("PiMarket", async (accounts) => {
       await sampleERC20.mint(bidder2, 65000);
 
       await sampleERC20.approve(piMarket.address, 60000, { from: bidder1 });
-      await piMarket.Bid(3, 60000, { from: bidder1, value: 60000 });
+      await piMarket.Bid(4, 60000, { from: bidder1});
       await sampleERC20.approve(piMarket.address, 65000, { from: bidder2 });
-      await piMarket.Bid(3, 65000, { from: bidder2, value: 65000 });
+      await piMarket.Bid(4, 65000, { from: bidder2});
       await sampleERC20.approve(piMarket.address, 70000, { from: bidder1 });
-      await piMarket.Bid(3, 70000, { from: bidder1, value: 70000 });
+      await piMarket.Bid(4, 70000, { from: bidder1});
 
-      result = await piMarket.Bids(3, 2);
+      result = await piMarket.Bids(4, 2);
       assert.equal(result.buyerAddress, bidder1);
     });
 
@@ -311,7 +411,93 @@ contract("PiMarket", async (accounts) => {
 
       // console.log("ss1", _balance1.toString());
 
-      await piMarket.executeBidOrder(3, 2, false, { from: alice });
+      await piMarket.executeBidOrder(4, 2, false, { from: alice });
+      result = await piNFT.ownerOf(1);
+      assert.equal(result, bidder1);
+
+      let balance1 = await sampleERC20.balanceOf(alice);
+      let balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+      let balance3 = await sampleERC20.balanceOf(feeReceiver);
+      let balance4 = await sampleERC20.balanceOf(validator);
+      // let tt = BigNumber(_balance1).minus(BigNumber(balance1));
+      // console.log("Alic Balance",balance1-_balance1);
+      // console.log(BigNumber(balance2).minus(BigNumber(_balance2)));
+      // console.log(BigNumber(balance3).minus(BigNumber(_balance3)));
+
+      assert.equal(
+        balance1 - _balance1,
+        (70000 * 8200) / 10000,
+        "Failed to transfer NFT amount"
+      );
+      // console.log("Get Token", (7000 * 9200) / 10000);
+      assert.equal(
+        balance2 - _balance2,
+        (70000 * 500) / 10000,
+        "Failed to transfer royalty amount"
+      );
+      assert.equal(
+        balance3 - _balance3,
+        (70000 * 100) / 10000,
+        "Failed to transfer fee amount"
+      );
+      assert.equal(
+        balance4 - _balance4,
+        (70000 * 1200) / 10000,
+        "Failed to transfer validator amount"
+      );
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 1);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
+    });
+
+    it("should let other bidders withdraw their bids", async () => {
+      result = await sampleERC20.balanceOf(piMarket.address);
+      assert.equal(result, 125000);
+      await piMarket.withdrawBidMoney(4, 0, { from: bidder1 });
+      await piMarket.withdrawBidMoney(4, 1, { from: bidder2 });
+      result = await sampleERC20.balanceOf(piMarket.address);
+      assert.equal(result, 0);
+    });
+
+    it("should let alice place piNFT on auction", async () => {
+      await piNFT.safeTransferFrom(bidder1, alice, 1, {from: bidder1})
+      await piNFT.approve(piMarket.address, 1);
+      const tx = await piMarket.SellNFT_byBid(
+        piNFT.address,
+        1,
+        50000,
+        300,
+        sampleERC20.address
+      );
+      assert.equal(
+        await piNFT.ownerOf(1),
+        piMarket.address,
+        "Failed to put piNFT on Auction"
+      );
+      const result = await piMarket._tokenMeta(5);
+      assert.equal(result.bidSale, true);
+    });
+
+    it("should let bidders place bid on piNFT", async () => {
+      await sampleERC20.mint(bidder1, 70000);
+
+      await sampleERC20.approve(piMarket.address, 70000, { from: bidder1 });
+      await piMarket.Bid(5, 70000, { from: bidder1});
+
+      result = await piMarket.Bids(5, 0);
+      assert.equal(result.buyerAddress, bidder1);
+    });
+
+    it("should let alice execute highest bid", async () => {
+      let _balance1 = await sampleERC20.balanceOf(alice);
+      let _balance2 = await sampleERC20.balanceOf(royaltyReceiver);
+      let _balance3 = await sampleERC20.balanceOf(feeReceiver);
+      let _balance4 = await sampleERC20.balanceOf(validator);
+
+      // console.log("ss1", _balance1.toString());
+
+      await piMarket.executeBidOrder(5, 0, false, { from: alice });
       result = await piNFT.ownerOf(1);
       assert.equal(result, bidder1);
 
@@ -345,15 +531,10 @@ contract("PiMarket", async (accounts) => {
         (70000 * 200) / 10000,
         "Failed to transfer validator amount"
       );
-    });
-
-    it("should let other bidders withdraw their bids", async () => {
-      result = await sampleERC20.balanceOf(piMarket.address);
-      assert.equal(result, 125000);
-      await piMarket.withdrawBidMoney(3, 0, { from: bidder1 });
-      await piMarket.withdrawBidMoney(3, 1, { from: bidder2 });
-      result = await sampleERC20.balanceOf(piMarket.address);
-      assert.equal(result, 0);
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 1);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 1000);
     });
 
     it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
@@ -378,7 +559,7 @@ contract("PiMarket", async (accounts) => {
       //140 bid royalty
       assert.equal(
         await sampleERC20.balanceOf(validator),
-        4400,
+        18800,
         "Failed to transfer ERC20 tokens to validator"
       );
       assert.equal(
@@ -386,6 +567,10 @@ contract("PiMarket", async (accounts) => {
         bob,
         "Failed to transfer NFT to bob"
       );
+      let commission = await piNftMethods.validatorCommissions(piNFT.address, 1);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+      assert(commission.commission.value == 0);
     });
   });
 });

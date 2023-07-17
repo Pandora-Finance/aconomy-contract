@@ -98,6 +98,7 @@ contract piMarket is
 
     address internal feeAddress;
     address public collectionFactoryAddress;
+    address public piNFTMethodsAddress;
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
     mapping(uint256 => Swap) public _swaps;
@@ -126,7 +127,8 @@ contract piMarket is
 
     function initialize(
         address _feeAddress,
-        address _collectionFactoryAddress
+        address _collectionFactoryAddress,
+        address _piNFTMethodsAddress
     ) public initializer {
         require(_feeAddress != address(0));
         require(_collectionFactoryAddress != address(0));
@@ -136,6 +138,7 @@ contract piMarket is
         __UUPSUpgradeable_init();
         feeAddress = _feeAddress;
         collectionFactoryAddress = _collectionFactoryAddress;
+        piNFTMethodsAddress = _piNFTMethodsAddress;
     }
 
     function pause() external onlyOwner {
@@ -322,6 +325,7 @@ contract piMarket is
         LibMarket.executeSale(
             _tokenMeta[_saleId],
             feeAddress,
+            piNFTMethodsAddress,
             royalties,
             validatorRoyalties
         );
@@ -342,8 +346,7 @@ contract piMarket is
      */
     function cancelSale(uint256 _saleId) external nonReentrant whenNotPaused {
         require(
-            msg.sender == _tokenMeta[_saleId].currentOwner,
-            "Only owner can cancel sale"
+            msg.sender == _tokenMeta[_saleId].currentOwner
         );
         require(_tokenMeta[_saleId].status);
 
@@ -378,7 +381,7 @@ contract piMarket is
         whenNotPaused
     {
         require(_contractAddress != address(0));
-        require(_price >= 10000, "price too low");
+        require(_price >= 10000);
         require(_bidTime != 0);
         _saleIdCounter.increment();
 
@@ -486,6 +489,7 @@ contract piMarket is
             Bids[_saleId][_bidOrderID],
             royalties,
             validatorRoyalties,
+            piNFTMethodsAddress,
             feeAddress
         );
 

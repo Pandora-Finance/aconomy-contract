@@ -91,6 +91,7 @@ contract("PiNFT", (accounts) => {
       0,
       sampleERC20.address,
       500,
+      500,
       [[validator, 200]],
       {
         from: validator,
@@ -104,6 +105,10 @@ contract("PiNFT", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 500);
   });
 
   it("should let the validator add more erc20 tokens of the same contract", async () => {
@@ -113,6 +118,7 @@ contract("PiNFT", (accounts) => {
       0,
       sampleERC20.address,
       200,
+      500,
       [[validator, 200]],
       {
         from: validator,
@@ -126,6 +132,10 @@ contract("PiNFT", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 700, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 300, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 500);
   });
 
   it("should not let validator add funds of a different erc20", async () => {
@@ -135,6 +145,7 @@ contract("PiNFT", (accounts) => {
         0,
         accounts[5],
         200,
+        400,
         [[validator, 200]],
         {
           from: validator,
@@ -201,6 +212,10 @@ contract("PiNFT", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await piNFT.ownerOf(0), alice);
+    let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+    assert(commission.isValid == false);
+    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(commission.commission.value == 0);
   });
 
   it("should transfer NFT to bob", async () => {
@@ -217,6 +232,7 @@ contract("PiNFT", (accounts) => {
         0,
         sampleERC20.address,
         500,
+        400,
         [
           [validator, 2000],
           [bob, 2001],
@@ -232,6 +248,7 @@ contract("PiNFT", (accounts) => {
       0,
       sampleERC20.address,
       500,
+      400,
       [[validator, 200]],
       {
         from: validator,
@@ -245,6 +262,10 @@ contract("PiNFT", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
+    let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+    assert(commission.isValid == true);
+    assert(commission.commission.account == validator);
+    assert(commission.commission.value == 400);
   });
 
   it("should let bob burn piNFT", async () => {
@@ -277,5 +298,9 @@ contract("PiNFT", (accounts) => {
       validator,
       "Failed to transfer NFT to alice"
     );
+    let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
+    assert(commission.isValid == false);
+    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(commission.commission.value == 0);
   });
 });

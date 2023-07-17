@@ -5,8 +5,90 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../utils/LibShare.sol";
 import "../piMarket.sol";
 import "../AconomyFee.sol";
+import "../piNFTMethods.sol";
 
 library LibMarket {
+
+    function executeSaleCommission(
+        address currency, 
+        uint256 principle, 
+        address piNFTMethodsAddress, 
+        address collection, 
+        uint256 tokenId
+        ) private returns(uint256){
+        (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+            collection, 
+            tokenId
+            );
+
+        if(currency == address(0)) {
+            uint256 commission = (principle * comm.value)/10000;
+            if(commission != 0) {
+                if(commValid) {
+                    (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
+                    require(commissionSuccess, "Commission payment failed");
+                    piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
+                }
+            }
+            return 0;
+        } else {
+            uint256 commission = (principle * comm.value)/10000;
+            if(commission != 0) {
+                if(commValid) {
+                    (bool commissionSuccess) = IERC20(currency).transferFrom(
+                    msg.sender,
+                    comm.account,
+                    commission
+                );
+                    require(commissionSuccess, "Commission payment failed");
+                    piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
+                }
+            }
+            return 0;
+        }
+    }
+
+    function executeBidCommission(
+        address currency, 
+        uint256 principle, 
+        address piNFTMethodsAddress, 
+        address collection, 
+        uint256 tokenId
+        ) private returns(uint256){
+        (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+            collection, 
+            tokenId
+            );
+
+        if(currency == address(0)) {
+            uint256 commission = (principle * comm.value)/10000;
+            if(commission != 0) {
+                if(commValid) {
+                    (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
+                    require(commissionSuccess, "Commission payment failed");
+                    piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
+                }
+            }
+            return 0;
+        } else {
+            uint256 commission = (principle * comm.value)/10000;
+            if(commission != 0) {
+                if(commValid) {
+                    (bool commissionSuccess) = IERC20(currency).transfer(
+                    comm.account,
+                    commission
+                );
+                    require(commissionSuccess, "Commission payment failed");
+                    piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
+                }
+            }
+            return 0;
+        }
+    }
 
     /**
      * @notice Checks the requiments for a sale to go through.
@@ -36,6 +118,7 @@ library LibMarket {
     function executeSale(
         piMarket.TokenMeta storage meta,
         address AconomyFeeAddress,
+        address piNFTMethodsAddress,
         LibShare.Share[] memory royalties,
         LibShare.Share[] memory validatorRoyalties
     ) external {
@@ -67,8 +150,10 @@ library LibMarket {
                 sum = sum - amount;
             }
 
+            uint256 commission = executeSaleCommission(meta.currency, msg.value, piNFTMethodsAddress, meta.tokenContractAddress, meta.tokenId);
+
             (bool isSuccess, ) = payable(meta.currentOwner).call{
-                value: (sum - fee)
+                value: (sum - fee - commission)
             }("");
             require(isSuccess, "Transfer failed");
             if(piMarketFee != 0) {
@@ -97,10 +182,12 @@ library LibMarket {
                 sum = sum - amount;
             }
 
+            uint256 commission = executeSaleCommission(meta.currency, meta.price, piNFTMethodsAddress, meta.tokenContractAddress, meta.tokenId);
+
             bool isSuccess = IERC20(meta.currency).transferFrom(
                 msg.sender,
                 meta.currentOwner,
-                sum - fee
+                sum - fee - commission
             );
             require(isSuccess, "Transfer failed");
             if(piMarketFee != 0) {
@@ -148,6 +235,7 @@ library LibMarket {
         piMarket.BidOrder storage bids,
         LibShare.Share[] memory royalties,
         LibShare.Share[] memory validatorRoyalties,
+        address piNFTMethodsAddress,
         address AconomyFeeAddress
     ) external {
         require(msg.sender == meta.currentOwner);
@@ -184,7 +272,9 @@ library LibMarket {
                 sum = sum - amount;
             }
 
-            (bool isSuccess, ) = payable(msg.sender).call{value: (sum - fee)}("");
+            uint256 commission = executeBidCommission(meta.currency, bids.price, piNFTMethodsAddress, meta.tokenContractAddress, meta.tokenId);
+
+            (bool isSuccess, ) = payable(msg.sender).call{value: (sum - fee - commission)}("");
             require(isSuccess, "Transfer failed");
             if(piMarketFee != 0) {
                 (bool feeSuccess, ) = payable(AconomyOwner).call{value: fee}("");
@@ -211,9 +301,11 @@ library LibMarket {
                 sum = sum - amount;
             }
 
+            uint256 commission = executeBidCommission(meta.currency, bids.price, piNFTMethodsAddress, meta.tokenContractAddress, meta.tokenId);
+
             bool isSuccess = IERC20(meta.currency).transfer(
                 meta.currentOwner,
-                sum - fee
+                sum - fee - commission
             );
             require(isSuccess, "Transfer failed");
             if(piMarketFee != 0) {
