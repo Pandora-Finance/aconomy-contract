@@ -156,7 +156,6 @@ contract("PiNFT", (accounts) => {
   });
 
   it("should let alice transfer NFT to bob", async () => {
-    await piNFT.approve(piNftMethods.address, 0, { from: alice });
     await piNFT.safeTransferFrom(alice, bob, 0, {
       from: alice,
     });
@@ -164,7 +163,6 @@ contract("PiNFT", (accounts) => {
   });
 
   it("should let bob transfer NFT to alice", async () => {
-    await piNFT.approve(piNftMethods.address, 0, { from: bob });
     await piNFT.safeTransferFrom(bob, alice, 0, {
       from: bob,
     });

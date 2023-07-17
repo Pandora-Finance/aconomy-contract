@@ -170,7 +170,6 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let alice transfer NFT to bob", async () => {
-    await collectionInstance.approve(piNftMethods.address, 0, { from: alice });
     await collectionInstance.safeTransferFrom(
       alice,
       bob,
@@ -185,7 +184,6 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let bob transfer NFT to alice", async () => {
-    await collectionInstance.approve(piNftMethods.address, 0, { from: bob });
     await collectionInstance.safeTransferFrom(
       bob,
       alice,
