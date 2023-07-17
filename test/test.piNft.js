@@ -157,7 +157,7 @@ contract("PiNFT", (accounts) => {
 
   it("should let alice transfer NFT to bob", async () => {
     await piNFT.approve(piNftMethods.address, 0, { from: alice });
-    await piNftMethods.transferAfterFunding(piNFT.address, 0, bob, {
+    await piNFT.safeTransferFrom(alice, bob, 0, {
       from: alice,
     });
     assert.equal(await piNFT.ownerOf(0), bob, "Failed to transfer NFT");
@@ -165,7 +165,7 @@ contract("PiNFT", (accounts) => {
 
   it("should let bob transfer NFT to alice", async () => {
     await piNFT.approve(piNftMethods.address, 0, { from: bob });
-    await piNftMethods.transferAfterFunding(piNFT.address, 0, alice, {
+    await piNFT.safeTransferFrom(bob, alice, 0, {
       from: bob,
     });
     assert.equal(await piNFT.ownerOf(0), alice, "Failed to transfer NFT");

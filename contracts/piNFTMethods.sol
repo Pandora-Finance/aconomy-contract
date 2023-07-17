@@ -563,31 +563,6 @@ contract piNFTMethods is
         );
     }
 
-    /**
-     * @notice Transfers the piNft after validator funding.
-     * @param _collectionAddress The address of the collection.
-     * @param _tokenId The Id of the token.
-     * @param _to The address to transfer to.
-     */
-    function transferAfterFunding(
-        address _collectionAddress,
-        uint256 _tokenId,
-        address _to
-    ) external nonReentrant whenNotPaused {
-        require(
-            IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
-                msg.sender
-        );
-        //require(msg.sender == NFTowner[_collectionAddress][_tokenId]);
-        NFTowner[_collectionAddress][_tokenId] = _to;
-        //needs approval
-        IERC721Upgradeable(_collectionAddress).safeTransferFrom(
-            msg.sender,
-            _to,
-            _tokenId
-        );
-    }
-
     function paidCommission(address _collection, uint256 _tokenId) external {
         require(msg.sender == piMarketAddress);
         validatorCommissions[_collection][_tokenId].isValid = false;
