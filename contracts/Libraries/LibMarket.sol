@@ -28,9 +28,10 @@ library LibMarket {
                     (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
                 }
             }
-            return commission;
+            return 0;
         } else {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
@@ -42,9 +43,10 @@ library LibMarket {
                 );
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
                 }
             }
-            return commission;
+            return 0;
         }
     }
 
@@ -67,9 +69,10 @@ library LibMarket {
                     (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
                 }
             }
-            return commission;
+            return 0;
         } else {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
@@ -80,9 +83,10 @@ library LibMarket {
                 );
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
+                    return commission;
                 }
             }
-            return commission;
+            return 0;
         }
     }
 

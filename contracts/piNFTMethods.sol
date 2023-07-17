@@ -194,6 +194,7 @@ contract piNFTMethods is
         uint96 _commission,
         LibShare.Share[] memory royalties
     ) public whenNotPaused {
+        require(piNFT(_collectionAddress).exists(_tokenId));
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
@@ -577,7 +578,7 @@ contract piNFTMethods is
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
                 msg.sender
         );
-        require(msg.sender == NFTowner[_collectionAddress][_tokenId]);
+        //require(msg.sender == NFTowner[_collectionAddress][_tokenId]);
         NFTowner[_collectionAddress][_tokenId] = _to;
         //needs approval
         IERC721Upgradeable(_collectionAddress).safeTransferFrom(

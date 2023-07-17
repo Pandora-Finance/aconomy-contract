@@ -123,6 +123,10 @@ contract CollectionMethods is
         _burn(_tokenId);
     }
 
+    function exists(uint256 _tokenId) external view returns(bool){
+        return _exists(_tokenId);
+    }
+
     /**
      * @notice Fetches the validator royalties.
      * @dev Returns a LibShare.Share[] array.

@@ -194,6 +194,10 @@ contract piNFT is
         _burn(_tokenId);
     }
 
+    function exists(uint256 _tokenId) external view returns(bool){
+        return _exists(_tokenId);
+    }
+
     function _msgSender()
         internal
         view
