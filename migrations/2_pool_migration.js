@@ -34,7 +34,7 @@ module.exports = async function (deployer) {
   await deployer.deploy(attestationServices, attestRegistry.address)
   var attestServices = await attestationServices.deployed()
 
-  var piNftMethods = await deployProxy(piNFTMethods, ["0xd8253782c45a12053594b9deB72d8e8aB2Fca54c"], {
+  var piNftMethods = await deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
     initializer: "initialize",
     kind: "uups",
   });
