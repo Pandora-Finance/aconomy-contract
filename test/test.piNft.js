@@ -27,7 +27,7 @@ contract("PiNFT", (accounts) => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     // console.log(tx);
     await expectRevert(
-      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]),
+      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4901]]),
       "overflow"
     );
     const tokenId = tx.logs[0].args.tokenId.toNumber();
@@ -43,9 +43,9 @@ contract("PiNFT", (accounts) => {
     await piNFT.unpause();
   });
 
-  it("should Royality must be less 4000", async () => {
+  it("should Royality must be less 4900", async () => {
     await expectRevert(
-      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4001]]),
+      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4901]]),
       "overflow"
     );
   });
@@ -232,7 +232,7 @@ contract("PiNFT", (accounts) => {
         500,
         400,
         [
-          [validator, 2000],
+          [validator, 2900],
           [bob, 2001],
         ],
         {

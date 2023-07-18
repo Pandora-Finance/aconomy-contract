@@ -75,6 +75,7 @@ contract CollectionMethods is
      */
     function setRoyaltiesForValidator(
         uint256 _tokenId,
+        uint256 _commission,
         LibShare.Share[] memory royalties
     ) external {
         require(
@@ -91,7 +92,7 @@ contract CollectionMethods is
             RoyaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4900 - _commission, "overflow");
 
         emit RoyaltiesSet(_tokenId, royalties);
     }

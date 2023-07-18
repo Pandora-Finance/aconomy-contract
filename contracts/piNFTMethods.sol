@@ -205,14 +205,15 @@ contract piNFTMethods is
                 "invalid"
             );
         } else {
-            require(_commission <= 1000);
-            piNFT(_collectionAddress).setRoyaltiesForValidator(
-                _tokenId,
-                royalties
-            );
+            require(_commission <= 4900);
             LibShare.Share memory commissionShare = LibShare.Share(payable(msg.sender), _commission);
             validatorCommissions[_collectionAddress][_tokenId].commission = commissionShare;
             validatorCommissions[_collectionAddress][_tokenId].isValid = true;
+            piNFT(_collectionAddress).setRoyaltiesForValidator(
+                _tokenId,
+                _commission,
+                royalties
+            );
         }
         NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
             _collectionAddress

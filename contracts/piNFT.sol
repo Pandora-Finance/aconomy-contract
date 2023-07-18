@@ -121,7 +121,7 @@ contract piNFT is
             royaltiesByTokenId[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4900, "overflow");
 
         emit RoyaltiesSetForTokenId(_tokenId, royalties);
     }
@@ -157,6 +157,7 @@ contract piNFT is
      */
     function setRoyaltiesForValidator(
         uint256 _tokenId,
+        uint256 _commission,
         LibShare.Share[] memory royalties
     ) external {
         require(msg.sender == piNFTMethodsAddress);
@@ -169,7 +170,7 @@ contract piNFT is
             royaltiesForValidator[_tokenId].push(royalties[i]);
             sumRoyalties += royalties[i].value;
         }
-        require(sumRoyalties <= 4000, "overflow");
+        require(sumRoyalties <= 4900 - _commission, "overflow");
 
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
