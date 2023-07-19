@@ -1,3 +1,5 @@
+const { deployProxy, upgradeProxy } = require("@openzeppelin/truffle-upgrades");
+const PiMarketV2 = artifacts.require("piMarketV2");
 const BigNumber = require("big-number");
 const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
@@ -780,4 +782,24 @@ contract("PiMarket", async (accounts) => {
       assert.equal(res.status, false);
     });
   });
+  describe("Upgrade contract", async () => {
+    it("should upgrade the contract", async () => {
+      
+      let upgrade = await upgradeProxy(piMarket.address, PiMarketV2, {
+        kind: "uups",
+        unsafeAllow: ["external-library-linking"],
+      })
+
+      assert(piMarket.address == upgrade.address);
+
+      meta = await upgrade._tokenMeta(1);
+      assert.equal(meta.status, false);
+      assert.equal(meta.newValue, 0);
+
+      assert(await upgrade.number() == 0);
+      let r = await upgrade.setNumber(3);
+      console.log(r);
+      assert(await upgrade.number() == 3);
+    })
+  })
 });
