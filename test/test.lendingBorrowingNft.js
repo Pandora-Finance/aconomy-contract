@@ -149,6 +149,13 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert(BidId3 == 2, "Bid not placed successfully");
   });
 
+  it("should fail to withdraw second bid", async () => {
+    await expectRevert(
+      nftLendBorrow.withdraw(1, 1, { from: carl }),
+      "Can't withdraw Bid before expiration"
+    );
+  })
+
   it("Should Accept Bid", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
     let feeAddress = await aconomyFee.getAconomyOwnerAddress();
@@ -208,15 +215,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert.equal(nft.listed, false);
   });
 
-  it("Withdraw second Bid", async () => {
-    await expectRevert(
-      nftLendBorrow.withdraw(1, 1, { from: carl }),
-      "Can't withdraw Bid before expiration"
-    );
-
-    await time.increase(time.duration.seconds(201));
-    // console.log( (await time.latest()).toNumber())
-
+  it("Should Withdraw second Bid", async () => {
     const res = await nftLendBorrow.withdraw(1, 1, { from: carl });
 
     assert(res.receipt.status == true, "Unable to withdraw bid");

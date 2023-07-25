@@ -421,10 +421,12 @@ contract NFTlendingBorrowing is
             !Bids[_NFTid][_bidId].bidAccepted,
             "Your Bid has been Accepted"
         );
-        require(
-            block.timestamp > Bids[_NFTid][_bidId].expiration,
-            "Can't withdraw Bid before expiration"
-        );
+        if(!NFTdetails[_NFTid].bidAccepted) {
+            require(
+                block.timestamp > Bids[_NFTid][_bidId].expiration,
+                "Can't withdraw Bid before expiration"
+            );
+        }
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
                 msg.sender,
