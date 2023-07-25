@@ -4,7 +4,7 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract mintToken is ERC20 {
-    constructor(uint256 initialSupply) ERC20("Shrish", "srs") {
+    constructor(uint256 initialSupply) ERC20("Shrish", "SRS") {
         _mint(msg.sender, initialSupply);
     }
 

@@ -72,6 +72,18 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
     },
+    arbitrum_goerli: {
+      provider: function () {
+        return new HDWalletProvider(
+          'cd09e7726f5d917f8f5df889037e7ecf7fa7b8de73aac55b5615795ddfebe843',
+          'https://goerli-rollup.arbitrum.io/rpc'
+        );
+      },
+      network_id: 421613,
+      // gasPrice: 10000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -143,6 +155,7 @@ module.exports = {
   plugins: ['truffle-plugin-verify', 'truffle-contract-size'],
   api_keys: {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
-    bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI'
+    bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI',
+    arbiscan: 'G12ERUZ5VEVHX3MKZBUMXSP9I3ZBJH2Y2U'
   }
 };

@@ -5,15 +5,15 @@ const SampleERC20 = artifacts.require("mintToken");
 const piNFTMethods = artifacts.require("piNFTMethods");
 
 module.exports = async function (deployer) {
-  var piNftMethods = await piNFTMethods.deployed();
+  // var piNftMethods = await piNFTMethods.deployed();
 
-  var pi = await deployProxy(PiNFT, ["Aconomy", "ACO", piNftMethods.address, "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
-    initializer: "initialize",
-    kind: "uups",
-    //unsafeAllow: ["external-library-linking"],
-  });
+  // var pi = await deployProxy(PiNFT, ["Aconomy", "ACO", piNftMethods.address, "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
+  //   initializer: "initialize",
+  //   kind: "uups",
+  //   //unsafeAllow: ["external-library-linking"],
+  // });
 
-  console.log("piNFT: ", pi.address);
-  console.log("piNFTMethods", piNftMethods.address);
+  // console.log("piNFT: ", pi.address);
+  // console.log("piNFTMethods", piNftMethods.address);
   //deployer.deploy(SampleERC20, "1000000");
 };
