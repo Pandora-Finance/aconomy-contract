@@ -28,6 +28,10 @@ module.exports = async function (deployer) {
   await deployer.deploy(aconomyFee);
   var aconomyfee = await aconomyFee.deployed();
 
+  await aconomyfee.setAconomyPoolFee(50)
+  await aconomyfee.setAconomyPiMarketFee(50)
+  await aconomyfee.setAconomyNFTLendBorrowFee(50)
+
   await deployer.deploy(attestationRegistry)
   var attestRegistry = await attestationRegistry.deployed();
 
@@ -106,7 +110,7 @@ module.exports = async function (deployer) {
   console.log("NFTlendingBorrowing : ", lending.address)
 
 
-  await deployer.deploy(lendingToken, 100000000000)
+   await deployer.deploy(lendingToken, 100000000000)
 
 
 };

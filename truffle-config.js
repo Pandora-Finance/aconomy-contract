@@ -72,6 +72,14 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
     },
+    maticMumbai: {
+      provider: () => new HDWalletProvider(pk, `https://polygon-mumbai-bor.publicnode.com`),
+      network_id: 80001,
+      timeoutBlocks: 200,
+      networkCheckTimeout: 10000,
+      skipDryRun: true,
+      gasPrice: 100000000000,
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -143,6 +151,7 @@ module.exports = {
   plugins: ['truffle-plugin-verify', 'truffle-contract-size'],
   api_keys: {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
-    bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI'
+    bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI',
+    polygonscan: `${process.env.POLYGON_SCAN_API}`
   }
 };
