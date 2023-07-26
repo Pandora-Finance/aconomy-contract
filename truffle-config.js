@@ -80,6 +80,17 @@ module.exports = {
       skipDryRun: true,
       gasPrice: 100000000000,
     },
+    arbitrum_goerli: {
+      provider: function () {
+        return new HDWalletProvider(
+          pk,
+          'https://goerli-rollup.arbitrum.io/rpc'
+        );
+      },
+      network_id: 421613,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -152,6 +163,7 @@ module.exports = {
   api_keys: {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
     bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI',
-    polygonscan: `${process.env.POLYGON_SCAN_API}`
+    polygonscan: `${process.env.POLYGON_SCAN_API}`,
+    arbiscan: 'G12ERUZ5VEVHX3MKZBUMXSP9I3ZBJH2Y2U'
   }
 };
