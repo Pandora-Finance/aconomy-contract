@@ -347,6 +347,12 @@ contract NFTlendingBorrowing is
         uint256 _NFTid,
         uint256 _bidId
     ) external view returns (uint256) {
+        if(!Bids[_NFTid][_bidId].bidAccepted) {
+            return 0;
+        }
+        if(NFTdetails[_NFTid].repaid) {
+            return 0;
+        }
         uint256 percentageAmount = LibCalculations.calculateInterest(
             Bids[_NFTid][_bidId].Amount,
             Bids[_NFTid][_bidId].percent,
