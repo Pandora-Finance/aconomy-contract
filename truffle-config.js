@@ -93,17 +93,16 @@ module.exports = {
     },
       phalcon: {
         provider: () => new HDWalletProvider(['cd09e7726f5d917f8f5df889037e7ecf7fa7b8de73aac55b5615795ddfebe843'], 
-        'https://rpc.phalcon.xyz/rpc_90941b18ded44a178a48bbfe3ecba85c'),
+        'https://rpc.phalcon.xyz/rpc_c18ba00f0caa47f1bbaf2cced5143952'),
         network_id: "*", // Match any network id
-        // gas: 5500000, // Gas limit
+        gas: 5500000, // Gas limit
         confirmations: 0, //number of confirmations to wait between deployments
         timeoutBlocks: 200,
         skipDryRun: true,
-        gasPrice: 100000000000,
         verify: {
-          apiUrl: 'https://rpc.phalcon.xyz/rpc_90941b18ded44a178a48bbfe3ecba85c',
-          apiKey: 'bec77057-38b6-4ddb-a089-4962b44bc701',
-          explorerUrl: 'https://api.phalcon.xyz/api/rpc_90941b18ded44a178a48bbfe3ecba85c',
+          apiUrl: 'https://api.phalcon.xyz/api/rpc_b4c7df5bf4044960949882e599e772d2',
+          apiKey: 'fc23c7ee-053c-4c46-b2e7-d3ecf31064fc',
+          explorerUrl: 'https://scan.phalcon.xyz/fork_9a0d38685864439ebe07d58fbbfad679',
         },
       },
 
