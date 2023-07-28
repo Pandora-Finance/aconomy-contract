@@ -100,8 +100,8 @@ module.exports = {
         timeoutBlocks: 200,
         skipDryRun: true,
         verify: {
-          apiUrl: 'https://api.phalcon.xyz/api/rpc_b4c7df5bf4044960949882e599e772d2',
-          apiKey: 'fc23c7ee-053c-4c46-b2e7-d3ecf31064fc',
+          apiUrl: 'https://api.phalcon.xyz/api/rpc_c18ba00f0caa47f1bbaf2cced5143952',
+          apiKey: '4d449d80-bc87-4c4c-a7a2-7f482a167518',
           explorerUrl: 'https://scan.phalcon.xyz/fork_9a0d38685864439ebe07d58fbbfad679',
         },
       },
@@ -180,6 +180,6 @@ module.exports = {
     bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI',
     polygonscan: `${process.env.POLYGON_SCAN_API}`,
     arbiscan: 'G12ERUZ5VEVHX3MKZBUMXSP9I3ZBJH2Y2U',
-    phalcon: 'bec77057-38b6-4ddb-a089-4962b44bc701',
+    phalcon: '4d449d80-bc87-4c4c-a7a2-7f482a167518',
   }
 };
