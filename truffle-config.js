@@ -99,10 +99,11 @@ module.exports = {
         confirmations: 0, //number of confirmations to wait between deployments
         timeoutBlocks: 200,
         skipDryRun: true,
+        gasPrice: 100000000000,
         verify: {
           apiUrl: 'https://rpc.phalcon.xyz/rpc_90941b18ded44a178a48bbfe3ecba85c',
           apiKey: 'bec77057-38b6-4ddb-a089-4962b44bc701',
-          explorerUrl: 'https://scan.phalcon.xyz/fork_d2f4b279c0744016b4fc9843b103f422',
+          explorerUrl: 'https://api.phalcon.xyz/api/rpc_90941b18ded44a178a48bbfe3ecba85c',
         },
       },
 
