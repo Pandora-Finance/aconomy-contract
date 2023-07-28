@@ -91,6 +91,21 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
     },
+      phalcon: {
+        provider: () => new HDWalletProvider(['cd09e7726f5d917f8f5df889037e7ecf7fa7b8de73aac55b5615795ddfebe843'], 
+        'https://rpc.phalcon.xyz/rpc_90941b18ded44a178a48bbfe3ecba85c'),
+        network_id: "*", // Match any network id
+        // gas: 5500000, // Gas limit
+        confirmations: 0, //number of confirmations to wait between deployments
+        timeoutBlocks: 200,
+        skipDryRun: true,
+        verify: {
+          apiUrl: 'https://rpc.phalcon.xyz/rpc_90941b18ded44a178a48bbfe3ecba85c',
+          apiKey: 'bec77057-38b6-4ddb-a089-4962b44bc701',
+          explorerUrl: 'https://scan.phalcon.xyz/fork_d2f4b279c0744016b4fc9843b103f422',
+        },
+      },
+
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
@@ -164,6 +179,7 @@ module.exports = {
     etherscan: '5KG1R648C45F878IWS9VBB6YTCVMZC9I6E',
     bscscan: 'V1IIN8HXAYVSDQU61QDX12MJU6WSWED8TI',
     polygonscan: `${process.env.POLYGON_SCAN_API}`,
-    arbiscan: 'G12ERUZ5VEVHX3MKZBUMXSP9I3ZBJH2Y2U'
+    arbiscan: 'G12ERUZ5VEVHX3MKZBUMXSP9I3ZBJH2Y2U',
+    phalcon: 'bec77057-38b6-4ddb-a089-4962b44bc701',
   }
 };
