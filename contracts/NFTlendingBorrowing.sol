@@ -44,6 +44,7 @@ contract NFTlendingBorrowing is
         address tokenIdOwner;
         address contractAddress;
         uint32 duration;
+        uint256 expiration;
         uint256 expectedAmount;
         uint16 percent;
         bool listed;
@@ -156,6 +157,7 @@ contract NFTlendingBorrowing is
         address _contractAddress,
         uint16 _percent,
         uint32 _duration,
+        uint256 _expiration,
         uint256 _expectedAmount
     )
         external
@@ -175,6 +177,7 @@ contract NFTlendingBorrowing is
             msg.sender,
             _contractAddress,
             _duration,
+            _expiration + block.timestamp,
             _expectedAmount,
             _percent,
             true,
@@ -260,6 +263,7 @@ contract NFTlendingBorrowing is
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
+        require(NFTdetails[_NFTid].expiration > block.timestamp, "Bid time over");
 
         uint16 fee = AconomyFee(AconomyFeeAddress).AconomyNFTLendBorrowFee();
 

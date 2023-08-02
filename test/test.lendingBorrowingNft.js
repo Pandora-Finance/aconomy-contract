@@ -4,6 +4,9 @@ const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const NftLendingBorrowing = artifacts.require("NFTlendingBorrowing");
 const AconomyFee = artifacts.require("AconomyFee");
+const ethers = require("ethers");
+
+
 
 contract("NFTlendingBorrowing", async (accounts) => {
   let piNFT, sampleERC20, nftLendBorrow, aconomyFee;
@@ -41,6 +44,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
       piNFT.address,
       200,
       300,
+      3600,
       200000000000
     );
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
@@ -57,6 +61,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
         piNFT.address,
         200,
         300,
+        3600,
         200000000000,
         { from: alice }
       ),
@@ -149,6 +154,8 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert(BidId3 == 2, "Bid not placed successfully");
   });
 
+
+
   it("should fail to withdraw second bid", async () => {
     await expectRevert(
       nftLendBorrow.withdraw(1, 1, { from: carl }),
@@ -235,6 +242,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
       piNFT.address,
       200,
       200,
+      3600,
       100000000000
     );
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
@@ -244,4 +252,58 @@ contract("NFTlendingBorrowing", async (accounts) => {
     let t = await nftLendBorrow.NFTdetails(2);
     assert.equal(t.listed, false);
   });
+
+  it("should fail to Bid after expiration", async () => {
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    assert(tokenId === 3, "Failed to mint or wrong token Id");
+    // assert.equal(await piNFT.balanceOf(alice), 3, "Failed to mint");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      tokenId,
+      piNFT.address,
+      200,
+      200,
+      3600,
+      100000000000
+    );
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+
+    await sampleERC20.mint(carl, 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: carl,
+    });
+    
+    const tx2 = await nftLendBorrow.Bid(
+      NFTid,
+      100000000000,
+      sampleERC20.address,
+      10,
+      200,
+      200,
+      { from: carl }
+    );
+
+    await time.increase(3601);
+
+    await expectRevert(
+      nftLendBorrow.Bid(
+        NFTid,
+        100000000000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: carl }
+      ),
+      "Bid time over"
+    );
+
+    
+    
+
+
+  })
+
+
 });
