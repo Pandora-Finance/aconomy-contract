@@ -176,7 +176,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         require(_amount != 0, "You can't supply with zero amount");
         require(_maxLoanDuration % 30 days == 0);
         require(_APR >= 100, "apr too low");
-        require(_amount >= 10000000000, "amount too low");
+        require(_amount >= 1000000, "amount too low");
 
         uint16 fee = poolRegistry(poolRegistryAddress).getAconomyFee();
 
@@ -501,6 +501,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
+        require(fundDetail.amount / fundDetail.installment.installments >= 1000000);
         if (fundDetail.state != BidState.ACCEPTED) {
             revert("Loan must be accepted");
         }

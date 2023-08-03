@@ -103,7 +103,7 @@ contract poolAddress is
         require(!poolRegistry(poolRegistryAddress).ClosedPool(_poolId));
         require(_duration % 30 days == 0);
         require(_APR >= 100);
-        require(_principal >= 10000000000);
+        require(_principal >= 1000000);
         require(_expirationDuration > 0);
 
         loanId_ = loanId;
@@ -329,6 +329,7 @@ contract poolAddress is
     function repayMonthlyInstallment(
         uint256 _loanId
     ) external whenNotPaused nonReentrant {
+        require(loans[_loanId].loanDetails.principal / uint256(loans[_loanId].terms.installments) >= 1000000);
         require(loans[_loanId].state == LoanState.ACCEPTED);
         require(
             loans[_loanId].terms.installmentsPaid + 1 <=

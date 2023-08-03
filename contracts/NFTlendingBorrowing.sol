@@ -169,7 +169,7 @@ contract NFTlendingBorrowing is
     {
         require(_contractAddress != address(0));
         require(_percent >= 10);
-        require(_expectedAmount >= 100000000000);
+        require(_expectedAmount >= 10000000);
 
         _NFTid = ++NFTid;
 
@@ -233,7 +233,7 @@ contract NFTlendingBorrowing is
         uint256 _NFTid,
         uint256 _expectedAmount
     ) public whenNotPaused NFTOwner(_NFTid) {
-        require(_expectedAmount >= 100000000000);
+        require(_expectedAmount >= 10000000);
         if (_expectedAmount != NFTdetails[_NFTid].expectedAmount) {
             NFTdetails[_NFTid].expectedAmount = _expectedAmount;
 
@@ -260,7 +260,7 @@ contract NFTlendingBorrowing is
     ) external whenNotPaused nonReentrant {
         require(_ERC20Address != address(0));
         require(_bidAmount != 0, "You can't bid with zero Amount");
-        require(_bidAmount >= 100000000000, "bid amount too low");
+        require(_bidAmount >= 10000000, "bid amount too low");
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");

@@ -167,7 +167,9 @@ library LibCalculations {
 
         uint256 interestInAYear = percent(owedPrincipal_, _interestRate);
         uint256 owedTime = _timestamp - uint256(_lastRepaidTimestamp);
-        interest_ = (interestInAYear * owedTime) / 360 days;
+        uint256 owedTimeInHours = owedTime / 3600;
+        uint256 oneYearInHours = 360 days / 3600;
+        interest_ = (interestInAYear * owedTimeInHours) / oneYearInHours;
 
         // Cast to int265 to avoid underflow errors (negative means loan duration has passed)
         int256 durationLeftOnLoan = int256(uint256(_loanDuration)) -
@@ -188,6 +190,8 @@ library LibCalculations {
 
     function calculateInterest(uint256 _owedPrincipal, uint16 _interestRate, uint256 _owedTime) internal pure returns(uint256 _interest) {
         uint256 interestInAYear = percent(_owedPrincipal, _interestRate);
-        _interest = (interestInAYear * _owedTime) / 365 days;
+        uint256 owedTimeInHours = _owedTime / 3600;
+        uint256 oneYearInHours = 360 days / 3600;
+        _interest = (interestInAYear * owedTimeInHours) / oneYearInHours;
     }
 }
