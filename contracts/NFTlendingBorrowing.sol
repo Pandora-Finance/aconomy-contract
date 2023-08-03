@@ -263,7 +263,6 @@ contract NFTlendingBorrowing is
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
-        require(NFTdetails[_NFTid].expiration > block.timestamp, "Bid time over");
 
         uint16 fee = AconomyFee(AconomyFeeAddress).AconomyNFTLendBorrowFee();
 
