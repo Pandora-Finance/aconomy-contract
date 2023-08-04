@@ -5,7 +5,7 @@ const IERC20 = artifacts.require("IERC20");
 var BigNumber = require("big-number");
 var moment = require("moment");
 const truffleAssert = require("truffle-assertions");
-const { time } = require("@openzeppelin/test-helpers");
+const { time, BN } = require("@openzeppelin/test-helpers");
 const AttestRegistry = artifacts.require("AttestationRegistry");
 const AttestServices = artifacts.require("AttestationServices");
 const AconomyFee = artifacts.require("AconomyFee");
@@ -354,6 +354,11 @@ contract("FundingPool", (accounts) => {
       );
       // console.log("installment after 1 cycle", r.toString());
       //1
+      let dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      let acceptedTimeStamp = new BN(loan.acceptBidTimestamp)
+      let paymentCycle = new BN(paymentCycleDuration)
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(1)))}`);
+
       await erc20.approve(fundingpoolInstance.address, r);
       let result = await fundingpoolInstance.repayMonthlyInstallment(
         poolId,
@@ -415,6 +420,11 @@ contract("FundingPool", (accounts) => {
         true
       );
       //2
+      let dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      let acceptedTimeStamp = new BN(loan.acceptBidTimestamp)
+      let paymentCycle = new BN(paymentCycleDuration)
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(2)))}`);
+
       let r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
         erc20.address,
@@ -450,6 +460,9 @@ contract("FundingPool", (accounts) => {
         true
       );
       //3
+      dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(3)))}`);
+
       r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
         erc20.address,
@@ -484,6 +497,9 @@ contract("FundingPool", (accounts) => {
         false
       );
       //4
+      dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(4)))}`);
+
       await time.increase(paymentCycleDuration);
       r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
@@ -519,6 +535,9 @@ contract("FundingPool", (accounts) => {
         false
       );
       //5
+      dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(5)))}`);
+
       await time.increase(paymentCycleDuration);
       r = await fundingpoolInstance.viewInstallmentAmount(
         poolId,
@@ -554,6 +573,9 @@ contract("FundingPool", (accounts) => {
         false
       );
       //6
+      dueDate = await fundingpoolInstance.calculateNextDueDate(poolId, erc20.address, bidId, lender);
+      assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(6)))}`);
+
       await time.increase(paymentCycleDuration);
       //await erc20.mint(accounts[1], '100000000');
       r = await fundingpoolInstance.viewInstallmentAmount(
@@ -562,13 +584,13 @@ contract("FundingPool", (accounts) => {
         bidId,
         lender
       );
-      let full = await fundingpoolInstance.viewFullRepayAmount(
-        poolId,
-        erc20.address,
-        bidId,
-        lender
-      );
-      await erc20.approve(fundingpoolInstance.address, full + 100);
+      // let full = await fundingpoolInstance.viewFullRepayAmount(
+      //   poolId,
+      //   erc20.address,
+      //   bidId,
+      //   lender
+      // );
+      await erc20.approve(fundingpoolInstance.address, r);
       // console.log("full", full.toString());
       await fundingpoolInstance.repayMonthlyInstallment(
         poolId,
@@ -656,7 +678,7 @@ contract("FundingPool", (accounts) => {
       // console.log(bal.toNumber());
       let b = await erc20.balanceOf(accounts[1]);
       //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
-      await erc20.approve(fundingpoolInstance.address, bal + 10);
+      await erc20.approve(fundingpoolInstance.address, bal);
       let r = await fundingpoolInstance.RepayFullAmount(
         poolId,
         erc20.address,
@@ -817,5 +839,99 @@ contract("FundingPool", (accounts) => {
       );
       assert.equal(r, true);
     });
+
+    it("should supply funds to pool again, this time 1 usdt", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+
+      await truffleAssert.reverts(fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        100000,
+        loanDefaultDuration,
+        expiration,
+        1000,
+        { from: lender }
+      ), "amount too low")
+
+      const tx = await fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        1000000,
+        loanDefaultDuration,
+        expiration,
+        1000,
+        { from: lender }
+      );
+      // console.log(tx);
+      bidId = tx.logs[0].args.BidId.toNumber();
+      assert.equal(bidId, 5);
+    });
+
+    it("should accept the bid", async () => {
+      const tx = await fundingpoolInstance.AcceptBid(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        receiver
+      );
+    });
+
+    it("should not allow monthly installments as amount is too low", async () => {
+      r = await fundingpoolInstance.viewInstallmentAmount(
+        poolId,
+        erc20.address,
+        bidId,
+        lender
+      );
+      
+      await erc20.approve(fundingpoolInstance.address, r);
+
+      await truffleAssert.reverts(
+        fundingpoolInstance.repayMonthlyInstallment(
+          poolId,
+          erc20.address,
+          bidId,
+          lender
+        ),
+        "low"
+      );
+    })
+
+    it("should repay the full amount", async () => {
+      let bal = await fundingpoolInstance.viewFullRepayAmount(
+        poolId,
+        erc20.address,
+        bidId,
+        lender
+      );
+      assert.equal(bal, 1000000);
+
+      await time.increase(3600);
+
+      bal = await fundingpoolInstance.viewFullRepayAmount(
+        poolId,
+        erc20.address,
+        bidId,
+        lender
+      );
+
+      console.log(bal.toString())
+      
+      await erc20.approve(fundingpoolInstance.address, bal);
+
+      let r = await fundingpoolInstance.RepayFullAmount(
+        poolId,
+        erc20.address,
+        bidId,
+        lender
+      );
+    })
   });
 });

@@ -477,6 +477,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             block.timestamp
         );
 
+        if (
+            fundDetail.installment.installmentsPaid + 1 ==
+            fundDetail.installment.installments
+        ) {
+            return viewFullRepayAmount(_poolId, _ERC20Address, _bidId, _lender);
+        }
+
         if (monthsSinceStart > lastPaymentCycle) {
             return fundDetail.paymentCycleAmount;
         } else {
@@ -501,7 +508,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
-        require(fundDetail.amount / fundDetail.installment.installments >= 1000000);
+        require(fundDetail.amount / fundDetail.installment.installments >= 1000000, "low");
         if (fundDetail.state != BidState.ACCEPTED) {
             revert("Loan must be accepted");
         }

@@ -5,6 +5,7 @@ const SampleERC20 = artifacts.require("mintToken");
 const NftLendingBorrowing = artifacts.require("NFTlendingBorrowing");
 const AconomyFee = artifacts.require("AconomyFee");
 const ethers = require("ethers");
+const { unspecified } = require("@openzeppelin/test-helpers/src/expectRevert");
 
 
 
@@ -38,6 +39,15 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 0, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 1, "Failed to mint");
+
+    await expectRevert.unspecified(nftLendBorrow.listNFTforBorrowing(
+      tokenId,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      1000000
+    ))
 
     const tx1 = await nftLendBorrow.listNFTforBorrowing(
       tokenId,
@@ -94,6 +104,11 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx = await nftLendBorrow.setExpectedAmount(1, 100000000000, {
       from: alice,
     });
+
+    await expectRevert.unspecified(
+      nftLendBorrow.setExpectedAmount(1, 1000000, { from: alice })
+    );
+
     await expectRevert(
       nftLendBorrow.setExpectedAmount(1, 100000000000, { from: bob }),
       "Not the owner"
@@ -107,6 +122,17 @@ contract("NFTlendingBorrowing", async (accounts) => {
     await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
       from: bob,
     });
+
+    await expectRevert(nftLendBorrow.Bid(
+      1,
+      1000000,
+      sampleERC20.address,
+      10,
+      200,
+      200,
+      { from: bob }
+    ), "bid amount too low")
+
     const tx = await nftLendBorrow.Bid(
       1,
       100000000000,

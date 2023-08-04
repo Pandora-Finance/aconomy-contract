@@ -228,7 +228,7 @@ contract("PoolAddress", async (accounts) => {
   it("should view and pay 1st intallment amount", async () => {
     loanId1 = res.logs[0].args.loanId.toNumber();
     let loan = await poolAddressInstance.loans(loanId1);
-    // console.log(loan);
+    //console.log(loan);
     let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     // console.log("installment before 1 cycle", r.toString());
     // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
@@ -236,6 +236,11 @@ contract("PoolAddress", async (accounts) => {
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     // console.log("installment after 1 cycle", r.toString());
     //1
+    let dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    let acceptedTimeStamp = new BN(loan.loanDetails.acceptedTimestamp)
+    let paymentCycle = await new BN(loan.terms.paymentCycle)
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle)}`);
+
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
     let result = await poolAddressInstance.repayMonthlyInstallment(loanId1, {
       from: accounts[1],
@@ -268,6 +273,10 @@ contract("PoolAddress", async (accounts) => {
     now = await erc20.getTime();
     // console.log(now.toString());
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), true);
+    let dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    let acceptedTimeStamp = new BN(loan.loanDetails.acceptedTimestamp)
+    let paymentCycle = await new BN(loan.terms.paymentCycle)
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(2)))}`);
     //2
     let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
@@ -285,6 +294,9 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.terms.installmentsPaid, 2);
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), true);
     //3
+    dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(3)))}`);
+
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
     await poolAddressInstance.repayMonthlyInstallment(loanId1, {
@@ -301,7 +313,15 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.terms.installmentsPaid, 3);
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), false);
     //4
-    await time.increase(paymentCycleDuration);
+    dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(4)))}`);
+
+    let full1 = await poolAddressInstance.viewFullRepayAmount(loanId1);
+    await time.increase(1800)
+    let full2 = await poolAddressInstance.viewFullRepayAmount(loanId1);
+    assert.equal(full1.toString(), full2.toString())
+
+    await time.increase(paymentCycleDuration - 1800);
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
     await poolAddressInstance.repayMonthlyInstallment(loanId1, {
@@ -318,6 +338,9 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.terms.installmentsPaid, 4);
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), false);
     //5
+    dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(5)))}`);
+
     await time.increase(paymentCycleDuration);
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
     await erc20.approve(poolAddressInstance.address, r, { from: accounts[1] });
@@ -335,11 +358,14 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.terms.installmentsPaid, 5);
     assert.equal(await poolAddressInstance.isPaymentLate(loanId1), false);
     //6
+    dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(6)))}`);
+
     await time.increase(paymentCycleDuration);
     await erc20.mint(accounts[1], "1000000000");
     r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-    let full = await poolAddressInstance.viewFullRepayAmount(loanId1);
-    await erc20.approve(poolAddressInstance.address, full, {
+    // let full = await poolAddressInstance.viewFullRepayAmount(loanId1);
+    await erc20.approve(poolAddressInstance.address, r, {
       from: accounts[1],
     });
     // console.log("full", full.toString());
@@ -490,4 +516,67 @@ contract("PoolAddress", async (accounts) => {
     r = await poolAddressInstance.isLoanDefaulted(loanId1);
     assert.equal(r, true);
   });
+
+  it("should request loan again, this time 1 usdt", async () => {
+
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      100000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ), "low")
+
+    res = await poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      1000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    );
+    loanId1 = res.logs[0].args.loanId.toNumber();
+    let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
+    // console.log(paymentCycleAmount, "pca");
+    assert.equal(loanId1, 4, "Unable to create loan: Wrong LoanId");
+  });
+
+  it("should accept the loan", async () => {
+    await erc20.approve(poolAddressInstance.address, 1000000);
+    res = await poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] });
+  });
+
+  it("should not allow monthly installments as amount is too low", async () => {
+    r = await poolAddressInstance.viewInstallmentAmount(loanId1);
+    
+    await erc20.approve(poolAddressInstance.address, r);
+
+    await truffleAssert.reverts(
+      poolAddressInstance.repayMonthlyInstallment(loanId1, {
+        from: accounts[1],
+      }),
+      "low"
+    );
+  })
+
+  it("should repay the full amount", async () => {
+    let bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
+
+    assert.equal(bal, 1000000);
+
+    await time.increase(3600);
+
+    bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
+
+    console.log(bal.toString())
+    
+    await erc20.approve(poolAddressInstance.address, bal);
+
+    let r = await poolAddressInstance.repayFullLoan(loanId1);
+  })
 });
