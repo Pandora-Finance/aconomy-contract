@@ -30,6 +30,18 @@ contract CollectionMethods is
     event TokenMinted(uint256 tokenId, address to);
 
     /**
+     * @notice Modifier enabling only the piNFTMethods contract to call.
+     */
+    modifier onlyMethods {
+        require(
+            msg.sender ==
+                CollectionFactory(collectionFactoryAddress)
+                    .piNFTMethodsAddress()
+        ,"methods");
+        _;
+    }
+
+    /**
      * @notice Contract initializer.
      * @param _collectionOwner The address set to own the collection.
      * @param _collectionFactoryAddress The address of the CollectionFactory contract.
@@ -77,12 +89,7 @@ contract CollectionMethods is
         uint256 _tokenId,
         uint256 _commission,
         LibShare.Share[] memory royalties
-    ) external {
-        require(
-            msg.sender ==
-                CollectionFactory(collectionFactoryAddress)
-                    .piNFTMethodsAddress()
-        );
+    ) external onlyMethods{
         require(royalties.length <= 10);
         delete RoyaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
@@ -97,12 +104,7 @@ contract CollectionMethods is
         emit RoyaltiesSet(_tokenId, royalties);
     }
 
-    function deleteValidatorRoyalties(uint256 _tokenId) external {
-        require(
-            msg.sender ==
-                CollectionFactory(collectionFactoryAddress)
-                    .piNFTMethodsAddress()
-        );
+    function deleteValidatorRoyalties(uint256 _tokenId) external onlyMethods{
         delete RoyaltiesForValidator[_tokenId];
     }
 

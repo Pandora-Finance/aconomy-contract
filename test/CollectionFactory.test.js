@@ -343,4 +343,9 @@ contract("CollectionFactory", (accounts) => {
     assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
     assert(commission.commission.value == 0);
   });
+
+  it("should prevent an external address to call piNFTMethods callable functions", async () => {
+    await expectRevert(collectionInstance.setRoyaltiesForValidator(1, 3000, []), "methods")
+    await expectRevert(collectionInstance.deleteValidatorRoyalties(1), "methods")
+  })
 });

@@ -2,6 +2,7 @@ const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const piNFTMethods = artifacts.require("piNFTMethods");
 const { expectRevert } = require("@openzeppelin/test-helpers");
+const truffleAssertions = require("truffle-assertions");
 
 contract("PiNFT", (accounts) => {
   let piNFT, sampleERC20, piNftMethods;
@@ -301,4 +302,9 @@ contract("PiNFT", (accounts) => {
     assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
     assert(commission.commission.value == 0);
   });
+
+  it("should prevent an external address to call piNFTMethods callable functions", async () => {
+    await expectRevert(piNFT.setRoyaltiesForValidator(1, 3000, []), "methods")
+    await expectRevert(piNFT.deleteValidatorRoyalties(1), "methods")
+  })
 });
