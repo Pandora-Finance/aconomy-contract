@@ -150,7 +150,7 @@ contract NFTlendingBorrowing is
      * @param _contractAddress The address of the token contract.
      * @param _percent The interest percentage expected.
      * @param _duration The duration of the loan.
-     * @param _expiration The expiration of the loan for the NFT.
+     * @param _expiration The expiration duration of the loan for the NFT.
      * @param _expectedAmount The loan amount expected.
      */
     function listNFTforBorrowing(
