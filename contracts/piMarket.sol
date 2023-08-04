@@ -431,11 +431,12 @@ contract piMarket is
         //  require(_timeOfAuction[_saleId] >= block.timestamp,"Auction Over");
 
         if (_tokenMeta[_saleId].currency != address(0)) {
-            IERC20(_tokenMeta[_saleId].currency).transferFrom(
+            bool success = IERC20(_tokenMeta[_saleId].currency).transferFrom(
                 msg.sender,
                 address(this),
                 _bidPrice
             );
+            require(success);
         }
 
         BidOrder memory bid = BidOrder(

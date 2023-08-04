@@ -311,6 +311,7 @@ contract poolRegistry is
         uint256 _poolId,
         address _lenderAddress
     ) public whenNotPaused ownsPool(_poolId) {
+        require(pools[_poolId].lenderAttestationRequired);
         _attestAddress(_poolId, _lenderAddress, true);
     }
 
@@ -324,6 +325,7 @@ contract poolRegistry is
         uint256 _poolId,
         address _borrowerAddress
     ) public whenNotPaused ownsPool(_poolId) {
+        require(pools[_poolId].borrowerAttestationRequired);
         _attestAddress(_poolId, _borrowerAddress, false);
     }
 
@@ -337,6 +339,7 @@ contract poolRegistry is
         uint256 _poolId,
         address _lenderAddress
     ) external whenNotPaused ownsPool(_poolId) {
+        require(pools[_poolId].lenderAttestationRequired);
         _revokeAddress(_poolId, _lenderAddress, true);
     }
 
@@ -350,6 +353,7 @@ contract poolRegistry is
         uint256 _poolId,
         address _borrowerAddress
     ) external whenNotPaused ownsPool(_poolId) {
+        require(pools[_poolId].borrowerAttestationRequired);
         _revokeAddress(_poolId, _borrowerAddress, false);
     }
 
