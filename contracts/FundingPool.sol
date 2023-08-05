@@ -221,6 +221,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _poolId
         );
 
+        bidId++;
+
         // Send payment to the Pool
         require(
             IERC20(_ERC20Address).transferFrom(
@@ -230,7 +232,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             ),
             "Unable to tansfer to poolAddress"
         );
-        bidId++;
 
         emit SuppliedToPool(
             msg.sender,
@@ -742,6 +743,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         } else {
             emit BidRepayment(_bidId, paymentAmount);
         }
+
+        fundDetail.Repaid.amount += _amount;
+        fundDetail.Repaid.interest += _interest;
+        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
+
         // Send payment to the lender
         require(
             IERC20(_ERC20Address).transferFrom(
@@ -751,10 +757,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             ),
             "unable to transfer to lender"
         );
-
-        fundDetail.Repaid.amount += _amount;
-        fundDetail.Repaid.interest += _interest;
-        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
     /**
@@ -788,13 +790,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             "You can't Withdraw"
         );
 
+        fundDetail.state = BidState.WITHDRAWN;
+
         // Transfering the amount to the lender
         require(
             IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),
             "Unable to transfer to lender"
         );
-
-        fundDetail.state = BidState.WITHDRAWN;
 
         emit Withdrawn(_lender, _bidId, _poolId, fundDetail.amount);
     }

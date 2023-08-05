@@ -605,6 +605,9 @@ contract piMarket is
             swap.requestedTokenOwner == msg.sender,
             "Only requested owner can accept swap"
         );
+
+        swap.status = false;
+
         ERC721(swap.initiatorNFTAddress).safeTransferFrom(
             address(this),
             msg.sender,
@@ -615,7 +618,6 @@ contract piMarket is
             swap.initiator,
             swap.requestedTokenId
         );
-        swap.status = false;
         emit SwapAccepted(swapId);
     }
 

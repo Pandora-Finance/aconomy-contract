@@ -281,6 +281,9 @@ contract NFTlendingBorrowing is
             false,
             false
         );
+
+        Bids[_NFTid].push(bidDetail);
+
         require(
             IERC20(_ERC20Address).transferFrom(
                 msg.sender,
@@ -289,7 +292,6 @@ contract NFTlendingBorrowing is
             ),
             "Unable to tansfer Your ERC20"
         );
-        Bids[_NFTid].push(bidDetail);
         emit AppliedBid(Bids[_NFTid].length - 1, _NFTid);
     }
 
@@ -388,6 +390,9 @@ contract NFTlendingBorrowing is
             block.timestamp - Bids[_NFTid][_bidId].acceptedTimestamp
         );
 
+        NFTdetails[_NFTid].repaid = true;
+        NFTdetails[_NFTid].listed = false;
+
         // transfering Amount to Bidder
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transferFrom(
@@ -397,9 +402,6 @@ contract NFTlendingBorrowing is
             ),
             "unable to transfer to bidder Address"
         );
-
-        NFTdetails[_NFTid].repaid = true;
-        NFTdetails[_NFTid].listed = false;
 
         // transferring NFT to this address
         ERC721(NFTdetails[_NFTid].contractAddress).safeTransferFrom(
@@ -438,6 +440,9 @@ contract NFTlendingBorrowing is
                 "Can't withdraw Bid before expiration"
             );
         }
+
+        Bids[_NFTid][_bidId].withdrawn = true;
+
         require(
             IERC20(Bids[_NFTid][_bidId].ERC20Address).transfer(
                 msg.sender,
@@ -445,7 +450,6 @@ contract NFTlendingBorrowing is
             ),
             "unable to transfer to Bidder Address"
         );
-        Bids[_NFTid][_bidId].withdrawn = true;
         emit Withdrawn(_NFTid, _bidId, Bids[_NFTid][_bidId].Amount);
     }
 

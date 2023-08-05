@@ -452,6 +452,11 @@ contract poolAddress is
         } else {
             emit LoanRepayment(_loanId, paymentAmount);
         }
+
+        loan.loanDetails.totalRepaid.principal += _payment.principal;
+        loan.loanDetails.totalRepaid.interest += _payment.interest;
+        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
+
         // Send payment to the lender
         bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
             msg.sender,
@@ -460,10 +465,6 @@ contract poolAddress is
         );
 
         require(isSuccess);
-
-        loan.loanDetails.totalRepaid.principal += _payment.principal;
-        loan.loanDetails.totalRepaid.interest += _payment.interest;
-        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
