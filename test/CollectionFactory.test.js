@@ -33,6 +33,52 @@ contract("CollectionFactory", (accounts) => {
   });
 
 
+  it("should check Royality receiver isn't 0 address", async () => {
+    await expectRevert(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        ["0x0000000000000000000000000000000000000000", 4901],
+      ]),
+      "Royalty recipient should be present"
+    );
+  });
+
+  it("should check that Royality must be less 4900", async () => {
+    await expectRevert(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [royaltyReciever, 4901],
+      ]),
+      "Sum of Royalties > 49%"
+    );
+  });
+
+  it("should check that Royality length must be less than 10", async () => {
+    await expectRevert.unspecified(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+      ])
+    );
+  });
+
+  it("should check that Royality value isn't 0", async () => {
+    await expectRevert.unspecified(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [royaltyReciever, 0],
+      ]),
+      "Royalty value should be > 0"
+    );
+  });
+
+
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
       [royaltyReciever, 500],
