@@ -199,6 +199,54 @@ contract("FundingPool", (accounts) => {
     });
 
     it("should not allow non-lender to supply funds to the pool", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: nonLender,
+      });
+      await truffleAssert.reverts(
+        fundingpoolInstance.supplyToPool(
+          poolId,
+          erc20.address,
+          erc20Amount,
+          loanDefaultDuration,
+          expiration,
+          1000,
+          { from: nonLender }
+        ),
+        "Not verified lender"
+      );
+    });
+
+    it("should not allow lender to supply 0 address to the pool", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      await truffleAssert.reverts(
+        fundingpoolInstance.supplyToPool(
+          poolId,
+          "0x0000000000000000000000000000000000000000",
+          erc20Amount,
+          loanDefaultDuration,
+          expiration,
+          1000,
+          { from: lender }
+        ),
+        "you can't do this with zero address"
+      );
+    });
+
+    it("should not allow lender to input a duration not divisible by 30 days", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
       await erc20.approve(fundingpoolInstance.address, erc20Amount, {
         from: lender,
       });
@@ -207,12 +255,77 @@ contract("FundingPool", (accounts) => {
           poolId,
           erc20.address,
           erc20Amount,
-          maxLoanDuration,
-          loanExpirationDuration,
+          loanDefaultDuration + 1,
+          expiration,
           1000,
-          { from: nonLender }
+          { from: lender }
+        )
+      );
+    });
+
+    it("should not allow lender to supply an apr less than 100 bps", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      await truffleAssert.reverts(
+        fundingpoolInstance.supplyToPool(
+          poolId,
+          erc20.address,
+          erc20Amount,
+          loanDefaultDuration,
+          expiration,
+          10,
+          { from: lender }
         ),
-        "Not verified lender"
+        "apr too low"
+      );
+    });
+
+    it("should not allow lender to supply 100000 amount to the pool", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      await truffleAssert.reverts(
+        fundingpoolInstance.supplyToPool(
+          poolId,
+          erc20.address,
+          100000,
+          loanDefaultDuration,
+          expiration,
+          1000,
+          { from: lender }
+        ),
+        "amount too low"
+      );
+    });
+
+    it("should not allow lender to supply a faulty expiration", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount, {
+        from: lender,
+      });
+      await truffleAssert.reverts(
+        fundingpoolInstance.supplyToPool(
+          poolId,
+          erc20.address,
+          erc20Amount,
+          loanDefaultDuration,
+          10,
+          1000,
+          { from: lender }
+        ),
+        "wrong timestamp"
       );
     });
 
@@ -233,6 +346,16 @@ contract("FundingPool", (accounts) => {
       const feee = await aconomyFee.AconomyPoolFee();
       // console.log("protocolFee", feee.toString());
       let b1 = await erc20.balanceOf(feeAddress);
+
+      await truffleAssert.reverts(fundingpoolInstance.AcceptBid(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        receiver,
+        {from: receiver}
+      ), "You are not the Pool Owner")
+
       // console.log("owner1", b1.toString());
       const tx = await fundingpoolInstance.AcceptBid(
         poolId,
@@ -288,6 +411,17 @@ contract("FundingPool", (accounts) => {
       );
     });
 
+    it("should revert reject if bid is not pending", async () => {
+      await truffleAssert.reverts(
+        fundingpoolInstance.RejectBid(
+          poolId,
+          erc20.address,
+          bidId,
+          lender
+        ), "Bid must be pending"
+      )
+    })
+
     it("should reject the bid and emit RejectBid event", async () => {
       const balance = await erc20.balanceOf(lender);
       // console.log("bbb", balance.toString());
@@ -297,6 +431,14 @@ contract("FundingPool", (accounts) => {
         bidId1,
         lender
       );
+
+      const fundDetail = await fundingpoolInstance.lenderPoolFundDetails(
+        lender,
+        poolId,
+        erc20.address,
+        bidId1
+      );
+      expect(fundDetail.state.toNumber()).to.equal(4); 
       // console.log(poolId)
       const balance1 = await erc20.balanceOf(lender);
       // console.log("bbb", balance1.toString());
@@ -360,6 +502,16 @@ contract("FundingPool", (accounts) => {
       assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle.mul(new BN(1)))}`);
 
       await erc20.approve(fundingpoolInstance.address, r);
+      await erc20.approve(fundingpoolInstance.address, r, {from: receiver});
+
+      truffleAssert.reverts(fundingpoolInstance.repayMonthlyInstallment(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        {from: receiver}
+      ), "You are not the Pool Owner")
+
       let result = await fundingpoolInstance.repayMonthlyInstallment(
         poolId,
         erc20.address,
@@ -679,6 +831,16 @@ contract("FundingPool", (accounts) => {
       let b = await erc20.balanceOf(accounts[1]);
       //await erc20.transfer(accounts[1], bal - b + 10, { from: accounts[0] })
       await erc20.approve(fundingpoolInstance.address, bal);
+      await erc20.approve(fundingpoolInstance.address, bal, {from: receiver});
+
+      truffleAssert.reverts(fundingpoolInstance.RepayFullAmount(
+        poolId,
+        erc20.address,
+        bidId,
+        lender,
+        {from: receiver}
+      ), "You are not the Pool Owner")
+
       let r = await fundingpoolInstance.RepayFullAmount(
         poolId,
         erc20.address,
@@ -734,6 +896,12 @@ contract("FundingPool", (accounts) => {
       bidId = tx.logs[0].args.BidId.toNumber();
       assert.equal(bidId, 3);
     });
+
+    it("should not allow withdrawal within the expiration", async () => {
+      await truffleAssert.reverts(fundingpoolInstance.Withdraw(poolId, erc20.address, bidId, lender, {
+        from: lender
+      }), "You can't Withdraw")
+    })
 
     it("should show the bid has expired", async () => {
       let r = await fundingpoolInstance.isBidExpired(

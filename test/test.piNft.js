@@ -24,6 +24,10 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.symbol(), "ACO");
   });
 
+  it("should fail to mint if the to address is address 0", async () => {
+    await expectRevert.unspecified(piNFT.mintNFT("0x0000000000000000000000000000000000000000", "xyz", [[royaltyReciever, 500]]));
+  })
+
   it("should mint an ERC721 token to alice", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     // console.log(tx);
@@ -44,10 +48,29 @@ contract("PiNFT", (accounts) => {
     await piNFT.unpause();
   });
 
-  it("should Royality must be less 4900", async () => {
+  it("should check that Royality must be less 4900", async () => {
     await expectRevert(
       piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4901]]),
       "overflow"
+    );
+  });
+
+  it("should check that Royality receiver isn't 0 address", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", [["0x0000000000000000000000000000000000000000", 4900]])
+    );
+  });
+
+  it("should check that Royality value isn't 0", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 0]])
+    );
+  });
+
+  it("should check that Royality length is less than 10", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", 
+      [[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100]])
     );
   });
 
@@ -56,6 +79,10 @@ contract("PiNFT", (accounts) => {
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 1, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 2, "Failed to mint");
+  });
+
+  it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
+    await expectRevert.unspecified(piNFT.deleteNFT(1, {from: bob}))
   });
 
   it("should Delete an ERC721 token to alice", async () => {
@@ -110,6 +137,10 @@ contract("PiNFT", (accounts) => {
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 500);
+  });
+
+  it("should not Delete an ERC721 token after validator funding", async () => {
+    await expectRevert.unspecified(piNFT.deleteNFT(0))
   });
 
   it("should let the validator add more erc20 tokens of the same contract", async () => {

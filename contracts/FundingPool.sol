@@ -173,7 +173,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             "you can't do this with zero address"
         );
 
-        require(_amount != 0, "You can't supply with zero amount");
         require(_maxLoanDuration % 30 days == 0);
         require(_APR >= 100, "apr too low");
         require(_amount >= 1000000, "amount too low");
@@ -629,7 +628,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+            revert("Bid must be accepted");
         }
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
@@ -678,7 +677,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+            revert("Bid must be accepted");
         }
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)

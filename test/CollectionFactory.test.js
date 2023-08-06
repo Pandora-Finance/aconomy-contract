@@ -41,6 +41,14 @@ contract("CollectionFactory", (accounts) => {
     collectionInstance = await CollectionMethods.at(address);
   });
 
+  it("should fail to mint if the caller is not the collection owner", async () => {
+    await expectRevert.unspecified(collectionInstance.mintNFT(bob, "xyz", {from: bob}));
+  })
+
+  it("should fail to mint if the to address is address 0", async () => {
+    await expectRevert.unspecified(collectionInstance.mintNFT("0x0000000000000000000000000000000000000000", "xyz"));
+  })
+
   it("should mint an ERC721 token to alice", async () => {
     const tx = await collectionInstance.mintNFT(alice, "URI1");
     const tokenId = tx.logs[0].args.tokenId.toNumber();
@@ -63,7 +71,11 @@ contract("CollectionFactory", (accounts) => {
     );
   });
 
-  it("should Delete an ERC721 token to alice", async () => {
+  it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
+    await expectRevert.unspecified(collectionInstance.deleteNFT(1, {from: bob}))
+  });
+
+  it("should Delete an ERC721 token", async () => {
     const tx = await collectionInstance.deleteNFT(1);
     assert.equal(
       await collectionInstance.balanceOf(alice),
@@ -121,6 +133,10 @@ contract("CollectionFactory", (accounts) => {
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 500);
+  });
+
+  it("should not Delete an ERC721 token after validator funding", async () => {
+    await expectRevert.unspecified(collectionInstance.deleteNFT(0))
   });
 
   it("should let validator add more ERC20 tokens to alice's NFT", async () => {
