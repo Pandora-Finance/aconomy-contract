@@ -32,6 +32,51 @@ contract("CollectionFactory", (accounts) => {
     await CollectionFactory.unpause();
   });
 
+  it("should check Royality receiver isn't 0 address", async () => {
+    await expectRevert(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        ["0x0000000000000000000000000000000000000000", 4901],
+      ]),
+      "Royalty recipient should be present"
+    );
+  });
+
+  it("should check that Royality must be less 4900", async () => {
+    await expectRevert(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [royaltyReciever, 4901],
+      ]),
+      "Sum of Royalties > 49%"
+    );
+  });
+
+  it("should check that Royality length must be less than 10", async () => {
+    await expectRevert.unspecified(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+        [accounts[0], 100],
+      ])
+    );
+  });
+
+  it("should check that Royality value isn't 0", async () => {
+    await expectRevert.unspecified(
+      CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
+        [royaltyReciever, 0],
+      ]),
+      "Royalty value should be > 0"
+    );
+  });
+
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
       [royaltyReciever, 500],
@@ -42,12 +87,19 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should fail to mint if the caller is not the collection owner", async () => {
-    await expectRevert.unspecified(collectionInstance.mintNFT(bob, "xyz", {from: bob}));
-  })
+    await expectRevert.unspecified(
+      collectionInstance.mintNFT(bob, "xyz", { from: bob })
+    );
+  });
 
   it("should fail to mint if the to address is address 0", async () => {
-    await expectRevert.unspecified(collectionInstance.mintNFT("0x0000000000000000000000000000000000000000", "xyz"));
-  })
+    await expectRevert.unspecified(
+      collectionInstance.mintNFT(
+        "0x0000000000000000000000000000000000000000",
+        "xyz"
+      )
+    );
+  });
 
   it("should mint an ERC721 token to alice", async () => {
     const tx = await collectionInstance.mintNFT(alice, "URI1");
@@ -72,7 +124,9 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
-    await expectRevert.unspecified(collectionInstance.deleteNFT(1, {from: bob}))
+    await expectRevert.unspecified(
+      collectionInstance.deleteNFT(1, { from: bob })
+    );
   });
 
   it("should Delete an ERC721 token", async () => {
@@ -129,14 +183,17 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
-    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    let commission = await piNftMethods.validatorCommissions(
+      collectionInstance.address,
+      0
+    );
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 500);
   });
 
   it("should not Delete an ERC721 token after validator funding", async () => {
-    await expectRevert.unspecified(collectionInstance.deleteNFT(0))
+    await expectRevert.unspecified(collectionInstance.deleteNFT(0));
   });
 
   it("should let validator add more ERC20 tokens to alice's NFT", async () => {
@@ -162,7 +219,10 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 700, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 300, "Validators balance not reduced");
-    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    let commission = await piNftMethods.validatorCommissions(
+      collectionInstance.address,
+      0
+    );
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 500);
@@ -186,12 +246,7 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let alice transfer NFT to bob", async () => {
-    await collectionInstance.safeTransferFrom(
-      alice,
-      bob,
-      0,
-      { from: alice }
-    );
+    await collectionInstance.safeTransferFrom(alice, bob, 0, { from: alice });
     assert.equal(
       await collectionInstance.ownerOf(0),
       bob,
@@ -200,12 +255,7 @@ contract("CollectionFactory", (accounts) => {
   });
 
   it("should let bob transfer NFT to alice", async () => {
-    await collectionInstance.safeTransferFrom(
-      bob,
-      alice,
-      0,
-      { from: bob }
-    );
+    await collectionInstance.safeTransferFrom(bob, alice, 0, { from: bob });
     assert.equal(
       await collectionInstance.ownerOf(0),
       alice,
@@ -273,9 +323,15 @@ contract("CollectionFactory", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await collectionInstance.ownerOf(0), alice);
-    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    let commission = await piNftMethods.validatorCommissions(
+      collectionInstance.address,
+      0
+    );
     assert(commission.isValid == false);
-    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(
+      commission.commission.account ==
+        "0x0000000000000000000000000000000000000000"
+    );
     assert(commission.commission.value == 0);
   });
 
@@ -314,7 +370,10 @@ contract("CollectionFactory", (accounts) => {
     const validatorBal = await sampleERC20.balanceOf(validator);
     assert(tokenBal == 500, "Failed to add ERC20 tokens into NFT");
     assert(validatorBal == 500, "Validators balance not reduced");
-    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    let commission = await piNftMethods.validatorCommissions(
+      collectionInstance.address,
+      0
+    );
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 600);
@@ -354,14 +413,26 @@ contract("CollectionFactory", (accounts) => {
       validator,
       "Failed to transfer NFT to alice"
     );
-    let commission = await piNftMethods.validatorCommissions(collectionInstance.address, 0);
+    let commission = await piNftMethods.validatorCommissions(
+      collectionInstance.address,
+      0
+    );
     assert(commission.isValid == false);
-    assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
+    assert(
+      commission.commission.account ==
+        "0x0000000000000000000000000000000000000000"
+    );
     assert(commission.commission.value == 0);
   });
 
   it("should prevent an external address to call piNFTMethods callable functions", async () => {
-    await expectRevert(collectionInstance.setRoyaltiesForValidator(1, 3000, []), "methods")
-    await expectRevert(collectionInstance.deleteValidatorRoyalties(1), "methods")
-  })
+    await expectRevert(
+      collectionInstance.setRoyaltiesForValidator(1, 3000, []),
+      "methods"
+    );
+    await expectRevert(
+      collectionInstance.deleteValidatorRoyalties(1),
+      "methods"
+    );
+  });
 });
