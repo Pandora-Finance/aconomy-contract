@@ -126,6 +126,25 @@ contract("CollectionFactory", (accounts) => {
 
   })
 
+  it("should change the Collection Name", async () => {
+    let meta = await CollectionFactory.collections(1);
+    let name = meta.name;
+    assert.equal(
+      name,
+      "PANDORA",
+      "Name is not correct"
+    );
+    await CollectionFactory.setCollectionName(1,"Shrish");
+    let newMeta = await CollectionFactory.collections(1);
+    let newName = newMeta.name;
+    assert.equal(
+      newName,
+      "Shrish",
+      "Name is not updated"
+    );
+
+  })
+
   it("should fail to mint if the caller is not the collection owner", async () => {
     await expectRevert.unspecified(
       collectionInstance.mintNFT(bob, "xyz", { from: bob })
