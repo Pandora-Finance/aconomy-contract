@@ -145,6 +145,25 @@ contract("CollectionFactory", (accounts) => {
 
   })
 
+  it("should change the Collection Description", async () => {
+    let meta = await CollectionFactory.collections(1);
+    let description = meta.description;
+    assert.equal(
+      description,
+      "xyz",
+      "Description is not correct"
+    );
+    await CollectionFactory.setCollectionDescription(1,"I am Shrish");
+    let newMeta = await CollectionFactory.collections(1);
+    let newDescription = newMeta.description;
+    assert.equal(
+      newDescription,
+      "I am Shrish",
+      "Description is not updated"
+    );
+
+  })
+
   it("should fail to mint if the caller is not the collection owner", async () => {
     await expectRevert.unspecified(
       collectionInstance.mintNFT(bob, "xyz", { from: bob })
