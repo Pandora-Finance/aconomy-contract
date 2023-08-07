@@ -90,6 +90,26 @@ contract("PiMarket", async (accounts) => {
       await piMarket.unpause();
     });
 
+    it("should not place nft on sale if price < 10000", async () => {
+      await piNFT.approve(piMarket.address, 0);
+      await expectRevert.unspecified(piMarket.sellNFT(
+        piNFT.address,
+        0,
+        100,
+        "0x0000000000000000000000000000000000000000"
+      ))
+    })
+
+    it("should not place nft on sale if contract address is 0", async () => {
+      await piNFT.approve(piMarket.address, 0);
+      await expectRevert.unspecified(piMarket.sellNFT(
+        "0x0000000000000000000000000000000000000000",
+        0,
+        50000,
+        "0x0000000000000000000000000000000000000000"
+      ))
+    })
+
     it("should let alice place piNFT on sale", async () => {
       await piNFT.approve(piMarket.address, 0);
       const result = await piMarket.sellNFT(
@@ -111,6 +131,9 @@ contract("PiMarket", async (accounts) => {
         piMarket.editSalePrice(1, 60000, { from: bob }),
         "You are not the owner"
       );
+      await expectRevert.unspecified(
+        piMarket.editSalePrice(1, 60, { from: alice })
+      );
       let price = tx.logs[0].args.Price.toNumber();
       // console.log("newPrice", price);
       assert.equal(price, 60000, "Price not updated");
@@ -118,6 +141,10 @@ contract("PiMarket", async (accounts) => {
       let newPrice = tx1.logs[0].args.Price.toNumber();
       assert.equal(newPrice, 50000, "Price is still 6000");
     });
+
+    it("should not let seller buy their own nft", async () => {
+      expectRevert.unspecified(piMarket.BuyNFT(1, false, { from: alice, value: 50000 }))
+    })
 
     it("should let bob buy piNFT", async () => {
       let meta = await piMarket._tokenMeta(1);
@@ -299,6 +326,10 @@ contract("PiMarket", async (accounts) => {
       );
     });
 
+    it("should not let non owner cancel sale", async () => {
+      await expectRevert.unspecified(piMarket.cancelSale(3, { from: alice }))
+    })
+
     it("should let bob cancel sale", async () => {
       await piMarket.cancelSale(3, { from: bob });
       meta = await piMarket._tokenMeta(2);
@@ -370,6 +401,39 @@ contract("PiMarket", async (accounts) => {
       assert(commission.commission.value == 900);
     });
 
+    it("should not place nft on auction if price < 10000", async () => {
+      await piNFT.approve(piMarket.address, 1);
+      await expectRevert.unspecified(piMarket.SellNFT_byBid(
+        piNFT.address,
+        1,
+        100,
+        300,
+        "0x0000000000000000000000000000000000000000"
+      ))
+    })
+
+    it("should not place nft on auction if contract address is 0", async () => {
+      await piNFT.approve(piMarket.address, 1);
+      await expectRevert.unspecified(piMarket.SellNFT_byBid(
+        "0x0000000000000000000000000000000000000000",
+        1,
+        50000,
+        300,
+        "0x0000000000000000000000000000000000000000"
+      ))
+    })
+
+    it("should not place nft on auction if auction time is 0", async () => {
+      await piNFT.approve(piMarket.address, 1);
+      await expectRevert.unspecified(piMarket.SellNFT_byBid(
+        piNFT.address,
+        1,
+        50000,
+        0,
+        "0x0000000000000000000000000000000000000000"
+      ))
+    })
+
     it("should let alice place piNFT on auction", async () => {
       await piNFT.approve(piMarket.address, 1);
       const tx = await piMarket.SellNFT_byBid(
@@ -388,7 +452,19 @@ contract("PiMarket", async (accounts) => {
       assert.equal(result.bidSale, true);
     });
 
+    it("should let alice change the start price of the auction", async () => {
+      await piMarket.editSalePrice(4, 10000);
+      let result = await piMarket._tokenMeta(4);
+      assert.equal(result.price, 10000);
+      await piMarket.editSalePrice(4, 50000);
+      result = await piMarket._tokenMeta(4);
+      assert.equal(result.price, 50000);
+    })
+
     it("should let bidders place bid on piNFT", async () => {
+      await expectRevert.unspecified(piMarket.Bid(4, 60000, { from: alice, value: 60000 }))
+      await expectRevert.unspecified(piMarket.Bid(4, 50000, { from: bidder1, value: 50000 }))
+
       await piMarket.Bid(4, 60000, { from: bidder1, value: 60000 });
       await piMarket.Bid(4, 65000, { from: bidder2, value: 65000 });
       await piMarket.Bid(4, 70000, { from: bidder1, value: 70000 });
@@ -397,6 +473,10 @@ contract("PiMarket", async (accounts) => {
       assert.equal(result.buyerAddress, bidder1);
     });
 
+    it("should not let alice change the auction price after bidding has begun", async () => {
+      await expectRevert(piMarket.editSalePrice(4, 10000), "Bid has started")
+    })
+
     it("should let alice execute highest bid", async () => {
       let _balance1 = await web3.eth.getBalance(alice);
       let _balance2 = await web3.eth.getBalance(royaltyReceiver);
@@ -404,6 +484,8 @@ contract("PiMarket", async (accounts) => {
       let _balance4 = await web3.eth.getBalance(validator);
 
       // console.log("Ball", _balance1.toString());
+
+      await expectRevert.unspecified(piMarket.executeBidOrder(4, 2, false, { from: bob }))
 
       await piMarket.executeBidOrder(4, 2, false, { from: alice });
       result = await piNFT.ownerOf(1);
@@ -441,6 +523,10 @@ contract("PiMarket", async (accounts) => {
       assert(commission.commission.value == 900);
     });
 
+    it("should not let wallet withdraw anothers bid", async () => {
+      await expectRevert.unspecified(piMarket.withdrawBidMoney(4, 0, { from: bidder2 }))
+    })
+
     it("should let other bidders withdraw their bids", async () => {
       await piMarket.withdrawBidMoney(4, 0, { from: bidder1 });
       await piMarket.withdrawBidMoney(4, 1, { from: bidder2 });
@@ -448,6 +534,14 @@ contract("PiMarket", async (accounts) => {
       assert.equal(result, 0);
       await piNFT.safeTransferFrom(bidder1, alice, 1, {from: bidder1});
     });
+
+    it("should not let bidder withdraw again", async () => {
+      await expectRevert.unspecified(piMarket.withdrawBidMoney(4, 0, { from: bidder1 }))
+    })
+
+    it("should not execute a withdrawn bid", async () => {
+      await expectRevert.unspecified(piMarket.executeBidOrder(4, 1, false, { from: alice }))
+    })
 
     it("should let alice place piNFT on auction", async () => {
       await piNFT.approve(piMarket.address, 1);
