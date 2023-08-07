@@ -88,6 +88,25 @@ contract("CollectionFactory", (accounts) => {
     collectionInstance = await CollectionMethods.at(address);
   });
 
+  it("should change the uri", async () => {
+    let meta = await CollectionFactory.collections(1);
+    let uri = meta.URI;
+    assert.equal(
+      uri,
+      "xyz",
+      "URI is not correct"
+    );
+    await CollectionFactory.setCollectionURI(1,"SRS");
+    let newMeta = await CollectionFactory.collections(1);
+    let newURI = newMeta.URI;
+    assert.equal(
+      newURI,
+      "SRS",
+      "URI is not updated"
+    );
+
+  })
+
   it("should fail to mint if the caller is not the collection owner", async () => {
     await expectRevert.unspecified(
       collectionInstance.mintNFT(bob, "xyz", { from: bob })
