@@ -1101,5 +1101,23 @@ contract("FundingPool", (accounts) => {
         lender
       );
     })
+
+    it("should close the pool", async () => {
+      await poolRegis.closePool(poolId1)
+      let closed = await poolRegis.ClosedPool(poolId1);
+      assert.equal(closed, true);
+    })
+  
+    it("should not request loan in a closed pool", async () => {
+      await truffleAssert.reverts(fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        1000000,
+        loanDefaultDuration,
+        expiration,
+        1000,
+        { from: lender }
+      ), "pool closed")
+    })
   });
 });

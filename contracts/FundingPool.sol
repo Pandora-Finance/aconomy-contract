@@ -163,6 +163,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _expiration,
         uint16 _APR
     ) external nonReentrant {
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .lenderVerification(_poolId, msg.sender);
 
@@ -257,6 +261,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _receiver
     ) external nonReentrant {
         require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -319,6 +327,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _lender
     ) external nonReentrant {
         require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
