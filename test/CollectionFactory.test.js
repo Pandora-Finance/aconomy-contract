@@ -482,6 +482,8 @@ contract("CollectionFactory", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await collectionInstance.ownerOf(0), alice);
+    assert.equal(await piNftMethods.NFTowner(collectionInstance.address, 0), "0x0000000000000000000000000000000000000000")
+    assert.equal(await piNftMethods.approvedValidator(collectionInstance.address, 0), "0x0000000000000000000000000000000000000000")
     let commission = await piNftMethods.validatorCommissions(
       collectionInstance.address,
       0
