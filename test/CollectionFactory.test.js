@@ -107,6 +107,25 @@ contract("CollectionFactory", (accounts) => {
 
   })
 
+  it("should change the Collection Symbol", async () => {
+    let meta = await CollectionFactory.collections(1);
+    let symbol = meta.symbol;
+    assert.equal(
+      symbol,
+      "PAN",
+      "Symbol is not correct"
+    );
+    await CollectionFactory.setCollectionSymbol(1,"PNDR");
+    let newMeta = await CollectionFactory.collections(1);
+    let newSymbol = newMeta.symbol;
+    assert.equal(
+      newSymbol,
+      "PNDR",
+      "Symbol is not updated"
+    );
+
+  })
+
   it("should fail to mint if the caller is not the collection owner", async () => {
     await expectRevert.unspecified(
       collectionInstance.mintNFT(bob, "xyz", { from: bob })
