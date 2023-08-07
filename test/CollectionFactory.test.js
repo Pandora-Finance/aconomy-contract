@@ -32,7 +32,6 @@ contract("CollectionFactory", (accounts) => {
     await CollectionFactory.unpause();
   });
 
-
   it("should check Royality receiver isn't 0 address", async () => {
     await expectRevert(
       CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
@@ -78,7 +77,6 @@ contract("CollectionFactory", (accounts) => {
     );
   });
 
-
   it("deploying collections with CollectionFactory contract", async () => {
     await CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
       [royaltyReciever, 500],
@@ -91,78 +89,42 @@ contract("CollectionFactory", (accounts) => {
   it("should change the uri", async () => {
     let meta = await CollectionFactory.collections(1);
     let uri = meta.URI;
-    assert.equal(
-      uri,
-      "xyz",
-      "URI is not correct"
-    );
-    await CollectionFactory.setCollectionURI(1,"SRS");
+    assert.equal(uri, "xyz", "URI is not correct");
+    await CollectionFactory.setCollectionURI(1, "SRS");
     let newMeta = await CollectionFactory.collections(1);
     let newURI = newMeta.URI;
-    assert.equal(
-      newURI,
-      "SRS",
-      "URI is not updated"
-    );
-
-  })
+    assert.equal(newURI, "SRS", "URI is not updated");
+  });
 
   it("should change the Collection Symbol", async () => {
     let meta = await CollectionFactory.collections(1);
     let symbol = meta.symbol;
-    assert.equal(
-      symbol,
-      "PAN",
-      "Symbol is not correct"
-    );
-    await CollectionFactory.setCollectionSymbol(1,"PNDR");
+    assert.equal(symbol, "PAN", "Symbol is not correct");
+    await CollectionFactory.setCollectionSymbol(1, "PNDR");
     let newMeta = await CollectionFactory.collections(1);
     let newSymbol = newMeta.symbol;
-    assert.equal(
-      newSymbol,
-      "PNDR",
-      "Symbol is not updated"
-    );
-
-  })
+    assert.equal(newSymbol, "PNDR", "Symbol is not updated");
+  });
 
   it("should change the Collection Name", async () => {
     let meta = await CollectionFactory.collections(1);
     let name = meta.name;
-    assert.equal(
-      name,
-      "PANDORA",
-      "Name is not correct"
-    );
-    await CollectionFactory.setCollectionName(1,"Shrish");
+    assert.equal(name, "PANDORA", "Name is not correct");
+    await CollectionFactory.setCollectionName(1, "Shrish");
     let newMeta = await CollectionFactory.collections(1);
     let newName = newMeta.name;
-    assert.equal(
-      newName,
-      "Shrish",
-      "Name is not updated"
-    );
-
-  })
+    assert.equal(newName, "Shrish", "Name is not updated");
+  });
 
   it("should change the Collection Description", async () => {
     let meta = await CollectionFactory.collections(1);
     let description = meta.description;
-    assert.equal(
-      description,
-      "xyz",
-      "Description is not correct"
-    );
-    await CollectionFactory.setCollectionDescription(1,"I am Shrish");
+    assert.equal(description, "xyz", "Description is not correct");
+    await CollectionFactory.setCollectionDescription(1, "I am Shrish");
     let newMeta = await CollectionFactory.collections(1);
     let newDescription = newMeta.description;
-    assert.equal(
-      newDescription,
-      "I am Shrish",
-      "Description is not updated"
-    );
-
-  })
+    assert.equal(newDescription, "I am Shrish", "Description is not updated");
+  });
 
   it("should fail to mint if the caller is not the collection owner", async () => {
     await expectRevert.unspecified(
