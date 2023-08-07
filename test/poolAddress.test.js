@@ -160,7 +160,100 @@ contract("PoolAddress", async (accounts) => {
     let paymentCycleAmount = res.logs[0].args.paymentCycleAmount.toNumber();
     // console.log(paymentCycleAmount, "pca");
     assert.equal(loanId1, 0, "Unable to create loan: Wrong LoanId");
+    let loan = await poolAddressInstance.loans(loanId1);
+    assert.equal(loan.state, 0);
   });
+
+  it("should not request if lending token is 0 address", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      "0x0000000000000000000000000000000000000000",
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ))
+  })
+
+  it("should not request if receiver is 0 address", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      "0x0000000000000000000000000000000000000000",
+      { from: accounts[1] }
+    ))
+  })
+
+  it("should not request if lender is unverified", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[2] }
+    ))
+  })
+
+  it("should not request if duration is not divisible by 30", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration + 1,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ))
+  })
+
+  it("should not request if apr < 100", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      10,
+      accounts[1],
+      { from: accounts[1] }
+    ))
+  })
+
+  it("should not request if principal < 1000000", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      100000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ))
+  })
+
+  it("should not request if expiration duration is 0", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      0,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ))
+  })
 
   it("should not request if the contract is paused", async () => {
     await poolAddressInstance.pause();
@@ -178,6 +271,12 @@ contract("PoolAddress", async (accounts) => {
     );
     await poolAddressInstance.unpause();
   });
+
+  it("should not accept loan if caller is not lender", async () => {
+    await erc20.approve(poolAddressInstance.address, 10000000000, {from:accounts[2]});
+    await truffleAssert.reverts(poolAddressInstance.AcceptLoan(loanId1, { from: accounts[2] }),
+    "Not verified lender")
+  })
 
   it("should Accept loan ", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
@@ -197,20 +296,24 @@ contract("PoolAddress", async (accounts) => {
     //console.log(_balance1.toNumber())
     //Amount that the borrower will get is 999 after cutting fees and market charges
     assert.equal(_balance1.toNumber(), 9800000000, "Not able to accept loan");
+    let loan = await poolAddressInstance.loans(loanId1);
+    assert.equal(loan.state, 2)
   });
+
+  it("should not accept loan if loan is not pending", async () => {
+    await erc20.approve(poolAddressInstance.address, 10000000000, {from:accounts[0]});
+    await truffleAssert.reverts(poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] }),
+    "loan not pending")
+  })
 
   it("should calculate the next due date", async () => {
     loanId1 = res.logs[0].args.loanId.toNumber();
-    // console.log(loanId1);
-    let now = await erc20.getTime();
-    // console.log("now before increase", now.toString())
-    // await time.increase(paymentCycleDuration)
-    let r = await poolAddressInstance.calculateNextDueDate(loanId1);
-    // console.log("due", r.toString());
-    now = await erc20.getTime();
-    // console.log("now", now.toString());
-    // console.log("difference", r - now);
-    assert.equal(r - now, 2592000);
+    let loan = await poolAddressInstance.loans(loanId1);
+    
+    let dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
+    let acceptedTimeStamp = new BN(loan.loanDetails.acceptedTimestamp)
+    let paymentCycle = await new BN(loan.terms.paymentCycle)
+    assert.equal(`${new BN(dueDate)}`, `${acceptedTimeStamp.add(paymentCycle)}`);
   });
 
   it("should not work after the loan expires", async () => {
@@ -381,6 +484,12 @@ contract("PoolAddress", async (accounts) => {
     assert.equal(loan.state, 3);
   });
 
+  it("should not allow further payment after the loan has been repaid", async () => {
+    await truffleAssert.reverts(poolAddressInstance.repayMonthlyInstallment(loanId1, {
+      from: accounts[1],
+    }))
+  })
+
   it("should check that full repayment amount is 0", async () => {
     let loan = await poolAddressInstance.loans(loanId1);
     advanceBlockAtTime(
@@ -437,6 +546,12 @@ contract("PoolAddress", async (accounts) => {
     // console.log(res)
     assert.equal(r.receipt.status, true, "Not able to repay loan");
   });
+
+  it("should not allow further payment after the loan has been repaid", async () => {
+    await truffleAssert.reverts(poolAddressInstance.repayFullLoan(loanId1, {
+      from: accounts[1],
+    }))
+  })
 
   it("should check that full repayment amount is 0", async () => {
     let loan = await poolAddressInstance.loans(loanId1);
@@ -578,5 +693,24 @@ contract("PoolAddress", async (accounts) => {
     await erc20.approve(poolAddressInstance.address, bal);
 
     let r = await poolAddressInstance.repayFullLoan(loanId1);
+  })
+
+  it("should close the pool", async () => {
+    await poolRegis.closePool(poolId1)
+    let closed = await poolRegis.ClosedPool(poolId1);
+    assert.equal(closed, true);
+  })
+
+  it("should not request loan in a closed pool", async () => {
+    await truffleAssert.reverts(poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      10000000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    ))
   })
 });
