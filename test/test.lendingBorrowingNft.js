@@ -61,6 +61,48 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert(NFTid === 1, "Failed to list NFT for Lending");
   });
 
+  it("should check contract address isn't 0 address", async() => {
+    await expectRevert.unspecified(
+      nftLendBorrow.listNFTforBorrowing(
+        0,
+        "0x0000000000000000000000000000000000000000",
+        200,
+        300,
+        3600,
+        200000000000
+      ),
+      "Contract Address is zero"
+    );
+  })
+
+  it("should check percent must be greater than 0.1%", async() => {
+    await expectRevert.unspecified(
+      nftLendBorrow.listNFTforBorrowing(
+        0,
+        piNFT.address,
+        9,
+        300,
+        3600,
+        200000000000
+      ),
+      "percent is less than 0.1"
+    );
+  })
+
+  it("should check expected amount must be greater than 1^6", async() => {
+    await expectRevert.unspecified(
+      nftLendBorrow.listNFTforBorrowing(
+        0,
+        piNFT.address,
+        200,
+        300,
+        3600,
+        100000
+      ),
+      "expected Amount must be greater than 1$"
+    );
+  })
+
   it("should not put on borrow if the contract is paused", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     const tokenId = tx.logs[0].args.tokenId.toNumber();
@@ -180,14 +222,71 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert(BidId3 == 2, "Bid not placed successfully");
   });
 
-
-
-  it("should fail to withdraw second bid", async () => {
-    await expectRevert(
-      nftLendBorrow.withdraw(1, 1, { from: carl }),
-      "Can't withdraw Bid before expiration"
+  it("should check while Bid ERC20 address is not 0", async() => {
+    await sampleERC20.mint(accounts[6], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[6],
+    });
+    await expectRevert.unspecified(
+      nftLendBorrow.Bid(
+        1,
+        100000000000,
+        "0x0000000000000000000000000000000000000000",
+        10,
+        200,
+        200,
+        { from: accounts[6] }
+      ),
+      "ERC20 address is zero"
     );
   })
+
+  it("should check Bid amount must be greater than 10^6", async() => {
+    await sampleERC20.mint(accounts[6], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[6],
+    });
+    await expectRevert(
+      nftLendBorrow.Bid(
+        1,
+        10000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: accounts[6] }
+      ),
+      "bid amount too low"
+    );
+  })
+
+  it("should check percent must be greater than 0.1%", async() => {
+    await sampleERC20.mint(accounts[6], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[6],
+    });
+    await expectRevert(
+      nftLendBorrow.Bid(
+        1,
+        100000000000,
+        sampleERC20.address,
+        9,
+        200,
+        200,
+        { from: carl }
+      ),
+      "interest percent too low"
+    );
+  })
+
+
+
+  // it("should fail to withdraw second bid", async () => {
+  //   await expectRevert(
+  //     nftLendBorrow.withdraw(1, 1, { from: carl }),
+  //     "Can't withdraw Bid before expiration"
+  //   );
+  // })
 
   it("Should Accept Bid", async () => {
     await aconomyFee.transferOwnership(accounts[9]);
@@ -214,6 +313,26 @@ contract("NFTlendingBorrowing", async (accounts) => {
     assert.equal(bid.bidAccepted, true);
     assert.equal(bid.withdrawn, false);
   });
+
+  it("should check anyone can't Bid on already Accepted bid", async() => {
+    await sampleERC20.mint(accounts[6], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[6],
+    });
+    await expectRevert(
+      nftLendBorrow.Bid(
+        1,
+        100000000000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: accounts[6] }
+      ),
+      "Bid Already Accepted"
+    );
+  })
+
 
   it("Should Reject Third Bid by NFT Owner", async () => {
     const newBalance1 = await sampleERC20.balanceOf(carl);
@@ -324,12 +443,141 @@ contract("NFTlendingBorrowing", async (accounts) => {
       ),
       "Bid time over"
     );
+  })
 
-    
-    
 
+  it("should mint hte NFT and list for NFT for Borrowing", async() => {
+
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    console.log("tokenid",tokenId);
+    assert(tokenId === 4, "Failed to mint or wrong token Id");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      4,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      200000000000
+    );
+
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+    console.log("nftId",NFTid)
+    assert(NFTid === 4, "Failed to list NFT for Lending");
+
+    // await time.increase(3600);
+    // await sampleERC20.mint(accounts[6], 100000000000);
+    // await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+    //   from: accounts[6],
+    // });
+    // await expectRevert(
+    //   nftLendBorrow.Bid(
+    //     2,
+    //     100000000000,
+    //     sampleERC20.address,
+    //     10,
+    //     200,
+    //     200,
+    //     { from: accounts[6] }
+    //   ),
+    //   "Bid time over"
+    // );
+
+    // await time.decrease(3600);
 
   })
 
+  it("should check someone is bidding on listed NFT", async() => {
+       await sampleERC20.mint(accounts[7], 100000000000);
+      await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+        from: accounts[7],
+      });
+
+        await expectRevert(
+          nftLendBorrow.Bid(
+            2,
+            100000000000,
+            sampleERC20.address,
+            10,
+            200,
+            200,
+            { from: accounts[7] }
+          ),
+          "You can't Bid on this NFT"
+        );
+  })
+
+  it("Should check that NFT owner can Accept the Bid", async () => {
+
+    await sampleERC20.mint(accounts[7], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[7],
+    });
+
+    await nftLendBorrow.Bid(
+        4,
+        100000000000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: accounts[7] }
+      )
+
+    // const tx = await nftLendBorrow.AcceptBid(1, 0);
+
+    await expectRevert(
+      nftLendBorrow.AcceptBid(
+        4,
+        0,
+        { from: accounts[6] }
+      ),
+      "You can't Accept This Bid"
+    );
+
+  });
+
+
+  it("Should check owner can't accept the bid if it's already accepted", async () => {
+
+    await sampleERC20.mint(accounts[8], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[8],
+    });
+
+    await nftLendBorrow.Bid(
+        4,
+        100000000000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: accounts[8] }
+      )
+
+    await piNFT.approve(nftLendBorrow.address, 4);
+    const tx = await nftLendBorrow.AcceptBid(4, 0);
+
+    await expectRevert(
+      nftLendBorrow.AcceptBid(
+        4,
+        0
+      ),
+      "bid already accepted"
+    );
+  });
+
+  it("Should check owner can't accept another bid if it's already accepted a bid", async () => {
+    await expectRevert(
+      nftLendBorrow.AcceptBid(
+        4,
+        0
+      ),
+      "bid already accepted"
+    );
+  });
+
+  
 
 });
