@@ -259,7 +259,6 @@ contract NFTlendingBorrowing is
         uint256 _expiration
     ) external whenNotPaused nonReentrant {
         require(_ERC20Address != address(0));
-        require(_bidAmount != 0, "You can't bid with zero Amount");
         require(_bidAmount >= 10000000, "bid amount too low");
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");

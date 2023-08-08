@@ -450,7 +450,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
 
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     const tokenId = tx.logs[0].args.tokenId.toNumber();
-    console.log("tokenid",tokenId);
+    // console.log("tokenid",tokenId);
     assert(tokenId === 4, "Failed to mint or wrong token Id");
 
     const tx1 = await nftLendBorrow.listNFTforBorrowing(
@@ -463,7 +463,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
     );
 
     const NFTid = tx1.logs[0].args.NFTid.toNumber();
-    console.log("nftId",NFTid)
+    // console.log("nftId",NFTid)
     assert(NFTid === 4, "Failed to list NFT for Lending");
 
     // await time.increase(3600);
@@ -539,7 +539,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
   });
 
 
-  it("Should check owner can't accept the bid if it's already accepted", async () => {
+  it("Should check owner can't accept the bid if it's already accepted and can't remove NFT after accepting Bid ", async () => {
 
     await sampleERC20.mint(accounts[8], 100000000000);
     await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
@@ -560,6 +560,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
     const tx = await nftLendBorrow.AcceptBid(4, 0);
 
     await expectRevert(
+      nftLendBorrow.removeNFTfromList(
+        4,
+        { from: alice }
+      ),
+      "Only token owner can execute"
+    );
+
+    await expectRevert(
       nftLendBorrow.AcceptBid(
         4,
         0
@@ -578,6 +586,185 @@ contract("NFTlendingBorrowing", async (accounts) => {
     );
   });
 
+  it("Should check only NFT owner can Reject the Bid", async () => {
+
+    await expectRevert(
+      nftLendBorrow.rejectBid(
+        4,
+        1,
+        { from: accounts[6] }
+      ),
+      "You can't Reject This Bid"
+    );
+
+  });
+
+  it("Should check Bid can't reject which is already accepted", async () => {
+
+    await expectRevert(
+      nftLendBorrow.rejectBid(
+        4,
+        0,
+        { from: accounts[6] }
+      ),
+      "Bid Already Accepted"
+    );
+
+  });
+
+  it("Should check Anyone can't repay untill Bid is not accepted", async () => {
+
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    // console.log("tokenid",tokenId);
+    assert(tokenId === 5, "Failed to mint or wrong token Id");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      5,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      200000000000
+    );
+
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+    // console.log("nftId",NFTid)
+    assert(NFTid === 5, "Failed to list NFT for Lending");
+
+    await sampleERC20.mint(accounts[8], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[8],
+    });
+
+    await nftLendBorrow.Bid(
+        5,
+        100000000000,
+        sampleERC20.address,
+        10,
+        200,
+        200,
+        { from: accounts[8] }
+      )
+
+    await expectRevert(
+      nftLendBorrow.Repay(
+        5,
+        0,
+      ),
+      "Bid Not Accepted yet"
+    );
+
+  });
+
+  it("Should check user can't repay again if It's already repaid'", async () => {
+
+    await piNFT.approve(nftLendBorrow.address, 5);
+    await nftLendBorrow.AcceptBid(5, 0);
+
+    let val = await nftLendBorrow.viewRepayAmount(5, 0);
+    await sampleERC20.approve(nftLendBorrow.address, val);
+    const tx = await nftLendBorrow.Repay(5, 0);
+    const amount = tx.logs[0].args.Amount.toNumber();
+    // console.log("Amount",amount);
+    let nft = await nftLendBorrow.NFTdetails(5);
+    assert.equal(nft.listed, false);
+    // console.log("nft",nft)
+
+    await expectRevert(
+      nftLendBorrow.Repay(
+        5,
+        0,
+      ),
+      "It's not listed for Borrowing"
+    );
+
+  });
+
+  it("should check only bidder can withdraw the bid", async() => {
+
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    // console.log("tokenid",tokenId);
+    assert(tokenId === 6, "Failed to mint or wrong token Id");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      6,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      200000000000
+    );
+
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+    // console.log("nftId",NFTid)
+    assert(NFTid === 6, "Failed to list NFT for Lending");
+
+
+    await sampleERC20.mint(accounts[9], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[9],
+    });
+    await nftLendBorrow.Bid(
+      6,
+      100000000000,
+      sampleERC20.address,
+      10,
+      200,
+      200,
+      { from: accounts[9] }
+    )
+
+    await expectRevert(
+      nftLendBorrow.withdraw(
+        6,
+        0,
+        { from: accounts[8] }
+      ),
+      "You can't withdraw this Bid"
+    );
+  })
+
+  it("should check Bidder can't withdraw before expiration ", async() => {
+    await expectRevert(
+      nftLendBorrow.withdraw(
+        6,
+        0,
+        { from: accounts[9] }
+      ),
+      "Can't withdraw Bid before expiration"
+    );
+  })
+
+  it("should check only Token owner can remove from borrowing ", async() => {
+
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    // console.log("tokenid",tokenId);
+    assert(tokenId === 7, "Failed to mint or wrong token Id");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      7,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      200000000000
+    );
+
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+    // console.log("nftId",NFTid)
+    assert(NFTid === 7, "Failed to list NFT for Lending");
+
+    await expectRevert(
+      nftLendBorrow.removeNFTfromList(
+        7,
+        { from: accounts[9] }
+      ),
+      "Only token owner can execute"
+    );
+  })
   
 
 });

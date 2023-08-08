@@ -63,7 +63,7 @@ library LibNFTLendingBorrowing {
         require(!bidDetail.bidAccepted, "Bid Already Accepted");
         require(
             nftDetail.tokenIdOwner == msg.sender,
-            "You can't Accept This Bid"
+            "You can't Reject This Bid"
         );
         bidDetail.withdrawn = true;
         require(
