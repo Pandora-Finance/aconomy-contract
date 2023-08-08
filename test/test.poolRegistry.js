@@ -169,7 +169,7 @@ contract("poolRegistry", async (accounts) => {
   it("should change the uri", async () => {
     let apr = await poolRegis.getPoolApr(3);
     assert.equal(apr, 1000, "apr is not correct");
-    await poolRegis.setApr(3,200)
+    await poolRegis.setApr(3, 200);
     let newAPR = await poolRegis.getPoolApr(3);
     assert.equal(newAPR, 200, "apr is not updated");
   });
@@ -177,29 +177,40 @@ contract("poolRegistry", async (accounts) => {
   it("should change the payment default duration", async () => {
     let DefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
     assert.equal(DefaultDuration, 211111111, "DefaultDuration is not correct");
-    await poolRegis.setPaymentDefaultDuration(3,211111112)
+    await poolRegis.setPaymentDefaultDuration(3, 211111112);
     let newDefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
-    assert.equal(newDefaultDuration, 211111112, "DefaultDuration is not updated");
+    assert.equal(
+      newDefaultDuration,
+      211111112,
+      "DefaultDuration is not updated"
+    );
   });
 
   it("should change the Pool Fee percent", async () => {
     let PoolFeePercent = await poolRegis.getPoolFeePercent(3);
     assert.equal(PoolFeePercent, 100, "PoolFeePercent is not correct");
-    await poolRegis.setPoolFeePercent(3,200)
+    await poolRegis.setPoolFeePercent(3, 200);
     let newPoolFeePercent = await poolRegis.getPoolFeePercent(3);
     assert.equal(newPoolFeePercent, 200, "PoolFeePercent is not updated");
   });
 
   it("should change the loan Expiration Time", async () => {
     let loanExpirationTime = await poolRegis.getloanExpirationTime(3);
-    assert.equal(loanExpirationTime, 2111111222, "loanExpirationTime is not correct");
-    await poolRegis.setloanExpirationTime(3,2111111223)
+    assert.equal(
+      loanExpirationTime,
+      2111111222,
+      "loanExpirationTime is not correct"
+    );
+    await poolRegis.setloanExpirationTime(3, 2111111223);
     let newloanExpirationTime = await poolRegis.getloanExpirationTime(3);
-    assert.equal(newloanExpirationTime, 2111111223, "loanExpirationTime is not updated");
+    assert.equal(
+      newloanExpirationTime,
+      2111111223,
+      "loanExpirationTime is not updated"
+    );
   });
 
-  it("should check only owner can add lender and borrower", async() => {
-
+  it("should check only owner can add lender and borrower", async () => {
     await expectRevert(
       poolRegis.addBorrower(newpoolId, accounts[1], { from: accounts[2] }),
       "Not the owner"
@@ -216,10 +227,9 @@ contract("poolRegistry", async (accounts) => {
       poolRegis.addLender(newpoolId, accounts[9], { from: accounts[2] }),
       "Not the owner"
     );
+  });
 
-  })
-
-  it("should check lender and borrower are romoved or not", async() => {
+  it("should check lender and borrower are romoved or not", async () => {
     res = await poolRegis.lenderVerification(newpoolId, accounts[9]);
     assert.equal(
       res.isVerified_,
@@ -250,16 +260,16 @@ contract("poolRegistry", async (accounts) => {
       "Borrower Not added to pool, borrowerVerification failed"
     );
 
-    await poolRegis.removeBorrower(newpoolId, accounts[1], { from: accounts[0] });
+    await poolRegis.removeBorrower(newpoolId, accounts[1], {
+      from: accounts[0],
+    });
     res = await poolRegis.borrowerVerification(newpoolId, accounts[1]);
     assert.equal(
       res.isVerified_,
       false,
       "Borrower Not added to pool, borrowerVerification failed"
     );
-
-
-  })
+  });
 
   it("should verify the details of pool2", async () => {
     let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2);
@@ -425,7 +435,7 @@ contract("poolRegistry", async (accounts) => {
 
     //First Installment
     await time.increase(paymentCycleDuration + 1);
-    let rr = await poolAddressInstance.viewInstallmentAmount(loanId1)
+    let rr = await poolAddressInstance.viewInstallmentAmount(loanId1);
     // console.log(
     //   rr.toNumber()
     // );
@@ -449,7 +459,7 @@ contract("poolRegistry", async (accounts) => {
     //console.log(res.logs[0].args.Amount.toNumber())
 
     //Full loan Repay
-    let b = await poolAddressInstance.viewFullRepayAmount(loanId1)
+    let b = await poolAddressInstance.viewFullRepayAmount(loanId1);
     await erc20.approve(poolAddressInstance.address, b, {
       from: accounts[0],
     });
@@ -472,5 +482,4 @@ contract("poolRegistry", async (accounts) => {
       poolAddressInstance.repayFullLoan(loanId1, { from: accounts[0] })
     );
   });
-
 });
