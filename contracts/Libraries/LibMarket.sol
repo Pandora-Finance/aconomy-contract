@@ -245,6 +245,7 @@ library LibMarket {
         require(msg.sender == meta.currentOwner);
         require(!bids.withdrawn);
         require(meta.status);
+        require(meta.bidSale);
         meta.status = false;
         meta.price = bids.price;
         bids.withdrawn = true;
