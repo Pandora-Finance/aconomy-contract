@@ -583,6 +583,10 @@ contract poolRegistry is
         return pools[_poolId].APR;
     }
 
+    function getPoolFeePercent(uint256 _poolId) public view returns (uint16) {
+        return pools[_poolId].poolFeePercent;
+    }
+
     function getAconomyFee() public view returns (uint16) {
         return AconomyFee(AconomyFeeAddress).AconomyPoolFee();
     }

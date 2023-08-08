@@ -37,6 +37,8 @@ contract("poolRegistry", async (accounts) => {
     poolId2,
     loanId1,
     poolAddressInstance,
+    newpool1Address,
+    newpoolId,
     erc20;
 
   it("should set Aconomyfee", async () => {
@@ -132,6 +134,132 @@ contract("poolRegistry", async (accounts) => {
       "Borrower Not added to pool, borrowerVarification failed"
     );
   });
+
+  it("should create an other new Pool", async () => {
+    // console.log("attestTegistry: ", attestServices.address)
+    poolRegis = await PoolRegistry.deployed();
+    res = await poolRegis.createPool(
+      211111111,
+      2111111222,
+      100,
+      1000,
+      "sk.com",
+      true,
+      true
+    );
+
+    newpoolId = res.logs[5].args.poolId.toNumber();
+    // console.log(newpoolId, "poolId");
+    newpool1Address = res.logs[4].args.poolAddress;
+    // console.log(pool1Address, "poolAdress");
+    // res = await poolRegis.lenderVerification(poolId2, accounts[0]);
+    // assert.equal(
+    //   res.isVerified_,
+    //   false,
+    //   "Lender Not added to pool, lenderVarification failed"
+    // );
+    // res = await poolRegis.borrowerVerification(poolId2, accounts[0]);
+    // assert.equal(
+    //   res.isVerified_,
+    //   false,
+    //   "Borrower Not added to pool, borrowerVarification failed"
+    // );
+  });
+
+  it("should change the uri", async () => {
+    let apr = await poolRegis.getPoolApr(3);
+    assert.equal(apr, 1000, "apr is not correct");
+    await poolRegis.setApr(3,200)
+    let newAPR = await poolRegis.getPoolApr(3);
+    assert.equal(newAPR, 200, "apr is not updated");
+  });
+
+  it("should change the payment default duration", async () => {
+    let DefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
+    assert.equal(DefaultDuration, 211111111, "DefaultDuration is not correct");
+    await poolRegis.setPaymentDefaultDuration(3,211111112)
+    let newDefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
+    assert.equal(newDefaultDuration, 211111112, "DefaultDuration is not updated");
+  });
+
+  it("should change the Pool Fee percent", async () => {
+    let PoolFeePercent = await poolRegis.getPoolFeePercent(3);
+    assert.equal(PoolFeePercent, 100, "PoolFeePercent is not correct");
+    await poolRegis.setPoolFeePercent(3,200)
+    let newPoolFeePercent = await poolRegis.getPoolFeePercent(3);
+    assert.equal(newPoolFeePercent, 200, "PoolFeePercent is not updated");
+  });
+
+  it("should change the loan Expiration Time", async () => {
+    let loanExpirationTime = await poolRegis.getloanExpirationTime(3);
+    assert.equal(loanExpirationTime, 2111111222, "loanExpirationTime is not correct");
+    await poolRegis.setloanExpirationTime(3,2111111223)
+    let newloanExpirationTime = await poolRegis.getloanExpirationTime(3);
+    assert.equal(newloanExpirationTime, 2111111223, "loanExpirationTime is not updated");
+  });
+
+  it("should check only owner can add lender and borrower", async() => {
+
+    await expectRevert(
+      poolRegis.addBorrower(newpoolId, accounts[1], { from: accounts[2] }),
+      "Not the owner"
+    );
+
+    res = await poolRegis.lenderVerification(poolId1, accounts[9]);
+    assert.equal(
+      res.isVerified_,
+      false,
+      "AddLender function not called but verified"
+    );
+
+    await expectRevert(
+      poolRegis.addLender(newpoolId, accounts[9], { from: accounts[2] }),
+      "Not the owner"
+    );
+
+  })
+
+  it("should check lender and borrower are romoved or not", async() => {
+    res = await poolRegis.lenderVerification(newpoolId, accounts[9]);
+    assert.equal(
+      res.isVerified_,
+      false,
+      "AddLender function not called but verified"
+    );
+    await poolRegis.addLender(newpoolId, accounts[9], { from: accounts[0] });
+    res = await poolRegis.lenderVerification(newpoolId, accounts[9]);
+    assert.equal(
+      res.isVerified_,
+      true,
+      "Lender Not added to pool, lenderVerification failed"
+    );
+
+    await poolRegis.removeLender(newpoolId, accounts[9], { from: accounts[0] });
+    res = await poolRegis.lenderVerification(newpoolId, accounts[9]);
+    assert.equal(
+      res.isVerified_,
+      false,
+      "AddLender function not called but verified"
+    );
+
+    await poolRegis.addBorrower(newpoolId, accounts[1], { from: accounts[0] });
+    res = await poolRegis.borrowerVerification(newpoolId, accounts[1]);
+    assert.equal(
+      res.isVerified_,
+      true,
+      "Borrower Not added to pool, borrowerVerification failed"
+    );
+
+    await poolRegis.removeBorrower(newpoolId, accounts[1], { from: accounts[0] });
+    res = await poolRegis.borrowerVerification(newpoolId, accounts[1]);
+    assert.equal(
+      res.isVerified_,
+      false,
+      "Borrower Not added to pool, borrowerVerification failed"
+    );
+
+
+  })
 
   it("should verify the details of pool2", async () => {
     let DefaultDuration = await poolRegis.getPaymentDefaultDuration(poolId2);
