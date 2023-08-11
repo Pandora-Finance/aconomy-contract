@@ -17,6 +17,7 @@ library LibNFTLendingBorrowing {
         require(nftDetail.listed, "It's not listed for Borrowing");
         require(!nftDetail.bidAccepted, "bid already accepted");
         require(!bidDetail.bidAccepted, "Bid Already Accepted");
+        require(bidDetail.expiration > block.timestamp, "Bid is expired");
         require(
             nftDetail.tokenIdOwner == msg.sender,
             "You can't Accept This Bid"
@@ -61,6 +62,7 @@ library LibNFTLendingBorrowing {
     ) external {
         require(!bidDetail.withdrawn, "Already withdrawn");
         require(!bidDetail.bidAccepted, "Bid Already Accepted");
+        require(bidDetail.expiration > block.timestamp, "Bid is expired");
         require(
             nftDetail.tokenIdOwner == msg.sender,
             "You can't Reject This Bid"

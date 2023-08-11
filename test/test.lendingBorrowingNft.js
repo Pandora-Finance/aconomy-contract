@@ -765,6 +765,119 @@ contract("NFTlendingBorrowing", async (accounts) => {
       "Only token owner can execute"
     );
   })
+
+  it("should check Bid can't be accepted after It's expired ", async() => {
+
+    const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+    const tokenId = tx.logs[0].args.tokenId.toNumber();
+    // console.log("tokenid",tokenId);
+    assert(tokenId === 8, "Failed to mint or wrong token Id");
+
+    const tx1 = await nftLendBorrow.listNFTforBorrowing(
+      8,
+      piNFT.address,
+      200,
+      300,
+      3600,
+      200000000000
+    );
+
+    const NFTid = tx1.logs[0].args.NFTid.toNumber();
+    // console.log("nftId",NFTid)
+    assert(NFTid === 8, "Failed to list NFT for Lending");
+
+    await sampleERC20.mint(accounts[9], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[9],
+    });
+    let b1 = await sampleERC20.balanceOf(accounts[9]);
+    console.log("fee 1", b1.toNumber());
+    await nftLendBorrow.Bid(
+      8,
+      100000000000,
+      sampleERC20.address,
+      10,
+      200,
+      200,
+      { from: accounts[9] }
+    )
+    let b2 = await sampleERC20.balanceOf(accounts[9]);
+    console.log("fee 1", b2.toNumber());
+
+    await time.increase(201);
+
+    await expectRevert(
+      nftLendBorrow.AcceptBid(
+        8,
+        0,
+        { from: alice }
+      ),
+      "Bid is expired"
+    );
+
+    await expectRevert(
+      nftLendBorrow.rejectBid(
+        8,
+        0,
+        { from: alice }
+      ),
+      "Bid is expired"
+    );
+    
+
+  })
+
+  it("should withdraw the Bid after expiration",async() => {
+    let b1 = await sampleERC20.balanceOf(accounts[9]);
+    console.log("fee 1", b1.toNumber());
+      
+
+      await expectRevert(
+        nftLendBorrow.withdraw(
+          8,
+          0,
+          { from: alice }
+        ),
+        "You can't withdraw this Bid"
+      );
+
+      nftLendBorrow.withdraw(
+        8,
+        0,
+        { from: accounts[9] }
+      )
+      
+      let b2 = await sampleERC20.balanceOf(accounts[9]);
+    console.log("fee 2", b2.toNumber());
+
+    await sampleERC20.mint(accounts[8], 100000000000);
+    await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
+      from: accounts[8],
+    });
+    let b3 = await sampleERC20.balanceOf(accounts[8]);
+    console.log("fee 3", b3.toNumber());
+    await nftLendBorrow.Bid(
+      8,
+      100000000000,
+      sampleERC20.address,
+      10,
+      200,
+      200,
+      { from: accounts[8] }
+    )
+    let b4 = await sampleERC20.balanceOf(accounts[8]);
+    console.log("fee 4", b4.toNumber());
+    await time.increase(201);
+
+    nftLendBorrow.withdraw(
+      8,
+      1,
+      { from: accounts[8] }
+    )
+    let b5 = await sampleERC20.balanceOf(accounts[8]);
+    console.log("fee 5", b5.toNumber());
+
+  })
   
 
 });
