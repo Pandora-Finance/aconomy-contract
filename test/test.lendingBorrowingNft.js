@@ -791,7 +791,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
       from: accounts[9],
     });
     let b1 = await sampleERC20.balanceOf(accounts[9]);
-    console.log("fee 1", b1.toNumber());
+    // console.log("fee 1", b1.toNumber());
     await nftLendBorrow.Bid(
       8,
       100000000000,
@@ -802,7 +802,7 @@ contract("NFTlendingBorrowing", async (accounts) => {
       { from: accounts[9] }
     )
     let b2 = await sampleERC20.balanceOf(accounts[9]);
-    console.log("fee 1", b2.toNumber());
+    // console.log("fee 1", b2.toNumber());
 
     await time.increase(201);
 
@@ -848,14 +848,14 @@ contract("NFTlendingBorrowing", async (accounts) => {
       )
       
       let b2 = await sampleERC20.balanceOf(accounts[9]);
-    console.log("fee 2", b2.toNumber());
+    // console.log("fee 2", b2.toNumber());
 
     await sampleERC20.mint(accounts[8], 100000000000);
     await sampleERC20.approve(nftLendBorrow.address, 100000000000, {
       from: accounts[8],
     });
     let b3 = await sampleERC20.balanceOf(accounts[8]);
-    console.log("fee 3", b3.toNumber());
+    // console.log("fee 3", b3.toNumber());
     await nftLendBorrow.Bid(
       8,
       100000000000,
@@ -866,16 +866,20 @@ contract("NFTlendingBorrowing", async (accounts) => {
       { from: accounts[8] }
     )
     let b4 = await sampleERC20.balanceOf(accounts[8]);
-    console.log("fee 4", b4.toNumber());
+    // console.log("fee 4", b4.toNumber());
     await time.increase(201);
+    assert.equal(await sampleERC20.balanceOf(accounts[8]), 100000000000, "Incorrect Balance");
 
-    nftLendBorrow.withdraw(
+    await nftLendBorrow.withdraw(
       8,
       1,
       { from: accounts[8] }
     )
     let b5 = await sampleERC20.balanceOf(accounts[8]);
-    console.log("fee 5", b5.toNumber());
+    assert.equal(await sampleERC20.balanceOf(accounts[8]), 200000000000, "Incorrect Balance");
+    // console.log("fee 5", b5.toNumber());
+    let bid = await nftLendBorrow.Bids(8, 1);
+    assert.equal(bid.withdrawn, true, "withdraw is not done");
 
   })
   
