@@ -166,9 +166,13 @@ contract("poolRegistry", async (accounts) => {
     // );
   });
 
-  it("should change the uri", async () => {
+  it("should change the APR", async () => {
     let apr = await poolRegis.getPoolApr(3);
     assert.equal(apr, 1000, "apr is not correct");
+    await expectRevert(
+      poolRegis.setApr(3, 99),
+      "given apr too low"
+    );
     await poolRegis.setApr(3, 200);
     let newAPR = await poolRegis.getPoolApr(3);
     assert.equal(newAPR, 200, "apr is not updated");
@@ -177,6 +181,10 @@ contract("poolRegistry", async (accounts) => {
   it("should change the payment default duration", async () => {
     let DefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
     assert.equal(DefaultDuration, 211111111, "DefaultDuration is not correct");
+    await expectRevert(
+      poolRegis.setPaymentDefaultDuration(3, 0),
+      "default duration cannot be 0"
+    );
     await poolRegis.setPaymentDefaultDuration(3, 211111112);
     let newDefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
     assert.equal(
@@ -189,6 +197,10 @@ contract("poolRegistry", async (accounts) => {
   it("should change the Pool Fee percent", async () => {
     let PoolFeePercent = await poolRegis.getPoolFeePercent(3);
     assert.equal(PoolFeePercent, 100, "PoolFeePercent is not correct");
+    await expectRevert(
+      poolRegis.setPoolFeePercent(3, 1001),
+      "cannot exceed 10%"
+    );
     await poolRegis.setPoolFeePercent(3, 200);
     let newPoolFeePercent = await poolRegis.getPoolFeePercent(3);
     assert.equal(newPoolFeePercent, 200, "PoolFeePercent is not updated");
@@ -196,6 +208,9 @@ contract("poolRegistry", async (accounts) => {
 
   it("should change the loan Expiration Time", async () => {
     let loanExpirationTime = await poolRegis.getloanExpirationTime(3);
+    await expectRevert.unspecified(
+      poolRegis.setloanExpirationTime(3, 0)
+    );
     assert.equal(
       loanExpirationTime,
       2111111222,
