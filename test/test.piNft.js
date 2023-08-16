@@ -2,6 +2,7 @@ const PiNFT = artifacts.require("piNFT");
 const SampleERC20 = artifacts.require("mintToken");
 const piNFTMethods = artifacts.require("piNFTMethods");
 const { expectRevert } = require("@openzeppelin/test-helpers");
+const truffleAssertions = require("truffle-assertions");
 
 contract("PiNFT", (accounts) => {
   let piNFT, sampleERC20, piNftMethods;
@@ -23,6 +24,10 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.symbol(), "ACO");
   });
 
+  it("should fail to mint if the to address is address 0", async () => {
+    await expectRevert.unspecified(piNFT.mintNFT("0x0000000000000000000000000000000000000000", "xyz", [[royaltyReciever, 500]]));
+  })
+
   it("should mint an ERC721 token to alice", async () => {
     const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
     // console.log(tx);
@@ -43,10 +48,29 @@ contract("PiNFT", (accounts) => {
     await piNFT.unpause();
   });
 
-  it("should Royality must be less 4900", async () => {
+  it("should check that Royality must be less 4900", async () => {
     await expectRevert(
       piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 4901]]),
       "overflow"
+    );
+  });
+
+  it("should check that Royality receiver isn't 0 address", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", [["0x0000000000000000000000000000000000000000", 4900]])
+    );
+  });
+
+  it("should check that Royality value isn't 0", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 0]])
+    );
+  });
+
+  it("should check that Royality length is less than 10", async () => {
+    await expectRevert.unspecified(
+      piNFT.mintNFT(alice, "URI1", 
+      [[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100],[alice, 100]])
     );
   });
 
@@ -55,6 +79,10 @@ contract("PiNFT", (accounts) => {
     const tokenId = tx.logs[0].args.tokenId.toNumber();
     assert(tokenId === 1, "Failed to mint or wrong token Id");
     assert.equal(await piNFT.balanceOf(alice), 2, "Failed to mint");
+  });
+
+  it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
+    await expectRevert.unspecified(piNFT.deleteNFT(1, {from: bob}))
   });
 
   it("should Delete an ERC721 token to alice", async () => {
@@ -76,6 +104,14 @@ contract("PiNFT", (accounts) => {
     assert(balance == 1000, "Failed to mint ERC20 tokens");
   });
 
+  it("should not allow non owner to add a validator", async () => {
+    expectRevert.unspecified(piNftMethods.addValidator(piNFT.address, 0, validator, {from: bob}))
+  })
+
+  it("should not allow validator to be 0 address", async () => {
+    expectRevert.unspecified(piNftMethods.addValidator(piNFT.address, 0, "0x0000000000000000000000000000000000000000"))
+  })
+
   it("should allow alice to add a validator to the nft", async () => {
     await piNftMethods.addValidator(piNFT.address, 0, validator);
     assert.equal(
@@ -83,6 +119,74 @@ contract("PiNFT", (accounts) => {
       validator
     );
   });
+
+  it("should not let non validator add funds", async () => {
+    await sampleERC20.approve(piNftMethods.address, 500, {
+      from: alice,
+    });
+    await expectRevert.unspecified(piNftMethods.addERC20(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      500,
+      500,
+      [[validator, 200]],
+      {
+        from: alice,
+      }
+    ));
+  })
+
+  it("should not let erc20 contract be address 0", async () => {
+    await sampleERC20.approve(piNftMethods.address, 500, {
+      from: validator,
+    });
+    await expectRevert.unspecified(piNftMethods.addERC20(
+      piNFT.address,
+      0,
+      "0x0000000000000000000000000000000000000000",
+      500,
+      500,
+      [[validator, 200]],
+      {
+        from: validator,
+      }
+    ));
+  })
+
+  it("should not let validator fund value be 0", async () => {
+    await sampleERC20.approve(piNftMethods.address, 500, {
+      from: validator,
+    });
+    await expectRevert.unspecified(piNftMethods.addERC20(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      0,
+      500,
+      [[validator, 200]],
+      {
+        from: validator,
+      }
+    ));
+  })
+
+  it("should not let validator commission value be 4901", async () => {
+    await sampleERC20.approve(piNftMethods.address, 500, {
+      from: validator,
+    });
+    await expectRevert.unspecified(piNftMethods.addERC20(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      500,
+      4901,
+      [[validator, 200]],
+      {
+        from: validator,
+      }
+    ));
+  })
 
   it("should let validator add ERC20 tokens to alice's NFT", async () => {
     await sampleERC20.approve(piNftMethods.address, 500, { from: validator });
@@ -109,6 +213,14 @@ contract("PiNFT", (accounts) => {
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
     assert(commission.commission.value == 500);
+  });
+
+  it("should not allow validator changing after funding", async () => {
+    expectRevert.unspecified(piNftMethods.addValidator(piNFT.address, 0, validator))
+  })
+
+  it("should not Delete an ERC721 token after validator funding", async () => {
+    await expectRevert.unspecified(piNFT.deleteNFT(0))
   });
 
   it("should let the validator add more erc20 tokens of the same contract", async () => {
@@ -169,6 +281,15 @@ contract("PiNFT", (accounts) => {
     assert.equal(await piNFT.ownerOf(0), alice, "Failed to transfer NFT");
   });
 
+  it("should not let non owner withdraw validator funds", async () => {
+    await expectRevert.unspecified(piNftMethods.withdraw(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      300
+    ))
+  })
+
   it("should let alice withdraw erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
     await piNFT.approve(piNftMethods.address, 0);
@@ -181,7 +302,34 @@ contract("PiNFT", (accounts) => {
     bal = await sampleERC20.balanceOf(alice);
     assert.equal(bal - _bal, 500);
     assert.equal(await sampleERC20.balanceOf(piNftMethods.address), 200);
+    await expectRevert.unspecified(piNftMethods.withdraw(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      201
+    ))
   });
+
+  it("should not let external account(bob) to repay the bid", async () => {
+    await sampleERC20.approve(piNftMethods.address, 300, {from: bob});
+    await expectRevert(piNftMethods.Repay(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      300,
+      {from: bob}
+    ),"not owner")
+  })
+
+  it("should not let alice repay more than what's borrowed", async () => {
+    await sampleERC20.approve(piNftMethods.address, 800);
+    await expectRevert(piNftMethods.Repay(
+      piNFT.address,
+      0,
+      sampleERC20.address,
+      800
+    ),"Invalid repayment amount")
+  })
 
   it("should let alice repay erc20", async () => {
     let _bal = await sampleERC20.balanceOf(alice);
@@ -210,6 +358,8 @@ contract("PiNFT", (accounts) => {
     const balance = await sampleERC20.balanceOf(validator);
     assert.equal(balance, 1000);
     assert.equal(await piNFT.ownerOf(0), alice);
+    assert.equal(await piNftMethods.NFTowner(piNFT.address, 0), "0x0000000000000000000000000000000000000000")
+    assert.equal(await piNftMethods.approvedValidator(piNFT.address, 0), "0x0000000000000000000000000000000000000000")
     let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
     assert(commission.isValid == false);
     assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
@@ -301,4 +451,9 @@ contract("PiNFT", (accounts) => {
     assert(commission.commission.account == "0x0000000000000000000000000000000000000000");
     assert(commission.commission.value == 0);
   });
+
+  it("should prevent an external address to call piNFTMethods callable functions", async () => {
+    await expectRevert(piNFT.setRoyaltiesForValidator(1, 3000, []), "methods")
+    await expectRevert(piNFT.deleteValidatorRoyalties(1), "methods")
+  })
 });

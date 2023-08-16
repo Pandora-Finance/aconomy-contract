@@ -103,7 +103,7 @@ contract poolAddress is
         require(!poolRegistry(poolRegistryAddress).ClosedPool(_poolId));
         require(_duration % 30 days == 0);
         require(_APR >= 100);
-        require(_principal >= 10000000000);
+        require(_principal >= 1000000, "low");
         require(_expirationDuration > 0);
 
         loanId_ = loanId;
@@ -315,6 +315,13 @@ contract poolAddress is
             block.timestamp
         );
 
+        if (
+            loans[_loanId].terms.installmentsPaid + 1 ==
+            loans[_loanId].terms.installments
+        ) {
+            return viewFullRepayAmount(_loanId);
+        }
+
         if (monthsSinceStart > lastPaymentCycle) {
             return loans[_loanId].terms.paymentCycleAmount;
         } else {
@@ -329,6 +336,7 @@ contract poolAddress is
     function repayMonthlyInstallment(
         uint256 _loanId
     ) external whenNotPaused nonReentrant {
+        require(loans[_loanId].loanDetails.principal / uint256(loans[_loanId].terms.installments) >= 1000000, "low");
         require(loans[_loanId].state == LoanState.ACCEPTED);
         require(
             loans[_loanId].terms.installmentsPaid + 1 <=
@@ -444,6 +452,11 @@ contract poolAddress is
         } else {
             emit LoanRepayment(_loanId, paymentAmount);
         }
+
+        loan.loanDetails.totalRepaid.principal += _payment.principal;
+        loan.loanDetails.totalRepaid.interest += _payment.interest;
+        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
+
         // Send payment to the lender
         bool isSuccess = IERC20(loan.loanDetails.lendingToken).transferFrom(
             msg.sender,
@@ -452,10 +465,6 @@ contract poolAddress is
         );
 
         require(isSuccess);
-
-        loan.loanDetails.totalRepaid.principal += _payment.principal;
-        loan.loanDetails.totalRepaid.interest += _payment.interest;
-        loan.loanDetails.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

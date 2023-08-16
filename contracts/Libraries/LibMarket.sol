@@ -25,6 +25,7 @@ library LibMarket {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
                 if(commValid) {
+                    require(comm.account != address(0), "0 address commission");
                     (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
@@ -36,6 +37,7 @@ library LibMarket {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
                 if(commValid) {
+                    require(comm.account != address(0), "0 address commission");
                     (bool commissionSuccess) = IERC20(currency).transferFrom(
                     msg.sender,
                     comm.account,
@@ -66,6 +68,7 @@ library LibMarket {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
                 if(commValid) {
+                    require(comm.account != address(0), "0 address commission");
                     (bool commissionSuccess, ) = payable(comm.account).call{value: commission}("");
                     require(commissionSuccess, "Commission payment failed");
                     piNFTMethods(piNFTMethodsAddress).paidCommission(collection, tokenId);
@@ -77,6 +80,7 @@ library LibMarket {
             uint256 commission = (principle * comm.value)/10000;
             if(commission != 0) {
                 if(commValid) {
+                    require(comm.account != address(0), "0 address commission");
                     (bool commissionSuccess) = IERC20(currency).transfer(
                     comm.account,
                     commission
@@ -241,6 +245,7 @@ library LibMarket {
         require(msg.sender == meta.currentOwner);
         require(!bids.withdrawn);
         require(meta.status);
+        require(meta.bidSale);
         meta.status = false;
         meta.price = bids.price;
         bids.withdrawn = true;

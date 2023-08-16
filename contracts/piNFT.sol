@@ -40,6 +40,14 @@ contract piNFT is
 
     event TokenMinted(uint256 tokenId, address to);
 
+    /**
+     * @notice Modifier enabling only the piNFTMethods contract to call.
+     */
+    modifier onlyMethods {
+        require(msg.sender == piNFTMethodsAddress, "methods");
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -159,8 +167,7 @@ contract piNFT is
         uint256 _tokenId,
         uint256 _commission,
         LibShare.Share[] memory royalties
-    ) external {
-        require(msg.sender == piNFTMethodsAddress);
+    ) external onlyMethods{
         require(royalties.length <= 10);
         delete royaltiesForValidator[_tokenId];
         uint256 sumRoyalties = 0;
@@ -175,8 +182,7 @@ contract piNFT is
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
 
-    function deleteValidatorRoyalties(uint256 _tokenId) external {
-        require(msg.sender == piNFTMethodsAddress);
+    function deleteValidatorRoyalties(uint256 _tokenId) external onlyMethods{
         delete royaltiesForValidator[_tokenId];
     }
 

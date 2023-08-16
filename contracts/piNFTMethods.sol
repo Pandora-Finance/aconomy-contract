@@ -27,7 +27,7 @@ contract piNFTMethods is
         internal erc20Balances;
 
     // collectionAddress => tokenId => token contract
-    mapping(address => mapping(uint256 => address[])) erc20Contracts;
+    mapping(address => mapping(uint256 => address[])) public erc20Contracts;
 
     // collectionAddress => tokenId => (token contract => token contract index)
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc20ContractIndex;
@@ -158,6 +158,7 @@ contract piNFTMethods is
                 msg.sender
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
+        require(_validator != address(0));
         approvedValidator[_collectionAddress][_tokenId] = _validator;
         emit ValidatorAdded(_collectionAddress, _tokenId, _validator);
     }
@@ -173,6 +174,7 @@ contract piNFTMethods is
                 AconomyERC2771Context._msgSender()
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
+        require(_validator != address(0));
         approvedValidator[_collectionAddress][_tokenId] = _validator;
         emit ValidatorAdded(_collectionAddress, _tokenId, _validator);
     }
@@ -193,7 +195,7 @@ contract piNFTMethods is
         uint256 _value,
         uint96 _commission,
         LibShare.Share[] memory royalties
-    ) public whenNotPaused {
+    ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
@@ -537,6 +539,9 @@ contract piNFTMethods is
             _amount <= withdrawnAmount[_collectionAddress][_tokenId],
             "Invalid repayment amount"
         );
+
+        withdrawnAmount[_collectionAddress][_tokenId] -= _amount;
+
         // Send payment to the Pool
         require(
             IERC20Upgradeable(_erc20Contract).transferFrom(
@@ -546,7 +551,6 @@ contract piNFTMethods is
             ),
             "failed"
         );
-        withdrawnAmount[_collectionAddress][_tokenId] -= _amount;
 
         if (withdrawnAmount[_collectionAddress][_tokenId] == 0) {
             IERC721Upgradeable(_collectionAddress).safeTransferFrom(

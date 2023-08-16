@@ -163,6 +163,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 _expiration,
         uint16 _APR
     ) external nonReentrant {
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         (bool isVerified, ) = poolRegistry(poolRegistryAddress)
             .lenderVerification(_poolId, msg.sender);
 
@@ -173,10 +177,9 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             "you can't do this with zero address"
         );
 
-        require(_amount != 0, "You can't supply with zero amount");
         require(_maxLoanDuration % 30 days == 0);
         require(_APR >= 100, "apr too low");
-        require(_amount >= 10000000000, "amount too low");
+        require(_amount >= 1000000, "amount too low");
 
         uint16 fee = poolRegistry(poolRegistryAddress).getAconomyFee();
 
@@ -221,6 +224,8 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _poolId
         );
 
+        bidId++;
+
         // Send payment to the Pool
         require(
             IERC20(_ERC20Address).transferFrom(
@@ -230,7 +235,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             ),
             "Unable to tansfer to poolAddress"
         );
-        bidId++;
 
         emit SuppliedToPool(
             msg.sender,
@@ -257,6 +261,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _receiver
     ) external nonReentrant {
         require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -319,6 +327,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         address _lender
     ) external nonReentrant {
         require(poolOwner == msg.sender, "You are not the Pool Owner");
+        require(
+            !poolRegistry(poolRegistryAddress).ClosedPool(_poolId),
+            "pool closed"
+        );
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
@@ -477,6 +489,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             block.timestamp
         );
 
+        if (
+            fundDetail.installment.installmentsPaid + 1 ==
+            fundDetail.installment.installments
+        ) {
+            return viewFullRepayAmount(_poolId, _ERC20Address, _bidId, _lender);
+        }
+
         if (monthsSinceStart > lastPaymentCycle) {
             return fundDetail.paymentCycleAmount;
         } else {
@@ -501,6 +520,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         FundDetail storage fundDetail = lenderPoolFundDetails[_lender][_poolId][
             _ERC20Address
         ][_bidId];
+        require(fundDetail.amount / fundDetail.installment.installments >= 1000000, "low");
         if (fundDetail.state != BidState.ACCEPTED) {
             revert("Loan must be accepted");
         }
@@ -620,7 +640,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+            revert("Bid must be accepted");
         }
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
@@ -669,7 +689,7 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _ERC20Address
         ][_bidId];
         if (fundDetail.state != BidState.ACCEPTED) {
-            revert("Bid must be pending");
+            revert("Bid must be accepted");
         }
 
         uint32 paymentCycle = poolRegistry(poolRegistryAddress)
@@ -734,6 +754,11 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         } else {
             emit BidRepayment(_bidId, paymentAmount);
         }
+
+        fundDetail.Repaid.amount += _amount;
+        fundDetail.Repaid.interest += _interest;
+        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
+
         // Send payment to the lender
         require(
             IERC20(_ERC20Address).transferFrom(
@@ -743,10 +768,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             ),
             "unable to transfer to lender"
         );
-
-        fundDetail.Repaid.amount += _amount;
-        fundDetail.Repaid.interest += _interest;
-        fundDetail.lastRepaidTimestamp = uint32(block.timestamp);
     }
 
     /**
@@ -780,13 +801,13 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             "You can't Withdraw"
         );
 
+        fundDetail.state = BidState.WITHDRAWN;
+
         // Transfering the amount to the lender
         require(
             IERC20(_ERC20Address).transfer(_lender, fundDetail.amount),
             "Unable to transfer to lender"
         );
-
-        fundDetail.state = BidState.WITHDRAWN;
 
         emit Withdrawn(_lender, _bidId, _poolId, fundDetail.amount);
     }

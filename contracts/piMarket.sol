@@ -431,11 +431,12 @@ contract piMarket is
         //  require(_timeOfAuction[_saleId] >= block.timestamp,"Auction Over");
 
         if (_tokenMeta[_saleId].currency != address(0)) {
-            IERC20(_tokenMeta[_saleId].currency).transferFrom(
+            bool success = IERC20(_tokenMeta[_saleId].currency).transferFrom(
                 msg.sender,
                 address(this),
                 _bidPrice
             );
+            require(success);
         }
 
         BidOrder memory bid = BidOrder(
@@ -604,6 +605,9 @@ contract piMarket is
             swap.requestedTokenOwner == msg.sender,
             "Only requested owner can accept swap"
         );
+
+        swap.status = false;
+
         ERC721(swap.initiatorNFTAddress).safeTransferFrom(
             address(this),
             msg.sender,
@@ -614,7 +618,6 @@ contract piMarket is
             swap.initiator,
             swap.requestedTokenId
         );
-        swap.status = false;
         emit SwapAccepted(swapId);
     }
 
