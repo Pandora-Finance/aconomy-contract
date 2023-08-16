@@ -695,6 +695,22 @@ contract("PoolAddress", async (accounts) => {
     let r = await poolAddressInstance.repayFullLoan(loanId1);
   })
 
+  it("should request another loan", async () => {
+    res = await poolAddressInstance.loanRequest(
+      erc20.address,
+      poolId1,
+      1000000,
+      loanDefaultDuration,
+      loanExpirationDuration,
+      100,
+      accounts[1],
+      { from: accounts[1] }
+    );
+    loanId1 = res.logs[0].args.loanId.toNumber();
+    
+    assert.equal(loanId1, 5, "Unable to create loan: Wrong LoanId");
+  })
+
   it("should close the pool", async () => {
     await poolRegis.closePool(poolId1)
     let closed = await poolRegis.ClosedPool(poolId1);
@@ -712,5 +728,11 @@ contract("PoolAddress", async (accounts) => {
       accounts[1],
       { from: accounts[1] }
     ))
+  })
+
+  it("should not allow accepting the loan in a closed pool", async () => {
+    await truffleAssert.reverts(poolAddressInstance.AcceptLoan(loanId1, { from: accounts[0] }), 
+    "pool closed"
+    )
   })
 });

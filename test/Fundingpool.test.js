@@ -1119,5 +1119,75 @@ contract("FundingPool", (accounts) => {
         { from: lender }
       ), "pool closed")
     })
+
+    it("should create another Pool", async () => {
+      res = await poolRegis.createPool(
+        loanExpirationDuration,
+        loanExpirationDuration,
+        100,
+        1000,
+        "sk.com",
+        true,
+        true
+      );
+      // console.log(res);
+      poolId1 = res.logs[5].args.poolId.toNumber();
+      // console.log(poolId1, "poolId1");
+      poolId = poolId1;
+      pool1Address = await poolRegis.getPoolAddress(poolId1);
+      // console.log(pool1Address, "poolAdress");
+      fundingpooladdress = pool1Address;
+      res = await poolRegis.lenderVerification(poolId1, accounts[0]);
+      assert.equal(
+        res.isVerified_,
+        true,
+        "Lender Not added to pool, lenderVarification failed"
+      );
+      res = await poolRegis.borrowerVerification(poolId1, accounts[0]);
+      assert.equal(
+        res.isVerified_,
+        true,
+        "Borrower Not added to pool, borrowerVarification failed"
+      );
+    });
+
+    it("should supply to pool", async () => {
+      const provider = new ethers.JsonRpcProvider("http://127.0.0.1:9545/");
+      const currentBlock = await provider.getBlockNumber();
+      const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+      expiration = blockTimestamp + 3600;
+      await erc20.approve(fundingpoolInstance.address, erc20Amount);
+      const tx = await fundingpoolInstance.supplyToPool(
+        poolId,
+        erc20.address,
+        erc20Amount,
+        loanDefaultDuration,
+        expiration,
+        1000
+      );
+    })
+
+    it("should close pool", async () => {
+      await poolRegis.closePool(poolId1)
+      let closed = await poolRegis.ClosedPool(poolId1);
+      assert.equal(closed, true);
+    })
+
+    it("should not allow accepting and rejecting bid after pool is closed", async () => {
+      await truffleAssert.reverts(fundingpoolInstance.AcceptBid(
+        poolId,
+        erc20.address,
+        0,
+        lender,
+        receiver
+      ), "pool closed")
+
+      await truffleAssert.reverts(fundingpoolInstance.RejectBid(
+        poolId,
+        erc20.address,
+        0,
+        lender
+      ), "pool closed")
+    })
   });
 });
