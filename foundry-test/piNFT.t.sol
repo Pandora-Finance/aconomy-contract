@@ -40,7 +40,7 @@ import "contracts/utils/LibShare.sol";
         
         royArray= new LibShare.Share[](1);
         royArray[0] = royalty;
-        string memory uri = "www.sk.com";
+        string memory uri = "www.adya.com";
          
         uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
         console.log(tokenId);
@@ -49,5 +49,22 @@ import "contracts/utils/LibShare.sol";
         return tokenId;
     }
 
+function test_fetch_token_uri_and_royalties() public {
+        uint256 tokenId = test_mint_an_erc721_token_to_alice();
+        console.log(tokenId);
+        string memory _uri = piNftContract.tokenURI(tokenId);
+        assertEq(_uri, "www.adya.com", "Invalid tokenURI");
+
+        LibShare.Share[] memory temp = piNftContract.getRoyalties(tokenId);
+        console.log(temp[0].account);
+        assertEq(temp[0].account, royaltyReceiver, "Incorrect Royalities Address");
+        assertEq(temp[0].value, 10, "Incorrect Royalities value");
+    }
+
+    function test_mint_ERC20_tokens_to_validator() public{
+        erc20Contract.mint(validator, 1000);
+        uint256 bal = erc20Contract.balanceOf(validator);
+        assertEq(bal, 1000, "Failed to mint ERC20 tokens");
+    }
  
 }
