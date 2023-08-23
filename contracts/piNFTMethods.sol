@@ -158,7 +158,6 @@ contract piNFTMethods is
                 msg.sender
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
-        require(_validator != address(0));
         approvedValidator[_collectionAddress][_tokenId] = _validator;
         emit ValidatorAdded(_collectionAddress, _tokenId, _validator);
     }
@@ -174,7 +173,6 @@ contract piNFTMethods is
                 AconomyERC2771Context._msgSender()
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
-        require(_validator != address(0));
         approvedValidator[_collectionAddress][_tokenId] = _validator;
         emit ValidatorAdded(_collectionAddress, _tokenId, _validator);
     }
@@ -197,6 +195,7 @@ contract piNFTMethods is
         LibShare.Share[] memory royalties
     ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
+        require(approvedValidator[_collectionAddress][_tokenId] != address(0));
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);

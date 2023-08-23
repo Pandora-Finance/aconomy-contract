@@ -108,10 +108,6 @@ contract("PiNFT", (accounts) => {
     expectRevert.unspecified(piNftMethods.addValidator(piNFT.address, 0, validator, {from: bob}))
   })
 
-  it("should not allow validator to be 0 address", async () => {
-    expectRevert.unspecified(piNftMethods.addValidator(piNFT.address, 0, "0x0000000000000000000000000000000000000000"))
-  })
-
   it("should allow alice to add a validator to the nft", async () => {
     await piNftMethods.addValidator(piNFT.address, 0, validator);
     assert.equal(
