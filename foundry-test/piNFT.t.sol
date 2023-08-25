@@ -66,5 +66,15 @@ function test_fetch_token_uri_and_royalties() public {
         uint256 bal = erc20Contract.balanceOf(validator);
         assertEq(bal, 1000, "Failed to mint ERC20 tokens");
     }
- 
-}
+ function test_validator_add_ERC20_tokens_to_alice_NFT() public{
+        uint256 tokenId = test_mint_an_erc721_token_to_alice();
+        test_mint_ERC20_tokens_to_validator();
+    
+ }
+   function testFail_transfer_NFT_to_bob_without_switching_to_Alice() public{
+        test_validator_add_ERC20_tokens_to_alice_NFT();
+        piNftContract.safeTransferFrom(alice, bob, 0);
+        assertEq(piNftContract.ownerOf(0), bob, "NFT not transfer to bob");
+    }
+
+ }
