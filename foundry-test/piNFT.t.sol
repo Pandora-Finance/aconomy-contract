@@ -76,5 +76,10 @@ function test_fetch_token_uri_and_royalties() public {
         piNftContract.safeTransferFrom(alice, bob, 0);
         assertEq(piNftContract.ownerOf(0), bob, "NFT not transfer to bob");
     }
-
+function test_transfer_NFT_to_bob() public{
+        test_validator_add_ERC20_tokens_to_alice_NFT();
+        vm.prank(alice);
+        piNftContract.safeTransferFrom(alice, bob, 0);
+        assertEq(piNftContract.ownerOf(0), bob, "NFT is not transferred to Bob");
+    }
  }
