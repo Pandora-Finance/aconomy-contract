@@ -312,7 +312,7 @@ contract("CollectionFactory", (accounts) => {
     await expectRevert.unspecified(collectionInstance.deleteNFT(0));
   });
 
-  it("should let validator add more ERC20 tokens to alice's NFT", async () => {
+  it("should let validator add more ERC20 tokens to alice's NFT and change commission", async () => {
     await sampleERC20.approve(piNftMethods.address, 200, {
       from: validator,
     });
@@ -341,7 +341,7 @@ contract("CollectionFactory", (accounts) => {
     );
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
-    assert(commission.commission.value == 500);
+    assert(commission.commission.value == 0);
   });
 
   it("should not let validator add funds of a different erc20", async () => {

@@ -219,14 +219,14 @@ contract("PiNFT", (accounts) => {
     await expectRevert.unspecified(piNFT.deleteNFT(0))
   });
 
-  it("should let the validator add more erc20 tokens of the same contract", async () => {
+  it("should let the validator add more erc20 tokens of the same contract and change commission value", async () => {
     await sampleERC20.approve(piNftMethods.address, 200, { from: validator });
     const tx = await piNftMethods.addERC20(
       piNFT.address,
       0,
       sampleERC20.address,
       200,
-      500,
+      300,
       [[validator, 200]],
       {
         from: validator,
@@ -243,7 +243,7 @@ contract("PiNFT", (accounts) => {
     let commission = await piNftMethods.validatorCommissions(piNFT.address, 0);
     assert(commission.isValid == true);
     assert(commission.commission.account == validator);
-    assert(commission.commission.value == 500);
+    assert(commission.commission.value == 300);
   });
 
   it("should not let validator add funds of a different erc20", async () => {
