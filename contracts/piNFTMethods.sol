@@ -205,10 +205,14 @@ contract piNFTMethods is
                     erc20Contracts[_collectionAddress][_tokenId][0],
                 "invalid"
             );
+            LibShare.setCommission(validatorCommissions[_collectionAddress][_tokenId].commission, _commission);
+            piNFT(_collectionAddress).setRoyaltiesForValidator(
+                _tokenId,
+                _commission,
+                royalties
+            );
         } else {
-            require(_commission <= 4900);
-            LibShare.Share memory commissionShare = LibShare.Share(payable(msg.sender), _commission);
-            validatorCommissions[_collectionAddress][_tokenId].commission = commissionShare;
+            LibShare.setCommission(validatorCommissions[_collectionAddress][_tokenId].commission, _commission);
             validatorCommissions[_collectionAddress][_tokenId].isValid = true;
             piNFT(_collectionAddress).setRoyaltiesForValidator(
                 _tokenId,
@@ -225,8 +229,7 @@ contract piNFTMethods is
                 msg.sender,
                 address(this),
                 _value
-            ),
-            "failed"
+            )
         );
         emit ERC20Added(
             _collectionAddress,
@@ -547,8 +550,7 @@ contract piNFTMethods is
                 msg.sender,
                 address(this),
                 _amount
-            ),
-            "failed"
+            )
         );
 
         if (withdrawnAmount[_collectionAddress][_tokenId] == 0) {

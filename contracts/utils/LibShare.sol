@@ -13,4 +13,10 @@ library LibShare {
         address payable account;
         uint96 value;
     }
+
+    function setCommission(Share storage _setShare, uint96 _commission) external {
+        require(_commission <= 4900);
+        _setShare.account = payable(msg.sender);
+        _setShare.value = _commission;
+    }
 }

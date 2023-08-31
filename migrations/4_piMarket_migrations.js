@@ -4,7 +4,7 @@ const PiMarket = artifacts.require("piMarket");
 const LibMarket = artifacts.require("LibMarket");
 const aconomyFee = artifacts.require("AconomyFee")
 const piNFTMethods = artifacts.require("piNFTMethods");
-
+const LibShare = artifacts.require("LibShare");
 const CollectionFactory = artifacts.require("CollectionFactory")
 const CollectionMethods = artifacts.require("CollectionMethods")
 // require("dotenv").config();
@@ -12,6 +12,7 @@ const CollectionMethods = artifacts.require("CollectionMethods")
 module.exports = async function (deployer) {
   await deployer.deploy(LibMarket);
   await deployer.link(LibMarket, [PiMarket])
+  await deployer.link(LibShare, [PiMarket])
 
   var piNftMethods = await piNFTMethods.deployed();
 

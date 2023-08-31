@@ -17,6 +17,7 @@ const BPBDTL = artifacts.require("BokkyPooBahsDateTimeLibrary")
 const piNFTMethods = artifacts.require("piNFTMethods");
 const LibPoolAddress = artifacts.require("LibPoolAddress");
 const LibNFTLendingBorrowing = artifacts.require("LibNFTLendingBorrowing");
+const LibShare = artifacts.require("LibShare");
 require('dotenv').config()
 
 let walletAddress = process.env.WALLET_ADDRESS
@@ -38,9 +39,13 @@ module.exports = async function (deployer) {
   await deployer.deploy(attestationServices, attestRegistry.address)
   var attestServices = await attestationServices.deployed()
 
+  await deployer.deploy(LibShare);
+  await deployer.link(LibShare, [CollectionFactory, CollectionMethods, piNFTMethods])
+
   var piNftMethods = await deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
     initializer: "initialize",
     kind: "uups",
+    unsafeAllow: ["external-library-linking"],
   });
 
 
@@ -99,6 +104,9 @@ module.exports = async function (deployer) {
     unsafeAllow: ["external-library-linking"],
   });
 
+  await deployer.deploy(lendingToken, 100000000000)
+  let token = await lendingToken.deployed();
+
   console.log("AconomyFee : ", aconomyfee.address)
   console.log("AttestationRegistry : ", attestRegistry.address)
   console.log("AttestationServices : ", attestServices.address)
@@ -108,9 +116,6 @@ module.exports = async function (deployer) {
   console.log("poolRegistry : ", poolRegis.address)
   console.log("poolAddress : ", pooladdress.address)
   console.log("NFTlendingBorrowing : ", lending.address)
-
-
-   await deployer.deploy(lendingToken, 100000000000)
-
+  console.log("mintToken : ", token.address)
 
 };
