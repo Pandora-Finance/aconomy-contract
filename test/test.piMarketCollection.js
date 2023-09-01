@@ -250,6 +250,25 @@ contract("PiMarket", async (accounts) => {
       assert.equal(await collectionContract.ownerOf(0), bob);
     });
 
+    it("should allow validator to add erc20 and change commission and royalties", async () => {
+      await sampleERC20.approve(piNftMethods.address, 500, { from: validator });
+      await piNftMethods.addERC20(
+        collectionContract.address,
+        0,
+        sampleERC20.address,
+        500,
+        100,
+        [[validator, 300]],
+        {
+          from: validator,
+        }
+      );
+      let commission = await piNftMethods.validatorCommissions(collectionContract.address, 0);
+      assert(commission.isValid == false);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 100);
+    })
+
     it("should let bob place piNFT on sale again", async () => {
       await collectionContract.approve(piMarket.address, 0, { from: bob });
       const result = await piMarket.sellNFT(
@@ -293,7 +312,7 @@ contract("PiMarket", async (accounts) => {
       console.log(balance1, " ", _balance1, " ", temp.toString());
       assert.equal(
         BigNumber(balance1).minus(BigNumber(_balance1)),
-        (50000 * 9200) / 10000,
+        (50000 * 9100) / 10000,
         "Failed to transfer NFT amount"
       );
 
@@ -314,7 +333,7 @@ contract("PiMarket", async (accounts) => {
 
       assert.equal(
         BigNumber(balance4).minus(BigNumber(_balance4)),
-        (50000 * 200) / 10000,
+        (50000 * 300) / 10000,
         "Failed to transfer validator amount"
       );
 
@@ -323,7 +342,7 @@ contract("PiMarket", async (accounts) => {
       let commission = await piNftMethods.validatorCommissions(collectionContract.address, 0);
       assert(commission.isValid == false);
       assert(commission.commission.account == validator);
-      assert(commission.commission.value == 1000);
+      assert(commission.commission.value == 100);
       await collectionContract.safeTransferFrom(alice, bob, 0, {from: alice});
     });
 
@@ -489,6 +508,25 @@ contract("PiMarket", async (accounts) => {
       assert.equal(result.price, 50000);
     })
 
+    it("should allow validator to add erc20 and change commission and royalties", async () => {
+      await sampleERC20.approve(piNftMethods.address, 500, { from: validator });
+      await piNftMethods.addERC20(
+        collectionContract.address,
+        1,
+        sampleERC20.address,
+        500,
+        900,
+        [[validator, 300]],
+        {
+          from: validator,
+        }
+      );
+      let commission = await piNftMethods.validatorCommissions(collectionContract.address, 1);
+      assert(commission.isValid == true);
+      assert(commission.commission.account == validator);
+      assert(commission.commission.value == 900);
+    })
+
     it("should let bidders place bid on piNFT", async () => {
       await expectRevert.unspecified(piMarket.Bid(4, 60000, { from: alice, value: 60000 }))
       await expectRevert.unspecified(piMarket.Bid(4, 50000, { from: bidder1, value: 50000 }))
@@ -547,7 +585,7 @@ contract("PiMarket", async (accounts) => {
       let commission = await piNftMethods.validatorCommissions(collectionContract.address, 1);
       assert(commission.isValid == false);
       assert(commission.commission.account == validator);
-      assert(commission.commission.value == 1000);
+      assert(commission.commission.value == 900);
     });
 
     it("should not let wallet withdraw anothers bid", async () => {
@@ -630,13 +668,13 @@ contract("PiMarket", async (accounts) => {
 
       assert.equal(
         BigNumber(balance4).minus(BigNumber(_balance4)),
-        (70000 * 200) / 10000,
+        (70000 * 300) / 10000,
         "Failed to transfer validator amount"
       );
       let commission = await piNftMethods.validatorCommissions(collectionContract.address, 1);
       assert(commission.isValid == false);
       assert(commission.commission.account == validator);
-      assert(commission.commission.value == 1000);
+      assert(commission.commission.value == 900);
     });
 
     it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
