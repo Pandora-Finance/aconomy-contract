@@ -81,5 +81,40 @@ function test_transfer_NFT_to_bob() public{
         vm.prank(alice);
         piNftContract.safeTransferFrom(alice, bob, 0);
         assertEq(piNftContract.ownerOf(0), bob, "NFT is not transferred to Bob");
+
+}
+  function testFail_alice_redeem_piNFT() public{
+        test_transfer_NFT_to_bob();
+        vm.prank(alice);
+        piNftContract.redeemPiNFT(0, alice, validator, address(erc20Contract), 500);
+         assertEq(
+                 piNftContract.viewBalance(0, address(erc20Contract)),
+                0,
+                "Failed to remove ERC20 tokens from NFT"
+            );
+         assertEq(
+            erc20Contract.balanceOf(validator),
+            1000,
+            "Failed to transfer ERC20 tokens to validator"
+        );
+        assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
+    }
+
+
+    function test_bob_redeem_piNFT()public{
+        test_transfer_NFT_to_bob();
+        vm.prank(bob);
+        // piNftContract.redeemPiNFT(0, bob,validator, 
+        // address(erc20Contract), 500);
+
+        //  assertEq(
+        //          piNftContract.viewBalance(0, address(erc20Contract)),
+        //         0,
+        //         "Failed to remove ERC20 tokens from NFT"
+        //     );
+        //  assertEq(
+        //     erc20Contract.balanceOf(validator),
+        //     1000,
+        //     "Failed to transfer ERC20 tokens to validator");
     }
  }
