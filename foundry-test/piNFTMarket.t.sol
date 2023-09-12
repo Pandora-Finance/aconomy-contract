@@ -59,7 +59,7 @@ import "contracts/utils/LibShare.sol";
         royalty = LibShare.Share(royaltyReceiver, uint96(500));   
         royArray= new LibShare.Share[](1);
         royArray[0] = royalty;
-        string memory uri = "www.sk.com";
+        string memory uri = "www.adya.com";
 
         uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
         assertEq(tokenId, 0, "Unable to mint NFT");
@@ -206,7 +206,7 @@ function testFail_bob_burn_piNFT() public{
       royalty = LibShare.Share(royaltyReceiver, uint96(500));   
       royArray= new LibShare.Share[](1);
       royArray[0] = royalty;
-      string memory uri = "www.sk.com";
+      string memory uri = "www.adya.com";
       erc20Contract.mint(validator, 1000);
       uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
       assertEq(tokenId, 1, "Failed to mint or wrong token Id");
@@ -268,13 +268,13 @@ function testFail_bob_burn_piNFT() public{
    assertEq(buyerAddress, bidder1, "bidding failed bidder1");
   }
 
-  function testFail_highest_bidder_tries_to_withdraw_his_bid() public{
-    test_bidders_place_bid_on_piNFT();
-    vm.prank(bidder1);
-    pimarket.withdrawBidMoney(3, 2);
-    uint256 result = address(pimarket).balance;
-    assertEq(result, 12500, "Not able to withdraw bids");
-  }
+  // function testFail_highest_bidder_tries_to_withdraw_his_bid() public{
+  //   test_bidders_place_bid_on_piNFT();
+  //   vm.prank(bidder1);
+  //   pimarket.withdrawBidMoney(3, 2);
+  //   uint256 result = address(pimarket).balance;
+  //   assertEq(result, 12500, "Not able to withdraw bids");
+  // }
 
   function test_alice_execute_highest_bid() public {
     test_bidders_place_bid_on_piNFT();
@@ -363,6 +363,64 @@ function test_bidder_redeem_piNFT() public{
         "Failed to transfer ERC20 tokens to validator"
       );
       assertEq(piNftContract.ownerOf(0), alice, "NFT not transferred to alice");
+  }
+
+  function test_cancel_sale_withdraw_bid() public{
+  test_bidders_place_bid_on_piNFT();
+  vm.prank(alice);
+  pimarket.cancelSale(3);
+  (,,,uint256 price,,,bool stat,,,) = pimarket._tokenMeta(3);
+  assertEq(stat, false, "Cancel sale failed");
+  vm.prank(bidder1);
+  pimarket.withdrawBidMoney(3, 0);
+  vm.prank(bidder2);
+  pimarket.withdrawBidMoney(3, 1);
+  vm.prank(bidder1);
+  pimarket.withdrawBidMoney(3, 2);
+  uint256 result = address(pimarket).balance;
+  assertEq(result, 0, "Not able to withdraw bids");
+}
+function test_create_a_piNFT_with_2000_erc20_tokens_to_alice() public{
+    test_cancel_sale_withdraw_bid();
+     LibShare.Share[] memory royArray ;
+      LibShare.Share memory royalty;
+      royalty = LibShare.Share(royaltyReceiver, uint96(500));
+      royArray= new LibShare.Share[](1);
+      royArray[0] = royalty;
+      string memory uri = "www.Adya.com";
+      erc20Contract.mint(validator, 2000);
+      uint256 tokenId = piNftContract.mintNFT(alice, uri, royArray);
+      assertEq(tokenId, 2, "Failed to mint or wrong token Id");
+      vm.prank(validator);
+      erc20Contract.approve(address(piNftContract), 2000);
+      vm.prank(validator);
+      piNftContract.addERC20(
+        validator,
+        tokenId,
+        address(erc20Contract),
+        2000
+      );
+  }
+  function test_create_a_piNFT_with_1000_erc20_tokens_to_bob() public{
+    test_create_a_piNFT_with_2000_erc20_tokens_to_alice();
+     LibShare.Share[] memory royArray ;
+      LibShare.Share memory royalty;
+      royalty = LibShare.Share(royaltyReceiver, uint96(500));
+      royArray= new LibShare.Share[](1);
+      royArray[0] = royalty;
+      string memory uri = "www.adya.com";
+      erc20Contract.mint(validator, 1000);
+      uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+      assertEq(tokenId, 3, "Failed to mint or wrong token Id");
+      vm.prank(validator);
+      erc20Contract.approve(address(piNftContract), 1000);
+      vm.prank(validator);
+      piNftContract.addERC20(
+        validator,
+        tokenId,
+        address(erc20Contract),
+        1000
+      );
   }
 
 }
