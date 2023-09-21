@@ -190,4 +190,41 @@ function test_Bid_by_alex() public {
         uint256 bal1 = erc20Contract.balanceOf(address(NFTlendingBorrowingContract));
         console.log("Bal",bal1);
 }
+function test_accept_bid() public {
+    test_Bid_by_alex();
+
+            (uint256 NFTtokenId,
+        address tokenIdOwner,
+        address contractAddress,
+        uint32 duration,
+        uint256 expectedAmount,
+        uint16 percent,
+        bool listed,
+        bool bidAccepted,
+        bool repaid) = NFTlendingBorrowingContract.NFTdetails(1);
+console.log("expectedAmount",expectedAmount);
+
+            vm.prank(alice);
+
+            piNftContract.approve(address(NFTlendingBorrowingContract),0);
+
+    uint tt = piNftContract.balanceOf(alice);
+    console.log("tt",tt);
+
+    // (uint256 bidId,
+    //     uint16 percent,
+    //     uint32 duration,
+    //     uint256 expiration,
+    //     address bidderAddress,
+    //     address ERC20Address,
+    //     uint256 Amount,
+    //     uint16 protocolFee,
+    //     bool withdrawn,
+        // bool bidAccepted) = NFTlendingBorrowingContract.Bids(1,1);
+        // console.log("Amount",Amount);
+
+    vm.prank(alice);
+    NFTlendingBorrowingContract.AcceptBid(NFTId,0);
+
+}
 }
