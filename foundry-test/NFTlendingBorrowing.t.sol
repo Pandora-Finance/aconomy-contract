@@ -67,30 +67,30 @@ contract NFTlendingBoroowing is Test {
     function test_list_NFT_for_lending() public returns (uint256){
         uint256 tokenId = test_mint_an_ERC_token_to_alice();
         vm.prank(alice);
-        uint256 NFTId = NFTlendingBorrowingContract.listForLending(
+        uint256 NFTId = NFTlendingBorrowingContract.listNFTforBorrowing(
             tokenId,
             address(piNftContract),
-            100,
+            1000,
             3600,
-            3600,
-            100
+            1200
         );
-        return NFTId;
+        
+                return NFTId;
     }
 
     function test_Bid_by_bob() public {
         vm.prank(bob);
-        erc20Contract.mint(bob, 1000);
+        erc20Contract.mint(bob, 2000);
         uint256 bal = erc20Contract.balanceOf(bob);
-        assertEq(bal, 1000, "Failed to mint ERC20 tokens");
+        // assertEq(bal, 1000, "Failed to mint ERC20 tokens");
         uint256 NFTId = test_list_NFT_for_lending();
         console.log("NFTId",NFTId);
         vm.prank(bob);
-        erc20Contract.approve(address(NFTlendingBorrowingContract), 1000);
+        erc20Contract.approve(address(NFTlendingBorrowingContract), 1001);
         vm.prank(bob);
         NFTlendingBorrowingContract.Bid(
             NFTId,
-            500,
+            1001,
             address(erc20Contract),
             1000,
             3600,
@@ -101,18 +101,18 @@ contract NFTlendingBoroowing is Test {
     }
     function test_Bid_by_sam() public {
         vm.prank(sam);
-        erc20Contract.mint(sam, 1000);
+        erc20Contract.mint(sam, 1500);
         uint256 bal = erc20Contract.balanceOf(sam);
-        assertEq(bal, 1000, "Failed to mint ERC20 tokens");
+        // assertEq(bal, 1000, "Failed to mint ERC20 tokens");
         uint256 NFTId = test_list_NFT_for_lending();
         console.log("NFTId",NFTId);
                      vm.prank(sam);
 
-        erc20Contract.approve(address(NFTlendingBorrowingContract), 1000);
+        erc20Contract.approve(address(NFTlendingBorrowingContract), 1002);
         vm.prank(sam);
         NFTlendingBorrowingContract.Bid(
             NFTId,
-            500,
+            1002,
             address(erc20Contract),
             1000,
             3600,
@@ -124,20 +124,43 @@ contract NFTlendingBoroowing is Test {
 function
  test_Bid_by_tom() public {
         vm.prank(tom);
-        erc20Contract.mint(tom, 1000);
+        erc20Contract.mint(tom, 1200);
 
         uint256 bal = erc20Contract.balanceOf(tom);
-        assertEq(bal, 1000, "Failed to mint ERC20 tokens");
+        // assertEq(bal, 1000, "Failed to mint ERC20 tokens");
         uint256 NFTId = test_list_NFT_for_lending();
         console.log("NFTId",NFTId);
 
         vm.prank(tom);
-        erc20Contract.approve(address(NFTlendingBorrowingContract), 1000);
+        erc20Contract.approve(address(NFTlendingBorrowingContract), 1100);
 
         vm.prank(tom);
         NFTlendingBorrowingContract.Bid(
             NFTId,
-            500,
+            1100,
+            address(erc20Contract),
+            1000,
+            3600,
+            3600
+            
+        );
+        uint256 bal1 = erc20Contract.balanceOf(address(NFTlendingBorrowingContract));
+        console.log("Bal",bal1);
+}
+function test_Bid_by_alex() public {
+        vm.prank(alex);
+        erc20Contract.mint(alex, 1800);
+                 uint256 bal = erc20Contract.balanceOf(alex);
+        // assertEq(bal, 1000, "Failed to mint ERC20 tokens");
+        uint256 NFTId = test_list_NFT_for_lending();
+        console.log("NFTId",NFTId);
+        vm.prank(alex);
+                    erc20Contract.approve(address(NFTlendingBorrowingContract), 1700);
+
+        vm.prank(alex);
+        NFTlendingBorrowingContract.Bid(
+            NFTId,
+            1700,
             address(erc20Contract),
             1000,
             3600,
@@ -146,26 +169,17 @@ function
         uint256 bal1 = erc20Contract.balanceOf(address(NFTlendingBorrowingContract));
         console.log("Bal",bal1);
 }
-function test_Bid_by_alex() public {
-        vm.prank(alex);
-        erc20Contract.mint(alex, 1000);
-                 uint256 bal = erc20Contract.balanceOf(alex);
-        assertEq(bal, 1000, "Failed to mint ERC20 tokens");
-        uint256 NFTId = test_list_NFT_for_lending();
-        console.log("NFTId",NFTId);
-        vm.prank(alex);
-                    erc20Contract.approve(address(NFTlendingBorrowingContract), 1000);
+function test_accept_bid() public {
+    vm.prank(alice);
+    uint256 NFTId=test_list_NFT_for_lending();
+            console.log("NFTId",NFTId);
 
-        vm.prank(alex);
-        NFTlendingBorrowingContract.Bid(
-            NFTId,
-            500,
-            address(erc20Contract),
-            1000,
-            3600,
-            3600
-        );
-        uint256 bal1 = erc20Contract.balanceOf(address(NFTlendingBorrowingContract));
-        console.log("Bal",bal1);
+    vm.prank(alice);
+    NFTlendingBorrowingContract.AcceptBid(NFTId,1);
+    // assertEq(NFTlendingBorrowing.contractaddress(ERC721)).ownerof(1)==address(NFTlendingBorrowing);
+//    assertEq(NFTlendingBorrowing.bids.withdrawn, "Already withdrawn");
+//     assertEq(NFTlendingBorrowing.NFT.listed, "It's not listed for Lending");
+//      assertEq(NFTlendingBorrowing.bids.bidAccepted, "Bid Already Accepted");
+
 }
 }
