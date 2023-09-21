@@ -202,7 +202,9 @@ function test_accept_bid() public {
         bool listed,
         bool bidAccepted,
         bool repaid) = NFTlendingBorrowingContract.NFTdetails(1);
-console.log("expectedAmount",expectedAmount);
+console.log("bidAccepted",bidAccepted);
+
+assertEq(bidAccepted, false, "bid not accepted yet"); 
 
             vm.prank(alice);
 
@@ -220,11 +222,52 @@ console.log("expectedAmount",expectedAmount);
     //     uint256 Amount,
     //     uint16 protocolFee,
     //     bool withdrawn,
-        // bool bidAccepted) = NFTlendingBorrowingContract.Bids(1,1);
-        // console.log("Amount",Amount);
+    //     bool bidAccepted) = NFTlendingBorrowingContract.Bids(1,1);
+    //     console.log("Amount",Amount);
 
     vm.prank(alice);
     NFTlendingBorrowingContract.AcceptBid(NFTId,0);
+ (,,,,,,,bool bidAccepted1,) = NFTlendingBorrowingContract.NFTdetails(1);
+    assertEq(bidAccepted1, true, "bid not accepted yet"); 
+
+
+}
+
+function test_rejectBid() public{
+    test_accept_bid();
+
+    //  (uint256 NFTtokenId,
+    //     address tokenIdOwner,
+    //     address contractAddress,
+    //     uint32 duration,
+    //     uint256 expectedAmount,
+    //     uint16 percent,
+    //     bool listed,
+    //     bool bidrejectedted)= NFTlendingBorrowingContract.NFTdetails();
+ vm.prank(alice);
+    NFTlendingBorrowingContract.rejectBid(NFTId,1);
+
+}
+function test_RepayBid() public {
+    test_accept_bid();
+    (,,,,,,,bool bidAccepted1,) = NFTlendingBorrowingContract.NFTdetails(1);
+console.log("bidAccepted11111",bidAccepted1);
+uint256 bal1 = erc20Contract.balanceOf(alice);
+        console.log("Bal",bal1);
+vm.prank(alice);
+erc20Contract.mint(alice, 20000000000);
+uint256 bal2 = erc20Contract.balanceOf(alice);
+        console.log("Bal",bal2);
+vm.prank(alice);
+                    erc20Contract.approve(address(NFTlendingBorrowingContract), 20000000000);
+                    vm.prank(alice);
+    NFTlendingBorrowingContract.Repay(NFTId,0);
+}
+function test_withdraw() public{
+    test_RepayBid();
+    vm.warp(block.timestamp+5000);
+    vm.prank(sam);
+     NFTlendingBorrowingContract.withdraw(NFTId,1);
 
 }
 }
