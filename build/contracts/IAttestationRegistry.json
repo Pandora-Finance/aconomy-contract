@@ -1,0 +1,428 @@
+{
+  "contractName": "IAttestationRegistry",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "schema",
+          "type": "bytes"
+        }
+      ],
+      "name": "register",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "uuid",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getAS",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "uuid",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "schema",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IAttestationRegistry.ASRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"uuid\",\"type\":\"bytes32\"}],\"name\":\"getAS\",\"outputs\":[{\"components\":[{\"internalType\":\"bytes32\",\"name\":\"uuid\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"schema\",\"type\":\"bytes\"}],\"internalType\":\"struct IAttestationRegistry.ASRecord\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"schema\",\"type\":\"bytes\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getAS(bytes32)\":{\"details\":\"Returns an existing AS by UUID\",\"params\":{\"uuid\":\"The UUID of the AS to retrieve.\"},\"returns\":{\"_0\":\"The AS data members.\"}},\"register(bytes)\":{\"details\":\"Submits and reserve a new AS\",\"params\":{\"schema\":\"The AS data schema.\"},\"returns\":{\"_0\":\"The UUID of the new AS.\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interfaces/IAttestationRegistry.sol\":\"IAttestationRegistry\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/interfaces/IAttestationRegistry.sol\":{\"keccak256\":\"0xd13402e49a65ab61401f227357d7cd92dd7a19babf0334787e62cd60252ab433\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://25119b4869bba2a5a3289f4bca711878dc9bc27d5d166ad2be9012cab0ef507c\",\"dweb:/ipfs/QmfYHPxa2cN1Tqaw2fStJ8bHKTQSUtXVnrrLKGkQYoXvYR\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.8.11;\n\n// SPDX-License-Identifier: MIT\n\ninterface IAttestationRegistry {\n\n    /**\n     * @title A struct representing a record for a submitted AS (Attestation Schema).\n     */\n    struct ASRecord {\n        // A unique identifier of the Attestation Registry.\n        bytes32 uuid;\n        // Auto-incrementing index for reference, assigned by the registry itself.\n        uint256 index;\n        // Custom specification of the Attestation Registry (e.g., an ABI).\n        bytes schema;\n    }\n\n    /**\n     * @dev Submits and reserve a new AS\n     *\n     * @param schema The AS data schema.\n     *\n     * @return The UUID of the new AS.\n     */\n    function register(bytes calldata schema) external returns (bytes32);\n\n     /**\n     * @dev Returns an existing AS by UUID\n     *\n     * @param uuid The UUID of the AS to retrieve.\n     *\n     * @return The AS data members.\n     */\n    function getAS(bytes32 uuid) external view returns (ASRecord memory);\n}\n",
+  "sourcePath": "/media/dell/17f09f70-0626-4927-a787-2813ab7ed2c0/dell/Pandora/pooolAddress Pandora Git/aconomy-contract/contracts/interfaces/IAttestationRegistry.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/interfaces/IAttestationRegistry.sol",
+    "exportedSymbols": {
+      "IAttestationRegistry": [
+        19207
+      ]
+    },
+    "id": 19208,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 19182,
+        "literals": [
+          "solidity",
+          "0.8",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:67"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IAttestationRegistry",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 19207,
+        "linearizedBaseContracts": [
+          19207
+        ],
+        "name": "IAttestationRegistry",
+        "nameLocation": "68:20:67",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "IAttestationRegistry.ASRecord",
+            "id": 19189,
+            "members": [
+              {
+                "constant": false,
+                "id": 19184,
+                "mutability": "mutable",
+                "name": "uuid",
+                "nameLocation": "292:4:67",
+                "nodeType": "VariableDeclaration",
+                "scope": 19189,
+                "src": "284:12:67",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                },
+                "typeName": {
+                  "id": 19183,
+                  "name": "bytes32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "284:7:67",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 19186,
+                "mutability": "mutable",
+                "name": "index",
+                "nameLocation": "397:5:67",
+                "nodeType": "VariableDeclaration",
+                "scope": 19189,
+                "src": "389:13:67",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 19185,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "389:7:67",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 19188,
+                "mutability": "mutable",
+                "name": "schema",
+                "nameLocation": "494:6:67",
+                "nodeType": "VariableDeclaration",
+                "scope": 19189,
+                "src": "488:12:67",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 19187,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "488:5:67",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "ASRecord",
+            "nameLocation": "205:8:67",
+            "nodeType": "StructDefinition",
+            "scope": 19207,
+            "src": "198:309:67",
+            "visibility": "public"
+          },
+          {
+            "documentation": {
+              "id": 19190,
+              "nodeType": "StructuredDocumentation",
+              "src": "513:146:67",
+              "text": " @dev Submits and reserve a new AS\n @param schema The AS data schema.\n @return The UUID of the new AS."
+            },
+            "functionSelector": "82fbdc9c",
+            "id": 19197,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "register",
+            "nameLocation": "673:8:67",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 19193,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19192,
+                  "mutability": "mutable",
+                  "name": "schema",
+                  "nameLocation": "697:6:67",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19197,
+                  "src": "682:21:67",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 19191,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "682:5:67",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "681:23:67"
+            },
+            "returnParameters": {
+              "id": 19196,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19195,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19197,
+                  "src": "723:7:67",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 19194,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "723:7:67",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "722:9:67"
+            },
+            "scope": 19207,
+            "src": "664:68:67",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 19198,
+              "nodeType": "StructuredDocumentation",
+              "src": "739:155:67",
+              "text": " @dev Returns an existing AS by UUID\n @param uuid The UUID of the AS to retrieve.\n @return The AS data members."
+            },
+            "functionSelector": "72487d52",
+            "id": 19206,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAS",
+            "nameLocation": "908:5:67",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 19201,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19200,
+                  "mutability": "mutable",
+                  "name": "uuid",
+                  "nameLocation": "922:4:67",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19206,
+                  "src": "914:12:67",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 19199,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "914:7:67",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "913:14:67"
+            },
+            "returnParameters": {
+              "id": 19205,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19204,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19206,
+                  "src": "951:15:67",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ASRecord_$19189_memory_ptr",
+                    "typeString": "struct IAttestationRegistry.ASRecord"
+                  },
+                  "typeName": {
+                    "id": 19203,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 19202,
+                      "name": "ASRecord",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 19189,
+                      "src": "951:8:67"
+                    },
+                    "referencedDeclaration": 19189,
+                    "src": "951:8:67",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ASRecord_$19189_storage_ptr",
+                      "typeString": "struct IAttestationRegistry.ASRecord"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "950:17:67"
+            },
+            "scope": 19207,
+            "src": "899:69:67",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 19208,
+        "src": "58:912:67",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:971:67"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.11+commit.d7f03943.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.10",
+  "updatedAt": "2023-09-20T09:26:37.740Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getAS(bytes32)": {
+        "details": "Returns an existing AS by UUID",
+        "params": {
+          "uuid": "The UUID of the AS to retrieve."
+        },
+        "returns": {
+          "_0": "The AS data members."
+        }
+      },
+      "register(bytes)": {
+        "details": "Submits and reserve a new AS",
+        "params": {
+          "schema": "The AS data schema."
+        },
+        "returns": {
+          "_0": "The UUID of the new AS."
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

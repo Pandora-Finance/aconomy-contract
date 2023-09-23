@@ -1,0 +1,178 @@
+{
+  "contractName": "IAttestationServices",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "schema",
+          "type": "bytes"
+        }
+      ],
+      "name": "register",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.11+commit.d7f03943\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"schema\",\"type\":\"bytes\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interfaces/IAttestationServices.sol\":\"IAttestationServices\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/interfaces/IAttestationServices.sol\":{\"keccak256\":\"0x26913ba7e006ed7b0d0168eb1341c7f2fea98efb7d9a5861e32e3a0adc917508\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://39c319a1dd1f273f848f05311c22a537f1513fee05182b5ec20887e43a2ea24f\",\"dweb:/ipfs/QmSuJ3kTPsZWyvsWh3ivTHXaoDzAJsKMeEwzFYig6yo7dn\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.8.11;\n\n// SPDX-License-Identifier: MIT\n\ninterface IAttestationServices {\n    function register(bytes calldata schema) external returns (bytes32);\n}\n",
+  "sourcePath": "/media/dell/17f09f70-0626-4927-a787-2813ab7ed2c0/dell/Pandora/pooolAddress Pandora Git/aconomy-contract/contracts/interfaces/IAttestationServices.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/interfaces/IAttestationServices.sol",
+    "exportedSymbols": {
+      "IAttestationServices": [
+        19217
+      ]
+    },
+    "id": 19218,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 19209,
+        "literals": [
+          "solidity",
+          "0.8",
+          ".11"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:68"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IAttestationServices",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 19217,
+        "linearizedBaseContracts": [
+          19217
+        ],
+        "name": "IAttestationServices",
+        "nameLocation": "68:20:68",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "82fbdc9c",
+            "id": 19216,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "register",
+            "nameLocation": "104:8:68",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 19212,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19211,
+                  "mutability": "mutable",
+                  "name": "schema",
+                  "nameLocation": "128:6:68",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19216,
+                  "src": "113:21:68",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 19210,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "113:5:68",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "112:23:68"
+            },
+            "returnParameters": {
+              "id": 19215,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 19214,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 19216,
+                  "src": "154:7:68",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 19213,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "154:7:68",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "153:9:68"
+            },
+            "scope": 19217,
+            "src": "95:68:68",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 19218,
+        "src": "58:107:68",
+        "usedErrors": []
+      }
+    ],
+    "src": "0:166:68"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.11+commit.d7f03943.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.10",
+  "updatedAt": "2023-09-20T09:26:37.740Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
