@@ -74,8 +74,6 @@ describe("piNFT", function () {
         bob,
         royaltyReciever,
       } = await deploypiNFT();
-
-      // expect(await CollectionFactory.piNFTMethodsAddress()).to.equal(await piNftMethods.getAddress())
     });
 
     it("should deploy the contracts", async () => {
