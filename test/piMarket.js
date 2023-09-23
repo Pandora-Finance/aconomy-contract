@@ -13,14 +13,14 @@ describe("piMarket", function () {
       validator,
       bob,
       carl,
-      royaltyReciever,
+      royaltyReceiver,
       feeReceiver,
       bidder1,
       bidder2,
     ] = await ethers.getSigners();
 
-    const aconomyFee = await hre.ethers.deployContract("AconomyFee", []);
-    await aconomyFee.waitForDeployment();
+    const aconomyfee = await hre.ethers.deployContract("AconomyFee", []);
+    aconomyFee = await aconomyfee.waitForDeployment();
 
     await aconomyFee.setAconomyPoolFee(50);
     await aconomyFee.setAconomyPiMarketFee(50);
@@ -34,7 +34,7 @@ describe("piMarket", function () {
         LibShare: await LibShare.getAddress(),
       },
     });
-    const piNftMethods = await upgrades.deployProxy(
+    piNftMethods = await upgrades.deployProxy(
       piNFTMethods,
       ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"],
       {
@@ -80,7 +80,7 @@ describe("piMarket", function () {
     );
 
     const piNfT = await hre.ethers.getContractFactory("piNFT");
-    const piNFT = await upgrades.deployProxy(
+    piNFT = await upgrades.deployProxy(
       piNfT,
       [
         "Aconomy",
@@ -141,7 +141,7 @@ describe("piMarket", function () {
       validator,
       bob,
       carl,
-      royaltyReciever,
+      royaltyReceiver,
       feeReceiver,
       bidder1,
       bidder2,
@@ -160,22 +160,16 @@ describe("piMarket", function () {
         validator,
         bob,
         carl,
-        royaltyReciever,
+        royaltyReceiver,
         feeReceiver,
         bidder1,
         bidder2,
       } = await deploypiMarket();
-
-      console.log("jgvhg", await aconomyFee.getAddress());
     });
 
     it("should create a piNFT with 500 erc20 tokens to carl", async () => {
-      console.log("jgqqqqqqqvhg", await sampleERC20.getAddress());
-
-      console.log("jgqqqqqqqq1111vhg", await validator.getAddress());
-
-      // await aconomyFee.setAconomyPiMarketFee(100);
-      // await aconomyFee.transferOwnership(feeReceiver.getAddress());
+      await aconomyFee.setAconomyPiMarketFee(100);
+      await aconomyFee.transferOwnership(feeReceiver.getAddress());
       await sampleERC20.mint(validator.getAddress(), 1000);
       const tx1 = await piNFT.mintNFT(carl.getAddress(), "URI1", [
         [royaltyReceiver.getAddress(), 500],
@@ -183,8 +177,8 @@ describe("piMarket", function () {
 
       const owner = await piNFT.ownerOf(0);
       // console.log("dhvdh",alice.getAddress())
-      expect(owner).to.equal(await alice.getAddress());
-      const bal = await piNFT.balanceOf(alice);
+      expect(owner).to.equal(await carl.getAddress());
+      const bal = await piNFT.balanceOf(carl);
       expect(bal).to.equal(1);
 
       await piNftMethods
@@ -212,7 +206,9 @@ describe("piMarket", function () {
         0
       );
       expect(commission.isValid).to.equal(true);
-      expect(commission.commission.account).to.equal(validator.getAddress());
+      expect(commission.commission.account).to.equal(
+        await validator.getAddress()
+      );
       expect(commission.commission.value).to.equal(1000);
     });
   });
