@@ -182,10 +182,87 @@ function testSetloanExpirationTime() external {
 }
 
 function testAddLender() external {
-// testSetloanExpirationTime();
+
+    uint256 poolId = PoolRegistry.createPool(
+        3600, 
+            1800, 
+            86400, 
+            1000, 
+            500, 
+            "https://adya.com",
+            true,
+            true
+    );
+
+
+PoolRegistry.addLender(poolId, address(this), block.timestamp + 3600);
+
+    (bool isVerified, ) = PoolRegistry.lenderVarification(poolId, address(this));
+    assertEq(isVerified, true, "Lender not added successfully");
+}
+
+
+function testAddBorrower() external {
+    
+    uint256 poolId = PoolRegistry.createPool(
+        3600,
+            1800, 
+            86400, 
+            1000, 
+            500, 
+            "https://adya.com",
+            true,
+            true
+    );
+
+    PoolRegistry.addBorrower(poolId, address(this), block.timestamp + 3600);
+
+    (bool isVerified, ) = PoolRegistry.borrowerVarification(poolId, address(this));
+    assertEq(isVerified, true, "Borrower not added successfully");
+}
+function testClosePool() external {
+
+    uint256 poolId = PoolRegistry.createPool(
+        3600, 
+            1800, 
+            86400, 
+            1000, 
+            500, 
+            "https://adya.com",
+            true,
+            true
+    );
+
+    PoolRegistry.closePool(poolId);
+
+    bool isClosed = PoolRegistry.ClosedPool(poolId);
+    assertEq(isClosed, true, "Pool not closed successfully");
+}
+ 
+
+function testGetPaymentCycleDuration() external {
+    // Create a pool with a payment cycle duration of 30 days
+
+         uint256 poolId = PoolRegistry.createPool(
+        30, // Payment cycle duration
+            7, // Payment default duration(7 days)
+            365, // Loan expiration time(365 days)
+            1000, // Pool fee percent (e.g., 10%)
+            500, // APR (e.g., 5%)
+            "https://adya.com",
+            true,
+            true
+    );
+
+    uint32 cycleDuration = PoolRegistry.getPaymentCycleDuration(poolId);
+    assertEq(cycleDuration, 30, "Incorrect payment cycle duration");
+}
+
+function testGetPaymentDefaultDuration() external {
+    // Create a pool with a payment default duration of 1 day
     uint256 poolId = PoolRegistry.createPool(
         3600, // Payment cycle duration
-            1800, // Payment default duration
+            86400, // Payment default duration
             86400, // Loan expiration time
             1000, // Pool fee percent (e.g., 10%)
             500, // APR (e.g., 5%)
@@ -194,11 +271,38 @@ function testAddLender() external {
             true
     );
 
-    // Add a lender to the pool
-    PoolRegistry.addLender(poolId, address(this), block.timestamp + 3600);
-
-    (bool isVerified, ) = PoolRegistry.lenderVarification(poolId, address(this));
-    assertEq(isVerified, true, "Lender not added successfully");
+    uint32 defaultDuration = PoolRegistry.getPaymentDefaultDuration(poolId);
+    assertEq(defaultDuration, 86400, "Incorrect payment default duration");
 }
 
+function testGetLoanExpirationTime() external {
+    // Create a pool with a loan expiration time of 365 days
+     uint256 poolId = PoolRegistry.createPool(
+        
+            7200,
+            1800,
+            365, // Loan expiration time(1 year(365 days))
+            1000, 
+            600, 
+            "https://adya.com",
+            true,
+            true
+    );
+
+    uint32 expirationTime = PoolRegistry.getloanExpirationTime(poolId);
+    assertEq(expirationTime, 365, "Incorrect loan expiration time");
+}
+
+function testGetPoolAddress() external {
+    uint256 poolId = PoolRegistry.createPool(
+        3600,
+            5400, 
+            86400, 
+            1000, 
+            400, 
+            "https://adya.com",
+            true,
+            true
+    );
+}
 }
