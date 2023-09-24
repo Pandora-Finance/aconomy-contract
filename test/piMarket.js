@@ -8,7 +8,6 @@ const { ethers } = require("hardhat");
 
 const BigNumber = require("big-number");
 
-
 describe("piMarket", function () {
   async function deploypiMarket() {
     [
@@ -218,9 +217,10 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(1000);
     });
 
-
     it("should let carl transfer piNFT to alice", async () => {
-      await piNFT.connect(carl).safeTransferFrom(carl.getAddress(), alice.getAddress(), 0);
+      await piNFT
+        .connect(carl)
+        .safeTransferFrom(carl.getAddress(), alice.getAddress(), 0);
       expect(await piNFT.ownerOf(0)).to.equal(await alice.getAddress());
     });
 
@@ -248,19 +248,19 @@ describe("piMarket", function () {
           "0x0000000000000000000000000000000000000000"
         )
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should not place nft on sale if contract address is 0", async () => {
       await piNFT.approve(piMarket.getAddress(), 0);
       await expect(
         piMarket.sellNFT(
           "0x0000000000000000000000000000000000000000",
-        0,
-        50000,
-        "0x0000000000000000000000000000000000000000"
+          0,
+          50000,
+          "0x0000000000000000000000000000000000000000"
         )
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let alice place piNFT on sale", async () => {
       await piNFT.approve(piMarket.getAddress(), 0);
@@ -272,7 +272,6 @@ describe("piMarket", function () {
       );
       expect(await piNFT.ownerOf(0)).to.equal(await piMarket.getAddress());
     });
-
 
     it("should edit the price after listing on sale", async () => {
       await piMarket.connect(alice).editSalePrice(1, 60000);
@@ -293,41 +292,59 @@ describe("piMarket", function () {
 
     it("should not let seller buy their own nft", async () => {
       await expect(
-        piMarket.connect(alice).BuyNFT(1, false, {  value: 50000 })
+        piMarket.connect(alice).BuyNFT(1, false, { value: 50000 })
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let bob buy piNFT", async () => {
       let meta = await piMarket._tokenMeta(1);
       expect(meta.status).to.equal(true);
 
-      const _balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const _balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const _balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const _balance4 = await ethers.provider.getBalance(validator.getAddress())
+      const _balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const _balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const _balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const _balance4 = await ethers.provider.getBalance(
+        validator.getAddress()
+      );
 
       result2 = await piMarket.connect(bob).BuyNFT(1, false, { value: 50000 });
       expect(await piNFT.ownerOf(0)).to.equal(await bob.getAddress());
-      const balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const balance4 = await ethers.provider.getBalance(validator.getAddress())
-      console.log("hhh",_balance1.toString())
-      console.log("hhh",balance1.toString())
-      let temp = BigNumber(balance1.toString()).minus(BigNumber(_balance1.toString()));
-      let alicegotAmount = (50000 * 8200) / 10000
-      console.log("hhh",temp.toString())
+      const balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const balance4 = await ethers.provider.getBalance(validator.getAddress());
+      console.log("hhh", _balance1.toString());
+      console.log("hhh", balance1.toString());
+      let temp = BigNumber(balance1.toString()).minus(
+        BigNumber(_balance1.toString())
+      );
+      let alicegotAmount = (50000 * 8200) / 10000;
+      console.log("hhh", temp.toString());
       expect(temp.toString()).to.equal(alicegotAmount.toString());
-      let temp2 = BigNumber(balance2.toString()).minus(BigNumber(_balance2.toString()));
-      let gotAmount2 = (50000 * 500) / 10000
+      let temp2 = BigNumber(balance2.toString()).minus(
+        BigNumber(_balance2.toString())
+      );
+      let gotAmount2 = (50000 * 500) / 10000;
       expect(temp2.toString()).to.equal(gotAmount2.toString());
 
-      let temp3 = BigNumber(balance3.toString()).minus(BigNumber(_balance3.toString()));
-      let gotAmount3 = (50000 * 100) / 10000
+      let temp3 = BigNumber(balance3.toString()).minus(
+        BigNumber(_balance3.toString())
+      );
+      let gotAmount3 = (50000 * 100) / 10000;
       expect(temp3.toString()).to.equal(gotAmount3.toString());
 
-      let temp4 = BigNumber(balance4.toString()).minus(BigNumber(_balance4.toString()));
-      let gotAmount4 = (50000 * 1200) / 10000
+      let temp4 = BigNumber(balance4.toString()).minus(
+        BigNumber(_balance4.toString())
+      );
+      let gotAmount4 = (50000 * 1200) / 10000;
       expect(temp4.toString()).to.equal(gotAmount4.toString());
 
       let newMeta = await piMarket._tokenMeta(1);
@@ -344,84 +361,113 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(1000);
     });
 
-
     it("should let bob withdraw funds from the NFT", async () => {
       await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
-      await piNftMethods.connect(bob).withdraw(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200);
+      await piNftMethods
+        .connect(bob)
+        .withdraw(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200);
       expect(await sampleERC20.balanceOf(bob)).to.equal(200);
       expect(await piNFT.ownerOf(0)).to.equal(await piNftMethods.getAddress());
     });
 
     it("should let bob withdraw more funds from the NFT", async () => {
-      await piNftMethods.connect(bob).withdraw(piNFT.getAddress(), 0, sampleERC20.getAddress(), 100);
+      await piNftMethods
+        .connect(bob)
+        .withdraw(piNFT.getAddress(), 0, sampleERC20.getAddress(), 100);
       expect(await sampleERC20.balanceOf(bob)).to.equal(300);
       expect(await piNFT.ownerOf(0)).to.equal(await piNftMethods.getAddress());
     });
 
     it("should let bob repay funds to the NFT", async () => {
       await sampleERC20.connect(bob).approve(piNftMethods.getAddress(), 300);
-      await piNftMethods.connect(bob).Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 300);
+      await piNftMethods
+        .connect(bob)
+        .Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 300);
       expect(await sampleERC20.balanceOf(bob)).to.equal(0);
       expect(await piNFT.ownerOf(0)).to.equal(await bob.getAddress());
     });
 
     it("should allow validator to add erc20 and change commission and royalties", async () => {
-      await sampleERC20.connect(validator).approve(piNftMethods.getAddress(), 500);
-      await piNftMethods.connect(validator).addERC20(
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+      await piNftMethods
+        .connect(validator)
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 100, [
+          [validator.getAddress(), 300],
+        ]);
+      let commission = await piNftMethods.validatorCommissions(
         piNFT.getAddress(),
-        0,
-        sampleERC20.getAddress(),
-        500,
-        100,
-        [[validator.getAddress(), 300]]
+        0
       );
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 0);
       expect(commission.isValid).to.equal(false);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(100);
-    })
+    });
 
     it("should let bob place piNFT on sale again", async () => {
       await piNFT.connect(bob).approve(piMarket.getAddress(), 0, { from: bob });
-      const result = await piMarket.connect(bob).sellNFT(
-        piNFT.getAddress(),
-        0,
-        50000,
-        "0x0000000000000000000000000000000000000000"
-      );
+      const result = await piMarket
+        .connect(bob)
+        .sellNFT(
+          piNFT.getAddress(),
+          0,
+          50000,
+          "0x0000000000000000000000000000000000000000"
+        );
       expect(await piNFT.ownerOf(0)).to.equal(await piMarket.getAddress());
     });
 
     it("should let alice buy piNFT", async () => {
       let meta = await piMarket._tokenMeta(2);
       expect(meta.status).to.equal(true);
-      const _balance1 = await ethers.provider.getBalance(bob.getAddress())
-      const _balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const _balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const _balance4 = await ethers.provider.getBalance(validator.getAddress())
+      const _balance1 = await ethers.provider.getBalance(bob.getAddress());
+      const _balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const _balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const _balance4 = await ethers.provider.getBalance(
+        validator.getAddress()
+      );
 
-      result2 = await piMarket.connect(alice).BuyNFT(2, false, { value: 50000 });
+      result2 = await piMarket
+        .connect(alice)
+        .BuyNFT(2, false, { value: 50000 });
       expect(await piNFT.ownerOf(0)).to.equal(await alice.getAddress());
-      const balance1 = await ethers.provider.getBalance(bob.getAddress())
-      const balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const balance4 = await ethers.provider.getBalance(validator.getAddress())
-      let temp1 = BigNumber(balance1.toString()).minus(BigNumber(_balance1.toString()));
-      let gotAmount1 = (50000 * 9100) / 10000
+      const balance1 = await ethers.provider.getBalance(bob.getAddress());
+      const balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const balance4 = await ethers.provider.getBalance(validator.getAddress());
+      let temp1 = BigNumber(balance1.toString()).minus(
+        BigNumber(_balance1.toString())
+      );
+      let gotAmount1 = (50000 * 9100) / 10000;
       expect(temp1.toString()).to.equal(gotAmount1.toString());
 
-      let temp2 = BigNumber(balance2.toString()).minus(BigNumber(_balance2.toString()));
-      let gotAmount2 = (50000 * 500) / 10000
+      let temp2 = BigNumber(balance2.toString()).minus(
+        BigNumber(_balance2.toString())
+      );
+      let gotAmount2 = (50000 * 500) / 10000;
       expect(temp2.toString()).to.equal(gotAmount2.toString());
 
-      let temp3 = BigNumber(balance3.toString()).minus(BigNumber(_balance3.toString()));
-      let gotAmount3 = (50000 * 100) / 10000
+      let temp3 = BigNumber(balance3.toString()).minus(
+        BigNumber(_balance3.toString())
+      );
+      let gotAmount3 = (50000 * 100) / 10000;
       expect(temp2.toString()).to.equal(gotAmount2.toString());
 
-      let temp4 = BigNumber(balance4.toString()).minus(BigNumber(_balance4.toString()));
-      let gotAmount4 = (50000 * 300) / 10000
+      let temp4 = BigNumber(balance4.toString()).minus(
+        BigNumber(_balance4.toString())
+      );
+      let gotAmount4 = (50000 * 300) / 10000;
       expect(temp4.toString()).to.equal(gotAmount4.toString());
 
       let newMeta = await piMarket._tokenMeta(1);
@@ -436,17 +482,21 @@ describe("piMarket", function () {
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(100);
-      await piNFT.connect(alice).safeTransferFrom(alice.getAddress(), bob.getAddress(), 0);
+      await piNFT
+        .connect(alice)
+        .safeTransferFrom(alice.getAddress(), bob.getAddress(), 0);
     });
 
     it("should let bob place piNFT on sale again", async () => {
       await piNFT.connect(bob).approve(piMarket.getAddress(), 0);
-      await piMarket.connect(bob).sellNFT(
-        piNFT.getAddress(),
-        0,
-        10000,
-        "0x0000000000000000000000000000000000000000"
-      );
+      await piMarket
+        .connect(bob)
+        .sellNFT(
+          piNFT.getAddress(),
+          0,
+          10000,
+          "0x0000000000000000000000000000000000000000"
+        );
       expect(await piNFT.ownerOf(0)).to.equal(await piMarket.getAddress());
     });
 
@@ -454,73 +504,94 @@ describe("piMarket", function () {
       await expect(
         piMarket.connect(alice).cancelSale(3)
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let bob cancel sale", async () => {
-      await piMarket.connect(bob).cancelSale(3)
+      await piMarket.connect(bob).cancelSale(3);
       meta = await piMarket._tokenMeta(2);
       expect(meta.status).to.equal(false);
     });
 
     it("should let bob redeem piNFT", async () => {
       await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
-      await piNftMethods.connect(bob).redeemOrBurnPiNFT(
-        piNFT.getAddress(),
-        0,
-        alice,
-        "0x0000000000000000000000000000000000000000",
-        sampleERC20.getAddress(),
-        false
-      );
+      await piNftMethods
+        .connect(bob)
+        .redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice,
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        );
       const validatorBal = await sampleERC20.balanceOf(validator.getAddress());
-      expect(await piNftMethods.viewBalance(piNFT.getAddress(), 0, sampleERC20.getAddress())).to.equal(0);
+      expect(
+        await piNftMethods.viewBalance(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress()
+        )
+      ).to.equal(0);
 
-      expect(await sampleERC20.balanceOf(validator.getAddress())).to.equal(1000);
+      expect(await sampleERC20.balanceOf(validator.getAddress())).to.equal(
+        1000
+      );
 
       expect(await piNFT.ownerOf(0)).to.equal(await alice.getAddress());
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 0);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        0
+      );
       expect(commission.isValid).to.equal(false);
       expect(commission.commission.account).to.equal(
         "0x0000000000000000000000000000000000000000"
       );
       expect(commission.commission.value).to.equal(0);
     });
-
   });
 
-
   describe("Auction sale", () => {
-
     it("should create a piNFT with 500 erc20 tokens to alice", async () => {
       await sampleERC20.mint(validator.getAddress(), 1000);
-      await piNFT.mintNFT(alice.getAddress(), "URI2", [[royaltyReceiver.getAddress(), 500]]);
+      await piNFT.mintNFT(alice.getAddress(), "URI2", [
+        [royaltyReceiver.getAddress(), 500],
+      ]);
       let tokenId = 1;
       const owner = await piNFT.ownerOf(tokenId);
       expect(owner).to.equal(await alice.getAddress());
       const bal = await piNFT.balanceOf(alice.getAddress());
       expect(bal).to.equal(2);
 
-
-      await piNftMethods.addValidator(piNFT.getAddress(), tokenId, validator.getAddress());
-      await sampleERC20.connect(validator).approve(piNftMethods.getAddress(), 500);
-      await piNftMethods.connect(validator).addERC20(
+      await piNftMethods.addValidator(
         piNFT.getAddress(),
         tokenId,
-        sampleERC20.getAddress(),
-        500,
-        900,
-        [[validator.getAddress(), 200]]
+        validator.getAddress()
       );
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+      await piNftMethods
+        .connect(validator)
+        .addERC20(
+          piNFT.getAddress(),
+          tokenId,
+          sampleERC20.getAddress(),
+          500,
+          900,
+          [[validator.getAddress(), 200]]
+        );
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 1);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        1
+      );
       expect(commission.isValid).to.equal(true);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(900);
     });
-
 
     it("should not place nft on auction if price < 10000", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
@@ -533,22 +604,20 @@ describe("piMarket", function () {
           "0x0000000000000000000000000000000000000000"
         )
       ).to.be.revertedWithoutReason();
-
-    })
+    });
 
     it("should not place nft on auction if contract address is 0", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
       await expect(
         piMarket.SellNFT_byBid(
           "0x0000000000000000000000000000000000000000",
-        1,
-        50000,
-        300,
-        "0x0000000000000000000000000000000000000000"
+          1,
+          50000,
+          300,
+          "0x0000000000000000000000000000000000000000"
         )
       ).to.be.revertedWithoutReason();
-
-    })
+    });
 
     it("should not place nft on auction if auction time is 0", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
@@ -561,7 +630,7 @@ describe("piMarket", function () {
           "0x0000000000000000000000000000000000000000"
         )
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let alice place piNFT on auction", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
@@ -571,7 +640,7 @@ describe("piMarket", function () {
         50000,
         300,
         "0x0000000000000000000000000000000000000000"
-      )
+      );
       expect(await piNFT.ownerOf(1)).to.equal(await piMarket.getAddress());
 
       const result = await piMarket._tokenMeta(4);
@@ -585,26 +654,27 @@ describe("piMarket", function () {
       await piMarket.editSalePrice(4, 50000);
       result = await piMarket._tokenMeta(4);
       expect(result.price).to.equal(50000);
-    })
+    });
 
     it("should allow validator to add erc20 and change commission and royalties", async () => {
-      await sampleERC20.connect(validator).approve(piNftMethods.getAddress(), 500);
-      await piNftMethods.connect(validator).addERC20(
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+      await piNftMethods
+        .connect(validator)
+        .addERC20(piNFT.getAddress(), 1, sampleERC20.getAddress(), 500, 1000, [
+          [validator, 300],
+        ]);
+      let commission = await piNftMethods.validatorCommissions(
         piNFT.getAddress(),
-        1,
-        sampleERC20.getAddress(),
-        500,
-        1000,
-        [[validator, 300]]
+        1
       );
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 1);
       expect(commission.isValid).to.equal(true);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(1000);
-
-    })
+    });
 
     it("should let bidders place bid on piNFT", async () => {
       await expect(
@@ -621,22 +691,25 @@ describe("piMarket", function () {
 
       result = await piMarket.Bids(4, 2);
       expect(result.buyerAddress).to.equal(await bidder1.getAddress());
-
     });
 
     it("should not let alice change the auction price after bidding has begun", async () => {
-      await expect(
-        piMarket.editSalePrice(4, 10000)
-      ).to.be.revertedWith("Bid has started");
-
-    })
+      await expect(piMarket.editSalePrice(4, 10000)).to.be.revertedWith(
+        "Bid has started"
+      );
+    });
 
     it("should let alice execute highest bid", async () => {
-
-      const _balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const _balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const _balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const _balance4 = await ethers.provider.getBalance(validator.getAddress())
+      const _balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const _balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const _balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const _balance4 = await ethers.provider.getBalance(
+        validator.getAddress()
+      );
 
       await expect(
         piMarket.connect(bob).executeBidOrder(4, 2, false)
@@ -646,59 +719,71 @@ describe("piMarket", function () {
       // result = await piNFT.ownerOf(1);
       expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
-      const balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const balance4 = await ethers.provider.getBalance(validator.getAddress())
+      const balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const balance4 = await ethers.provider.getBalance(validator.getAddress());
 
-      let bal1 = BigNumber(balance2.toString()).minus(BigNumber(_balance2.toString()));
-      let _bal1 = (70000 * 500) / 10000
+      let bal1 = BigNumber(balance2.toString()).minus(
+        BigNumber(_balance2.toString())
+      );
+      let _bal1 = (70000 * 500) / 10000;
       expect(bal1.toString()).to.equal(_bal1.toString());
 
-
-      let bal2 = BigNumber(balance3.toString()).minus(BigNumber(_balance3.toString()));
-      let _bal2 = (70000 * 100) / 10000
+      let bal2 = BigNumber(balance3.toString()).minus(
+        BigNumber(_balance3.toString())
+      );
+      let _bal2 = (70000 * 100) / 10000;
       expect(bal2.toString()).to.equal(_bal2.toString());
 
-
-      let bal3 = BigNumber(balance4.toString()).minus(BigNumber(_balance4.toString()));
-      let _bal3 = (70000 * 1300) / 10000
+      let bal3 = BigNumber(balance4.toString()).minus(
+        BigNumber(_balance4.toString())
+      );
+      let _bal3 = (70000 * 1300) / 10000;
       expect(bal3.toString()).to.equal(_bal3.toString());
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 1);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        1
+      );
       expect(commission.isValid).to.equal(false);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(1000);
-
     });
 
     it("should not let wallet withdraw anothers bid", async () => {
       await expect(
         piMarket.connect(bidder2).withdrawBidMoney(4, 0)
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let other bidders withdraw their bids", async () => {
       await piMarket.connect(bidder1).withdrawBidMoney(4, 0);
       await piMarket.connect(bidder2).withdrawBidMoney(4, 1);
-      const balance1 = await ethers.provider.getBalance(piMarket.getAddress())
+      const balance1 = await ethers.provider.getBalance(piMarket.getAddress());
       expect(balance1.toString()).to.equal("0");
-      await piNFT.connect(bidder1).safeTransferFrom(bidder1.getAddress(), alice.getAddress(), 1);
+      await piNFT
+        .connect(bidder1)
+        .safeTransferFrom(bidder1.getAddress(), alice.getAddress(), 1);
     });
 
     it("should not let bidder withdraw again", async () => {
       await expect(
         piMarket.connect(bidder1).withdrawBidMoney(4, 0)
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should not execute a withdrawn bid", async () => {
       await expect(
         piMarket.connect(alice).executeBidOrder(4, 1, false)
       ).to.be.revertedWithoutReason();
-    })
+    });
 
     it("should let alice place piNFT on auction", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
@@ -722,36 +807,52 @@ describe("piMarket", function () {
     });
 
     it("should let alice execute highest bid", async () => {
+      const _balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const _balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const _balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const _balance4 = await ethers.provider.getBalance(
+        validator.getAddress()
+      );
 
-      const _balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const _balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const _balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const _balance4 = await ethers.provider.getBalance(validator.getAddress())
-
-       await piMarket.connect(alice).executeBidOrder(5, 0, false)
+      await piMarket.connect(alice).executeBidOrder(5, 0, false);
 
       expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
-      const balance1 = await ethers.provider.getBalance(alice.getAddress())
-      const balance2 = await ethers.provider.getBalance(royaltyReceiver.getAddress())
-      const balance3 = await ethers.provider.getBalance(feeReceiver.getAddress())
-      const balance4 = await ethers.provider.getBalance(validator.getAddress())
+      const balance1 = await ethers.provider.getBalance(alice.getAddress());
+      const balance2 = await ethers.provider.getBalance(
+        royaltyReceiver.getAddress()
+      );
+      const balance3 = await ethers.provider.getBalance(
+        feeReceiver.getAddress()
+      );
+      const balance4 = await ethers.provider.getBalance(validator.getAddress());
 
-      let bal1 = BigNumber(balance2.toString()).minus(BigNumber(_balance2.toString()));
-      let _bal1 = (70000 * 500) / 10000
+      let bal1 = BigNumber(balance2.toString()).minus(
+        BigNumber(_balance2.toString())
+      );
+      let _bal1 = (70000 * 500) / 10000;
       expect(bal1.toString()).to.equal(_bal1.toString());
 
-
-      let bal2 = BigNumber(balance3.toString()).minus(BigNumber(_balance3.toString()));
-      let _bal2 = (70000 * 100) / 10000
+      let bal2 = BigNumber(balance3.toString()).minus(
+        BigNumber(_balance3.toString())
+      );
+      let _bal2 = (70000 * 100) / 10000;
       expect(bal2.toString()).to.equal(_bal2.toString());
 
-
-      let bal3 = BigNumber(balance4.toString()).minus(BigNumber(_balance4.toString()));
-      let _bal3 = (70000 * 300) / 10000
+      let bal3 = BigNumber(balance4.toString()).minus(
+        BigNumber(_balance4.toString())
+      );
+      let _bal3 = (70000 * 300) / 10000;
       expect(bal3.toString()).to.equal(_bal3.toString());
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 1);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        1
+      );
       expect(commission.isValid).to.equal(false);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
@@ -759,54 +860,76 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(1000);
     });
 
-
     it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
       await piNFT.connect(bidder1).approve(piNftMethods.getAddress(), 1);
-      await piNftMethods.connect(bidder1).redeemOrBurnPiNFT(
-        piNFT.getAddress(),
-        1,
-        bob,
-        "0x0000000000000000000000000000000000000000",
-        sampleERC20.getAddress(),
-        false
-      );
+      await piNftMethods
+        .connect(bidder1)
+        .redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          1,
+          bob,
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        );
       const validatorBal = await sampleERC20.balanceOf(validator.getAddress());
-      expect(await piNftMethods.viewBalance(piNFT.getAddress(), 1, sampleERC20.getAddress())).to.equal(0);
-      expect(await sampleERC20.balanceOf(validator.getAddress())).to.equal(2000)
-      expect(await piNFT.ownerOf(1)).to.equal(await bob.getAddress())
+      expect(
+        await piNftMethods.viewBalance(
+          piNFT.getAddress(),
+          1,
+          sampleERC20.getAddress()
+        )
+      ).to.equal(0);
+      expect(await sampleERC20.balanceOf(validator.getAddress())).to.equal(
+        2000
+      );
+      expect(await piNFT.ownerOf(1)).to.equal(await bob.getAddress());
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 1);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        1
+      );
       expect(commission.isValid).to.equal(false);
       expect(commission.commission.account).to.equal(
         "0x0000000000000000000000000000000000000000"
       );
       expect(commission.commission.value).to.equal(0);
-
     });
 
     it("should create a piNFT with 500 erc20 tokens to alice", async () => {
-
       await sampleERC20.mint(validator.getAddress(), 1000);
-      await piNFT.mintNFT(alice.getAddress(), "URI2", [[royaltyReceiver.getAddress(), 500]]);
+      await piNFT.mintNFT(alice.getAddress(), "URI2", [
+        [royaltyReceiver.getAddress(), 500],
+      ]);
       let tokenId = 2;
       const owner = await piNFT.ownerOf(tokenId);
       expect(owner).to.equal(await alice.getAddress());
       const bal = await piNFT.balanceOf(alice.getAddress());
       expect(bal).to.equal(2);
 
-
-      await piNftMethods.addValidator(piNFT.getAddress(), tokenId, validator.getAddress());
-      await sampleERC20.connect(validator).approve(piNftMethods.getAddress(), 500);
-      await piNftMethods.connect(validator).addERC20(
+      await piNftMethods.addValidator(
         piNFT.getAddress(),
         tokenId,
-        sampleERC20.getAddress(),
-        500,
-        900,
-        [[validator.getAddress(), 200]]
+        validator.getAddress()
       );
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+      await piNftMethods
+        .connect(validator)
+        .addERC20(
+          piNFT.getAddress(),
+          tokenId,
+          sampleERC20.getAddress(),
+          500,
+          900,
+          [[validator.getAddress(), 200]]
+        );
 
-      let commission = await piNftMethods.validatorCommissions(piNFT.getAddress(), 2);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        2
+      );
       expect(commission.isValid).to.equal(true);
       expect(commission.commission.account).to.equal(
         await validator.getAddress()
@@ -822,12 +945,11 @@ describe("piMarket", function () {
         50000,
         300,
         "0x0000000000000000000000000000000000000000"
-      )
+      );
       expect(await piNFT.ownerOf(2)).to.equal(await piMarket.getAddress());
 
       const result = await piMarket._tokenMeta(4);
       expect(result.bidSale).to.equal(true);
-
     });
 
     it("should let bidders place bid on piNFT", async () => {
@@ -864,27 +986,5 @@ describe("piMarket", function () {
       result = await piMarket.Bids(6, 1);
       expect(result.withdrawn).to.equal(true);
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  })
+  });
 });
