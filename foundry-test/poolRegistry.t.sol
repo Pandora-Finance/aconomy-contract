@@ -88,11 +88,11 @@ vm.prank(alice);
         test_SetApr();
         vm.prank(alice);
         uint256 poolId = PoolRegistry.createPool(
-            3600, // Payment cycle duration
-            1800, // Payment default duration
-            86400, // Loan expiration time
-            1000, // Pool fee percent (e.g., 10%)
-            500, // APR (e.g., 5%)
+            3600, 
+            1800, 
+            86400, 
+            1000, 
+            500, 
             "https://adya.com",
             true,
             true
@@ -244,11 +244,11 @@ function testGetPaymentCycleDuration() external {
     // Create a pool with a payment cycle duration of 30 days
 
          uint256 poolId = PoolRegistry.createPool(
-        30, // Payment cycle duration
+        30, // Payment cycle duration 30 days.
             7, // Payment default duration(7 days)
             365, // Loan expiration time(365 days)
-            1000, // Pool fee percent (e.g., 10%)
-            500, // APR (e.g., 5%)
+            1000, // Pool fee percent (10% w.r.t 10000)
+            500, // Set APR to  5%)
             "https://adya.com",
             true,
             true
@@ -305,4 +305,101 @@ function testGetPoolAddress() external {
             true
     );
 }
+
+function testGetPoolOwner() external {
+    uint256 poolId = PoolRegistry.createPool(
+         3600, 
+            1800, 
+            86400, 
+            1000, 
+            500, 
+            "https://adya.com",
+            true,
+            true);
+
+    // Retrieve pool owner
+    address owner = PoolRegistry.getPoolOwner(poolId);
+
+    // Perform assertions on owner as needed
+}
+
+// Test getting pool APR
+function testGetPoolApr() external {
+    uint256 poolId = PoolRegistry.createPool(
+     3600, 
+            1800, 
+            86400, 
+            1000, 
+            500, 
+            "Adya.com",
+            true,
+            true);
+
+//     Retrieve pool APR
+//  uint16Apr = PoolRegistry.getPoolApr(poolId);
+
+}
+
+function testGetAconomyFee() external {
+uint256 poolId = PoolRegistry.createPool(
+        30,
+        7,
+        365,
+        11,
+        5,
+        "adya.com",
+        true,
+        true
+    );
+
+    // Retrieve the Aconomy fee
+    uint16 fee = PoolRegistry.getAconomyFee();
+
+    
+//    assertEq(AconomyFee, 50000, "Incoreect Fee");
+}
+// Test getting the Aconomy owner address
+function testGetAconomyOwner() external {
+   uint256 poolId = PoolRegistry.createPool(
+    // Here i have taken duration in days and percent w.r.t 100.
+        30,
+        7,
+        365,
+        10,
+        5,
+        "adya.com",
+        true,
+        true
+    );
+
+    // Retrieve the Aconomy owner address
+    address owner = PoolRegistry.getAconomyOwner();
+}
+function testAttestLenderAddress() external {
+ uint256 poolId = PoolRegistry.createPool(
+    //Taken duration in days and percent w.r.t 100.
+        30,
+        7,
+        365,
+        10,
+        5,
+        "adya.com",
+        true,
+        true
+    );
+    address lenderAddress = address(0x123); 
+    uint256 expirationTime =  30 days; 
+    // Attest lender address
+    PoolRegistry.addLender(poolId, lenderAddress, expirationTime);
+
+   
+    bool isLenderVerified;
+    bytes32 lenderAttestationId;
+    (isLenderVerified, lenderAttestationId) = PoolRegistry.lenderVarification(poolId, lenderAddress);
+
+    
+    assert(isLenderVerified);
+    assert(lenderAttestationId != bytes32(0));
+}
+
 }
