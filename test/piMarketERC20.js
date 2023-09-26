@@ -635,7 +635,7 @@ describe("piMarketERC20", function () {
                 .approve(piNftMethods.getAddress(), 500);
             await piNftMethods
                 .connect(validator)
-                .addERC20(piNFT.getAddress(), 1, sampleERC20.getAddress(), 500, 1000, [
+                .addERC20(piNFT.getAddress(), 1, sampleERC20.getAddress(), 500, 100, [
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(
@@ -646,7 +646,7 @@ describe("piMarketERC20", function () {
             expect(commission.commission.account).to.equal(
                 await validator.getAddress()
             );
-            expect(commission.commission.value).to.equal(1000);
+            expect(commission.commission.value).to.equal(100);
         });
 
         it("should let bidders place bid on piNFT", async () => {
@@ -663,9 +663,9 @@ describe("piMarketERC20", function () {
                 piMarket.connect(bidder1).Bid(4, 50000, { value: 50000 })
             ).to.be.revertedWithoutReason();
 
-            await piMarket.connect(bidder1).Bid(4, 60000, { value: 60000 });
-            await piMarket.connect(bidder2).Bid(4, 65000, { value: 65000 });
-            await piMarket.connect(bidder1).Bid(4, 70000, { value: 70000 });
+            await piMarket.connect(bidder1).Bid(4, 60000);
+            await piMarket.connect(bidder2).Bid(4, 65000);
+            await piMarket.connect(bidder1).Bid(4, 70000);
 
             result = await piMarket.Bids(4, 2);
             expect(result.buyerAddress).to.equal(await bidder1.getAddress());
@@ -675,6 +675,209 @@ describe("piMarketERC20", function () {
             await expect(piMarket.editSalePrice(4, 10000)).to.be.revertedWith(
                 "Bid has started"
             );
+        });
+
+        it("should let alice execute highest bid", async () => {
+            let _balance1 = await sampleERC20.balanceOf(alice.getAddress());
+            let _balance2 = await sampleERC20.balanceOf(royaltyReceiver.getAddress());
+            let _balance3 = await sampleERC20.balanceOf(feeReceiver.getAddress());
+            let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
+
+            await expect(
+                piMarket.connect(bob).executeBidOrder(4, 2, false)
+            ).to.be.revertedWithoutReason();
+
+            await piMarket.connect(alice).executeBidOrder(4, 2, false);
+            
+            expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
+
+            let balance1 = await sampleERC20.balanceOf(alice.getAddress());
+            let balance2 = await sampleERC20.balanceOf(royaltyReceiver.getAddress());
+            let balance3 = await sampleERC20.balanceOf(feeReceiver.getAddress());
+            let balance4 = await sampleERC20.balanceOf(validator.getAddress());
+            let bal = BigNumber(balance1.toString()).minus(
+                BigNumber(_balance1.toString())
+            );
+            let _bal = (70000 * 9000) / 10000;
+            expect(bal.toString()).to.equal(_bal.toString());
+
+
+            let bal1 = BigNumber(balance2.toString()).minus(
+                BigNumber(_balance2.toString())
+            );
+            let _bal1 = (70000 * 500) / 10000;
+            expect(bal1.toString()).to.equal(_bal1.toString());
+
+            let bal2 = BigNumber(balance3.toString()).minus(
+                BigNumber(_balance3.toString())
+            );
+            let _bal2 = (70000 * 100) / 10000;
+            expect(bal2.toString()).to.equal(_bal2.toString());
+
+            let bal3 = BigNumber(balance4.toString()).minus(
+                BigNumber(_balance4.toString())
+            );
+            let _bal3 = (70000 * 400) / 10000;
+            expect(bal3.toString()).to.equal(_bal3.toString());
+
+            let commission = await piNftMethods.validatorCommissions(
+                piNFT.getAddress(),
+                1
+            );
+            expect(commission.isValid).to.equal(false);
+            expect(commission.commission.account).to.equal(
+                await validator.getAddress()
+            );
+            expect(commission.commission.value).to.equal(100);
+        });
+
+        it("should not let wallet withdraw anothers bid", async () => {
+            await expect(
+                piMarket.connect(bidder2).withdrawBidMoney(4, 0)
+            ).to.be.revertedWithoutReason();
+
+        })
+
+        it("should let other bidders withdraw their bids", async () => {
+            await piMarket.connect(bidder1).withdrawBidMoney(4, 0);
+            await piMarket.connect(bidder2).withdrawBidMoney(4, 1);
+            const balance1 = await sampleERC20.balanceOf(piMarket.getAddress())
+            expect(balance1.toString()).to.equal("0");
+        });
+
+        it("should not let bidder withdraw again", async () => {
+            await expect(
+                piMarket.connect(bidder1).withdrawBidMoney(4, 0)
+            ).to.be.revertedWithoutReason();
+        })
+
+        it("should not execute a withdrawn bid", async () => {
+            await expect(
+                piMarket.connect(alice).executeBidOrder(4, 1, false)
+            ).to.be.revertedWithoutReason();
+        })
+
+        it("should let alice place piNFT on auction", async () => {
+            await piNFT.connect(bidder1).safeTransferFrom(bidder1.getAddress(), alice.getAddress(), 1)
+            await piNFT.approve(piMarket.getAddress(), 1);
+            await piMarket.SellNFT_byBid(
+                piNFT.getAddress(),
+                1,
+                50000,
+                300,
+                sampleERC20.getAddress()
+            );
+            expect(await piNFT.ownerOf(1)).to.equal(await piMarket.getAddress());
+
+            const result = await piMarket._tokenMeta(5);
+            expect(result.bidSale).to.equal(true);
+        });
+
+        it("should let bidders place bid on piNFT", async () => {
+            await sampleERC20.mint(bidder1.getAddress(), 70000);
+            await sampleERC20.connect(bidder1).approve(piMarket.getAddress(), 70000);
+
+            await expect(
+                piMarket.connect(alice).Bid(5, 70000, { value: 60000 })
+            ).to.be.revertedWithoutReason();
+
+            await expect(
+                piMarket.connect(bidder1).Bid(5, 50000, { value: 50000 })
+            ).to.be.revertedWithoutReason();
+
+            await piMarket.connect(bidder1).Bid(5, 70000);
+
+            result = await piMarket.Bids(5, 0);
+            expect(result.buyerAddress).to.equal(await bidder1.getAddress());
+        });
+
+        it("should let alice execute highest bid", async () => {
+            let _balance1 = await sampleERC20.balanceOf(alice.getAddress());
+            let _balance2 = await sampleERC20.balanceOf(royaltyReceiver.getAddress());
+            let _balance3 = await sampleERC20.balanceOf(feeReceiver.getAddress());
+            let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
+
+            await expect(
+                piMarket.connect(bob).executeBidOrder(5, 0, false)
+            ).to.be.revertedWithoutReason();
+
+            await piMarket.connect(alice).executeBidOrder(5, 0, false);
+            expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
+
+            let balance1 = await sampleERC20.balanceOf(alice.getAddress());
+            let balance2 = await sampleERC20.balanceOf(royaltyReceiver.getAddress());
+            let balance3 = await sampleERC20.balanceOf(feeReceiver.getAddress());
+            let balance4 = await sampleERC20.balanceOf(validator.getAddress());
+            let bal = BigNumber(balance1.toString()).minus(
+                BigNumber(_balance1.toString())
+            );
+            let _bal = (70000 * 9100) / 10000;
+            expect(bal.toString()).to.equal(_bal.toString());
+
+
+            let bal1 = BigNumber(balance2.toString()).minus(
+                BigNumber(_balance2.toString())
+            );
+            let _bal1 = (70000 * 500) / 10000;
+            expect(bal1.toString()).to.equal(_bal1.toString());
+
+            let bal2 = BigNumber(balance3.toString()).minus(
+                BigNumber(_balance3.toString())
+            );
+            let _bal2 = (70000 * 100) / 10000;
+            expect(bal2.toString()).to.equal(_bal2.toString());
+
+            let bal3 = BigNumber(balance4.toString()).minus(
+                BigNumber(_balance4.toString())
+            );
+            let _bal3 = (70000 * 300) / 10000;
+            expect(bal3.toString()).to.equal(_bal3.toString());
+
+            let commission = await piNftMethods.validatorCommissions(
+                piNFT.getAddress(),
+                1
+            );
+            expect(commission.isValid).to.equal(false);
+            expect(commission.commission.account).to.equal(
+                await validator.getAddress()
+            );
+            expect(commission.commission.value).to.equal(100);
+        });
+
+        it("should let bidder disintegrate NFT and ERC20 tokens", async () => {
+            await piNFT.connect(bidder1).approve(piNftMethods.getAddress(), 1);
+            await piNftMethods
+                .connect(bidder1)
+                .redeemOrBurnPiNFT(
+                    piNFT.getAddress(),
+                    1,
+                    bob,
+                    "0x0000000000000000000000000000000000000000",
+                    sampleERC20.getAddress(),
+                    false
+                );
+            const validatorBal = await sampleERC20.balanceOf(validator.getAddress());
+            expect(
+                await piNftMethods.viewBalance(
+                    piNFT.getAddress(),
+                    1,
+                    sampleERC20.getAddress()
+                )
+            ).to.equal(0);
+            expect(await sampleERC20.balanceOf(validator.getAddress())).to.equal(
+                14400
+            );
+            expect(await piNFT.ownerOf(1)).to.equal(await bob.getAddress());
+
+            let commission = await piNftMethods.validatorCommissions(
+                piNFT.getAddress(),
+                1
+            );
+            expect(commission.isValid).to.equal(false);
+            expect(commission.commission.account).to.equal(
+                "0x0000000000000000000000000000000000000000"
+            );
+            expect(commission.commission.value).to.equal(0);
         });
     });
 });
