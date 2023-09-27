@@ -347,7 +347,7 @@ uint256 poolId = PoolRegistry.createPool(
         365,
         11,
         5,
-        "adya.com",
+        "adyaa.com",
         true,
         true
     );
