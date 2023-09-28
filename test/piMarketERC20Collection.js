@@ -11,7 +11,7 @@ const { assert } = require("ethers");
 
 let collectionContract;
 
-describe("piMarketCollection", function () {
+describe("piMarketERC20Collection", function () {
 
     async function deploypiMarket() {
         [

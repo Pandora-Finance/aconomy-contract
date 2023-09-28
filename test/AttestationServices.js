@@ -8,7 +8,7 @@ const {
   const moment = require("moment");
   const { BN } = require("@openzeppelin/test-helpers");
   
-  describe("Pool Registry", function (){
+  describe("Attestation Services", function (){
     let schemaUUID;
     let attestationUUID;
 
@@ -34,6 +34,14 @@ const {
             expect(
                 await registry.getAddress()).to.not.equal(
                 null || undefined
+              );
+        })
+
+        it("should fail to deploy services if registry address is 0", async () => {
+            await expect(
+                hre.ethers.deployContract("AttestationServices", ["0x0000000000000000000000000000000000000000"])
+                ).to.be.revertedWith(
+                "InvalidRegistry"
               );
         })
 

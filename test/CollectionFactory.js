@@ -381,6 +381,9 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         300
       );
+
+      let withdrawn = await piNftMethods.viewWithdrawnAmount(await collectionInstance.getAddress(), 0);
+      expect(withdrawn).to.equal(300)
   
       expect(await collectionInstance.ownerOf(0)).to.equal(await piNftMethods.getAddress());
       let bal = await sampleERC20.balanceOf(alice);
@@ -391,6 +394,9 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         200
       );
+
+      withdrawn = await piNftMethods.viewWithdrawnAmount(await collectionInstance.getAddress(), 0);
+      expect(withdrawn).to.equal(500)
   
       await expect(piNftMethods.withdraw(
         await collectionInstance.getAddress(),

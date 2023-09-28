@@ -8,6 +8,7 @@ const { ethers } = require("hardhat");
 
 describe("piNFT", function () {
   let piNFTInstance;
+  let erc2771Context;
   async function deploypiNFT() {
     [alice, validator, bob, royaltyReciever] = await ethers.getSigners();
 
@@ -86,7 +87,42 @@ describe("piNFT", function () {
       ).to.be.revertedWith("Pausable: paused");
 
       await piNFT.unpause();
+      erc2771Context = await hre.ethers.getContractAt("AconomyERC2771Context", await piNFT.getAddress())
     });
+
+    it("should check is trusted forwarder", async () => {
+      expect(
+          await erc2771Context.isTrustedForwarder("0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d")
+          ).to.equal(true)
+
+      expect(
+          await erc2771Context.isTrustedForwarder(await bob.getAddress())
+          ).to.equal(false)
+    })
+
+    it("should not let non owner add a trusted forwarder", async () => {
+        await expect(erc2771Context.connect(royaltyReciever).addTrustedForwarder(await bob.getAddress())
+        ).to.be.revertedWith("Ownable: caller is not the owner")
+    })
+
+    it("should not let non owner remove a trusted forwarder", async () => {
+        await expect(erc2771Context.connect(royaltyReciever).removeTrustedForwarder(await alice.getAddress())
+        ).to.be.revertedWith("Ownable: caller is not the owner")
+    })
+
+    it("should let owner add a trusted forwarder", async () => {
+        await erc2771Context.addTrustedForwarder(await bob.getAddress())
+        expect(
+            await erc2771Context.isTrustedForwarder(await bob.getAddress())
+            ).to.equal(true)
+    })
+
+    it("should let owner add a trusted forwarder", async () => {
+        await erc2771Context.removeTrustedForwarder(await bob.getAddress())
+        expect(
+            await erc2771Context.isTrustedForwarder(await bob.getAddress())
+            ).to.equal(false)
+    })
 
     it("should read the name and symbol of piNFT contract", async () => {
       expect(await piNFT.name()).to.equal("Aconomy");
@@ -197,6 +233,22 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
+    it("should pause and unpause piNFTMethods", async () => {
+      await piNftMethods.pause();
+
+      // const tx = await piNFTcontract.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+
+      await expect(
+        piNftMethods.addValidator(
+          piNFT.getAddress(),
+          0,
+          validator.getAddress()
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piNftMethods.unpause();
+    });
+
     it("should allow alice to add a validator to the nft", async () => {
       await piNftMethods.addValidator(
         piNFT.getAddress(),
@@ -277,6 +329,29 @@ describe("piNFT", function () {
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
+    });
+
+    it("should pause and unpause piNFTMethods", async () => {
+      await piNftMethods.pause();
+
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+
+      await expect(
+        piNftMethods
+        .connect(validator)
+        .addERC20(
+          await piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          500,
+          500,
+          [[await validator.getAddress(), 200]]
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piNftMethods.unpause();
     });
 
     it("should let validator add ERC20 tokens to alice's NFT", async () => {
@@ -396,11 +471,15 @@ describe("piNFT", function () {
       let _bal = await sampleERC20.balanceOf(alice.getAddress());
       await piNFT.approve(piNftMethods.getAddress(), 0);
       await piNftMethods.withdraw(
-        piNFT.getAddress(),
+        await piNFT.getAddress(),
         0,
         sampleERC20.getAddress(),
         300
       );
+
+      let withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 0);
+      expect(withdrawn).to.equal(300)
+
       expect(await piNFT.ownerOf(0)).to.equal(await piNftMethods.getAddress());
       let bal = await sampleERC20.balanceOf(alice);
       expect(bal - _bal).to.equal(300);
@@ -410,6 +489,10 @@ describe("piNFT", function () {
         sampleERC20.getAddress(),
         200
       );
+
+      withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 0);
+      expect(withdrawn).to.equal(500)
+
       expect(await piNFT.ownerOf(0)).to.equal(await piNftMethods.getAddress());
       bal = await sampleERC20.balanceOf(alice);
       expect(bal - _bal).to.equal(500);

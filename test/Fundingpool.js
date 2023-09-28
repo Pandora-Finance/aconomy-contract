@@ -812,6 +812,22 @@ const {
         // console.log(bal.toNumber());
         expect(bal).to.equal(0);
       });
+
+      it("should not allow repayment after loan state change", async () => {
+        await expect(fundingpoolInstance.RepayFullAmount(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )).to.be.revertedWith("Bid must be accepted")
+
+        await expect(fundingpoolInstance.repayMonthlyInstallment(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )).to.be.revertedWith("Loan must be accepted")
+      })
   
       it("should supply funds to pool again", async () => {
         const provider = ethers.provider;
