@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('@openzeppelin/hardhat-upgrades');
 require('solidity-coverage')
+require("hardhat-gas-reporter");
 require('dotenv').config()
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -19,5 +20,9 @@ module.exports = {
       url: `https://goerli-rollup.arbitrum.io/rpc`,
       accounts: [process.env.PK]
     }
+  },
+  gasReporter: {
+    currency: 'CHF',
+    gasPrice: 21
   }
 };
