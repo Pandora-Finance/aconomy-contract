@@ -338,17 +338,20 @@ const {
       it("should view and pay 1st intallment amount", async () => {
         let loan = await poolAddressInstance.loans(loanId1);
         //console.log(loan);
-        let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
+        // let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
         // console.log("installment before 1 cycle", r.toString());
         // advanceBlockAtTime(loan.loanDetails.lastRepaidTimestamp + paymentCycleDuration + 20)
-        await time.increase(paymentCycleDuration + 5);
-        r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-        // console.log("installment after 1 cycle", r.toString());
+        await time.increase(paymentCycleDuration + 50000);
         //1
         let dueDate = await poolAddressInstance.calculateNextDueDate(loanId1);
-        let acceptedTimeStamp = new BN(loan.loanDetails.acceptedTimestamp)
+        let acceptedTimeStamp = await new BN(loan.loanDetails.acceptedTimestamp)
         let paymentCycle = await new BN(loan.terms.paymentCycle)
         expect(`${new BN(dueDate)}`).to.equal(`${acceptedTimeStamp.add(paymentCycle)}`);
+        
+        let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
+        console.log(acceptedTimeStamp.toString())
+        console.log(await time.latest())
+        console.log("installment after 1 cycle", r.toString());
     
         await erc20.connect(borrower).approve(await poolAddressInstance.getAddress(), r);
         let result = await poolAddressInstance.connect(borrower).repayMonthlyInstallment(loanId1);
@@ -363,7 +366,7 @@ const {
           loan[4][2][0] + loan[4][2][1]).to.equal(loan.terms.paymentCycleAmount
         );
         await time.increase(100);
-        r = await poolAddressInstance.viewInstallmentAmount(loanId1);
+        // r = await poolAddressInstance.viewInstallmentAmount(loanId1);
         // console.log("installment after paying 1st cycle", r.toString());
       });
     
