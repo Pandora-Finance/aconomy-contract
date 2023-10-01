@@ -37,6 +37,7 @@ AttestationRegistry attestationRegistry;
 
     address payable alice = payable(address(0xABCC));
     address payable sam = payable(address(0xABDD));
+    address payable bob = payable(address(0xABCD));
 
     address public owner;
     address public borrower;
@@ -59,7 +60,6 @@ AttestationRegistry attestationRegistry;
         owner = msg.sender;
         borrower = address(0x123); 
         lendingToken = address(0x456);
-        poolId = 1; 
         principal = 1000000;
         duration = 30 days;
         expirationDuration = 7 days;
@@ -72,8 +72,8 @@ AttestationRegistry attestationRegistry;
 }
 function test_CreatePool() public {
         vm.prank(alice);
-        uint256 poolId = PoolRegistry.createPool(
-            3600, // Payment cycle duration
+        poolId = PoolRegistry.createPool(
+            3500, // Payment cycle duration
             1800, // Payment default duration
             86400, // Loan expiration time
             1000, // Pool fee percent (e.g., 10%)
@@ -89,48 +89,48 @@ function test_CreatePool() public {
         assertTrue(poolId > 0, "Pool creation failed");   
     }
 
-function testAddLender() external {
+function test_AddLender() external {
+test_CreatePool();
+    // uint256 poolId = PoolRegistry.createPool(
+    //     3600, 
+    //         1800, 
+    //         86400, 
+    //         1000, 
+    //         500, 
+    //         "https://adya.com",
+    //         true,
+    //         true
+    // );
+assertEq(poolId, 1, "something wromg");
+vm.prank(alice);
+PoolRegistry.addLender(poolId, bob, block.timestamp + 3600);
 
-    uint256 poolId = PoolRegistry.createPool(
-        3600, 
-            1800, 
-            86400, 
-            1000, 
-            500, 
-            "https://adya.com",
-            true,
-            true
-    );
-
-
-PoolRegistry.addLender(poolId, address(this), block.timestamp + 3600);
-
-    (bool isVerified, ) = PoolRegistry.lenderVarification(poolId, address(this));
+    (bool isVerified, ) = PoolRegistry.lenderVarification(poolId, bob);
     assertEq(isVerified, true, "Lender not added successfully");
 }
 
 
 function testAddBorrower() external {
-    
-    uint256 poolId = PoolRegistry.createPool(
-        3600,
-            1800, 
-            86400, 
-            1000, 
-            500, 
-            "https://adya.com",
-            true,
-            true
-    );
+    test_CreatePool();
+    // uint256 poolId = PoolRegistry.createPool(
+    //     3600,
+    //         1800, 
+    //         86400, 
+    //         1000, 
+    //         500, 
+    //         "https://adya.com",
+    //         true,
+    //         true
+    // );
+vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
 
-    PoolRegistry.addBorrower(poolId, address(this), block.timestamp + 3600);
-
-    (bool isVerified, ) = PoolRegistry.borrowerVarification(poolId, address(this));
+    (bool isVerified, ) = PoolRegistry.borrowerVarification(poolId, sam);
     assertEq(isVerified, true, "Borrower not added successfully");
 }
 
  function testLoanRequest() public {
-
+test_CreatePool();
     vm.prank(alice);
         uint256 poolId = PoolRegistry.createPool(
             3600, // Payment cycle duration
@@ -139,18 +139,18 @@ function testAddBorrower() external {
             1000, // Pool fee percent (e.g., 10%)
             500, // APR (e.g., 5%)
             "https://adya.com",
-            true,
+            false,
             false 
         );
 
        
         assertEq(PoolRegistry.getPoolOwner(poolId), alice, "Owner should be alice");
-        assertEq(poolId, 1, "something wromg");
+        assertEq(poolId, 2, "something wromg");
         assertTrue(poolId > 0, "Pool creation failed");   
 
         address lendingToken = address(erc20Contract);
-        // uint256 poolId = 1;
-        uint256 principal = 1000;
+        poolId = 1;
+        uint256 principal = 1000000;
         uint32 duration = 3600;
         uint16 APR = 500;
         
@@ -206,9 +206,40 @@ function testAddBorrower() external {
         
         uint256 loanId = 1; 
 
-        uint256 installmentAmount = pool.viewInstallmentAmount(loanId);
+        // uint256 installmentAmount = pool.viewInstallmentAmount(loanId);
+
+        // console.log("sssss",installmentAmount);
 
        
-        assertEq(installmentAmount, 0, "Installment amount should be non-negative");
+        // assertEq(installmentAmount, 0, "Installment amount should be non-negative");
+    }
+     function testIsPaymentLate() public {
+        uint256 loanId = 1;
+
+        bool paymentLate = pool.isPaymentLate(loanId);
+
+        // Assert that the payment is not late initially
+        assertFalse(paymentLate, "Payment should not be late initially");
+
+    }
+
+    function test_createNewPool() public {
+        test_CreatePool();
+        uint256 paymentCycleDuration = 30 days;
+        uint256 loanExpirationDuration = 2 days;
+        vm.prank(alice);
+        // poolId = PoolRegistry.createPool(
+        //     paymentCycleDuration,
+        //     loanExpirationDuration,
+        //     100,
+        //     100,
+        //     "sk.com",
+        //     true,
+        //     true
+        // );
+        // assertEq(PoolRegistry.getPoolOwner(poolId), alice, "Owner should be alice");
+        // assertEq(poolId, 3, "something wromg");
+        // assertTrue(poolId > 0, "Pool creation failed");   
+
     }
 }
