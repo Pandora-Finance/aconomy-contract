@@ -78,6 +78,10 @@ describe("piNFT", function () {
     });
 
     it("should deploy the contracts", async () => {
+      await expect(
+        piNFT.connect(royaltyReciever).pause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
       await piNFT.pause();
 
       // const tx = await piNFTcontract.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
@@ -86,9 +90,27 @@ describe("piNFT", function () {
         piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]])
       ).to.be.revertedWith("Pausable: paused");
 
+      await expect(
+        piNFT.connect(royaltyReciever).unpause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
       await piNFT.unpause();
       erc2771Context = await hre.ethers.getContractAt("AconomyERC2771Context", await piNFT.getAddress())
     });
+
+    it("should not allow non owner to pause piNFTMethods", async () => {
+      await expect(
+        piNftMethods.connect(royaltyReciever).pause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await piNftMethods.pause();
+
+      await expect(
+        piNftMethods.connect(royaltyReciever).unpause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await piNftMethods.unpause();
+    })
 
     it("should check is trusted forwarder", async () => {
       expect(
@@ -201,6 +223,16 @@ describe("piNFT", function () {
       await expect(
         piNFT.connect(bob).deleteNFT(1)
       ).to.be.revertedWithoutReason();
+    });
+
+    it("should not allow delete if contract is paused", async () => {
+      await piNFT.pause();
+
+      await expect(
+        piNFT.deleteNFT(1)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piNFT.unpause();
     });
 
     it("should Delete an ERC721 token to alice", async () => {
@@ -550,6 +582,72 @@ describe("piNFT", function () {
       expect(_bal - bal).to.equal(500);
     });
 
+    it("should not allow redeem if contract is paused", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+      await piNftMethods.pause();
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piNftMethods.unpause();
+    });
+
+    it("should not allow redeem if erc20 contract is 0 address", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          false
+        )
+      ).to.be.revertedWithoutReason();
+
+    });
+
+    it("should not allow redeem if NFT receiver is 0 address", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWithoutReason();
+
+    });
+
+    it("should not allow redeem if ERC20 receiver is not 0 address", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          alice.getAddress(),
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWithoutReason();
+
+    });
+
     it("should redeem piNft", async () => {
       await piNFT.approve(piNftMethods.getAddress(), 0);
       await piNftMethods.redeemOrBurnPiNFT(
@@ -623,6 +721,37 @@ describe("piNFT", function () {
       );
       expect(commission.commission.value).to.equal(400);
     });
+
+    it("should not allow burn if erc20 receiver is 0 address", async () => {
+      await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWithoutReason("");
+    });
+
+    it("should not allow burn if NFT receiver is not 0 address", async () => {
+      await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          alice.getAddress(),
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWithoutReason("");
+    });
+    
 
     it("should let bob burn piNFT", async () => {
       expect(await sampleERC20.balanceOf(bob.getAddress())).to.equal(0);
