@@ -77,6 +77,21 @@ const {
             );
         });
 
+        it("should not let non owner set aconomy fees", async () => {
+          await expect(aconomyFee.connect(royaltyReceiver).setAconomyNFTLendBorrowFee(100)
+          ).to.be.revertedWith("Ownable: caller is not the owner")
+
+          await expect(aconomyFee.connect(royaltyReceiver).setAconomyPoolFee(100)
+          ).to.be.revertedWith("Ownable: caller is not the owner")
+
+          await expect(aconomyFee.connect(royaltyReceiver).setAconomyPiMarketFee(100)
+          ).to.be.revertedWith("Ownable: caller is not the owner")
+
+          await aconomyFee.setAconomyNFTLendBorrowFee(100)
+          await aconomyFee.setAconomyPoolFee(100)
+          await aconomyFee.setAconomyPiMarketFee(100)
+        })
+
         it("mint NFT and list for lending", async () => {
             const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
             await aconomyFee.setAconomyNFTLendBorrowFee(100);
