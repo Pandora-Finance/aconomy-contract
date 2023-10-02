@@ -68,6 +68,20 @@ describe("Collection Factory", function (){
       await CollectionFactory.unpause();
     });
 
+    it("should not allow non owner to pause piNFTMethods", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).pause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await CollectionFactory.pause();
+
+      await expect(
+        CollectionFactory.connect(royaltyReciever).unpause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await CollectionFactory.unpause();
+    })
+
     it("should check Royality receiver isn't 0 address", async () => {
       await expect(
         CollectionFactory.createCollection("PANDORA", "PAN", "xyz", "xyz", [
@@ -122,6 +136,34 @@ describe("Collection Factory", function (){
       collectionInstance = await CollectionMethods.attach(address);
     });
 
+    it("should not allow royalties to be set by non owner", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).setRoyaltiesForCollection(1, [[royaltyReciever, 500]])
+        ).to.be.revertedWith("Not the owner")
+    })
+
+    it("should not allow royalties to be set when contract is paused", async () => {
+      await CollectionFactory.pause();
+      await expect(
+        CollectionFactory.setRoyaltiesForCollection(1, [[royaltyReciever, 500]]))
+      .to.be.revertedWith("Pausable: paused");
+      await CollectionFactory.unpause();
+    })
+
+    it("should not allow uri to be set by non owner", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).setCollectionURI(1, "XYZ")
+        ).to.be.revertedWith("Not the owner")
+    })
+
+    it("should not allow uri to be set when contract is paused", async () => {
+      await CollectionFactory.pause();
+      await expect(
+        CollectionFactory.setCollectionURI(1, "XYZ"))
+      .to.be.revertedWith("Pausable: paused");
+      await CollectionFactory.unpause();
+    })
+
     it("should change the uri", async () => {
       let meta = await CollectionFactory.collections(1);
       let uri = meta.URI;
@@ -132,6 +174,20 @@ describe("Collection Factory", function (){
       expect(newURI).to.equal("SRS");
     });
 
+    it("should not allow symbol to be set by non owner", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).setCollectionSymbol(1, "XYZ")
+        ).to.be.revertedWith("Not the owner")
+    })
+
+    it("should not allow symbol to be set when contract is paused", async () => {
+      await CollectionFactory.pause();
+      await expect(
+        CollectionFactory.setCollectionSymbol(1, "XYZ"))
+      .to.be.revertedWith("Pausable: paused");
+      await CollectionFactory.unpause();
+    })
+
     it("should change the Collection Symbol", async () => {
       let meta = await CollectionFactory.collections(1);
       let symbol = meta.symbol;
@@ -141,6 +197,20 @@ describe("Collection Factory", function (){
       let newSymbol = newMeta.symbol;
       expect(newSymbol).to.equal("PNDR")
     });
+
+    it("should not allow name to be set by non owner", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).setCollectionName(1, "XYZ")
+        ).to.be.revertedWith("Not the owner")
+    })
+
+    it("should not allow name to be set when contract is paused", async () => {
+      await CollectionFactory.pause();
+      await expect(
+        CollectionFactory.setCollectionName(1, "XYZ"))
+      .to.be.revertedWith("Pausable: paused");
+      await CollectionFactory.unpause();
+    })
   
     it("should change the Collection Name", async () => {
       let meta = await CollectionFactory.collections(1);
@@ -151,6 +221,20 @@ describe("Collection Factory", function (){
       let newName = newMeta.name;
       expect(newName).to.equal("Pan")
     });
+
+    it("should not allow description to be set by non owner", async () => {
+      await expect(
+        CollectionFactory.connect(royaltyReciever).setCollectionDescription(1, "XYZ")
+        ).to.be.revertedWith("Not the owner")
+    })
+
+    it("should not allow description to be set when contract is paused", async () => {
+      await CollectionFactory.pause();
+      await expect(
+        CollectionFactory.setCollectionDescription(1, "XYZ"))
+      .to.be.revertedWith("Pausable: paused");
+      await CollectionFactory.unpause();
+    })
   
     it("should change the Collection Description", async () => {
       let meta = await CollectionFactory.collections(1);
@@ -275,6 +359,64 @@ describe("Collection Factory", function (){
         4901,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
+    })
+
+    it("should not let validator royalties have more than 10 addresses", async () => {
+      await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
+      await expect(piNftMethods.connect(validator).addERC20(
+        await collectionInstance.getAddress(),
+        0,
+        await sampleERC20.getAddress(),
+        500,
+        500,
+        [[validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],
+        [validator, 100],]
+      )).to.be.revertedWithoutReason();
+    })
+
+    it("should not let validator royalties value be 0", async () => {
+      await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
+      await expect(piNftMethods.connect(validator).addERC20(
+        await collectionInstance.getAddress(),
+        0,
+        await sampleERC20.getAddress(),
+        500,
+        500,
+        [[validator, 0]]
+      )).to.be.revertedWith("Royalty 0");
+    })
+
+    it("should not let validator royalties address be 0", async () => {
+      await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
+      await expect(piNftMethods.connect(validator).addERC20(
+        await collectionInstance.getAddress(),
+        0,
+        await sampleERC20.getAddress(),
+        500,
+        500,
+        [["0x0000000000000000000000000000000000000000", 100]]
+      )).to.be.revertedWithoutReason();
+    })
+
+    it("should not let validator royalties be greater than 4901", async () => {
+      await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
+      await expect(piNftMethods.connect(validator).addERC20(
+        await collectionInstance.getAddress(),
+        0,
+        await sampleERC20.getAddress(),
+        500,
+        500,
+        [[validator, 4901]]
+      )).to.be.revertedWith("overflow");
     })
   
     it("should let validator add ERC20 tokens to alice's NFT", async () => {
