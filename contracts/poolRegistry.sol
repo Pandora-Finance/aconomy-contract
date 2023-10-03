@@ -571,6 +571,10 @@ contract poolRegistry is
         return pools[poolId].loanExpirationTime;
     }
 
+    function getPoolUri(uint256 _poolId) public view returns (string memory) {
+        return pools[_poolId].URI;
+    }
+
     function getPoolAddress(uint256 _poolId) public view returns (address) {
         return pools[_poolId].poolAddress;
     }

@@ -92,6 +92,20 @@ const {
             expect(aconomyFeeOwner).to.equal(await account0.getAddress());
             expect(protocolFee).to.equal(200);
           });
+
+          it("should not let non owner to pause and unpause the contract", async () => {
+            await expect(
+              poolRegis.connect(random).pause()
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+      
+            await poolRegis.pause();
+      
+            await expect(
+              poolRegis.connect(random).unpause()
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+      
+            await poolRegis.unpause();
+          })
         
           it("should create attestRegistry, attestationService", async () => {
             expect(
@@ -173,10 +187,22 @@ const {
               res.isVerified_).to.equal(
               true);
           });
+
+          it("should change the URI", async () => {
+            let uri = await poolRegis.getPoolUri(3);
+            expect(uri).to.equal("sk.com");
+            await poolRegis.setPoolURI(3, "sk.com")
+            await expect(poolRegis.connect(random).setPoolURI(3, "sk.com")).to.be.revertedWith("Not the owner")
+            await poolRegis.setPoolURI(3, "XYZ");
+            uri = await poolRegis.getPoolUri(3);
+            expect(uri).to.equal("XYZ");
+          })
         
           it("should change the APR", async () => {
             let apr = await poolRegis.getPoolApr(3);
             expect(apr).to.equal(1000);
+            await poolRegis.setApr(3, 1000)
+            await expect(poolRegis.connect(random).setApr(3, 1000)).to.be.revertedWith("Not the owner")
             await expect(
               poolRegis.setApr(3, 99)).to.be.revertedWith(
               "given apr too low"
@@ -189,6 +215,8 @@ const {
           it("should change the payment default duration", async () => {
             let DefaultDuration = await poolRegis.getPaymentDefaultDuration(3);
             expect(DefaultDuration).to.equal(211111111);
+            await poolRegis.setPaymentDefaultDuration(3, 211111111)
+            await expect(poolRegis.connect(random).setPaymentDefaultDuration(3, 211111111)).to.be.revertedWith("Not the owner")
             await expect(
               poolRegis.setPaymentDefaultDuration(3, 0)).to.be.revertedWith(
               "default duration cannot be 0"
@@ -203,6 +231,8 @@ const {
           it("should change the Pool Fee percent", async () => {
             let PoolFeePercent = await poolRegis.getPoolFeePercent(3);
             expect(PoolFeePercent).to.equal(100);
+            await poolRegis.setPoolFeePercent(3, 100);
+            await expect(poolRegis.connect(random).setPoolFeePercent(3, 100)).to.be.revertedWith("Not the owner")
             await expect(
               poolRegis.setPoolFeePercent(3, 1001)).to.be.revertedWith(
               "cannot exceed 10%"
@@ -219,11 +249,33 @@ const {
             expect(
               loanExpirationTime).to.equal(
               2111111222);
+            await poolRegis.setloanExpirationTime(3, 2111111222);
+            await expect(poolRegis.connect(random).setloanExpirationTime(3, 2111111223)).to.be.revertedWith("Not the owner")
             await poolRegis.setloanExpirationTime(3, 2111111223);
             let newloanExpirationTime = await poolRegis.getloanExpirationTime(3);
             expect(
               newloanExpirationTime).to.equal(
               2111111223);
+          });
+
+          it("should not allow adding lender if contract is paused", async () => {
+            await poolRegis.pause();
+      
+            await expect(
+              poolRegis.addLender(newpoolId, account3)
+            ).to.be.revertedWith("Pausable: paused");
+      
+            await poolRegis.unpause();
+          });
+
+          it("should not allow adding borrower if contract is paused", async () => {
+            await poolRegis.pause();
+      
+            await expect(
+              poolRegis.addBorrower(newpoolId, account1)
+            ).to.be.revertedWith("Pausable: paused");
+      
+            await poolRegis.unpause();
           });
         
           it("should check only owner can add lender and borrower", async () => {
@@ -253,7 +305,17 @@ const {
             expect(
               res.isVerified_).to.equal(
               true);
-        
+                
+            await expect(poolRegis.connect(random).removeLender(newpoolId, account3)).to.be.revertedWith("Not the owner")
+
+            await poolRegis.pause();
+
+            await expect(
+              poolRegis.removeLender(newpoolId, account3)
+            ).to.be.revertedWith("Pausable: paused");
+
+            await poolRegis.unpause();
+
             await poolRegis.removeLender(newpoolId, account3);
             res = await poolRegis.lenderVerification(newpoolId, account3);
             expect(
@@ -265,7 +327,17 @@ const {
             expect(
               res.isVerified_).to.equal(
               true);
-        
+                
+            await expect(poolRegis.connect(random).removeBorrower(newpoolId, account1)).to.be.revertedWith("Not the owner")
+
+            await poolRegis.pause();
+
+            await expect(
+              poolRegis.removeBorrower(newpoolId, account1)
+            ).to.be.revertedWith("Pausable: paused");
+
+            await poolRegis.unpause();
+
             await poolRegis.removeBorrower(newpoolId, account1);
             res = await poolRegis.borrowerVerification(newpoolId, account1);
             expect(
@@ -294,6 +366,15 @@ const {
           });
         
           it("should change the setting of new pool", async () => {
+            await expect(poolRegis.connect(random).changePoolSetting(
+              poolId2,
+              11111111,
+              111111222,
+              200,
+              2000,
+              "srs.com"
+            )).to.be.revertedWith("Not the owner")
+
             res = await poolRegis.changePoolSetting(
               poolId2,
               11111111,
@@ -425,6 +506,23 @@ const {
             await expect(
               poolAddressInstance.repayFullLoan(loanId1, { from: account0 })
             ).to.be.revertedWithoutReason();
+          });
+
+          it("should not allow closing pool if contract is paused", async () => {
+            await poolRegis.pause();
+      
+            await expect(
+              poolRegis.closePool(3)
+            ).to.be.revertedWith("Pausable: paused");
+      
+            await poolRegis.unpause();
+          });
+
+          it("should not allow closing pool if caller is not pool owner", async () => {
+      
+            await expect(
+              poolRegis.connect(random).closePool(3)
+            ).to.be.revertedWith("Not the owner");
           });
       
     })
