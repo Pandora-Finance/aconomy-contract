@@ -139,7 +139,7 @@ describe("piNFT", function () {
             ).to.equal(true)
     })
 
-    it("should let owner add a trusted forwarder", async () => {
+    it("should let owner remove a trusted forwarder", async () => {
         await erc2771Context.removeTrustedForwarder(await bob.getAddress())
         expect(
             await erc2771Context.isTrustedForwarder(await bob.getAddress())
