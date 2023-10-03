@@ -524,6 +524,14 @@ const {
               poolRegis.connect(random).closePool(3)
             ).to.be.revertedWith("Not the owner");
           });
+
+          it("should not let non owner change funding pool implementation", async () => {
+            await expect(poolRegis.connect(random).changeFundingPoolImplementation(
+              "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d")).to.be.revertedWith("Ownable: caller is not the owner")
+      
+              await poolRegis.changeFundingPoolImplementation(
+                "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d")
+          })
       
     })
   })

@@ -693,6 +693,14 @@ describe("Collection Factory", function (){
       await expect(
         collectionInstance.deleteValidatorRoyalties(1)).to.be.revertedWith("methods");
     });
+
+    it("should not let non owner change collection method implementation", async () => {
+      await expect(CollectionFactory.connect(royaltyReciever).changeCollectionMethodImplementation(
+        "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d")).to.be.revertedWith("Ownable: caller is not the owner")
+
+        await CollectionFactory.changeCollectionMethodImplementation(
+          "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d")
+    })
   })
 })
 
