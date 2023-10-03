@@ -306,6 +306,11 @@ const {
               )).to.be.revertedWith("interest percent too low"
             );
           })
+
+          it("should check repayment amount is 0 before acceptance", async () => {
+            let val = await nftLendBorrow.viewRepayAmount(1, 0);
+            expect(val).to.equal(0)
+          })
         
           it("Should Accept Bid", async () => {
             await aconomyFee.transferOwnership(newFeeAddress);
@@ -379,6 +384,11 @@ const {
             let nft = await nftLendBorrow.NFTdetails(1);
             expect(nft[7]).to.equal(false);
           });
+
+          it("should check repayment amount is 0 after repayment", async () => {
+            let val = await nftLendBorrow.viewRepayAmount(1, 0);
+            expect(val).to.equal(0)
+          })
         
           it("Should Withdraw second Bid", async () => {
             const res = await nftLendBorrow.connect(carl).withdraw(1, 1);
