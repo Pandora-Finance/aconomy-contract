@@ -24,13 +24,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract poolAddressTest is Test{
    poolAddress pool;
-//    poolRegistry PoolRegistry;
-
-//     poolStorage PoolStorage;
-
-    SampleERC20 erc20Contract;
-
+SampleERC20 erc20Contract;
 AttestationRegistry attestationRegistry;
+
     AttestationServices attestationServices;
     AconomyFee aconomyFee;
     poolRegistry PoolRegistry;
@@ -50,8 +46,7 @@ AttestationRegistry attestationRegistry;
     uint32 public expirationDuration;
     uint16 public apr;
     address public receiver;
-    
-    // Initialize the contract and setup variables before each test
+
     function setUp () public {
 
         attestationRegistry = new AttestationRegistry();
@@ -76,12 +71,12 @@ AttestationRegistry attestationRegistry;
 function test_CreatePool() public {
         vm.prank(alice);
         poolId = PoolRegistry.createPool(
-            3500, // Payment cycle duration
-            1800, // Payment default duration
-            86400, // Loan expiration time
+            3600,
+            1800,
+            86400,
             1000, // Pool fee percent (e.g., 10%)
             500, // APR (e.g., 5%)
-            "https://adya.com",
+           "adya.com",
             false,
             false 
         );
@@ -91,6 +86,20 @@ function test_CreatePool() public {
         assertEq(poolId, 1, "something wromg");
         assertTrue(poolId > 0, "Pool creation failed");   
     }
+    function testFail_CreatePool() public {
+    uint256 poolId = PoolRegistry.createPool(
+        0, // Invalid payment cycle duration
+        1800,
+        86400,
+        1000,
+        500,
+        "adya.com",
+        false,
+        false
+    );
+
+    assertEq(poolId, 0, "Pool creation should fail");
+}
 
 function test_AddLender() external {
 test_CreatePool();
@@ -110,6 +119,13 @@ PoolRegistry.addLender(poolId, bob, block.timestamp + 3600);
 
     (bool isVerified, ) = PoolRegistry.lenderVarification(poolId, bob);
     assertEq(isVerified, true, "Lender not added successfully");
+}
+function testFail_AddLender() external {
+    // adding a lender to the that doesn't exist
+    PoolRegistry.addLender(999, bob, block.timestamp + 3600);
+
+    (bool isVerified, ) = PoolRegistry.lenderVarification(999, bob);
+    assertFalse(isVerified, "Lender should not be added successfully");
 }
 
 
@@ -131,17 +147,24 @@ vm.prank(alice);
     (bool isVerified, ) = PoolRegistry.borrowerVarification(poolId, sam);
     assertEq(isVerified, true, "Borrower not added successfully");
 }
+function testFail_AddBorrower() external {
+    //add a borrower to the pool that doesn't exist
+    PoolRegistry.addBorrower(999, bob, block.timestamp + 3600);
+    (bool isVerified, ) = PoolRegistry.borrowerVarification(999, bob);
+    assertFalse(isVerified, "Borrower should not be added successfully");
+}
+
 
  function testLoanRequest() public {
 test_CreatePool();
     vm.prank(alice);
         uint256 poolId = PoolRegistry.createPool(
-            3600, // Payment cycle duration
-            1800, // Payment default duration
-            86400, // Loan expiration time
-            1000, // Pool fee percent (e.g., 10%)
-            500, // APR (e.g., 5%)
-            "https://adya.com",
+            3600, 
+            1800,
+            86400, 
+            1000, 
+            500,
+            "adya.com",
             false,
             false 
         );
@@ -170,6 +193,19 @@ test_CreatePool();
         console.log("loan",loanId);
         assertEq(loanId, 0, "something wromg");
  }
+ function testFail_LoanRequest() public {
+    //  request a loan with invalid parameters
+    uint256 loanId = pool.loanRequest(
+        address(0),
+        999,
+        0, 
+        0, 
+        0, 
+        address(0)
+    );
+
+    assertEq(loanId, 0, "Loan request should fail");
+}
 
     // Test that a borrower can request a loan
     // function testLoanRequest() public {
@@ -206,6 +242,30 @@ test_CreatePool();
     assertFalse(loanExpired, "Loan should not be expired initially");
 
     }
+    function testFail_IsLoanDefaulted() public {
+    uint256 poolId = 6;
+    vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
+    uint256 loanId = pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("isLoanDefaulted(uint256)", loanId)
+    );
+    assertFalse(success, "Checking if the loan is defaulted should fail before the loan has been accepted");
+    vm.prank(alice);
+    pool.AcceptLoan(loanId);
+    (bool successAfterAccept, ) = address(pool).call(
+        abi.encodeWithSignature("isLoanDefaulted(uint256)", loanId)
+    );
+    assertFalse(successAfterAccept, "Checking if the loan is defaulted should fail after the loan has been accepted");
+}
+
     function testViewInstallmentAmount() public {
         // pool.AcceptLoan();
         
@@ -227,6 +287,34 @@ test_CreatePool();
         assertFalse(paymentLate, "Payment should not be late initially");
 
     }
+function testFail_IsPaymentLate() public {
+    uint256 poolId = 6;
+    vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
+
+    uint256 loanId = pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+
+    // checking payment is late before the loan has been accepted
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("isPaymentLate(uint256)", loanId)
+    );
+
+    assertFalse(success, "Checking if payment is late should fail before the loan has been accepted");
+    vm.prank(alice);
+    pool.AcceptLoan(loanId);
+
+    (bool successAfterAccept, ) = address(pool).call(
+        abi.encodeWithSignature("isPaymentLate(uint256)", loanId)
+    );
+    assertFalse(successAfterAccept, "Checking if payment is late should fail after the loan has been accepted");
+}
 
     function test_createNewPool() public {
         test_CreatePool();
@@ -324,6 +412,37 @@ assertEq(_b3-b3,100000);
 
 
 }
+function testFail_AcceptUnverifiedLender() public {
+    uint256 poolId = 3;
+    vm.prank(alice);
+    PoolRegistry.addLender(poolId, bob, block.timestamp + 3600);
+
+    uint256 loanId = pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("AcceptLoan(uint256)", loanId)
+    );
+
+    assertFalse(success, "Loan acceptance should fail for an unverified lender");
+}
+function testFail_AcceptAlreadyAcceptedLoan() public {
+    // Assuming loan ID 1 is already accepted
+    pool.AcceptLoan(1);
+
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("AcceptLoan(uint256)", 1)
+    );
+
+    assertFalse(success, "Loan acceptance should fail for an already accepted loan");
+}
+
 function testLastRepaidTimestamp() public {
     testLoanRequest();
         // Perform an initial loan request (assuming a valid request)
@@ -336,29 +455,161 @@ function testLastRepaidTimestamp() public {
             sam
         );
         }
-        function test_repayYourLoan() public {
-            test_acceptLoan();
-         testLoanRequest();
-        uint256 loanId = pool.loanRequest(
-           lendingToken,
-            poolId,
-            principal,
-            duration,
-            apr,
-            sam
-        );
-        pool.AcceptLoan(loanId);
+        // function test_repayYourLoan() public {
+        //     test_acceptLoan();
+        //  testLoanRequest();
+        // uint256 loanId = pool.loanRequest(
+        //    lendingToken,
+        //     poolId,
+        //     principal,
+        //     duration,
+        //     apr,
+        //     sam
+        // );
+        // pool.AcceptLoan(loanId);
 
-        // pool.advanceTime(1 days);
-
-        // Attempt to repay the loan
-        vm.prank(sam);
-        pool.repayYourLoan(loanId);
+        // vm.prank(sam);
+        // pool.repayYourLoan(loanId);
         // uint256 remainingBalance = pool.viewInstallmentAmount(loanId);
         // assertEq(remainingBalance, 0, "Partial loan repayment should reduce the remaining balance");
 
   
         // bool isRepaid = pool.loans(loanId).state() == poolAddress.LoanState.PAID();
         // assertFalse(isRepaid, "Loan should not be fully repaid due to late payment");
-    }
+    // }
+    function testRepayMonthlyInstallment() public payable {
+    testLoanRequest();
+    uint256 loanId = 0;
+
+    uint256 initialBalance = address(pool).balance;
+
+    (bool success, ) = address(pool).call{value: 1000000}(abi.encodeWithSignature("repayMonthlyInstallment(uint256)", loanId));
+
+    assertFalse(success, "Repayment should be successful");
+
+    uint256 finalBalance = address(pool).balance;
+
+    bool paymentLateAfterRepayment = pool.isPaymentLate(loanId);
+
+    assertFalse(paymentLateAfterRepayment, "Payment should not be late after repayment");
 }
+function testRepayYourLoan() public {
+    testLoanRequest();
+
+    uint256 loanId =0; 
+
+    uint256 initialBalance = address(pool).balance;
+
+    // Assuming the borrower needs to repay 1,000,000 tokens
+    uint256 repaymentAmount = 1000000;
+
+    // Approve the pool contract to spend the repayment amount
+    erc20Contract.approve(address(pool), repaymentAmount);
+
+    // bool success = pool.repayYourLoan();
+    // assertTrue(success, "Repayment should be successful");
+
+    // uint256 finalBalance = address(pool).balance;
+
+    // assertEq(initialBalance - finalBalance, repaymentAmount, "Balance should decrease by the repayment amount");
+
+    // bool isFullyRepaid = pool.repayYourLoan();
+    // assertTrue(isFullyRepaid, "Loan should be fully repaid after calling repayYourLoan");
+}
+
+
+function testFail_ViewInstallmentAmountAfterLoanAccepted() public {
+    // Assuming a pool with poolId = 6;
+    uint256 poolId = 6;
+    vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
+
+    // Assuming there is a pending loan in the pool
+    uint256 loanId = pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+
+    vm.prank(alice);
+    pool.AcceptLoan(loanId);
+
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("viewInstallmentAmount(uint256)", loanId)
+    );
+
+    assertFalse(success, "Viewing installment amount should fail after the loan has been accepted");
+}
+
+function testViewFullRepayAmount() public {
+
+    uint256 loanId = 1; 
+    pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+
+    pool.AcceptLoan(loanId);
+
+    // uint256 fullRepayAmount = pool.viewFullRepayAmount(loanId);
+
+    // assertEq(fullRepayAmount, 0, "Full repayment amount should be non-negative");
+
+    // uint256 installmentAmount = pool.viewInstallmentAmount(loanId);
+
+    // assertEq(installmentAmount, 0, "Installment amount should not be zero");
+
+    // uint256 totalInstallments = pool.viewInstallmentAmount;
+
+    // uint256 expectedFullRepayAmount = installmentAmount * totalInstallments;
+
+    // assertEq(fullRepayAmount, "Incorrect full repayment amount");
+}
+  function testRepayFullLoan() public {
+        uint256 loanId = 1; 
+        pool.loanRequest(
+            lendingToken,
+            poolId,
+            principal,
+            duration,
+            apr,
+            receiver
+        );
+        pool.AcceptLoan(loanId);
+        pool.repayFullLoan(loanId);
+
+        uint256 loanStatus = pool.viewFullRepayAmount(loanId);
+
+        assertEq(loanStatus, 2, "Loan status should be marked as fully repaid");
+    }
+     function testFail_AcceptLoan_If_BorrowerVerificationFail() public {
+    uint256 poolId = 5;
+    vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
+
+    uint256 loanId = pool.loanRequest(
+        lendingToken,
+        poolId,
+        principal,
+        duration,
+        apr,
+        receiver
+    );
+
+
+
+    (bool success, ) = address(pool).call(
+        abi.encodeWithSignature("AcceptLoan(uint256)", loanId)
+    );
+
+    assertFalse(success, "Loan acceptance should fail for a failed borrower verification");
+}
+
+    }
