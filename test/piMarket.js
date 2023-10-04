@@ -172,6 +172,20 @@ describe("piMarket", function () {
       } = await deploypiMarket();
     });
 
+    it("should not allow non owner to pause piMarket", async () => {
+      await expect(
+        piMarket.connect(royaltyReceiver).pause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(royaltyReceiver).unpause()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await piMarket.unpause();
+    })
+
     it("should create a piNFT with 500 erc20 tokens to carl", async () => {
       await aconomyFee.setAconomyPiMarketFee(100);
       await aconomyFee.transferOwnership(feeReceiver.getAddress());
@@ -272,6 +286,16 @@ describe("piMarket", function () {
       expect(await piNFT.ownerOf(0)).to.equal(await piMarket.getAddress());
     });
 
+    it("should not allow sale price edit if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(alice).editSalePrice(1, 60000)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
     it("should edit the price after listing on sale", async () => {
       await piMarket.connect(alice).editSalePrice(1, 60000);
       await expect(
@@ -284,6 +308,7 @@ describe("piMarket", function () {
       let meta = await piMarket._tokenMeta(1);
       let price = meta.price;
       expect(price).to.equal(60000);
+      await piMarket.connect(alice).editSalePrice(1, 60000);
       await piMarket.connect(alice).editSalePrice(1, 50000);
       let newmeta = await piMarket._tokenMeta(1);
       expect(newmeta.price).to.equal(50000);
@@ -293,6 +318,16 @@ describe("piMarket", function () {
       await expect(
         piMarket.connect(alice).BuyNFT(1, false, { value: 50000 })
       ).to.be.revertedWithoutReason();
+    });
+
+    it("should not let bob buy nft if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(bob).BuyNFT(1, false, { value: 50000 })
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
     });
 
     it("should let bob buy piNFT", async () => {
@@ -355,6 +390,18 @@ describe("piMarket", function () {
         await validator.getAddress()
       );
       expect(commission.commission.value).to.equal(1000);
+    });
+
+    it("should not let owner cancel sale if sale status is false", async () => {
+      await expect(
+        piMarket.connect(alice).cancelSale(1)
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should not allow sale price edit if sale status is false", async () => {
+      await expect(
+        piMarket.connect(alice).editSalePrice(1, 60000)
+      ).to.be.revertedWithoutReason();
     });
 
     it("should let bob withdraw funds from the NFT", async () => {
@@ -495,6 +542,16 @@ describe("piMarket", function () {
         );
       expect(await piNFT.ownerOf(0)).to.equal(await piMarket.getAddress());
     });
+    
+    it("should not allow cancelling sale if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(alice).cancelSale(3)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
 
     it("should not let non owner cancel sale", async () => {
       await expect(
@@ -589,6 +646,24 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(900);
     });
 
+    it("should not place nft on auction if contract is paused", async () => {
+      await piMarket.pause();
+
+      await piNFT.approve(piMarket.getAddress(), 1);
+
+      await expect(
+        piMarket.SellNFT_byBid(
+          piNFT.getAddress(),
+          1,
+          100,
+          300,
+          "0x0000000000000000000000000000000000000000"
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
     it("should not place nft on auction if price < 10000", async () => {
       await piNFT.approve(piMarket.getAddress(), 1);
       await expect(
@@ -672,6 +747,22 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(1000);
     });
 
+    it("should not place bids if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(bidder1).Bid(4, 60000, { value: 60000 })
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
+    it("should not place bids bid price is not equal to msg.value", async () => {
+      await expect(
+        piMarket.connect(bidder1).Bid(4, 50000, { value: 60000 })
+      ).to.be.revertedWithoutReason();
+    });
+
     it("should let bidders place bid on piNFT", async () => {
       await expect(
         piMarket.connect(alice).Bid(4, 60000, { value: 60000 })
@@ -685,6 +776,10 @@ describe("piMarket", function () {
       await piMarket.connect(bidder2).Bid(4, 65000, { value: 65000 });
       await piMarket.connect(bidder1).Bid(4, 70000, { value: 70000 });
 
+      await time.increase(300);
+      await expect(piMarket.connect(bidder2).Bid(4, 75000, { value: 75000 })
+      ).to.be.revertedWithoutReason()
+
       result = await piMarket.Bids(4, 2);
       expect(result.buyerAddress).to.equal(await bidder1.getAddress());
     });
@@ -693,6 +788,16 @@ describe("piMarket", function () {
       await expect(piMarket.editSalePrice(4, 10000)).to.be.revertedWith(
         "Bid has started"
       );
+    });
+
+    it("should not execute bid if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(alice).executeBidOrder(4, 2, false)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
     });
 
     it("should let alice execute highest bid", async () => {
@@ -757,6 +862,16 @@ describe("piMarket", function () {
       await expect(
         piMarket.connect(bidder2).withdrawBidMoney(4, 0)
       ).to.be.revertedWithoutReason();
+    });
+
+    it("should not allow bids to be withdrawn if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(bidder1).withdrawBidMoney(4, 0)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
     });
 
     it("should let other bidders withdraw their bids", async () => {
@@ -1106,6 +1221,63 @@ describe("piMarket", function () {
       expect(commission.commission.value).to.equal(900);
     });
 
+    it("should not allow initiating a swap if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.makeSwapRequest(
+          piNFT.getAddress(),
+          piNFT.getAddress(),
+          3,
+          4
+        )
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
+    it("should not allow initiating a swap if caller is not token owner", async () => {
+      await expect(
+        piMarket.connect(bob).makeSwapRequest(
+          piNFT.getAddress(),
+          piNFT.getAddress(),
+          3,
+          4
+        )
+      ).to.be.revertedWith("Only token owner can execute");
+    });
+
+    it("should not allow initiating a swap if either contract address is 0", async () => {
+      await expect(
+        piMarket.connect(bob).makeSwapRequest(
+          "0x0000000000000000000000000000000000000000",
+          piNFT.getAddress(),
+          3,
+          4
+        )
+      ).to.be.revertedWithoutReason();
+
+      await expect(
+        piMarket.connect(bob).makeSwapRequest(
+          piNFT.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          3,
+          4
+        )
+      ).to.be.revertedWith("Only token owner can execute");
+    });
+
+    it("should not allow initiating a swap if caller is token2 owner", async () => {
+      await expect(
+        piMarket.makeSwapRequest(
+          piNFT.getAddress(),
+          piNFT.getAddress(),
+          3,
+          5
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
     it("should let alice initiate swap request", async () => {
       await piNFT.approve(piMarket.getAddress(), 3);
       await piMarket.makeSwapRequest(
@@ -1158,6 +1330,17 @@ describe("piMarket", function () {
       ).to.be.revertedWith("Only requested owner can accept swap");
     });
 
+    it("should not allow accepting a swap if contract is paused", async () => {
+      await piMarket.pause();
+      await piNFT.connect(bob).approve(piMarket.getAddress(), 4);
+
+      await expect(
+        piMarket.connect(bob).acceptSwapRequest(0)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
     it("should let bob accept the swap request", async () => {
       await piNFT.connect(bob).approve(piMarket.getAddress(), 4);
       let res = await piMarket._swaps(0);
@@ -1169,6 +1352,22 @@ describe("piMarket", function () {
       expect(await res.status).to.equal(false);
     });
 
+    it("should not allow cancelling a swap if contract is paused", async () => {
+      await piMarket.pause();
+
+      await expect(
+        piMarket.connect(alice).cancelSwap(1)
+      ).to.be.revertedWith("Pausable: paused");
+
+      await piMarket.unpause();
+    });
+
+    it("should not allow non initiator cancelling a swap", async () => {
+      await expect(
+        piMarket.connect(bob).cancelSwap(1)
+      ).to.be.revertedWithoutReason();
+    });
+
     it("should let alice cancle the swap request", async () => {
       let res = await piMarket._swaps(1);
       expect(await res.status).to.equal(true);
@@ -1176,6 +1375,45 @@ describe("piMarket", function () {
       expect(await piNFT.ownerOf(5)).to.equal(await alice.getAddress());
       res = await piMarket._swaps(1);
       expect(await res.status).to.equal(false);
+    });
+
+    it("should not allow cancelling an already cancelled swap", async () => {
+      await expect(
+        piMarket.cancelSwap(1)
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should let alice initiate swap request", async () => {
+      await piNFT.approve(piMarket.getAddress(), 5);
+      await piMarket.makeSwapRequest(
+        piNFT.getAddress(),
+        piNFT.getAddress(),
+        5,
+        3
+      );
+
+      let data = await piMarket._swaps(2);
+
+      expect(await data.initiator).to.equal(await alice.getAddress());
+
+      expect(await piNFT.ownerOf(5)).to.equal(await piMarket.getAddress());
+    });
+
+    it("should let alice cancle the swap request", async () => {
+      let res = await piMarket._swaps(2);
+      expect(await res.status).to.equal(true);
+      await piMarket.connect(alice).cancelSwap(2);
+      expect(await piNFT.ownerOf(5)).to.equal(await alice.getAddress());
+      res = await piMarket._swaps(2);
+      expect(await res.status).to.equal(false);
+    });
+
+    it("should not allow accepting a swap with a false status", async () => {
+      await piNFT.connect(bob).approve(piMarket.getAddress(), 3);
+
+      await expect(
+        piMarket.connect(bob).acceptSwapRequest(2)
+      ).to.be.revertedWithoutReason();
     });
   });
 });
