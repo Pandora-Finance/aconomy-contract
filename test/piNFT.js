@@ -166,10 +166,60 @@ describe("piNFT", function () {
       ).to.be.revertedWith("overflow");
 
       const owner = await piNFT.ownerOf(0);
-      // console.log("dhvdh",alice.getAddress())
       const bal = await piNFT.balanceOf(alice);
       expect(owner).to.equal(await alice.getAddress());
       expect(bal).to.equal(1);
+    });
+
+    it("should not allow redeem if It's not funded", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          false
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should not allow Burn if It's not funded", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          alice.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          true
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should not let owner withdraw validator funds before adding funds", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+      await expect(
+        piNftMethods.withdraw(
+          await piNFT.getAddress(),
+          0,
+          await sampleERC20.getAddress(),
+          300
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+
+    it("should not let non owner setPiMarket Address", async () => {
+      await expect(
+        piNftMethods.connect(bob).setPiMarket(
+          await piNFT.getAddress()
+        )
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("should check that Royality must be less 4900", async () => {
@@ -346,11 +396,11 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
-    it("should not let non validator add funds with 0 royalty address ", async () => {
+    it("should not let validator add funds with 0 royalty address ", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
       await expect(
         piNftMethods
-          .connect(alice)
+          .connect(validator)
           .addERC20(
             await piNFT.getAddress(),
             0,
@@ -368,7 +418,6 @@ describe("piNFT", function () {
               [alice, 100],
               [alice, 100],
               [alice, 100],
-              [alice, 100],
             ]
           )
       ).to.be.revertedWithoutReason();
@@ -376,11 +425,11 @@ describe("piNFT", function () {
 
     
 
-    it("should not let non validator add funds with more than 10 royalty", async () => {
+    it("should not let validator add funds with more than 10 royalty", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
       await expect(
         piNftMethods
-          .connect(alice)
+          .connect(validator)
           .addERC20(
             await piNFT.getAddress(),
             0,
@@ -404,11 +453,11 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
-    it("should not let non validator add funds with 0 royalty value", async () => {
+    it("should not let validator add funds with 0 royalty value", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
       await expect(
         piNftMethods
-          .connect(alice)
+          .connect(validator)
           .addERC20(
             await piNFT.getAddress(),
             0,
@@ -426,8 +475,18 @@ describe("piNFT", function () {
               [alice, 100],
               [alice, 100],
               [alice, 100],
-              [alice, 100],
             ]
+          )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should fail if paidcommition is calling by Non piMarketAddress ", async () => {
+      await expect(
+        piNftMethods
+          .connect(validator)
+          .paidCommission(
+            await piNFT.getAddress(),
+            1
           )
       ).to.be.revertedWithoutReason();
     });
@@ -763,6 +822,18 @@ describe("piNFT", function () {
       expect(_bal - bal).to.equal(500);
     });
 
+    it("should not let alice repay again", async () => {
+      await sampleERC20.approve(piNftMethods.getAddress(), 800);
+      await expect(
+        piNftMethods.Repay(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          200
+        )
+      ).to.be.revertedWith("Invalid repayment amount");
+    });
+
     it("should not allow redeem if contract is paused", async () => {
       await piNFT.approve(piNftMethods.getAddress(), 0);
       await piNftMethods.pause();
@@ -948,6 +1019,38 @@ describe("piNFT", function () {
         )
       ).to.be.revertedWithoutReason("");
     });
+
+    it("should not allow burn if NFT receiver is 0 address", async () => {
+      await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.connect(bob).redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          bob.getAddress(),
+          bob.getAddress(),
+          sampleERC20.getAddress(),
+          true
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should not allow burn if ERC20 is 0 address", async () => {
+      await piNFT.connect(bob).approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.connect(bob).redeemOrBurnPiNFT(
+          piNFT.getAddress(),
+          0,
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          sampleERC20.getAddress(),
+          true
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+
     
 
     it("should let bob burn piNFT", async () => {
