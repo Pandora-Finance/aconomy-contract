@@ -162,6 +162,20 @@ const {
         expect(
           res.isVerified_).to.equal(true);
       });
+
+      it("should not allow non owner to pause poolAddress", async () => {
+        await expect(
+          poolAddressInstance.connect(random).pause()
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+  
+        await poolAddressInstance.pause();
+  
+        await expect(
+          poolAddressInstance.connect(random).unpause()
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+  
+        await poolAddressInstance.unpause();
+      })
     
       it("testing loan request function", async () => {
         await aconomyFee.setAconomyPoolFee(100);
@@ -287,6 +301,18 @@ const {
         await erc20.connect(account2).approve(await poolAddressInstance.getAddress(), 10000000000);
         await expect(poolAddressInstance.connect(account2).AcceptLoan(loanId1)).to.be.revertedWith("Not verified lender")
       })
+
+      it("should not accept loan if contract is paused", async () => {
+        await poolAddressInstance.pause();
+
+        await erc20.approve(await poolAddressInstance.getAddress(), 10000000000);
+  
+        await expect(
+          poolAddressInstance.AcceptLoan(loanId1)
+        ).to.be.revertedWith("Pausable: paused");
+  
+        await poolAddressInstance.unpause();
+      });
     
       it("should Accept loan ", async () => {
         await aconomyFee.transferOwnership(random);
@@ -402,6 +428,15 @@ const {
     
         r = await poolAddressInstance.viewInstallmentAmount(loanId1);
         await erc20.connect(borrower).approve(await poolAddressInstance.getAddress(), r);
+
+        await poolAddressInstance.pause();
+  
+        await expect(
+          poolAddressInstance.connect(borrower).repayMonthlyInstallment(loanId1)
+        ).to.be.revertedWith("Pausable: paused");
+  
+        await poolAddressInstance.unpause();
+
         await poolAddressInstance.connect(borrower).repayMonthlyInstallment(loanId1);
     
         loan = await poolAddressInstance.loans(loanId1);
@@ -470,6 +505,21 @@ const {
         expect(loan.terms.installmentsPaid).to.equal(5);
         expect(loan.state).to.equal(3);
       });
+
+      it("should show loan is not defaulted if state is not accepted", async () => {
+        let r = await poolAddressInstance.isLoanDefaulted(loanId1)
+        expect(r).to.equal(false)
+      })
+
+      it("should show payment is not late if state is not accepted", async () => {
+        let r = await poolAddressInstance.isPaymentLate(loanId1)
+        expect(r).to.equal(false)
+      })
+
+      it("should return due date of 0 if state is not accepted", async () => {
+        let r = await poolAddressInstance.calculateNextDueDate(loanId1)
+        expect(r).to.equal(0)
+      })
     
       it("should not allow further payment after the loan has been repaid", async () => {
         await expect(poolAddressInstance.connect(borrower).repayMonthlyInstallment(loanId1)).to.be.revertedWithoutReason()
@@ -518,6 +568,13 @@ const {
         let b = await erc20.balanceOf(borrower);
         //await erc20.transfer(borrower, bal - b + 10, { from: poolOwner })
         await erc20.connect(borrower).approve(await poolAddressInstance.getAddress(), bal);
+        await poolAddressInstance.pause();
+  
+        await expect(
+          poolAddressInstance.connect(borrower).repayFullLoan(loanId1)
+        ).to.be.revertedWith("Pausable: paused");
+  
+        await poolAddressInstance.unpause();
         let r = await poolAddressInstance.connect(borrower).repayFullLoan(loanId1);
         // console.log(res)
       });
