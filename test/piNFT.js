@@ -1005,6 +1005,20 @@ describe("piNFT", function () {
             [bob.getAddress(), 2001],
           ])
       ).to.be.revertedWith("overflow");
+      
+        // await piNFT.approve(piNftMethods.getAddress(), 0);
+  
+        await expect(
+          piNftMethods.connect(bob).redeemOrBurnPiNFT(
+            piNFT.getAddress(),
+            0,
+            "0x0000000000000000000000000000000000000000",
+            bob,
+            sampleERC20.getAddress(),
+            true
+          )
+        ).to.be.revertedWithoutReason();
+
       await piNftMethods
         .connect(validator)
         .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, [

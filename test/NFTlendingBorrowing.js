@@ -544,6 +544,12 @@ const {
 
 
             const tx2 = await nftLendBorrow.removeNFTfromList(2);
+
+            await expect(
+              nftLendBorrow.removeNFTfromList(2)
+              ).to.be.revertedWith("It's already removed"
+            );
+
             let t = await nftLendBorrow.NFTdetails(2);
             expect(t[7]).to.equal(false);
           });
