@@ -710,6 +710,30 @@ const {
     
         let r = await poolAddressInstance.repayFullLoan(loanId1);
       })
+
+      it("should request another loan", async () => {
+        await aconomyFee.connect(random).setAconomyPoolFee(0);
+        res = await poolAddressInstance.connect(borrower).loanRequest(
+          await erc20.getAddress(),
+          poolId1,
+          10000000000,
+          loanDefaultDuration,
+          loanExpirationDuration,
+          100,
+          borrower
+        );
+        loanId1 = 5
+        
+        expect(loanId1).to.equal(5);
+      })
+
+      it("should accept loan with aconomy fee of 0", async () => {
+        await erc20.approve(await poolAddressInstance.getAddress(), 10000000000);
+        let b1 = await erc20.balanceOf(borrower.getAddress())
+        res = await poolAddressInstance.AcceptLoan(loanId1);
+        let b2 = await erc20.balanceOf(borrower.getAddress())
+        expect(b2 - b1).to.equal(9900000000)
+      })
     
       it("should request another loan", async () => {
         res = await poolAddressInstance.connect(borrower).loanRequest(
@@ -721,9 +745,9 @@ const {
           100,
           borrower
         );
-        loanId1 = 5
+        loanId1 = 6
         
-        expect(loanId1).to.equal(5);
+        expect(loanId1).to.equal(6);
       })
     
       it("should close the pool", async () => {

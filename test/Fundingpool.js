@@ -1112,6 +1112,39 @@ const {
           lender
         );
       })
+
+      it("should supply funds to pool again", async () => {
+        const provider = ethers.provider;
+        const currentBlock = await provider.getBlockNumber();
+        const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+        expiration = blockTimestamp + 3600;
+        await aconomyFee.connect(newFeeOwner).setAconomyPoolFee(0);
+        await erc20.connect(lender).approve(await fundingpoolInstance.getAddress(), erc20Amount);
+        const tx = await fundingpoolInstance.connect(lender).supplyToPool(
+          poolId,
+          await erc20.getAddress(),
+          erc20Amount,
+          loanDefaultDuration,
+          expiration,
+          1000
+        );
+        bidId = 6;
+        expect(bidId).to.equal(6);
+      });
+  
+      it("should accept the bid with aconomy fee of 0", async () => {
+        await aconomyFee.connect(newFeeOwner).setAconomyPoolFee(0);
+        let b1 = await erc20.balanceOf(receiver.address);
+        const tx = await fundingpoolInstance.AcceptBid(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender,
+          receiver
+        );
+        let b2 = await erc20.balanceOf(receiver.address);
+        expect(b2 - b1).to.equal(10000000000)
+      });
   
       it("should close the pool", async () => {
         await poolRegis.closePool(poolId1)
