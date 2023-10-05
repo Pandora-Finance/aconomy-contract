@@ -469,7 +469,7 @@ contract NFTlendingBorrowing is
             "bid has been accepted"
         );
         if (!NFTdetails[_NFTid].listed) {
-            revert("It's aiready removed");
+            revert("It's already removed");
         }
 
         NFTdetails[_NFTid].listed = false;
