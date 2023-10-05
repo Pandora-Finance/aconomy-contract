@@ -1280,6 +1280,25 @@ describe("piMarket", function () {
 
     it("should let alice initiate swap request", async () => {
       await piNFT.approve(piMarket.getAddress(), 3);
+
+      await expect(
+        piMarket.makeSwapRequest(
+          piNFT.getAddress(),
+          "0x0000000000000000000000000000000000000000",
+          5,
+          4
+        )
+      ).to.be.revertedWithoutReason();
+
+      await expect(
+        piMarket.makeSwapRequest(
+          "0x0000000000000000000000000000000000000000",
+          piNFT.getAddress(),
+          5,
+          4
+        )
+      ).to.be.revertedWithoutReason();
+
       await piMarket.makeSwapRequest(
         piNFT.getAddress(),
         piNFT.getAddress(),
