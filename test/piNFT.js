@@ -726,6 +726,33 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
     
+    it("let alice setPercent while it's paused", async () => {
+      await piNftMethods.pause();
+      await expect(
+        piNftMethods.withdraw(
+          await piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          300
+        )
+        ).to.be.revertedWith("Pausable: paused"
+      );
+      await piNftMethods.unpause();
+    });
+
+    it("should not let owner withdraw validator funds more than added fund", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 0);
+      await expect(
+        piNftMethods.withdraw(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          100000
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    
 
     it("should let alice withdraw erc20", async () => {
       let _bal = await sampleERC20.balanceOf(alice.getAddress());
@@ -737,18 +764,16 @@ describe("piNFT", function () {
         300
       );
 
-      it("should not let owner withdraw validator funds more than added fund", async () => {
-        await piNFT.approve(piNftMethods.getAddress(), 0);
-        await expect(
-          piNftMethods.withdraw(
-            piNFT.getAddress(),
-            0,
-            sampleERC20.getAddress(),
-            100000
-          )
-        ).to.be.revertedWithoutReason();
-      });
+      await expect(
+        piNftMethods.connect(bob).withdraw(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          100000
+        )
+      ).to.be.revertedWithoutReason();
 
+      
       let withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 0);
       expect(withdrawn).to.equal(300)
 
@@ -796,6 +821,20 @@ describe("piNFT", function () {
       await expect(
         piNftMethods.Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 800)
       ).to.be.revertedWith("Invalid repayment amount");
+    });
+
+    it("let alice setPercent while it's paused", async () => {
+      await piNftMethods.pause();
+      await expect(
+        piNftMethods.Repay(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          300
+        )
+        ).to.be.revertedWith("Pausable: paused"
+      );
+      await piNftMethods.unpause();
     });
 
     it("should let alice repay erc20", async () => {
