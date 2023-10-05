@@ -157,6 +157,19 @@ const {
                 100000
               )).to.be.revertedWithoutReason();
           })
+
+          it("should not let non owner pause this contract", async () => {
+            await expect(
+              nftLendBorrow.connect(bob).pause()).to.be.revertedWith("Ownable: caller is not the owner");
+          });
+
+          it("should not let non owner pause this contract", async () => {
+            await nftLendBorrow.pause();
+            await expect(
+              nftLendBorrow.connect(bob).unpause()
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+            await nftLendBorrow.unpause();
+          });
         
           it("should not put on borrow if the contract is paused", async () => {
             const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
@@ -174,6 +187,12 @@ const {
               )).to.be.revertedWith('Pausable: paused'
             );
             await nftLendBorrow.unpause();
+          });
+
+          it("let alice Set new percent fee less than 0.1%", async () => {
+            await expect(
+              nftLendBorrow.setPercent(1, 9)).to.be.revertedWith("interest percent should be greater than 0.1%"
+            );
           });
         
           it("let alice Set new percent fee", async () => {
@@ -522,6 +541,18 @@ const {
             );
         
           });
+
+          it("Should not let Repay Bid if It's not accepted", async () => {
+            let val = await nftLendBorrow.viewRepayAmount(4, 0);
+            await sampleERC20.approve(await nftLendBorrow.getAddress(), val);
+
+            await expect(
+              nftLendBorrow.Repay(4, 0)
+              ).to.be.revertedWith(
+              "Bid Not Accepted yet"
+            );
+          });
+
         
         
           it("Should check owner can't accept the bid if it's already accepted and can't remove NFT after accepting Bid ", async () => {
