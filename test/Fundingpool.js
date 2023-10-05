@@ -273,6 +273,23 @@ const {
             1000
           )).to.be.revertedWith("amount too low")
       });
+
+      it("should not allow lender to set a duration not divisible by 30", async () => {
+        const provider = ethers.provider;
+        const currentBlock = await provider.getBlockNumber();
+        const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+        expiration = blockTimestamp + 3600;
+        await erc20.connect(lender).approve(await fundingpoolInstance.getAddress(), erc20Amount);
+        await expect(
+          fundingpoolInstance.connect(lender).supplyToPool(
+            poolId,
+            await erc20.getAddress(),
+            10000000000,
+            31,
+            expiration,
+            1000
+          )).to.be.revertedWithoutReason()
+      });
   
       it("should not allow lender to supply a faulty expiration", async () => {
         const provider = ethers.provider;
@@ -609,6 +626,13 @@ const {
           bidId,
           lender
         );
+
+        await expect(fundingpoolInstance.repayMonthlyInstallment(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )).to.be.revertedWithoutReason()
   
         loan = await fundingpoolInstance.lenderPoolFundDetails(
           lender,
@@ -723,6 +747,56 @@ const {
         // console.log(bal.toNumber());
         expect(bal).to.equal(0);
       });
+
+      it("should check that bid expiry is false if state is not accepted", async () => {
+        let r = await fundingpoolInstance.isBidExpired(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )
+        expect(r).to.equal(false)
+      })
+
+      it("should check that bid expiry is false if loan is non existant and expiry is 0", async () => {
+        let r = await fundingpoolInstance.isBidExpired(
+          poolId,
+          await erc20.getAddress(),
+          5,
+          lender
+        )
+        expect(r).to.equal(false)
+      })
+
+      it("should check that loan defaulted is false if state is not accepted", async () => {
+        let r = await fundingpoolInstance.isLoanDefaulted(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )
+        expect(r).to.equal(false)
+      })
+
+      it("should show that late payment is false if state is not accepted", async () => {
+        let r = await fundingpoolInstance.isPaymentLate(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )
+        expect(r).to.equal(false)
+      })
+
+      it("should show that due date is 0 if state is not accepted", async () => {
+        let r = await fundingpoolInstance.calculateNextDueDate(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender
+        )
+        expect(r).to.equal(0)
+      })
   
       it("should supply funds to pool again", async () => {
         const provider = ethers.provider;
@@ -1038,6 +1112,39 @@ const {
           lender
         );
       })
+
+      it("should supply funds to pool again", async () => {
+        const provider = ethers.provider;
+        const currentBlock = await provider.getBlockNumber();
+        const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
+        expiration = blockTimestamp + 3600;
+        await aconomyFee.connect(newFeeOwner).setAconomyPoolFee(0);
+        await erc20.connect(lender).approve(await fundingpoolInstance.getAddress(), erc20Amount);
+        const tx = await fundingpoolInstance.connect(lender).supplyToPool(
+          poolId,
+          await erc20.getAddress(),
+          erc20Amount,
+          loanDefaultDuration,
+          expiration,
+          1000
+        );
+        bidId = 6;
+        expect(bidId).to.equal(6);
+      });
+  
+      it("should accept the bid with aconomy fee of 0", async () => {
+        await aconomyFee.connect(newFeeOwner).setAconomyPoolFee(0);
+        let b1 = await erc20.balanceOf(receiver.address);
+        const tx = await fundingpoolInstance.AcceptBid(
+          poolId,
+          await erc20.getAddress(),
+          bidId,
+          lender,
+          receiver
+        );
+        let b2 = await erc20.balanceOf(receiver.address);
+        expect(b2 - b1).to.equal(10000000000)
+      });
   
       it("should close the pool", async () => {
         await poolRegis.closePool(poolId1)
