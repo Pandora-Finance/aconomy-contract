@@ -997,7 +997,7 @@ const {
           })
     })
 
-    describe("Deployment", function () {
+    describe("zero AconomyFee test", function () {
       it("should not let non owner set aconomy fees", async () => {
         await expect(aconomyFee.connect(royaltyReceiver).setAconomyNFTLendBorrowFee(100)
         ).to.be.revertedWith("Ownable: caller is not the owner")
@@ -1083,28 +1083,12 @@ const {
       
           const BidId3 = 2;
           expect(BidId3).to.equal(2)
-
-          // let t = await nftLendBorrow.NFTdetails(2);
-          //   expect(t[7]).to.equal(false);
         });
 
         it("Should Accept Bid", async () => {
-          // await aconomyFee.transferOwnership(newFeeAddress);
-          // let feeAddress = await aconomyFee.getAconomyOwnerAddress();
-          // await aconomyFee.connect(newFeeAddress).setAconomyNFTLendBorrowFee(200);
-          // expect(feeAddress).to.equal(await newFeeAddress.getAddress());
-          // const feee = await aconomyFee.AconomyNFTLendBorrowFee();
-          // console.log("protocolFee", feee.toString());
-      
-          // let b1 = await sampleERC20.balanceOf(feeAddress);
-          // console.log("fee 1", b1.toNumber());
-      
           await piNFT.approve(await nftLendBorrow.getAddress(), 9);
       
           const tx = await nftLendBorrow.AcceptBid(9, 0);
-          // let b2 = await sampleERC20.balanceOf(feeAddress);
-          // console.log("fee 2", b2.toNumber());
-          // expect(b2 - b1).to.equal(1000000000);
           let nft = await nftLendBorrow.NFTdetails(9);
           let bid = await nftLendBorrow.Bids(9, 0);
           expect(nft.bidAccepted).to.equal(true);
