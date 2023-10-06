@@ -435,7 +435,7 @@ contract NFTlendingBorrowing is
         );
         if(!NFTdetails[_NFTid].bidAccepted) {
             require(
-                block.timestamp > Bids[_NFTid][_bidId].expiration,
+                block.timestamp > Bids[_NFTid][_bidId].expiration || !NFTdetails[_NFTid].listed,
                 "Can't withdraw Bid before expiration"
             );
         }

@@ -875,7 +875,7 @@ describe("NFT Lending and Borrowing", function (){
           );
         })
       
-        it("should check only Token owner can remove from borrowing ", async() => {
+        it("should check only Token owner can remove from borrowing and bid cannot be executed after removal", async() => {
       
           const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
           const tokenId = 7;
@@ -899,6 +899,25 @@ describe("NFT Lending and Borrowing", function (){
             )).to.be.revertedWith(
             "Only token owner can execute"
           );
+          //|| !NFTdetails[_NFTid].listed
+          
+          await sampleERC20.mint(random, 100000000000);
+          nftLendBorrow.connect(random).Bid(
+            7,
+            100000000000,
+            await sampleERC20.getAddress(),
+            10,
+            200,
+            200
+          )
+
+          await nftLendBorrow.removeNFTfromList(
+            7
+          )
+
+          await expect(nftLendBorrow.AcceptBid(7, 0)).to.be.revertedWith("It's not listed for Borrowing")
+
+          await nftLendBorrow.connect(random).withdraw(7, 0)
         })
       
         it("should check Bid can't be accepted after It's expired ", async() => {
@@ -983,13 +1002,13 @@ describe("NFT Lending and Borrowing", function (){
           )
           
           await time.increase(201);
-          expect(await sampleERC20.balanceOf(random)).to.equal(500000000000);
+          expect(await sampleERC20.balanceOf(random)).to.equal(600000000000);
       
           await nftLendBorrow.connect(random).withdraw(
             8,
             1
           )
-          expect(await sampleERC20.balanceOf(random)).to.equal(600000000000);
+          expect(await sampleERC20.balanceOf(random)).to.equal(700000000000);
           // console.log("fee 5", b5.toNumber());
           let bid = await nftLendBorrow.Bids(8, 1);
           expect(bid[9]).to.equal(true);
