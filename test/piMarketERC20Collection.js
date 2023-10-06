@@ -305,7 +305,7 @@ describe("piMarketERC20Collection", function () {
 
             await sampleERC20.connect(alice).approve(piMarket.getAddress(), 50000);
             await expect(
-                piMarket.BuyNFT(1, true, { value: 50000 })
+                piMarket.BuyNFT(1, true)
             ).to.be.revertedWithoutReason();
         })
 
@@ -321,7 +321,7 @@ describe("piMarketERC20Collection", function () {
 
             await sampleERC20.connect(bob).approve(piMarket.getAddress(), 50000);
 
-            result2 = await piMarket.connect(bob).BuyNFT(1, true, { value: 50000 });
+            result2 = await piMarket.connect(bob).BuyNFT(1, true);
             expect(await collectionContract.ownerOf(0)).to.equal(await bob.getAddress());
             /*validator 200
                         royalties 500
@@ -442,7 +442,7 @@ describe("piMarketERC20Collection", function () {
 
             result2 = await piMarket
                 .connect(alice)
-                .BuyNFT(2, true, { value: 50000 });
+                .BuyNFT(2, true);
             expect(await collectionContract.ownerOf(0)).to.equal(await alice.getAddress());
             /*validator 200
                         royalties 500
@@ -689,11 +689,11 @@ describe("piMarketERC20Collection", function () {
             await sampleERC20.connect(bidder1).approve(piMarket.getAddress(), 130000);
 
             await expect(
-                piMarket.connect(alice).Bid(4, 60000, { value: 60000 })
+                piMarket.connect(alice).Bid(4, 60000)
             ).to.be.revertedWithoutReason();
 
             await expect(
-                piMarket.connect(bidder1).Bid(4, 50000, { value: 50000 })
+                piMarket.connect(bidder1).Bid(4, 50000)
             ).to.be.revertedWithoutReason();
 
             await piMarket.connect(bidder1).Bid(4, 60000);
@@ -810,11 +810,11 @@ describe("piMarketERC20Collection", function () {
             await sampleERC20.connect(bidder1).approve(piMarket.getAddress(), 70000);
 
             await expect(
-                piMarket.connect(alice).Bid(5, 70000, { value: 60000 })
+                piMarket.connect(alice).Bid(5, 70000)
             ).to.be.revertedWithoutReason();
 
             await expect(
-                piMarket.connect(bidder1).Bid(5, 50000, { value: 50000 })
+                piMarket.connect(bidder1).Bid(5, 50000)
             ).to.be.revertedWithoutReason();
 
             await piMarket.connect(bidder1).Bid(5, 70000);
