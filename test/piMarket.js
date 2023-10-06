@@ -330,6 +330,10 @@ describe("piMarket", function () {
       await piMarket.unpause();
     });
 
+    it("should not let bidder place bid on direct sale NFT", async () => {
+      await expect(piMarket.connect(bob).Bid(1, 50000, {value: 50000})).to.be.revertedWithoutReason()
+    })
+
     it("should let bob buy piNFT", async () => {
       let meta = await piMarket._tokenMeta(1);
       expect(meta.status).to.equal(true);
@@ -775,6 +779,9 @@ describe("piMarket", function () {
       await piMarket.connect(bidder1).Bid(4, 60000, { value: 60000 });
       await piMarket.connect(bidder2).Bid(4, 65000, { value: 65000 });
       await piMarket.connect(bidder1).Bid(4, 70000, { value: 70000 });
+      
+      //should not let highest bidder withdraw before auction end time
+      await expect(piMarket.connect(bidder1).withdrawBidMoney(4, 2)).to.be.revertedWithoutReason()
 
       await time.increase(300);
       await expect(piMarket.connect(bidder2).Bid(4, 75000, { value: 75000 })
@@ -1622,10 +1629,12 @@ describe("piMarket", function () {
       expect(result.buyerAddress).to.equal(await bidder1.getAddress());
     });
 
-    it("should let bob buy piNFT", async () => {
+    it("should let alice execute bid order and not allow buying the NFT", async () => {
       let meta = await piMarket._tokenMeta(8);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(true);
+
+      await expect(piMarket.connect(bob).BuyNFT(8, false, { value: 70000 })).to.be.revertedWithoutReason()
 
       await piMarket.connect(alice).executeBidOrder(8, 2, false);
     });
