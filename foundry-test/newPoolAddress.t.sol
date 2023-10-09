@@ -121,7 +121,7 @@ PoolRegistry.addLender(poolId, bob, block.timestamp + 3600);
     assertEq(isVerified, true, "Lender not added successfully");
 }
 function testFail_AddLender() external {
-    // adding a lender to the that doesn't exist
+    // adding a lender that doesn't exist
     PoolRegistry.addLender(999, bob, block.timestamp + 3600);
 
     (bool isVerified, ) = PoolRegistry.lenderVarification(999, bob);
@@ -206,18 +206,43 @@ test_CreatePool();
 
     assertEq(loanId, 0, "Loan request should fail");
 }
+function testFail_LoanRequest_InvalidLendingToken() public {
+    test_CreatePool();
 
-    // Test that a borrower can request a loan
-    // function testLoanRequest() public {
-    //     pool.loanRequest(
-    //         lendingToken,
-    //         poolId,
-    //         principal,
-    //         duration,
-    //         apr,
-    //         receiver
-    //     );
-    //     console.log("Debug Message");
+    //request a loan with an invalid lending token address (0 address)
+    uint256 invalidLoanId = pool.loanRequest(
+        address(0),
+        poolId,      
+        principal,  
+        duration,    
+        apr,         
+        receiver     
+    );
+
+    assertTrue(invalidLoanId == 0, "Loan request should fail when lending token is the zero address");
+}
+function testFail_LoanRequest_UnverifiedLender() public {
+    // Set up the initial conditions and create a pool
+    test_CreatePool();
+
+    // Add a borrower to the pool
+    vm.prank(alice);
+    PoolRegistry.addBorrower(poolId, sam, block.timestamp + 3600);
+
+    // Try to request a loan with an unverified lender
+    uint256 LoanId = pool.loanRequest(
+        lendingToken, // Use a valid lending token address
+        poolId,       // Use a valid pool ID
+        principal,    // Use a valid principal amount
+        duration,     // Use a valid loan duration
+        apr,          // Use a valid APR
+        receiver      // Use a valid receiver address
+    );
+
+    // Assert that the loan request failed
+    assertEq(LoanId, 0, "Loan request should fail when the lender is unverified");
+}
+
 
     
 

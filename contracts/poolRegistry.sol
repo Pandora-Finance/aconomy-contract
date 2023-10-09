@@ -67,7 +67,7 @@ contract poolRegistry is ReentrancyGuard {
         mapping(address => bytes32) borrowerAttestationIds;
     }
 
-    //poolId => poolDetail
+    //poolId => poolDetail 
     mapping(uint256 => poolDetail) internal pools;
     //poolId => close or open
     mapping(uint256 => bool) private ClosedPools;
