@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+pragma solidity 0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -10,5 +10,9 @@ contract mintToken is ERC20 {
 
     function mint(address _recipient, uint256 _amount) external {
         _mint(_recipient, _amount);
+    }
+
+    function getTime() external view returns(uint256) {
+        return block.timestamp;
     }
 }

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+pragma solidity 0.8.11;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./WadRayMath.sol";
 import "../poolAddress.sol";
 
@@ -49,12 +49,25 @@ library LibCalculations {
         uint32 cycleDuration,
         uint16 apr
     ) public pure returns (uint256) {
-        uint256 n = loanDuration / cycleDuration;
-        if (apr == 0) return (principal / n);
+        require(
+            loanDuration >= cycleDuration,
+            "cycle < duration"
+        );
+        if (apr == 0)
+            return
+                Math.mulDiv(
+                    principal,
+                    cycleDuration,
+                    loanDuration,
+                    Math.Rounding.Up
+                );
+
+        // Number of payment cycles for the duration of the loan
+        uint256 n = Math.ceilDiv(loanDuration, cycleDuration);
 
         uint256 one = WadRayMath.wad();
         uint256 r = WadRayMath.pctToWad(apr).wadMul(cycleDuration).wadDiv(
-            365 days
+            360 days
         );
         uint256 exp = (one + r).wadPow(n);
         uint256 numerator = principal.wadMul(r).wadMul(exp);
@@ -80,13 +93,13 @@ library LibCalculations {
         uint16 interestRate,
         uint256 paymentCycleAmount,
         uint256 paymentCycle,
-        uint32 lastRepaidTimestamp,
+        uint32 _lastRepaidTimestamp,
         uint256 timestamp,
         uint256 acceptBidTimestamp,
         uint256 maxDuration
     )
         internal
-        view
+        pure
         returns (
             uint256 owedPrincipal_,
             uint256 duePrincipal_,
@@ -100,7 +113,7 @@ library LibCalculations {
                 interestRate,
                 paymentCycleAmount,
                 paymentCycle,
-                lastRepaidTimestamp,
+                _lastRepaidTimestamp,
                 timestamp,
                 acceptBidTimestamp,
                 maxDuration
@@ -154,12 +167,14 @@ library LibCalculations {
 
         uint256 interestInAYear = percent(owedPrincipal_, _interestRate);
         uint256 owedTime = _timestamp - uint256(_lastRepaidTimestamp);
-        interest_ = (interestInAYear * owedTime) / 365 days;
+        uint256 owedTimeInHours = owedTime / 3600;
+        uint256 oneYearInHours = 360 days / 3600;
+        interest_ = (interestInAYear * owedTimeInHours) / oneYearInHours;
 
         // Cast to int265 to avoid underflow errors (negative means loan duration has passed)
-        int256 durationLeftOnLoan = int256(_loanDuration) -
-            (int256(_timestamp) - int256(_startTimestamp));
-        bool isLastPaymentCycle = durationLeftOnLoan < int256(_paymentCycle) || // Check if current payment cycle is within or beyond the last one
+        int256 durationLeftOnLoan = int256(uint256(_loanDuration)) -
+            (int256(_timestamp) - int256(uint256(_startTimestamp)));
+        bool isLastPaymentCycle = durationLeftOnLoan < int256(uint256(_paymentCycle)) || // Check if current payment cycle is within or beyond the last one
             owedPrincipal_ + interest_ <= _paymentCycleAmount; // Check if what is left to pay is less than the payment cycle amount
 
         // Max payable amount in a cycle
@@ -171,5 +186,12 @@ library LibCalculations {
         // Calculate accrued amount due since last repayment
         uint256 Amount = (maxCycleOwed * owedTime) / _paymentCycle;
         duePrincipal_ = Math.min(Amount - interest_, owedPrincipal_);
+    }
+
+    function calculateInterest(uint256 _owedPrincipal, uint16 _interestRate, uint256 _owedTime) internal pure returns(uint256 _interest) {
+        uint256 interestInAYear = percent(_owedPrincipal, _interestRate);
+        uint256 owedTimeInHours = _owedTime / 3600;
+        uint256 oneYearInHours = 360 days / 3600;
+        _interest = (interestInAYear * owedTimeInHours) / oneYearInHours;
     }
 }
