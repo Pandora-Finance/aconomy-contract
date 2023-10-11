@@ -199,6 +199,9 @@ contract piNFTMethods is
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
+        require(IERC721Upgradeable(
+            _collectionAddress
+        ).ownerOf(_tokenId) != address(this));
         if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
             require(
                 _erc20Contract ==
@@ -538,8 +541,7 @@ contract piNFTMethods is
             "Balances repaid"
         );
         require(
-            _amount <= withdrawnAmount[_collectionAddress][_tokenId],
-            "Invalid repayment amount"
+            _amount <= withdrawnAmount[_collectionAddress][_tokenId]
         );
 
         withdrawnAmount[_collectionAddress][_tokenId] -= _amount;

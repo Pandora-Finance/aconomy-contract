@@ -807,6 +807,17 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
+    it("should not let validator add funds if funds have been withdrawn", async () => {
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 200);
+      await expect(piNftMethods
+        .connect(validator)
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200, 300, [
+          [validator, 200],
+        ])).to.be.revertedWithoutReason();
+    })
+
     it("should not let external account(bob) to repay the bid", async () => {
       await sampleERC20.connect(bob).approve(piNftMethods.getAddress(), 300);
       await expect(
@@ -820,7 +831,7 @@ describe("piNFT", function () {
       await sampleERC20.approve(piNftMethods.getAddress(), 800);
       await expect(
         piNftMethods.Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 800)
-      ).to.be.revertedWith("Invalid repayment amount");
+      ).to.be.revertedWithoutReason();
     });
 
     it("let alice setPercent while it's paused", async () => {
@@ -870,7 +881,7 @@ describe("piNFT", function () {
           sampleERC20.getAddress(),
           200
         )
-      ).to.be.revertedWith("Invalid repayment amount");
+      ).to.be.revertedWithoutReason();
     });
 
     it("should not allow redeem if contract is paused", async () => {

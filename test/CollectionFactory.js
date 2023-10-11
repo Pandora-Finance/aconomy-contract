@@ -569,7 +569,7 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         800
-      )).to.be.revertedWith("Invalid repayment amount")
+      )).to.be.revertedWithoutReason()
     })
   
     it("should let alice repay erc20", async () => {
