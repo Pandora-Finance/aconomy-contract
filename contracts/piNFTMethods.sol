@@ -220,9 +220,11 @@ contract piNFTMethods is
                 royalties
             );
         }
-        NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
-            _collectionAddress
-        ).ownerOf(_tokenId);
+        if(IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) != address(this)) {
+            NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
+                _collectionAddress
+            ).ownerOf(_tokenId);
+        }
         updateERC20(_collectionAddress, _tokenId, _erc20Contract, _value);
         require(
             IERC20Upgradeable(_erc20Contract).transferFrom(
@@ -538,8 +540,7 @@ contract piNFTMethods is
             "Balances repaid"
         );
         require(
-            _amount <= withdrawnAmount[_collectionAddress][_tokenId],
-            "Invalid repayment amount"
+            _amount <= withdrawnAmount[_collectionAddress][_tokenId]
         );
 
         withdrawnAmount[_collectionAddress][_tokenId] -= _amount;
