@@ -820,7 +820,7 @@ describe("piNFT", function () {
       await sampleERC20.approve(piNftMethods.getAddress(), 800);
       await expect(
         piNftMethods.Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 800)
-      ).to.be.revertedWith("Invalid repayment amount");
+      ).to.be.revertedWithoutReason();
     });
 
     it("let alice setPercent while it's paused", async () => {
@@ -870,7 +870,7 @@ describe("piNFT", function () {
           sampleERC20.getAddress(),
           200
         )
-      ).to.be.revertedWith("Invalid repayment amount");
+      ).to.be.revertedWithoutReason();
     });
 
     it("should not allow redeem if contract is paused", async () => {
@@ -1149,4 +1149,288 @@ describe("piNFT", function () {
       );
     });
   });
+
+  describe("Deployment", function () {
+    it("should mint an ERC721 token to alice", async () => {
+      const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]]);
+      await expect(
+        await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]])
+      )
+      .to.emit(piNFT, "TokenMinted")
+      .withArgs(3, await alice.getAddress());
+
+      const owner = await piNFT.ownerOf(3);
+      const bal = await piNFT.balanceOf(alice);
+      expect(owner).to.equal(await alice.getAddress());
+      expect(bal).to.equal(2);
+    });
+
+    it("should allow alice to add a validator to the nft", async () => {
+      await piNftMethods.addValidator(
+        piNFT.getAddress(),
+        3,
+        validator.getAddress()
+      );
+
+      expect(
+        await piNftMethods.approvedValidator(piNFT.getAddress(), 3)
+      ).to.equal(await validator.getAddress());
+    });
+
+    it("should not let owner withdraw validator funds before adding funds", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 3);
+      await expect(
+        piNftMethods.withdraw(
+          await piNFT.getAddress(),
+          3,
+          await sampleERC20.getAddress(),
+          300
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should let validator add ERC20 tokens to alice's NFT", async () => {
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+
+      await piNftMethods
+        .connect(validator)
+        .addERC20(
+          await piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          500,
+          500,
+          [[await validator.getAddress(), 200]]
+        );
+      const tokenBal = await piNftMethods.viewBalance(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress()
+      );
+      expect(tokenBal).to.equal(500);
+      const validatorBal = await sampleERC20.balanceOf(
+        await validator.getAddress()
+      );
+      expect(validatorBal).to.equal(0);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        3
+      );
+      expect(commission.isValid).to.equal(true);
+      expect(commission.commission.account).to.equal(
+        await validator.getAddress()
+      );
+      expect(commission.commission.value).to.equal(500);
+    });
+
+    it("should not let owner withdraw validator funds more than added fund", async () => {
+      await piNFT.approve(piNftMethods.getAddress(), 3);
+      await expect(
+        piNftMethods.withdraw(
+          piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          100000
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+
+    it("should let alice withdraw erc20", async () => {
+      let _bal = await sampleERC20.balanceOf(alice.getAddress());
+      await piNFT.approve(piNftMethods.getAddress(), 3);
+      await piNftMethods.withdraw(
+        await piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        300
+      );
+
+      await expect(
+        piNftMethods.connect(bob).withdraw(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          100000
+        )
+      ).to.be.revertedWithoutReason();
+
+      
+      let withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 3);
+      expect(withdrawn).to.equal(300)
+
+      expect(await piNFT.ownerOf(3)).to.equal(await piNftMethods.getAddress());
+      let bal = await sampleERC20.balanceOf(alice);
+      expect(bal - _bal).to.equal(300);
+      await piNftMethods.withdraw(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        200
+      );
+
+      withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 3);
+      expect(withdrawn).to.equal(500)
+
+      expect(await piNFT.ownerOf(3)).to.equal(await piNftMethods.getAddress());
+      bal = await sampleERC20.balanceOf(alice);
+      expect(bal - _bal).to.equal(500);
+      expect(await sampleERC20.balanceOf(piNftMethods.getAddress())).to.equal(
+        0
+      );
+
+      await expect(
+        piNftMethods.withdraw(
+          piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          201
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should let validator add more ERC20 tokens to alice's NFT", async () => {
+      await sampleERC20.mint(validator, 500);
+
+      await sampleERC20
+        .connect(validator)
+        .approve(piNftMethods.getAddress(), 500);
+
+      await piNftMethods
+        .connect(validator)
+        .addERC20(
+          await piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          500,
+          500,
+          [[await validator.getAddress(), 200]]
+        );
+      const tokenBal = await piNftMethods.viewBalance(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress()
+      );
+      expect(tokenBal).to.equal(1000);
+      const validatorBal = await sampleERC20.balanceOf(
+        await validator.getAddress()
+      );
+      expect(validatorBal).to.equal(0);
+      let commission = await piNftMethods.validatorCommissions(
+        piNFT.getAddress(),
+        3
+      );
+      expect(commission.isValid).to.equal(true);
+      expect(commission.commission.account).to.equal(
+        await validator.getAddress()
+      );
+      expect(commission.commission.value).to.equal(500);
+    });
+
+    it("should let alice again withdraw erc20", async () => {
+      let _bal = await sampleERC20.balanceOf(alice.getAddress());
+      // await piNFT.approve(piNftMethods.getAddress(), 3);
+      await piNftMethods.withdraw(
+        await piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        300
+      );
+
+      await expect(
+        piNftMethods.connect(bob).withdraw(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          100000
+        )
+      ).to.be.revertedWithoutReason();
+
+      
+      let withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 3);
+      expect(withdrawn).to.equal(800)
+
+      expect(await piNFT.ownerOf(3)).to.equal(await piNftMethods.getAddress());
+      let bal = await sampleERC20.balanceOf(alice);
+      expect(bal - _bal).to.equal(300);
+      await piNftMethods.withdraw(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        200
+      );
+
+      withdrawn = await piNftMethods.viewWithdrawnAmount(await piNFT.getAddress(), 3);
+      expect(withdrawn).to.equal(1000)
+
+      expect(await piNFT.ownerOf(3)).to.equal(await piNftMethods.getAddress());
+      bal = await sampleERC20.balanceOf(alice);
+      expect(bal - _bal).to.equal(500);
+      expect(await sampleERC20.balanceOf(piNftMethods.getAddress())).to.equal(
+        0
+      );
+
+      await expect(
+        piNftMethods.withdraw(
+          piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          201
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should not let alice repay more than what's borrowed", async () => {
+      await sampleERC20.approve(piNftMethods.getAddress(), 2000);
+      await expect(
+        piNftMethods.Repay(piNFT.getAddress(), 3, sampleERC20.getAddress(), 2000)
+      ).to.be.revertedWithoutReason();
+    });
+
+    it("should let alice repay erc20", async () => {
+      let _bal = await sampleERC20.balanceOf(alice.getAddress());
+      await sampleERC20.approve(piNftMethods.getAddress(), 500);
+      await piNftMethods.Repay(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        500
+      );
+      expect(await piNFT.ownerOf(3)).to.equal(await piNftMethods.getAddress());
+      let bal = await sampleERC20.balanceOf(alice.getAddress());
+      expect(_bal - bal).to.equal(500);
+      await sampleERC20.approve(piNftMethods.getAddress(), 500);
+      await piNftMethods.Repay(
+        piNFT.getAddress(),
+        3,
+        sampleERC20.getAddress(),
+        500
+      );
+      expect(await piNFT.ownerOf(3)).to.equal(await alice.getAddress());
+      bal = await sampleERC20.balanceOf(await alice.getAddress());
+      expect(_bal - bal).to.equal(1000);
+    });
+
+    it("should not let alice repay again", async () => {
+      await sampleERC20.approve(piNftMethods.getAddress(), 800);
+      await expect(
+        piNftMethods.Repay(
+          piNFT.getAddress(),
+          3,
+          sampleERC20.getAddress(),
+          200
+        )
+      ).to.be.revertedWithoutReason();
+    });
+
+
+
+
+
+  })
+
+
+
 });
