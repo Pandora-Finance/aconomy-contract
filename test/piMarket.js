@@ -1066,7 +1066,7 @@ describe("piMarket", function () {
       );
       expect(await piNFT.ownerOf(2)).to.equal(await piMarket.getAddress());
 
-      const result = await piMarket._tokenMeta(4);
+      const result = await piMarket._tokenMeta(6);
       expect(result.bidSale).to.equal(true);
     });
 
@@ -1098,11 +1098,85 @@ describe("piMarket", function () {
       ).to.be.revertedWithoutReason();
     });
 
+    it("should not let bidder1 withdraw the highest bid", async () => {
+      await expect(piMarket.connect(bidder1).withdrawBidMoney(6, 1)).to.be.revertedWithoutReason();
+    });
+
     it("should let highest bidder withdraw after auction expires", async () => {
       await time.increase(400);
       await piMarket.connect(bidder1).withdrawBidMoney(6, 1);
       result = await piMarket.Bids(6, 1);
       expect(result.withdrawn).to.equal(true);
+    });
+
+    it("should let alice cancel the auction after expiration", async () => {
+      await piMarket.cancelSale(6);
+      result = await piMarket._tokenMeta(6);
+      expect(result.status).to.equal(false)
+      expect(await piNFT.ownerOf(2)).to.equal(await alice.getAddress());
+    })
+
+    it("should let alice place piNFT on auction", async () => {
+      await piNFT.approve(piMarket.getAddress(), 2);
+      await piMarket.SellNFT_byBid(
+        piNFT.getAddress(),
+        2,
+        50000,
+        300,
+        "0x0000000000000000000000000000000000000000"
+      );
+      expect(await piNFT.ownerOf(2)).to.equal(await piMarket.getAddress());
+
+      const result = await piMarket._tokenMeta(7);
+      expect(result.bidSale).to.equal(true);
+    });
+
+    it("should let bidders place bid on piNFT", async () => {
+      await expect(
+        piMarket.connect(alice).Bid(7, 60000, { value: 60000 })
+      ).to.be.revertedWithoutReason();
+
+      await expect(
+        piMarket.connect(bidder1).Bid(7, 50000, { value: 50000 })
+      ).to.be.revertedWithoutReason();
+
+      await piMarket.connect(bidder2).Bid(7, 60000, { value: 60000 });
+      await piMarket.connect(bidder1).Bid(7, 70000, { value: 70000 });
+
+      result = await piMarket.Bids(7, 1);
+      expect(result.buyerAddress).to.equal(await bidder1.getAddress());
+    });
+
+    it("should not let bidder1 withdraw the highest bid", async () => {
+      await expect(piMarket.connect(bidder1).withdrawBidMoney(7, 1)).to.be.revertedWithoutReason();
+    });
+
+    it("should let alice cancel the auction", async () => {
+      await piMarket.cancelSale(7);
+      result = await piMarket._tokenMeta(7);
+      expect(result.status).to.equal(false)
+      expect(await piNFT.ownerOf(2)).to.equal(await alice.getAddress());
+    })
+
+    it("should let bidder1 withdraw the highest bid", async () => {
+      await piMarket.connect(bidder1).withdrawBidMoney(7, 1)
+      result = await piMarket.Bids(7, 1);
+      expect(result.withdrawn).to.equal(true)
+    });
+
+    it("should let alice place piNFT on auction", async () => {
+      await piNFT.approve(piMarket.getAddress(), 2);
+      await piMarket.SellNFT_byBid(
+        piNFT.getAddress(),
+        2,
+        50000,
+        300,
+        "0x0000000000000000000000000000000000000000"
+      );
+      expect(await piNFT.ownerOf(2)).to.equal(await piMarket.getAddress());
+
+      const result = await piMarket._tokenMeta(8);
+      expect(result.bidSale).to.equal(true);
     });
   });
 
@@ -1508,11 +1582,11 @@ describe("piMarket", function () {
         "0x0000000000000000000000000000000000000000"
       ))
       .to.emit(piMarket, "SaleCreated")
-      .withArgs(6, await piNFT.getAddress(), 7);
+      .withArgs(6, await piNFT.getAddress(), 9);
 
 
 
-      let meta = await piMarket._tokenMeta(7);
+      let meta = await piMarket._tokenMeta(9);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(false);
 
@@ -1520,18 +1594,18 @@ describe("piMarket", function () {
     });
 
     it("should let bob buy piNFT", async () => {
-      let meta = await piMarket._tokenMeta(7);
+      let meta = await piMarket._tokenMeta(9);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(false);
 
       await expect(
-        piMarket.connect(bob).BuyNFT(7, false, { value: 5000 })
+        piMarket.connect(bob).BuyNFT(9, false, { value: 5000 })
       ).to.be.revertedWithoutReason();
 
-      result2 = await piMarket.connect(bob).BuyNFT(7, false, { value: 50000 });
+      result2 = await piMarket.connect(bob).BuyNFT(9, false, { value: 50000 });
 
       await expect(
-        piMarket.connect(bob).BuyNFT(7, false, { value: 50000 })
+        piMarket.connect(bob).BuyNFT(9, false, { value: 50000 })
       ).to.be.revertedWithoutReason();
 
 
@@ -1601,11 +1675,11 @@ describe("piMarket", function () {
       ))
 
       .to.emit(piMarket, "SaleCreated")
-      .withArgs(7, await piNFT.getAddress(), 8);
+      .withArgs(7, await piNFT.getAddress(), 10);
 
 
 
-      let meta = await piMarket._tokenMeta(8);
+      let meta = await piMarket._tokenMeta(10);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(true);
 
@@ -1614,29 +1688,29 @@ describe("piMarket", function () {
 
     it("should let bidders place bid on piNFT", async () => {
       await expect(
-        piMarket.connect(alice).Bid(8, 60000, { value: 60000 })
+        piMarket.connect(alice).Bid(10, 60000, { value: 60000 })
       ).to.be.revertedWithoutReason();
 
       await expect(
-        piMarket.connect(bidder1).Bid(8, 50000, { value: 50000 })
+        piMarket.connect(bidder1).Bid(10, 50000, { value: 50000 })
       ).to.be.revertedWithoutReason();
 
-      await piMarket.connect(bidder1).Bid(8, 60000, { value: 60000 });
-      await piMarket.connect(bidder2).Bid(8, 65000, { value: 65000 });
-      await piMarket.connect(bidder1).Bid(8, 70000, { value: 70000 });
+      await piMarket.connect(bidder1).Bid(10, 60000, { value: 60000 });
+      await piMarket.connect(bidder2).Bid(10, 65000, { value: 65000 });
+      await piMarket.connect(bidder1).Bid(10, 70000, { value: 70000 });
 
-      result = await piMarket.Bids(8, 2);
+      result = await piMarket.Bids(10, 2);
       expect(result.buyerAddress).to.equal(await bidder1.getAddress());
     });
 
     it("should let alice execute bid order and not allow buying the NFT", async () => {
-      let meta = await piMarket._tokenMeta(8);
+      let meta = await piMarket._tokenMeta(10);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(true);
 
-      await expect(piMarket.connect(bob).BuyNFT(8, false, { value: 70000 })).to.be.revertedWithoutReason()
+      await expect(piMarket.connect(bob).BuyNFT(10, false, { value: 70000 })).to.be.revertedWithoutReason()
 
-      await piMarket.connect(alice).executeBidOrder(8, 2, false);
+      await piMarket.connect(alice).executeBidOrder(10, 2, false);
     });
 
 
@@ -1706,11 +1780,11 @@ describe("piMarket", function () {
         "0x0000000000000000000000000000000000000000"
       ))
       .to.emit(piMarket, "SaleCreated")
-      .withArgs(8, await piNFT.getAddress(), 9);
+      .withArgs(8, await piNFT.getAddress(), 11);
 
 
 
-      let meta = await piMarket._tokenMeta(9);
+      let meta = await piMarket._tokenMeta(11);
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(false);
 
@@ -1718,14 +1792,14 @@ describe("piMarket", function () {
     });
 
     it("should let alice cancel sale", async () => {
-      await piMarket.cancelSale(9);
-      meta = await piMarket._tokenMeta(9);
+      await piMarket.cancelSale(11);
+      meta = await piMarket._tokenMeta(11);
       expect(meta.status).to.equal(false);
     });
 
     it("should not let bidders place bid on piNFT", async () => {
       await expect(
-        piMarket.connect(bidder1).Bid(9, 60000, { value: 60000 })
+        piMarket.connect(bidder1).Bid(11, 60000, { value: 60000 })
       ).to.be.revertedWithoutReason();
     });
 
@@ -1745,46 +1819,46 @@ describe("piMarket", function () {
 
     it("should let bidders place bid on piNFT", async () => {
       await expect(
-        piMarket.connect(alice).Bid(10, 60000, { value: 60000 })
+        piMarket.connect(alice).Bid(12, 60000, { value: 60000 })
       ).to.be.revertedWithoutReason();
 
       await expect(
-        piMarket.connect(bidder1).Bid(10, 50000, { value: 50000 })
+        piMarket.connect(bidder1).Bid(12, 50000, { value: 50000 })
       ).to.be.revertedWithoutReason();
 
-      await piMarket.connect(bidder1).Bid(10, 60000, { value: 60000 });
-      await piMarket.connect(bidder2).Bid(10, 65000, { value: 65000 });
-      await piMarket.connect(bidder1).Bid(10, 70000, { value: 70000 });
+      await piMarket.connect(bidder1).Bid(12, 60000, { value: 60000 });
+      await piMarket.connect(bidder2).Bid(12, 65000, { value: 65000 });
+      await piMarket.connect(bidder1).Bid(12, 70000, { value: 70000 });
 
-      result = await piMarket.Bids(10, 2);
+      result = await piMarket.Bids(12, 2);
       expect(result.buyerAddress).to.equal(await bidder1.getAddress());
     });
 
 
 
-    it("should let alice cancel sale", async () => {
-      await piMarket.connect(bidder1).withdrawBidMoney(10, 0);
+    it("should let other bidders withdraw others bids", async () => {
+      await piMarket.connect(bidder1).withdrawBidMoney(12, 0);
 
       await time.increase(400);
 
       await expect(
-        piMarket.connect(bidder1).withdrawBidMoney(10, 1)
+        piMarket.connect(bidder1).withdrawBidMoney(12, 1)
           ).to.be.revertedWithoutReason();
       await expect(
-        piMarket.connect(bidder1).withdrawBidMoney(10, 0)
+        piMarket.connect(bidder1).withdrawBidMoney(12, 0)
           ).to.be.revertedWithoutReason();
 
       });
 
     it("should let alice cancel sale", async () => {
-      await piMarket.cancelSale(10);
-      meta = await piMarket._tokenMeta(10);
+      await piMarket.cancelSale(12);
+      meta = await piMarket._tokenMeta(12);
       expect(meta.status).to.equal(false);
     });
 
-    it("should let bidders place bid on piNFT", async () => {
+    it("should not let bidders place bid on piNFT", async () => {
       await expect(
-        piMarket.connect(bidder1).Bid(10, 60000, { value: 60000 })
+        piMarket.connect(bidder1).Bid(12, 60000, { value: 60000 })
       ).to.be.revertedWithoutReason();
     });
 

@@ -334,7 +334,7 @@ library LibMarket {
         piMarket.BidOrder storage bids
     ) external {
         //require(msg.sender != meta.currentOwner);
-        if(block.timestamp > meta.bidEndTime) {
+        if(block.timestamp > meta.bidEndTime || !meta.status) {
             require(!bids.withdrawn);
             require(bids.buyerAddress == msg.sender);
         } else {
