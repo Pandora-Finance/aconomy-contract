@@ -449,4 +449,253 @@ function testFail_addValidator() public {
 //         assertEq(receivedRoyalties[0].value, 500, "Incorrect royalty value");
     
 //       }
+
+    function testFail_validatorAddFundsZeroRoyaltyAddress() public {
+        // should not let validator add funds with 0 royalty address
+        vm.prank(validator);
+        sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+        LibShare.Share[] memory royArray;
+        LibShare.Share memory royalty;
+                royalty = LibShare.Share(payable(0x0000000000000000000000000000000000000000), uint96(200));
+
+
+        royArray = new LibShare.Share[](1);
+        royArray[0] = royalty;
+
+        vm.prank(validator);
+        piNFTMethodsContract.addERC20(
+            address(piNftContract),
+            0,
+            address(sampleERC20),
+            500,
+            500,
+            royArray
+        );
+    }
+        function testFail_validatorAddFundsMoreThan10Royalty() public {
+        // should not let validator add funds with more than 10 royalty
+        vm.prank(validator);
+        sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+        LibShare.Share[] memory royArray;
+        LibShare.Share memory royalty;
+        // Setting royalty value more than 10 (examp., 15)
+        royalty = LibShare.Share(validator, uint96(15));
+
+        royArray = new LibShare.Share[](1);
+        royArray[0] = royalty;
+
+        vm.prank(validator);
+        piNFTMethodsContract.addERC20(
+            address(piNftContract),
+            0,
+            address(sampleERC20),
+            500,
+            500,
+            royArray
+        );
+
+    }
+    function testFail_validatorAddFundsZeroRoyaltyValue() public {
+        // should not let validator add funds with 0 royalty value
+        vm.prank(validator);
+        sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+        LibShare.Share[] memory royArray;
+        LibShare.Share memory royalty;
+        // Setting royalty value to 0
+        royalty = LibShare.Share(validator, uint96(0));
+
+        royArray = new LibShare.Share[](1);
+        royArray[0] = royalty;
+
+        vm.prank(validator);
+        piNFTMethodsContract.addERC20(
+            address(piNftContract),
+            0,
+            address(sampleERC20),
+            500,
+            500,
+            royArray
+        );
+
+       
+    }
+
+function testFail_paidCommissionNonPiMarketAddress() public {
+    // should fail if paid commission is called by non-piMarketAddress
+    vm.prank(validator);
+    piNFTMethodsContract.paidCommission(
+        address(piNftContract),
+        1
+    );
+}
+function testFail_addERC20ContractAddressZero() public {
+    // should not let ERC20 contract be address 0
+    vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(0),
+        500,
+        500,
+        royArray
+    );
+}
+function testFail_validatorFundingOnNonExistingTokenId() public {
+    // should not let validator fund on non-existing tokenId
+    vm.prank(validator);
+     sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    // Assume that here tokenId 5 does not exist
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        5,
+        address(0),
+        500,
+        500,
+        royArray
+    );
+
+
+}
+
+function testFail_validatorFundingValueZero() public {
+  
+    vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        0,
+        500,
+        royArray
+    );
+}
+
+function testFail_validatorCommissionValueExceeds4900() public {
+    vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        500,
+        4901,
+        royArray
+    );
+}
+
+function testPauseUnpausePiNFTMethods() public {
+    piNFTMethodsContract.pause();
+
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+   LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        500,
+        4901,
+        royArray
+    );
+
+    piNFTMethodsContract.unpause();
+}
+
+function testValidatorAddERC20TokensToAliceNFT() public {
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    LibShare.Share[] memory royArray;
+    LibShare.Share memory royalty;
+    royalty = LibShare.Share(validator, uint96(200));
+
+    royArray = new LibShare.Share[](1);
+    royArray[0] = royalty;
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray
+    );
+
+    uint256 tokenBal = piNFTMethodsContract.viewBalance(
+        address(piNftContract),
+        0,
+        address(sampleERC20)
+    );
+assertEq(tokenBal,500,"incorrect balance");
+
+    uint256 validatorBal = sampleERC20.balanceOf(validator);
+
+    assertEq(validatorBal,500,"invalid balance");
+
+    // LibValidatorCommission.Commission memory commission = piNFTMethodsContract.validatorCommissions(
+    //     address(piNftContract),
+    //     0
+    // );
+}
+
+function testFail_changeValidatorAfterFunding() public {
+    // should not allow validator changing after funding
+    vm.prank(validator);
+    piNFTMethodsContract.addValidator(
+        address(piNftContract),
+        0,
+        validator
+    );
+
+
+}
+function testFail_DeleteNFTAfterValidatorFunding() public {
+    // should not delete an ERC721 token after validator funding
+    vm.prank(bob);
+    piNftContract.deleteNFT(0);
+}
+
 }
