@@ -809,6 +809,15 @@ function testFailOwnerWithdrawValidatorFundsExceedAddedFundsReverted() public {
     piNftContract.approve(address(piNFTMethodsContract), 0);
     piNFTMethodsContract.withdraw(address(piNftContract), 0, address(sampleERC20), 100000);
 }
+function testaliceWithdrawERC20() public {
+  // should let alice withdraw erc20
+  testTransferNFTBobToAlice();
+  vm.prank(alice);
+    uint256 initialBal = sampleERC20.balanceOf(address(alice));
+    piNftContract.approve(address(piNFTMethodsContract), 0);
+    piNFTMethodsContract.withdraw(address(piNftContract), 0, address(sampleERC20), 300);
+}
+
 function testFailAliceWithdrawERC20() public {
   // should not let alice withdraw erc20
 //   should let alice withdraw erc20 
@@ -968,10 +977,98 @@ uint256 balance = sampleERC20.balanceOf(address(validator));
     address approvedValidator = piNFTMethodsContract.approvedValidator(address(piNftContract), 0);
     assertEq(approvedValidator,address(0), "Invalid approved validator after redemption");
 
-    // // (bool isValid, address commissionAccount, uint256 commissionValue) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
-    // assertTrue(!isValid, "Validator commission should be invalid after redemption");
-    // assertEq(commissionAccount, address(0), "Invalid commission account after redemption");
-    // assertEq(commissionValue, 0, "Invalid commission value after redemption");
     
+}
+ 
+function testFail_RedeemPiNft() public {
+// should not allow redeem if ERC20 balance is 0 
+    piNFTMethodsContract.redeemOrBurnPiNFT(
+            address(piNftContract),
+            0,
+            address(alice),
+            address(0),
+            address(sampleERC20),
+            false
+        );
+}
+function testTransferNFTToBob() public {
+    testMintNFT();
+    piNftContract.approve(address(piNFTMethodsContract), 0);
+    // Assuming alice already owns the NFT with ID 0
+    require(piNftContract.ownerOf(0) == address(alice), "Alice should own the NFT with ID 0");
+
+    // Transfer the NFT from Alice to Bob
+    // piNftContract.safeTransferFrom(address(alice), address(bob), 0);
+
+    // Check if Bob is the new owner of the NFT
+    // require(piNftContract.ownerOf(0) == address(bob), "Bob should be the owner of the NFT with ID 0");
+}
+
+ function testBurnPiNFT() public {
+        // Initial expectations
+        assertEq(sampleERC20.balanceOf(address(bob)), 0);
+
+        // Approve piNFTMethodsContract to spend piNftContract
+        piNftContract.approve(address(piNFTMethodsContract), 0);
+
+        // Burn piNftContract
+        piNFTMethodsContract.redeemOrBurnPiNFT(
+            address(piNftContract),
+            0,
+            address(0),
+            address(bob),
+            address(sampleERC20),
+            true
+        );
+
+        // Verify results
+        assertEq(sampleERC20.balanceOf(address(bob)), 500);
+        assertEq(
+            piNFTMethodsContract.viewBalance(
+                address(piNftContract),
+                0,
+                address(sampleERC20)
+            ),
+            0
+        );
+        assertEq(piNftContract.ownerOf(0), address(validator));
+
+        // Check commission
+        // (bool isValid, address commissionAccount, uint256 commissionValue) =
+            piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    //     assertEq(isValid, false);
+    //     assertEq(commissionAccount, address(0));
+    //     assertEq(commissionValue, 0);
+    }
+
+
+function test_Validator_add_ERC20_tokenTo_bob() public {
+// should let validator add ERC20 tokens to bob's NFT
+vm.prank(validator);
+
+ sampleERC20.approve(address(piNFTMethodsContract), 500);
+vm.prank(bob);
+        piNFTMethodsContract.addValidator(
+            address(piNftContract),0, address(validator);
+        )
+LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(validator, uint96(200));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+
+vm.prank(validator);
+
+piNFTMethodsContract.addERC20(address(piNftContract),
+            0,
+            address(sampleERC20),
+            500,
+            400, 
+            royArray
+          );
+
+
 }
 }
