@@ -88,12 +88,15 @@ function testFail_NonOwnercannotSetAconomyFees() public {
 
 }
 function testFail_NonOwner_cannotSetAconomyFees() public {
+     // should not let non owner set aconomy fees 
+
         vm.prank(royaltyReceiver);
   
      aconomyFee.setAconomyPiMarketFee(100);
 
 }
 function testSetAconomyFees() public {
+    // it should set aconomy fee 
     testDeployandInitialize();
     vm.startPrank(alice);
  aconomyFee.setAconomyNFTLendBorrowFee(100);
@@ -126,6 +129,7 @@ function test_mintNFT_for_lending() public {
         // assertEq(piNFT.balanceOf(alice),1,"incorrect balance");
 
 
+    vm.stopPrank();
 
 }
 function testFail_listNFTforBorrowing() public {
@@ -144,8 +148,9 @@ nftLendBorrow.listNFTforBorrowing(
 }
 
 function test_listNFTforBorrowing() public {
+    // it should list NFT for borrowing 
     test_mintNFT_for_lending();
-
+vm.prank(alice);
  uint256 tokenId = 0;
 nftLendBorrow.listNFTforBorrowing(
             tokenId,
@@ -157,5 +162,123 @@ nftLendBorrow.listNFTforBorrowing(
     );
     uint256 NFTid = 1;
     assertEq(NFTid,1,"Incorrect NFTid");
+}
+function testFail_ListNFTforBorrowing() public {
+    // should check contract address isn't 0 address 
+    vm.prank(alice);
+
+     nftLendBorrow.listNFTforBorrowing(
+            0,
+            0x0000000000000000000000000000000000000000,
+ 
+            200,
+            300,
+            3600,
+            200000000000
+        );
+}
+function testFail_1_listNFTforBorrowing() public {
+    // should check percent must be greater than 0.1%
+    vm.prank(alice);
+
+
+nftLendBorrow.listNFTforBorrowing(
+      0,
+     address(piNftContract),
+      9,
+      300,
+      3600,
+      200000000000
+);
+}
+function testFail_2_listNFTforBorrowing() public {
+
+// should check expected amount must be greater than 1^6 
+vm.prank(alice);
+
+ nftLendBorrow.listNFTforBorrowing(
+              0,
+              address(piNftContract),
+              200,
+              300,
+              3600,
+              100000
+ );
+
+}
+function testFail_pause_NFTlendingBorrowingContract() public {
+// should not let non owner pause this contract
+vm.prank(bob);
+nftLendBorrow.pause();
+
+}
+function test_pause_NFTlendingBorrowingContract() public {
+// should not let non owner pause this contract
+test_listNFTforBorrowing();
+vm.prank(alice);
+nftLendBorrow.pause();
+}
+function testFail__unpause_NFTlendingBorrowingContract() public {
+// should not let non owner Unpause this contract 
+vm.prank(bob);
+nftLendBorrow.unpause();
+
+}
+function test_Unpause_NFTlendingBorrowingContract() public {
+    test_pause_NFTlendingBorrowingContract();
+    // it should Un-Pause the contract 
+    vm.prank(alice);
+
+nftLendBorrow.unpause();
+
+
+}
+function testFail__put_onBorrow_ifPause() public {
+
+// should not put on borrow if the contract is pause 
+
+  LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       piNftContract.mintNFT(alice, uri, royArray);
+nftLendBorrow.pause();
+uint256 tokenId = 1;
+assertEq(tokenId, 1);
+vm.prank(alice);
+nftLendBorrow.listNFTforBorrowing(
+            tokenId,
+           address(piNftContract),
+            200,
+            300,
+            3600,
+            200000000000 );
+}
+function testFail_setPercent() public {
+// let alice Set new percent fee less than 0.1%
+
+vm.prank(alice);
+ nftLendBorrow.setPercent(1, 9);
+}
+function testFail_2_setPercent() public {
+// let alice setPercent while it's paused 
+vm.prank(alice);
+   nftLendBorrow.pause();
+    nftLendBorrow.setPercent(1, 11);
+nftLendBorrow.unpause();
+}
+function testFail_3_setPercent() public {
+
+// let alice Set new percent fee
+
+nftLendBorrow.setPercent(1, 1000);
+vm.prank(bob);
+nftLendBorrow.setPercent(1, 1000);
+  (,,,,,,,bool percent,,) = nftLendBorrow.NFTdetails(7);
+
 }
 }
