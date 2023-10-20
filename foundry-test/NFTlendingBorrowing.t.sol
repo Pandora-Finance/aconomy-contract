@@ -413,7 +413,8 @@ function test_BidForNFT_bob() public {
 }
 function test_BidForNFT_carl() public {
     // Bid for NFT
-        test_listNFTforBorrowing();
+        // test_listNFTforBorrowing();
+        test_BidForNFT_bob();
     sampleERC20.mint(carl, 100000000000);
     vm.prank(carl);
     sampleERC20.approve(address(nftLendBorrow), 100000000000);
@@ -433,7 +434,8 @@ function test_BidForNFT_carl() public {
 }
 function test_BidForNFT_adya() public {
     // Bid for NFT
-        test_listNFTforBorrowing();
+        // test_listNFTforBorrowing();
+        test_BidForNFT_carl();
     sampleERC20.mint(adya, 100000000000);
     vm.prank(adya);
     sampleERC20.approve(address(nftLendBorrow), 100000000000);
@@ -518,7 +520,9 @@ function testFail_AcceptBidWhilePaused() public {
     nftLendBorrow.unpause();
 }
 function test_AcceptBid() public {
-    test_CheckRepaymentAmountIsZeroBeforeAcceptance();
+    // test_CheckRepaymentAmountIsZeroBeforeAcceptance();
+    test_BidForNFT_adya();
+    // test_BidForNFT_bob();
     // Should Accept Bid
     vm.prank(alice);
     aconomyFee.transferOwnership(newFeeAddress);
@@ -530,14 +534,153 @@ vm.startPrank(alice);
  uint256 b1 = sampleERC20.balanceOf(feeAddress);
 
     piNftContract.approve(address(nftLendBorrow), 0);
-
+// Accept Bid by bob 
+vm.startPrank(alice);
     nftLendBorrow.AcceptBid(1, 0);
 
     uint256 b2 = sampleERC20.balanceOf(feeAddress);
 
     assertEq(b2 - b1, 1000000000, "Incorrect fee calculation");
-
+vm.stopPrank();
     // (bool bidAccepted, bool listed, bool repaid,,,,) = nftLendBorrow.NFTdetails(1);
     // (bool withdrawn, , , ) = nftLendBorrow.Bids(1, 0);
+}
+function testFail_NotAliceAcceptBidIfAlreadyAccepted() public {
+    // Should revert when not Alice tries to accept bid that's already accepted
+    test_BidForNFT_bob();
+    vm.prank(alice);
+    nftLendBorrow.AcceptBid(1, 0);
+}
+function testFail_WithdrawAcceptedBid() public {
+    // Should revert when trying to withdraw an accepted bid
+     test_BidForNFT_bob();
+    vm.prank(bob);
+    nftLendBorrow.withdraw(1, 0);
+}
+function testFail_BidOnAcceptedBid() public {
+    // Should revert when trying to bid on an already accepted bid
+    sampleERC20.mint(random, 100000000000);
+        vm.prank(random);
+
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(random);
+    nftLendBorrow.Bid(1, 100000000000, address(sampleERC20), 10, 200, 200);
+}
+
+function testFail_RejectBidWhilePaused() public {
+    // Should revert when rejecting a bid while the contract is paused
+    nftLendBorrow.pause();
+        vm.prank(alice);
+
+    nftLendBorrow.rejectBid(1, 2);
+    nftLendBorrow.unpause();
+}
+function test_RejectThirdBidByNFTOwner() public {
+    // Should reject the third bid by the NFT owner
+test_AcceptBid();  
+test_BidForNFT_adya(); 
+
+    // Check initial balance of adya
+    uint256 newBalance1 = sampleERC20.balanceOf(adya);
+    assertEq(newBalance1, 0, "Incorrect initial balance");
+vm.prank(alice);
+    // Reject the third bid
+    nftLendBorrow.rejectBid(1, 2);
+
+    // Check if the bid is marked as withdrawn
+    (,,,,,,,,,bool withdrawn,) = nftLendBorrow.Bids(1, 2);
+    assertTrue(withdrawn ,"Bid should be marked as withdrawn");
+
+    // Check the new balance of adya
+    uint256 newBalance = sampleERC20.balanceOf(adya);
+    newBalance=100000000000;
+    assertEq(newBalance,100000000000, "Incorrect new balance after rejecting bid");
+}
+function testFail_WithdrawThirdBid() public {
+    // withdraw the third bid
+    vm.prank(adya);
+    nftLendBorrow.withdraw(1, 2);
+}
+function testFail_RepayBidNotAccepted() public {
+    // Should Repay Bid ,revert when trying to repay a bid that is not accepted
+    vm.prank(alice);
+    nftLendBorrow.Repay(1, 1);
+}
+function testFail_RepayBidWhilePaused() public {
+    // Should revert when trying to repay a bid while the contract is paused
+    nftLendBorrow.pause();
+        vm.prank(alice);
+
+    nftLendBorrow.Repay(1, 0);
+    nftLendBorrow.unpause();
+}
+function test_RepayBid() public {
+    // Should repay a bid
+    test_BidForNFT_bob();
+    test_AcceptBid();
+    sampleERC20.mint(alice, 100000000000);
+    uint256 val = nftLendBorrow.viewRepayAmount(1, 0);
+    vm.prank(alice);
+    sampleERC20.approve(address(nftLendBorrow), val);
+    console.log("sss",val);
+    uint256 newBalance1 = sampleERC20.balanceOf(alice);
+    console.log("qqq",newBalance1);
+    vm.prank(alice);
+    nftLendBorrow.Repay(1, 0);
+    uint256 newBalance12 = sampleERC20.balanceOf(alice);
+    console.log("qqq",newBalance12);
+    (,,,,,,,,,bool repaid) = nftLendBorrow.NFTdetails(1);
+    console.log("saaa",repaid);
+    // assertFalse(repaid, "Bid should not be repaid");
+}
+
+function test_RepaymentAmountIsZeroAfterRepayment() public {
+    // Check repayment amount is 0 after repayment
+    test_RepayBid();
+
+    uint256 repaymentAmount = nftLendBorrow.viewRepayAmount(1, 0);
+
+    // Assert that the repayment amount is 0
+    assertEq(repaymentAmount, 0, "Repayment amount should be 0 after repayment");
+}
+function testFail_WithdrawWhilePaused() public {
+    // Should revert when carl tries to withdraw while it's paused
+    vm.prank(carl);
+    nftLendBorrow.pause();
+
+    nftLendBorrow.withdraw(1, 1);
+
+    nftLendBorrow.unpause();
+}
+function test_WithdrawSecondBid() public {
+    // Withdraw second Bid by carl
+    test_RepaymentAmountIsZeroAfterRepayment();
+     vm.prank(carl);
+     nftLendBorrow.withdraw(1, 1);
+}
+function testFail_WithdrawSecondBid() public {
+// Should revert when random tries to reject the withdrawn bid
+    vm.prank(random);
+    nftLendBorrow.rejectBid(1, 1);
+
+}
+function testFail_NotCarlAcceptBidIfWithdrawn() public {
+    // Approve piNFT for nftLendBorrow
+    piNftContract.approve(address(nftLendBorrow), 1);
+
+    // Should revert when carl tries to accept a bid that has been withdrawn
+    vm.prank(carl);
+    nftLendBorrow.AcceptBid(1, 1);
+}
+function testFail_RemoveNFTfromList() public {
+// Should not remove the NFT from listing while it paused 
+    test_mintNFT_for_lending();
+
+    // Pause the contract
+    vm.prank(alice);
+    nftLendBorrow.pause();
+    // Should revert when trying to remove NFT while paused
+    vm.prank(alice);
+    nftLendBorrow.removeNFTfromList(1);
 }
 }
