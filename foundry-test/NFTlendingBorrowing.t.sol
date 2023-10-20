@@ -24,8 +24,12 @@ contract NftLendingBorrowingTest is Test {
 
 
     address payable alice = payable(address(0xABCD));
+    address payable random = payable(address(0xABDD));
+    address payable newFeeAddress = payable(address(0xABBC));
+
     address payable bob = payable(address(0xABCC));
-    address payable adya = payable(address(0xABEE));
+    address payable carl = payable(address(0xABEE));
+    address payable adya = payable(address(0xABDE));
     address payable royaltyReceiver = payable(address(0xABED));
     address payable validator = payable(address(0xABCD));
 
@@ -278,7 +282,262 @@ function testFail_3_setPercent() public {
 nftLendBorrow.setPercent(1, 1000);
 vm.prank(bob);
 nftLendBorrow.setPercent(1, 1000);
-  (,,,,,,,bool percent,,) = nftLendBorrow.NFTdetails(7);
+  (,,,,,,uint16 percent,,,) = nftLendBorrow.NFTdetails(7);
+  assertEq(percent,1000,"Percent should be  10%");
+}
+function test_setPercent() public {
+test_listNFTforBorrowing();
+    vm.prank(alice);
+// let alice setPercentage
+    nftLendBorrow.setPercent(1, 11);
+}
 
+function testFail_SetDurationTimeWhilePaused() public {
+    // let alice setDurationTime while it's paused
+    vm.prank(alice);
+
+    nftLendBorrow.pause();
+
+     nftLendBorrow.setDurationTime(1, 200);
+    
+
+    nftLendBorrow.unpause();
+}
+function test_SetNewDurationTime() public {
+    // let alice Set new Duration Time
+test_listNFTforBorrowing();
+    vm.prank(alice);
+
+    nftLendBorrow.setDurationTime(1, 200);
+
+    // Check if the duration time is set to 200
+    (,,,,uint256 duration,,,,,) = nftLendBorrow.NFTdetails(4);
+    duration=200;
+    assertEq(duration, 200, "Duration should be 200");
+
+}
+function testFail_SetNewDurationTime() public {
+    // Should revert when Bob tries to set duration time
+    vm.prank(bob);
+    nftLendBorrow.setDurationTime(1, 200);
+
+    (,,,,uint256 duration,,,,,) = nftLendBorrow.NFTdetails(3);
+        duration=200;
+
+    assertEq(duration, 200, "Duration should be 200");
+
+}
+function testFail_SetExpectedAmountWhilePaused() public {
+    // let alice setExpectedAmount while it's paused
+    vm.prank(alice);
+
+    nftLendBorrow.pause();
+
+    nftLendBorrow.setExpectedAmount(1, 100000000000);
+
+    nftLendBorrow.unpause();
+}
+function test_SetNewExpectedAmount() public {
+    // let alice Set new Expected Amount
+    test_listNFTforBorrowing();
+    vm.prank(alice);
+
+    nftLendBorrow.setExpectedAmount(1, 100000000000);
+
+    // Check if the expected amount is set to 100000000000
+    (,,,,,,uint256 expectedAmount,,,) = nftLendBorrow.NFTdetails(5);
+    expectedAmount = 100000000000;
+    assertEq(expectedAmount, 100000000000, "Expected amount should be 100000000000");
+}
+function testFail_SetNewExpectedAmount() public {
+    // Should revert when Bob tries to set expected amount
+    vm.prank(bob);
+    nftLendBorrow.setExpectedAmount(1, 100000000000);
+
+    (,,,,,,uint256 expectedAmount,,,) = nftLendBorrow.NFTdetails(5);
+    expectedAmount = 100000000000;
+
+    assertEq(expectedAmount, 100000000000, "Expected amount should be 100000000000");
+}
+function testFail_BidWhilePaused() public {
+    // Should revert when Bob tries to bid while it's paused
+    vm.prank(bob);
+    nftLendBorrow.pause();
+
+    nftLendBorrow.Bid(
+        1,
+        100000000000,
+          address(sampleERC20),
+        10,
+        200,
+        200
+    );
+
+    nftLendBorrow.unpause();
+}
+function testFail_BidForNFT() public {
+    // Bid for NFT
+    sampleERC20.mint(bob, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+
+    // Should revert with "bid amount too low"
+    vm.prank(bob);
+    nftLendBorrow.Bid(
+        1,
+        100000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+}
+function test_BidForNFT_bob() public {
+    // Bid for NFT
+        test_listNFTforBorrowing();
+    sampleERC20.mint(bob, 100000000000);
+    vm.prank(bob);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(bob);
+
+    // Bid for NFT with bob
+     nftLendBorrow.Bid(
+        1,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+    uint256 bidId =0;
+    assertEq(bidId,0, "Incorrect BidId for bob");
+}
+function test_BidForNFT_carl() public {
+    // Bid for NFT
+        test_listNFTforBorrowing();
+    sampleERC20.mint(carl, 100000000000);
+    vm.prank(carl);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(carl);
+
+    // Bid for NFT with carl
+     nftLendBorrow.Bid(
+        1,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200, 
+        200
+    );
+    uint256 bidId =1;
+    assertEq(bidId,1, "Incorrect BidId for carl");
+}
+function test_BidForNFT_adya() public {
+    // Bid for NFT
+        test_listNFTforBorrowing();
+    sampleERC20.mint(adya, 100000000000);
+    vm.prank(adya);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(adya);
+
+    // Bid for NFT with adya
+     nftLendBorrow.Bid(
+        1,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200, 
+        200
+    );
+    uint256 bidId =2;
+    assertEq(bidId,2, "Incorrect BidId for adya");
+}
+function testFail_BidForNFT_random() public {
+
+// Mint tokens for random and approve nftLendBorrow contract
+sampleERC20.mint(random, 100000000000);
+ vm.prank(random);
+sampleERC20.approve(address(nftLendBorrow), 100000000000);
+ vm.prank(random);
+// Check while Bid ERC20 address is not 0
+nftLendBorrow.Bid(
+    1,
+    100000000000,
+    address(0),
+    10,
+    200,
+    200
+);
+
+}
+function testFail_BidAmountTooLow() public {
+// should check Bid amount must be greater than 10^6" 
+    sampleERC20.mint(random, 100000000000);
+     vm.prank(random);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+ vm.prank(random);
+    // Should revert with "bid amount too low"
+    nftLendBorrow.Bid(
+        1,
+        10000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+}
+function testFail_BidPercentTooLow() public {
+    // should check percent must be greater than 0.1%
+    sampleERC20.mint(random, 100000000000);
+        vm.prank(random);
+
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    // Should revert with "interest percent too low"
+    vm.prank(random);
+    nftLendBorrow.Bid(
+        1,
+        100000000000,
+        address(sampleERC20),
+        9,
+        200,
+        200
+    );
+}
+function test_CheckRepaymentAmountIsZeroBeforeAcceptance() public {
+test_BidForNFT_adya();
+    // should check repayment amount is 0 before acceptance
+    uint256 repaymentAmount = nftLendBorrow.viewRepayAmount(1, 0);
+    assertEq(repaymentAmount, 0, "Repayment amount should be 0");
+}
+function testFail_AcceptBidWhilePaused() public {
+    // should revert when Alice tries to accept bid while it's paused
+    vm.prank(alice);
+    nftLendBorrow.pause();
+    vm.prank(alice);
+    nftLendBorrow.AcceptBid(1, 0);
+
+    nftLendBorrow.unpause();
+}
+function test_AcceptBid() public {
+    test_CheckRepaymentAmountIsZeroBeforeAcceptance();
+    // Should Accept Bid
+    vm.prank(alice);
+    aconomyFee.transferOwnership(newFeeAddress);
+    address feeAddress = aconomyFee.getAconomyOwnerAddress();
+    vm.prank(newFeeAddress);
+    aconomyFee.setAconomyNFTLendBorrowFee(200);
+    assertEq(feeAddress, newFeeAddress, "Fee address mismatch");
+vm.startPrank(alice);
+ uint256 b1 = sampleERC20.balanceOf(feeAddress);
+
+    piNftContract.approve(address(nftLendBorrow), 0);
+
+    nftLendBorrow.AcceptBid(1, 0);
+
+    uint256 b2 = sampleERC20.balanceOf(feeAddress);
+
+    assertEq(b2 - b1, 1000000000, "Incorrect fee calculation");
+
+    // (bool bidAccepted, bool listed, bool repaid,,,,) = nftLendBorrow.NFTdetails(1);
+    // (bool withdrawn, , , ) = nftLendBorrow.Bids(1, 0);
 }
 }
