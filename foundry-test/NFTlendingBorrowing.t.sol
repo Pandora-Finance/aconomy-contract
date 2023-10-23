@@ -884,5 +884,521 @@ function test_IfOwnerAcceptBidAfterAccepted() public {
         nftLendBorrow.AcceptBid(2, 0);
 
 }
+function test_FailOwnerAcceptAnotherBidAfterAccepted() public {
+    test_IfOwnerAcceptBidAfterAccepted();
+    // Try to accept another bid after it's already accepted and expect a revert
+   vm.prank(bob);
+    vm.expectRevert(bytes("bid already accepted"));
+
+        nftLendBorrow.AcceptBid(2, 0);
+}
+function test_IfNonOwnerRejectBid() public {
+    test_FailOwnerAcceptAnotherBidAfterAccepted();
+    // Try to reject the bid as a non-owner (random address) and expect a revert
+    vm.prank(random);
+         vm.expectRevert(bytes("You can't Reject This Bid"));
+
+        nftLendBorrow.rejectBid(2, 1);
+}
+
+function test_CanNot_reject_AcceptedBid() public {
+    test_IfNonOwnerRejectBid();
+
+// Should check Bid can't reject which is already accepted
+vm.prank(random);
+    vm.expectRevert(bytes("bid already accepted"));
+
+        nftLendBorrow.AcceptBid(2, 0);
+}
+
+function test_IfTry_To_RepayBeforeBidAccepted()  public {
+    test_CanNot_reject_AcceptedBid();
+// Should check Anyone can't repay untill Bid is accepted 
+
+  vm.startPrank(bob);
+
+     LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("hh",tokenId);
+     tokenId = 2;
+    assertEq(tokenId, 2, "Failed to mint NFT");
+
+    // // List the NFT for borrowing
+  uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("aaaa",NFTid);
+     NFTid = 3;
+    assertEq(NFTid,3,"Incorrect NFTid");
+
+    
+    vm.stopPrank();
+    // Mint ERC20 tokens for Carl and approve
+      vm.startPrank(carl);
+
+    sampleERC20.mint(carl, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+
+    // Carl bids on the NFT
+    nftLendBorrow.Bid(
+        3,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+    vm.stopPrank();
+
+    // Try to repay before the bid is accepted and expect a revert
+    vm.prank(bob);
+
+    vm.expectRevert(bytes("Bid Not Accepted yet"));
+            nftLendBorrow.Repay(3, 0);
+
+
+}
+function test_FailRepayAgainAfterRepaid() public {
+    test_IfTry_To_RepayBeforeBidAccepted();
+    // Approve NFT and accept the bid
+    vm.startPrank(bob);
+    piNftContract.approve(address(nftLendBorrow), 2);
+    nftLendBorrow.AcceptBid(3, 0);
+
+    // View repayment amount and repay
+    uint256 val = nftLendBorrow.viewRepayAmount(3, 0);
+    sampleERC20.approve(address(nftLendBorrow), val);
+    nftLendBorrow.Repay(3, 0);
+
+    // Check if the NFT is no longer listed for borrowing
+    // uint256 nft = nftLendBorrow.NFTdetails(3);
+    // nft=7;
+    // assertEq(nft,7, "It's not listed for Borrowing");
+
+    // Try to repay again and expect a revert
+            vm.expectRevert(bytes("It's not listed for Borrowing"));
+
+        nftLendBorrow.Repay(3, 0);
+        vm.stopPrank();
+}
+function test_Only_Owner_Can_WithdrawBid() public {
+     test_IfTry_To_RepayBeforeBidAccepted();
+// should check only bidder can withdraw the bid 
+vm.startPrank(bob);
+
+     LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("kk",tokenId);
+     tokenId = 3;
+    assertEq(tokenId, 3, "Failed to mint NFT");
+
+    // // List the NFT for borrowing
+  uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("zzz",NFTid);
+     NFTid = 4;
+    assertEq(NFTid,4,"Incorrect NFTid");
+
+    
+    vm.stopPrank();
+
+    vm.startPrank(newFeeAddress);
+    sampleERC20.mint(newFeeAddress, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    nftLendBorrow.Bid(
+        4,
+         100000000000,
+          address(sampleERC20),
+           10, 
+           200, 
+           200);
+vm.stopPrank();
+
+vm.prank(random);
+   vm.expectRevert(bytes("You can't withdraw this Bid"));
+
+nftLendBorrow.withdraw(4, 0);
+}
+
+function test_FailWithdrawBeforeExpiration() public {
+
+    // should check Bidder can't withdraw before expiration 
+    test_Only_Owner_Can_WithdrawBid();
+        vm.startPrank(newFeeAddress);
+            vm.expectRevert(bytes("Can't withdraw Bid before expiration"));
+
+nftLendBorrow.withdraw(
+              4,
+              0
+);
+
+}
+function test_FailRemoveNotTokenOwner() public {
+    // should check only Token owner can remove from borrowing and bid cannot be executed after removal 
+test_FailWithdrawBeforeExpiration();
+vm.startPrank(bob);
+
+     LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("kkkk",tokenId);
+     tokenId = 4;
+    assertEq(tokenId, 4, "Failed to mint NFT");
+
+    // // List the NFT for borrowing
+  uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        4,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("zz",NFTid);
+     NFTid = 5;
+    assertEq(NFTid,5,"Incorrect NFTid");
+
+    
+    vm.stopPrank();
+      // Try to remove NFT from borrowing as a non-token owner (newFeeAddress)
+    vm.startPrank(newFeeAddress);
+                    vm.expectRevert(bytes("Only token owner can execute"));
+
+        nftLendBorrow.removeNFTfromList(5);
+        vm.stopPrank();
+
+         // Mint ERC20 tokens for random and place a bid
+         vm.startPrank(random);
+    sampleERC20.mint(random, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    nftLendBorrow.Bid(
+        5,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+    vm.stopPrank();
+    // Remove NFT from borrowing
+    vm.prank(bob);
+    nftLendBorrow.removeNFTfromList(5);
+    
+    // Try to accept bid after removal and expect a revert
+        vm.startPrank(bob);
+
+    vm.expectRevert(bytes("It's not listed for Borrowing"));
+
+        nftLendBorrow.AcceptBid(5, 0);
+        vm.stopPrank();
+
+    //Withdraw bid after removal of NFT
+    vm.prank(random);
+
+    nftLendBorrow.withdraw(5, 0);
+}
+function test_FailAcceptAfterExpiration() public {
+    
+    test_FailRemoveNotTokenOwner();
+
+
+vm.startPrank(bob);
+
+     LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("ss",tokenId);
+     tokenId = 5;
+    assertEq(tokenId, 5, "Failed to mint NFT");
+
+    // // List the NFT for borrowing
+  uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        5,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("mmm",NFTid);
+     NFTid = 6;
+    assertEq(NFTid,6,"Incorrect NFTid");
+
+    
+    vm.stopPrank();
+
+     // Mint ERC20 tokens for adya and place a bid
+     vm.startPrank(adya);
+
+    sampleERC20.mint(adya, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    sampleERC20.balanceOf(adya);
+    nftLendBorrow.Bid(
+        6,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+    sampleERC20.balanceOf(adya);
+    vm.stopPrank();
+    
+    // Increase time to make the bid expire
+    skip(201);
+        // vm.stopPrank();
+
+    // Try to accept bid after expiration and expect a revert
+
+        vm.startPrank(bob);
+         vm.expectRevert(bytes("Bid is expired"));
+
+        nftLendBorrow.AcceptBid(6, 0);
+
+    // Try to reject bid after expiration and expect a revert
+                            vm.expectRevert(bytes("Bid is expired"));
+
+        nftLendBorrow.rejectBid(6, 0);
+        vm.stopPrank();
+
+}
+function test_WithdrawAfterExpiration() public {
+    // should withdraw the Bid after expiration 
+
+    test_FailAcceptAfterExpiration();
+    // Initial balance of newFeeAddress
+     sampleERC20.balanceOf(newFeeAddress);
+
+    // Try to withdraw bid before expiration and expect a revert
+            vm.expectRevert(bytes("You can't withdraw this Bid"));
+
+    nftLendBorrow.withdraw(6,
+     0);
+    vm.prank(adya);
+    nftLendBorrow.withdraw(6, 0);
+    
+    // Mint ERC20 tokens for random and place a bid
+    vm.startPrank(random);
+    sampleERC20.mint(random, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    nftLendBorrow.Bid(
+        6, 
+        100000000000, 
+        address(sampleERC20),
+         10, 
+         200, 
+         200);
+
+    // Increase time to make the bid expire
+    skip(201);
+
+    // Check the balance of random before and after withdrawal
+    // assertEq(sampleERC20.balanceOf(random), 600000000000, "Incorrect initial balance");
+    nftLendBorrow.withdraw(6, 1);
+
+    // assertEq(sampleERC20.balanceOf(random), 700000000000, "Incorrect balance after withdrawal");
+
+    // Check bid status after withdrawal
+    // bool bidWithdrawn = nftLendBorrow.Bids(6, 1); 
+    // assertTrue(bidWithdrawn, "Bid not marked as withdrawn");
+        vm.stopPrank();
+
+}
+function test_NonOwnerSetAconomyFees() public {
+    test_WithdrawAfterExpiration();
+    // Try to set AconomyNFTLendBorrowFee by a non-owner (royaltyReceiver)
+    vm.startPrank(royaltyReceiver);
+        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+
+    aconomyFee.setAconomyNFTLendBorrowFee(100);
+
+    // Try to set AconomyPoolFee by a non-owner (royaltyReceiver)
+        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+    aconomyFee.setAconomyPoolFee(100);
+
+    // Try to set AconomyPiMarketFee by a non-owner (royaltyReceiver)
+        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+    aconomyFee.setAconomyPiMarketFee(100);
+    vm.stopPrank();
+
+    // Get the current feeAddress
+    aconomyFee.getAconomyOwnerAddress();
+
+    // Set AconomyNFTLendBorrowFee by a non-owner (newFeeAddress)
+    vm.prank(newFeeAddress);
+            vm.expectRevert(bytes("Ownable: caller is not the owner"));
+
+    aconomyFee.setAconomyNFTLendBorrowFee(100);
+}
+// // function testFail_MintNFTAndListForLending() public {
+// //     test_NonOwnerSetAconomyFees();
+// //     // Mint NFT with URI "URI1" and royalty information
+// //     vm.startPrank(bob);
+// //     LibShare.Share[] memory royArray ;
+// //         LibShare.Share memory royalty;
+// //         royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+// //         royArray= new LibShare.Share[](1);
+// //         royArray[0] = royalty;
+// //         string memory uri = "www.adya.com";
+         
+// //        uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+// //     // Set AconomyNFTLendBorrowFee to 0
+// //     aconomyFee.setAconomyNFTLendBorrowFee(0);
+
+// //     // Try to list NFT for borrowing with incorrect fee (reverts without reason)
+// //     nftLendBorrow.listNFTforBorrowing(
+// //         tokenId,
+// //         address(piNftContract),
+// //         200,
+// //         300,
+// //         3600,
+// //         1000000
+// //     );
+
+// // vm.stopPrank();
+// }
+function test_MintNFTAndListForLending() public {
+test_NonOwnerSetAconomyFees();
+         vm.startPrank(bob);
+
+    LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("ww",tokenId);
+     tokenId = 6;
+    assertEq(tokenId,6,"Incorrect NFTid");
+
+   
+   uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        6,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("www",NFTid);
+     NFTid = 7;
+    assertEq(NFTid,7,"Incorrect NFTid");
+
+    
+    // Check if NFTid is equal to 7
+    assertEq(NFTid, 7, "Incorrect NFTid");
+vm.stopPrank();
+}
+function test_BidForNFT() public {
+    test_MintNFTAndListForLending();
+    // Mint ERC20 tokens for adya and approve
+    sampleERC20.mint(adya, 100000000000);
+    vm.prank(adya);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(adya);
+
+    // Bid for NFT with adya
+     nftLendBorrow.Bid(
+        7,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200, 
+        200
+    );
+    
+    uint256 BidId = 0;
+    assertEq(BidId, 0, "Incorrect BidId");
+
+    // Mint ERC20 tokens for carl and approve
+    sampleERC20.mint(carl, 100000000000);
+    vm.prank(carl);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(carl);
+
+    // Bid for NFT with carl
+     nftLendBorrow.Bid(
+        7,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200, 
+        200
+    );
+    uint256 BidId2 = 1;
+    assertEq(BidId2, 1, "Incorrect BidId2");
+
+    // Carl places another bid for NFT with tokenId 7
+     sampleERC20.mint(carl, 100000000000);
+    vm.prank(carl);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.prank(carl);
+
+    // Bid for NFT with carl
+     nftLendBorrow.Bid(
+        7,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200, 
+        200
+    );
+    uint256 BidId3 = 2;
+    assertEq(BidId3, 2, "Incorrect BidId3");
+}
+
+function test_acceptBid() public {
+test_BidForNFT();
+    vm.startPrank(bob);
+    // Approve the NFT for lending
+    piNftContract.approve(address(nftLendBorrow), 6);
+
+    // Accept the bid for NFT with tokenId 7 and BidId 0
+    nftLendBorrow.AcceptBid(7, 0);
+    vm.stopPrank();
+
+    
+}
 
 }
