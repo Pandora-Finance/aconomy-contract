@@ -665,7 +665,7 @@ function testFail_WithdrawSecondBid() public {
 
 }
 function testFail_NotCarlAcceptBidIfWithdrawn() public {
-    // Approve piNFT for nftLendBorrow
+// let not carl acceptBid if it's withdrawn 
     piNftContract.approve(address(nftLendBorrow), 1);
 
     // Should revert when carl tries to accept a bid that has been withdrawn
@@ -683,4 +683,206 @@ function testFail_RemoveNFTfromList() public {
     vm.prank(alice);
     nftLendBorrow.removeNFTfromList(1);
 }
+function testFail_RemoveNFTfrom_List() public {
+// Should revert when trying to remove an already removed NFT
+    vm.prank(alice);
+    nftLendBorrow.removeNFTfromList(2);
+
+    // Check if the NFT is removed
+    (,,,,,,,bool isRemoved,,) = nftLendBorrow.NFTdetails(2);
+    assertTrue(isRemoved, "NFT should be removed");
+}
+function test_FailBidAfterExpiration() public {
+    test_listNFTforBorrowing();
+        // Mint an NFT and list it for borrowing
+
+    sampleERC20.mint(carl, 100000000000);
+    vm.prank(carl);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+    vm.startPrank(carl);
+
+    // Carl places a bid on the listed NFT
+    uint256 NFTid = nftLendBorrow.NFTid();
+    nftLendBorrow.Bid(
+        NFTid,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+
+    
+}
+function test_BidAfterExpiration() public {
+    test_FailBidAfterExpiration();
+        // Increase time to simulate expiration
+
+
+skip(3601);
+    // Carl attempts to place a bid after expiration
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+        uint256 NFTid = nftLendBorrow.NFTid();
+    vm.expectRevert(bytes("Bid time over"));
+    nftLendBorrow.Bid(
+        NFTid,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+    vm.stopPrank();
+}
+function test_ListNFTForBorrowing() public  {
+    test_BidAfterExpiration();
+    // Mint an NFT
+   vm.startPrank(bob);
+
+     LibShare.Share[] memory royArray ;
+        LibShare.Share memory royalty;
+        royalty = LibShare.Share(royaltyReceiver, uint96(500));
+        
+        royArray= new LibShare.Share[](1);
+        royArray[0] = royalty;
+        string memory uri = "www.adya.com";
+         
+       uint256 tokenId = piNftContract.mintNFT(bob, uri, royArray);
+       console.log("bbbb",tokenId);
+     tokenId = 1;
+    assertEq(tokenId, 1, "Failed to mint NFT");
+
+    // // List the NFT for borrowing
+  uint256 NFTid =  nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        address(piNftContract),
+        200,
+        300,
+        3600,
+        200000000000
+    );
+    console.log("hhhh",NFTid);
+     NFTid = 2;
+    assertEq(NFTid,2,"Incorrect NFTid");
+
+    
+    vm.stopPrank();
+}
+function test_BidOnUnlistedNFT() public {
+    // should check someone can only bid on listed NFT 
+    // Mint an NFT and get the NFT ID
+    test_ListNFTForBorrowing();
+
+    // Mint ERC20 tokens for random address and approve
+    sampleERC20.mint(random, 100000000000);
+        vm.prank(random);
+
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+
+    // Try to bid on an unlisted NFT
+    vm.prank(random);
+        vm.expectRevert(bytes("You can't Bid on this NFT"));
+
+    nftLendBorrow.Bid(
+        4, 
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+}
+function test_NonOwnerAcceptBid() public {
+test_ListNFTForBorrowing();
+    // Mint ERC20 tokens for Carl and approve
+    sampleERC20.mint(carl, 100000000000);
+        vm.prank(carl);
+
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+        vm.prank(carl);
+
+    // Carl bids on the NFT
+    nftLendBorrow.Bid(
+        2,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+
+    // Try to accept the bid as a non-owner (random address)
+    vm.prank(random);
+    vm.expectRevert(bytes("You can't Accept This Bid"));
+
+    nftLendBorrow.AcceptBid(
+        2,
+        0
+    );
+}
+function test_FailRepayBidNotAccepted() public {
+// Should not let Repay Bid if It's not accepted 
+test_NonOwnerAcceptBid();
+    // Get the repayment amount for the bid (Bid ID: 0)
+        vm.startPrank(bob);
+
+    uint256 val = nftLendBorrow.viewRepayAmount(2, 0);
+
+    // Approve the repayment amount
+    sampleERC20.approve(address(nftLendBorrow), val);
+    // vm.startPrank(bob);
+
+
+    // Try to repay the bid that is not accepted yet and expect a revert
+            vm.expectRevert(bytes("Bid Not Accepted yet"));
+
+        nftLendBorrow.Repay(2, 0);
+            vm.stopPrank();
+
+}
+function test_IfOwnerAcceptBidAfterAccepted() public {
+    test_FailRepayBidNotAccepted();
+    // Mint ERC20 tokens for Carl and approve
+    vm.startPrank(carl);
+
+    sampleERC20.mint(carl, 100000000000);
+    sampleERC20.approve(address(nftLendBorrow), 100000000000);
+
+    // Carl bids on the NFT
+    nftLendBorrow.Bid(
+        2,
+        100000000000,
+        address(sampleERC20),
+        10,
+        200,
+        200
+    );
+            // vm.stopPrank();
+
+    // Approve the NFT
+                vm.stopPrank();
+                vm.prank(bob);
+    piNftContract.approve(address(nftLendBorrow), 1);
+
+
+    // bob accepts the bid (Bid ID: 0)
+    vm.prank(bob);
+    nftLendBorrow.AcceptBid(2, 0);
+
+    // Try to remove the NFT after accepting the bid and expect a revert
+        vm.prank(bob);
+
+     vm.expectRevert(bytes("Only token owner can execute"));
+
+        nftLendBorrow.removeNFTfromList(
+            2);
+
+    // Try to accept the bid again after it's already accepted and expect a revert
+    vm.prank(bob);
+    vm.expectRevert(bytes("bid already accepted"));
+
+        nftLendBorrow.AcceptBid(2, 0);
+
+}
+
 }
