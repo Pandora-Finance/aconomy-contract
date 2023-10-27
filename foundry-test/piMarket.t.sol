@@ -244,9 +244,170 @@ function testPauseBeforeSellNFT() public {
     PiMarket.unpause();
     vm.stopPrank();
 }
+function testFail_SellNFTWithLowPrice() public {
+    // should not place NFT on sale if price < 10000
+testPauseBeforeSellNFT();
+    // Approve the NFT for sale
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 0);
+
+    // Attempt to put the NFT on sale with a price less than 10000
+//  vm.expectRevert(bytes("PiMarket: price must be at least 10000"));
+     PiMarket.sellNFT(
+        address(piNftContract), 
+        0,
+        100,
+       0x0000000000000000000000000000000000000000
+     );
+        vm.stopPrank();
+
 
 }
+function testFail_SellNFTWithZeroAddress() public {
+    // should not place NFT on sale if contract address is 0
+testFail_SellNFTWithLowPrice();
+    // Approve the NFT for sale
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 0);
 
+    // Attempt to put the NFT on sale with a zero contract address
+    PiMarket.sellNFT(
+        address(0), 
+        0,
+        50000,
+        address(0)
+    );
+
+
+    vm.stopPrank();
+}
+function test_AlicePlacesNFTOnSale() public {
+    // should let Alice place piNFT on sale
+    // testFail_SellNFTWithZeroAddress();
+    testPauseBeforeSellNFT();
+    // PiMarket.pause();
+
+
+    // Approve the NFT for sale
+        vm.startPrank(alice);
+        address a= piNftContract.ownerOf(0);
+        console.log("fff", a);
+        console.log("ali",alice);
+
+    piNftContract.approve(address(PiMarket), 0);
+
+    // Alice places the NFT on sale
+    PiMarket.sellNFT(
+        address(piNftContract),
+        0,
+        50000,
+       0x0000000000000000000000000000000000000000
+    );
+
+    // Check if Alice is the owner of the NFT after placing it on sale
+        // piNftContract.ownerOf(0) = address(PiMarket);
+
+        assertEq(piNftContract.ownerOf(0), address(PiMarket), "Ownership should be transferred to the market");
+           
+               vm.stopPrank();
+
+}
+function testPauseBeforeEditSalePrice() public {
+    // should not allow sale price edit if contract is paused
+test_AlicePlacesNFTOnSale();
+    // Pause the piMarket contract
+    vm.startPrank(alice);
+    PiMarket.pause();
+
+    // Attempt to edit the sale price while the contract is paused
+    // vm.startPrank
+    vm.expectRevert(bytes("Pausable: paused"));
+
+    PiMarket.editSalePrice(1, 60000);
+
+    // Unpause the piMarket contract
+    PiMarket.unpause();
+    vm.stopPrank();
+}
+function testEditPriceAfterListingOnSale() public {
+// "should edit the price after listing on sale 
+testPauseBeforeEditSalePrice();
+    vm.prank(alice);
+    PiMarket.editSalePrice(1, 60000);
+    vm.prank(bob);
+    vm.expectRevert(bytes("You are not the owner"));
+        PiMarket.editSalePrice(1, 60000);
+
+        
+
+
+}
+function testFail_EditPriceAfterListingOnSale() public {
+     testEditPriceAfterListingOnSale();
+    vm.prank(alice);
+    PiMarket.editSalePrice(1, 60);
+}
+
+function testEdit_PriceAfterListingOnSale() public {
+    testEditPriceAfterListingOnSale();
+    // Get the initial price
+    // uint256 initialPrice = PiMarket._tokenMeta(1).price;
+    // assertEq(initialPrice, 60000, "Incorrect initial price");
+
+    // Edit the sale price by alice
+    vm.startPrank(alice);
+    PiMarket.editSalePrice(1, 60000);
+
+    // Attempt to edit the sale price by alice again
+        PiMarket.editSalePrice(1, 50000);
+  (     ,
+        ,
+        ,
+        uint256 price1,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(1);
+        console.log("ddd",price1);
+
+    // Get the updated price 
+  ( ,,, uint256 updatedPrice ,,,,,,,)= PiMarket._tokenMeta(1);
+    assertEq(updatedPrice, 50000, "Incorrect updated price");
+
+    vm.stopPrank();
+}
+function testFail_SellerCannotBuyOwnNFT() public {
+    testEdit_PriceAfterListingOnSale();
+    // Attempt to let the seller buy their own NFT
+    vm.prank(alice);
+        PiMarket.BuyNFT{ value: 50000 }(1, false );
+}
+function testFailPauseBeforeBuyNFT() public {
+    testEditPriceAfterListingOnSale();
+
+    // Pause the piMarket contract
+    vm.prank(alice);
+    PiMarket.pause();
+
+    // Attempt to let Bob buy NFT while the contract is paused
+        vm.startPrank(bob);
+            vm.expectRevert(bytes("Pausable: paused"));
+
+        PiMarket.BuyNFT{ value: 50000 }(1, false );
+            vm.stopPrank();
+
+        // "Pausable: paused"
+
+    // Unpause the piMarket contract
+
+    vm.prank(alice);
+    PiMarket.unpause();
+}
+
+}
 
    
 
