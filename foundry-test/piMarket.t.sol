@@ -381,11 +381,12 @@ function testEdit_PriceAfterListingOnSale() public {
 }
 function testFail_SellerCannotBuyOwnNFT() public {
     testEdit_PriceAfterListingOnSale();
-    // Attempt to let the seller buy their own NFT
-    vm.prank(alice);
+// should not let seller buy their own nft
+     vm.prank(alice);
         PiMarket.BuyNFT{ value: 50000 }(1, false );
 }
 function testFailPauseBeforeBuyNFT() public {
+    // should not let bob buy nft if contract is paused 
     testEditPriceAfterListingOnSale();
 
     // Pause the piMarket contract
@@ -405,6 +406,97 @@ function testFailPauseBeforeBuyNFT() public {
 
     vm.prank(alice);
     PiMarket.unpause();
+}
+function testFail_BidOnDirectSaleNFT() public {
+        testEditPriceAfterListingOnSale();
+
+// should not let bidder place bid on direct sale NFT 
+        vm.prank(bob);
+        PiMarket.Bid{ value: 50000 }(1, 50000);
+    
+}
+
+function test_BuyPiNFT() public {
+    // Let Bob buy piNFT
+testEdit_PriceAfterListingOnSale();
+    (   uint256 saleId,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status1,
+        ,
+        ,
+        address owner,
+        ) = PiMarket._tokenMeta(1);
+        console.log("aa",status1);
+                console.log("zz",bidSale);
+                        console.log("bbb",owner);
+                       console.log("ccc",saleId);
+
+
+        assertTrue(status1, "Incorrect piNFT status before the purchase");
+
+ vm.startPrank(bob);
+   uint256 balance1= bob.balance;
+    console.log("ss", balance1);
+    vm.deal(bob, 1 ether);
+    // bob.mint{value: 0.01 ether}();
+        console.log("www", bob.balance);
+
+   
+
+
+    PiMarket.BuyNFT { value: 500000 }(1, false);
+
+
+
+    // Validate piNFT ownership
+    address newOwner = piNftContract.ownerOf(0);
+    assertEq(newOwner, bob, "Failed to transfer ownership to Bob");
+    vm.stopPrank();
+
+    // Validate balances
+    // uint256 _balance1 = alice.getBalance;
+    // uint256 _balance2 = ethers.provider.getBalance(royaltyReceiver);
+    // uint256 _balance3 = ethers.provider.getBalance(feeReceiver);
+    // uint256 _balance4 = ethers.provider.getBalance(validator);
+
+    // // Trigger the BuyNFT function
+    // PiMarket.BuyNFT{ value: 50000 }(1, false);
+
+    // // Validate new balances
+    // uint256 balance1 = ethers.provider.getBalance(alice);
+    // uint256 balance2 = ethers.provider.getBalance(royaltyReceiver);
+    // uint256 balance3 = ethers.provider.getBalance(feeReceiver);
+    // uint256 balance4 = ethers.provider.getBalance(validator);
+
+    // // Check the amount received by Alice
+    // uint256 aliceGotAmount = (50000 * 8200) / 10000;
+    // assertEq(balance1 - _balance1, aliceGotAmount, "Incorrect amount received by Alice");
+
+    // // Check the amount received by Royalty Receiver
+    // uint256 royaltyGotAmount = (50000 * 500) / 10000;
+    // assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+
+    // // Check the amount received by Fee Receiver
+    // uint256 feeGotAmount = (50000 * 100) / 10000;
+    // assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+
+    // // Check the amount received by Validator
+    // uint256 validatorGotAmount = (50000 * 1200) / 10000;
+    // assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+
+    // // Validate piNFT status
+    // (bool status,) = PiMarket._tokenMeta(1);
+    // assertEq(status, false, "Incorrect piNFT status");
+
+    // // Validate validator commission
+    // (bool isValid, address account, uint256 value) = piNFTMethodsContract.validatorCommissions(piNftContract, 0);
+    // assertEq(isValid, false, "Incorrect validator commission status");
+    // assertEq(account, validator, "Incorrect validator account");
+    // assertEq(value, 1000, "Incorrect validator commission value");
 }
 
 }
