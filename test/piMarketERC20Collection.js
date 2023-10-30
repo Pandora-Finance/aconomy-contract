@@ -5,6 +5,7 @@ const { time } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { BN } = require("@openzeppelin/test-helpers");
 
 const BigNumber = require("big-number");
 const { assert } = require("ethers");
@@ -36,9 +37,13 @@ describe("piMarketERC20Collection", function () {
         const LibShare = await hre.ethers.deployContract("LibShare", []);
         await LibShare.waitForDeployment();
 
+        const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+        await LibPiNFTMethods.waitForDeployment();
+
         const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
             libraries: {
                 LibShare: await LibShare.getAddress(),
+                LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
             },
         });
         piNftMethods = await upgrades.deployProxy(
@@ -209,9 +214,10 @@ describe("piMarketERC20Collection", function () {
             await sampleERC20
                 .connect(validator)
                 .approve(piNftMethods.getAddress(), 500);
+                let exp = new BN(await time.latest()).add(new BN(3600));
             await piNftMethods
                 .connect(validator)
-                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 1000, [
+                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, exp.toString(), 1000, [
                     [validator.getAddress(), 200],
                 ]);
 
@@ -405,9 +411,11 @@ describe("piMarketERC20Collection", function () {
             await sampleERC20
                 .connect(validator)
                 .approve(piNftMethods.getAddress(), 500);
+                let exp = new BN(await time.latest()).add(new BN(7500));
+                await time.increase(3601);
             await piNftMethods
                 .connect(validator)
-                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 100, [
+                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, exp.toString(), 100, [
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(
@@ -576,6 +584,7 @@ describe("piMarketERC20Collection", function () {
             await sampleERC20
                 .connect(validator)
                 .approve(piNftMethods.getAddress(), 500);
+                let exp = new BN(await time.latest()).add(new BN(3600));
             await piNftMethods
                 .connect(validator)
                 .addERC20(
@@ -583,6 +592,7 @@ describe("piMarketERC20Collection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
+                    exp.toString(),
                     1000,
                     [[validator.getAddress(), 200]]
                 );
@@ -637,6 +647,53 @@ describe("piMarketERC20Collection", function () {
             ).to.be.revertedWithoutReason();
         })
 
+        // it("should let alice place piNFT on auction", async () => {
+        //     await collectionContract.approve(piMarket.getAddress(), 1);
+        //     await piMarket.SellNFT_byBid(
+        //         collectionContract.getAddress(),
+        //         1,
+        //         50000,
+        //         300,
+        //         sampleERC20.getAddress()
+        //     );
+        //     expect(await collectionContract.ownerOf(1)).to.equal(await piMarket.getAddress());
+
+        //     const result = await piMarket._tokenMeta(4);
+        //     expect(result.bidSale).to.equal(true);
+        // });
+
+        // it("should let alice change the start price of the auction", async () => {
+        //     await piMarket.editSalePrice(4, 10000);
+        //     let result = await piMarket._tokenMeta(4);
+        //     expect(result.price).to.equal(10000);
+        //     await piMarket.editSalePrice(4, 50000);
+        //     result = await piMarket._tokenMeta(4);
+        //     expect(result.price).to.equal(50000);
+        // })
+
+        it("should allow validator to add erc20 and change commission and royalties", async () => {
+
+            await sampleERC20
+                .connect(validator)
+                .approve(piNftMethods.getAddress(), 500);
+                let exp = new BN(await time.latest()).add(new BN(7500));
+                await time.increase(3601);
+            await piNftMethods
+                .connect(validator)
+                .addERC20(collectionContract.getAddress(), 1, sampleERC20.getAddress(), 500, exp.toString(), 100, [
+                    [validator.getAddress(), 300],
+                ]);
+            let commission = await piNftMethods.validatorCommissions(
+                collectionContract.getAddress(),
+                1
+            );
+            expect(commission.isValid).to.equal(true);
+            expect(commission.commission.account).to.equal(
+                await validator.getAddress()
+            );
+            expect(commission.commission.value).to.equal(100);
+        })
+
         it("should let alice place piNFT on auction", async () => {
             await collectionContract.approve(piMarket.getAddress(), 1);
             await piMarket.SellNFT_byBid(
@@ -659,27 +716,6 @@ describe("piMarketERC20Collection", function () {
             await piMarket.editSalePrice(4, 50000);
             result = await piMarket._tokenMeta(4);
             expect(result.price).to.equal(50000);
-        })
-
-        it("should allow validator to add erc20 and change commission and royalties", async () => {
-
-            await sampleERC20
-                .connect(validator)
-                .approve(piNftMethods.getAddress(), 500);
-            await piNftMethods
-                .connect(validator)
-                .addERC20(collectionContract.getAddress(), 1, sampleERC20.getAddress(), 500, 100, [
-                    [validator.getAddress(), 300],
-                ]);
-            let commission = await piNftMethods.validatorCommissions(
-                collectionContract.getAddress(),
-                1
-            );
-            expect(commission.isValid).to.equal(true);
-            expect(commission.commission.account).to.equal(
-                await validator.getAddress()
-            );
-            expect(commission.commission.value).to.equal(100);
         })
 
         it("should let bidders place bid on piNFT", async () => {

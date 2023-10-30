@@ -5,6 +5,8 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const moment = require("moment");
+const { BN } = require("@openzeppelin/test-helpers");
 
 describe("piNFT", function () {
   let piNFTInstance;
@@ -15,9 +17,13 @@ describe("piNFT", function () {
     const LibShare = await hre.ethers.deployContract("LibShare", []);
     await LibShare.waitForDeployment();
 
+    const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+    await LibPiNFTMethods.waitForDeployment();
+
     const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
       libraries: {
         LibShare: await LibShare.getAddress(),
+        LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
       },
     });
 
@@ -333,7 +339,7 @@ describe("piNFT", function () {
 
     it("should not let non validator add funds without adding validator address", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
-
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -342,6 +348,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [[await validator.getAddress(), 200]]
           )
@@ -382,6 +389,7 @@ describe("piNFT", function () {
 
     it("should not let non validator add funds", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(alice)
@@ -390,6 +398,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [[await validator.getAddress(), 200]]
           )
@@ -398,6 +407,7 @@ describe("piNFT", function () {
 
     it("should not let validator add funds with 0 royalty address ", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -406,6 +416,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [
               [alice, 100],
@@ -427,6 +438,7 @@ describe("piNFT", function () {
 
     it("should not let validator add funds with more than 10 royalty", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -435,6 +447,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [
               [alice, 100],
@@ -455,6 +468,7 @@ describe("piNFT", function () {
 
     it("should not let validator add funds with 0 royalty value", async () => {
       await sampleERC20.connect(alice).approve(piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -463,6 +477,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [
               [alice, 100],
@@ -498,6 +513,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
+        let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -506,6 +522,7 @@ describe("piNFT", function () {
             0,
             "0x0000000000000000000000000000000000000000",
             500,
+            exp.toString(),
             500,
             [[await validator.getAddress(), 200]]
           )
@@ -517,6 +534,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
+        let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -525,6 +543,7 @@ describe("piNFT", function () {
             5,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             500,
             [[await validator.getAddress(), 200]]
           )
@@ -535,6 +554,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
+        let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -543,6 +563,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             0,
+            exp.toString(),
             500,
             [[await validator.getAddress(), 200]]
           )
@@ -553,6 +574,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
+        let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(
         piNftMethods
           .connect(validator)
@@ -561,6 +583,7 @@ describe("piNFT", function () {
             0,
             sampleERC20.getAddress(),
             500,
+            exp.toString(),
             4901,
             [[await validator.getAddress(), 200]]
           )
@@ -573,6 +596,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
+        let exp = new BN(await time.latest()).add(new BN(3600));
 
       await expect(
         piNftMethods
@@ -582,6 +606,7 @@ describe("piNFT", function () {
           0,
           sampleERC20.getAddress(),
           500,
+          exp.toString(),
           500,
           [[await validator.getAddress(), 200]]
         )
@@ -594,7 +619,7 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
-
+        let exp = new BN(await time.latest()).add(new BN(3600));
       await piNftMethods
         .connect(validator)
         .addERC20(
@@ -602,6 +627,7 @@ describe("piNFT", function () {
           0,
           sampleERC20.getAddress(),
           500,
+          exp.toString(),
           500,
           [[await validator.getAddress(), 200]]
         );
@@ -640,9 +666,16 @@ describe("piNFT", function () {
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 200);
+        // console.log("ghsavacv",await time.latest());
+        await time.increase(3601);
+        let val = await piNftMethods.validatorCommissions(piNFT.getAddress(),0);
+        // console.log("dd",val.validationExpiration)
+        let exp = new BN(await time.latest()).add(new BN(7500));
+        // console.log("2acv",exp.toString());
+        // console.log("gh222acv",await time.latest());
       await piNftMethods
         .connect(validator)
-        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200, 300, [
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200, exp.toString(), 300, [
           [validator, 200],
         ]);
       const tokenBal = await piNftMethods.viewBalance(
@@ -666,13 +699,15 @@ describe("piNFT", function () {
     });
 
     it("should not let validator add funds of a different erc20", async () => {
+      let exp = new BN(await time.latest()).add(new BN(10000));
+      await time.increase(7501);
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
       await expect(
         piNftMethods
           .connect(validator)
-          .addERC20(await piNFT.getAddress(), 0, alice.getAddress(), 500, 400, [
+          .addERC20(await piNFT.getAddress(), 0, alice.getAddress(), 500, exp.toString(), 400, [
             [await validator.getAddress(), 200],
           ])
       ).to.be.revertedWith("invalid");
@@ -1000,7 +1035,7 @@ describe("piNFT", function () {
       await expect(
         piNftMethods
           .connect(validator)
-          .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, [
+          .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, moment.now()+3600, 400, [
             [validator.getAddress(), 2900],
             [bob.getAddress(), 2001],
           ])
@@ -1021,7 +1056,7 @@ describe("piNFT", function () {
 
       await piNftMethods
         .connect(validator)
-        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, [
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, moment.now()+3600, 400, [
           [validator, 200],
         ]);
       const tokenBal = await piNftMethods.viewBalance(
@@ -1190,6 +1225,8 @@ describe("piNFT", function () {
     });
 
     it("should let validator add ERC20 tokens to alice's NFT", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
+        // await time.increase(3601);
       await sampleERC20
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
@@ -1201,6 +1238,7 @@ describe("piNFT", function () {
           3,
           sampleERC20.getAddress(),
           500,
+          exp.toString(),
           500,
           [[await validator.getAddress(), 200]]
         );
@@ -1298,6 +1336,9 @@ describe("piNFT", function () {
         .connect(validator)
         .approve(piNftMethods.getAddress(), 500);
 
+        let exp = new BN(await time.latest()).add(new BN(7500));
+        await time.increase(3601);
+
       await piNftMethods
         .connect(validator)
         .addERC20(
@@ -1305,6 +1346,7 @@ describe("piNFT", function () {
           3,
           sampleERC20.getAddress(),
           500,
+          exp.toString(),
           500,
           [[await validator.getAddress(), 200]]
         );

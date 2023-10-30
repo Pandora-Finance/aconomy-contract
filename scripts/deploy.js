@@ -27,9 +27,13 @@ async function main() {
   const LibShare = await hre.ethers.deployContract("LibShare", []);
   await LibShare.waitForDeployment();
 
+  const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+  await LibPiNFTMethods.waitForDeployment();
+
   const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
     libraries: {
-      LibShare: await LibShare.getAddress()
+      LibShare: await LibShare.getAddress(),
+      LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
     }
   })
   const piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
