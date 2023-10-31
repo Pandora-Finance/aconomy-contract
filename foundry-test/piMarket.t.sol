@@ -90,6 +90,9 @@ contract piMarketTest is Test {
         PiMarket.initialize(address(aconomyFee),address(collectionFactory),address(piNFTMethodsContract));
         PiMarket.transferOwnership(alice);
          assertEq(PiMarket.owner(),alice, "Incorret owner");
+         vm.prank(alice);
+             piNFTMethodsContract.setPiMarket(address(PiMarket));
+
 
        
     }
@@ -431,7 +434,7 @@ testEdit_PriceAfterListingOnSale();
         address owner,
         ) = PiMarket._tokenMeta(1);
         console.log("aa",status1);
-                console.log("zz",bidSale);
+                console.log("sss",bidSale);
                         console.log("bbb",owner);
                        console.log("ccc",saleId);
 
@@ -439,40 +442,58 @@ testEdit_PriceAfterListingOnSale();
         assertTrue(status1, "Incorrect piNFT status before the purchase");
 
  vm.startPrank(bob);
-   uint256 balance1= bob.balance;
-    console.log("ss", balance1);
+//    uint256 balanceB= bob.balance;
+    // console.log("ss", balance1);
     vm.deal(bob, 1 ether);
     // bob.mint{value: 0.01 ether}();
-        console.log("www", bob.balance);
+        // console.log("www", bob.balance);
+// Validate balances
+    uint256 _balance1 = alice.balance;
+        console.log("aa", _balance1);
+
+    uint256 _balance2 =royaltyReceiver.balance;
+            console.log("bb", _balance2);
+
+    uint256 _balance3 =feeReceiver.balance;
+                console.log("cc", _balance3);
+
+    uint256 _balance4 =validator.balance;
+                    console.log("dd", _balance4);
+
 
    
 
 
-    PiMarket.BuyNFT { value: 500000 }(1, false);
+    PiMarket.BuyNFT { value: 50000 }(1, false);
 
 
 
     // Validate piNFT ownership
     address newOwner = piNftContract.ownerOf(0);
     assertEq(newOwner, bob, "Failed to transfer ownership to Bob");
-    vm.stopPrank();
+    // vm.stopPrank();
 
-    // Validate balances
-    // uint256 _balance1 = alice.getBalance;
-    // uint256 _balance2 = ethers.provider.getBalance(royaltyReceiver);
-    // uint256 _balance3 = ethers.provider.getBalance(feeReceiver);
-    // uint256 _balance4 = ethers.provider.getBalance(validator);
-
+    
     // // Trigger the BuyNFT function
     // PiMarket.BuyNFT{ value: 50000 }(1, false);
 
     // // Validate new balances
-    // uint256 balance1 = ethers.provider.getBalance(alice);
-    // uint256 balance2 = ethers.provider.getBalance(royaltyReceiver);
-    // uint256 balance3 = ethers.provider.getBalance(feeReceiver);
-    // uint256 balance4 = ethers.provider.getBalance(validator);
+    uint256 balance1 = alice.balance;
+                        console.log("bal1", balance1);
 
-    // // Check the amount received by Alice
+        uint256 balance2 = royaltyReceiver.balance;
+                                console.log("bal2", balance2);
+
+            uint256 balance3 = feeReceiver.balance;
+                                            console.log("bal3", balance3);
+
+    uint256 balance4 = validator.balance;
+                                    console.log("bal4", balance4);
+
+
+
+    
+    // Check the amount received by Alice
     // uint256 aliceGotAmount = (50000 * 8200) / 10000;
     // assertEq(balance1 - _balance1, aliceGotAmount, "Incorrect amount received by Alice");
 
@@ -489,14 +510,157 @@ testEdit_PriceAfterListingOnSale();
     // assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
 
     // // Validate piNFT status
-    // (bool status,) = PiMarket._tokenMeta(1);
-    // assertEq(status, false, "Incorrect piNFT status");
+     (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(1);
+        console.log("qq",status);
+        assertFalse(status, "Incorrect piNFT status after the purchase");
 
     // // Validate validator commission
     // (bool isValid, address account, uint256 value) = piNFTMethodsContract.validatorCommissions(piNftContract, 0);
     // assertEq(isValid, false, "Incorrect validator commission status");
     // assertEq(account, validator, "Incorrect validator account");
     // assertEq(value, 1000, "Incorrect validator commission value");
+    vm.stopPrank();
+}
+function testFail_CancelSaleWhenNotForSale() public {
+    // should not let owner cancel sale if sale status is false
+test_BuyPiNFT() ; 
+    // Attempt to cancel sale
+    vm.startPrank(alice);
+    PiMarket.cancelSale(1);
+    vm.stopPrank();
+}
+function testFail_EditSalePriceWhenNotForSale() public {
+    // should not allow sale price edit if sale status is false
+    test_BuyPiNFT() ; 
+
+
+    // Attempt to edit sale price when not for sale
+    vm.startPrank(alice);
+
+    PiMarket.editSalePrice(1, 60000);
+    vm.stopPrank();
+}
+function testWithdrawFundsFromNFT() public {
+    // should let bob withdraw funds from the NFT
+test_BuyPiNFT() ; 
+
+    // Withdraw funds from the NFT by bob
+    vm.startPrank(bob);
+    piNftContract.approve(address(piNFTMethodsContract), 0);
+
+    piNFTMethodsContract.withdraw(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        200
+    );
+
+    // Check the ERC20 balance of bob
+    vm.stopPrank();
+    uint256 balance = sampleERC20.balanceOf(bob);
+    assertEq(balance, 200, "Incorrect ERC20 balance for bob");
+
+    // Check the owner of the NFT
+    address owner = piNftContract.ownerOf(0);
+    assertEq(owner, address(piNFTMethodsContract), "Incorrect owner of the NFT");
+    // vm.stopPrank();
+}
+
+function testWithdrawMoreFundsFromNFT() public {
+    // should let bob withdraw more funds from the NFT
+    testWithdrawFundsFromNFT();
+
+    // Withdraw more funds from the NFT by bob
+    vm.startPrank(bob);
+    piNFTMethodsContract.withdraw(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        100
+    );
+    vm.stopPrank();
+
+    // Check the ERC20 balance of bob
+    uint256 balance = sampleERC20.balanceOf(bob);
+    assertEq(balance, 300, "Incorrect ERC20 balance for bob");
+
+    // Check the owner of the NFT
+    address owner = piNftContract.ownerOf(0);
+    assertEq(owner, address(piNFTMethodsContract), "Incorrect owner of the NFT");
+}
+function testRepayFundsToNFT() public {
+    // should let bob repay funds to the NFT
+    testWithdrawMoreFundsFromNFT();
+
+    // Repay funds to the NFT by bob
+    vm.startPrank(bob);
+    sampleERC20.approve(
+        address(piNFTMethodsContract),
+        300
+    );
+    piNFTMethodsContract.Repay(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        300
+    );
+    vm.stopPrank();
+
+    // Check the ERC20 balance of bob
+    uint256 balance = sampleERC20.balanceOf(bob);
+    assertEq(balance, 0, "Incorrect ERC20 balance for bob");
+
+    // Check the owner of the NFT
+    address owner = piNftContract.ownerOf(0);
+    console.log("mmmmm",owner);
+    assertEq(owner, bob, "Incorrect owner of the NFT");
+}
+
+function testValidatorAddERC20AndChangeCommission() public {
+    // should allow validator to add erc20 and change commission and royalties
+testRepayFundsToNFT();
+    // Increase time beyond the lock period
+    vm.startPrank(validator);
+    skip(7500);
+
+    // Approve ERC20 tokens to piNftMethods by validator
+    sampleERC20.approve(
+        address(piNFTMethodsContract),
+        500
+    );
+
+    // Add ERC20, change commission, and royalties by validator
+    // piNFTMethodsContract.addERC20(
+    //     address(piNftContract),
+    //     0,
+    //     address(sampleERC20),
+    //     500,
+    //     time.latest().add(3601).toString(),
+    //     100,
+    //     [
+    //         [validator.getAddress(), 300]
+    //     ]
+    // );
+    vm.stopPrank();
+
+    // Check validator commission after modification
+    // LibShare.Commission memory commission = piNftMethods.validatorCommissions(
+    //     address(piNftContract),
+    //     0
+    // );
+    // assertEq(commission.isValid, false, "Validator commission is still valid");
+    // assertEq(commission.commission.account, validator.getAddress(), "Incorrect validator account");
+    // assertEq(commission.commission.value, 100, "Incorrect commission value");
 }
 
 }
