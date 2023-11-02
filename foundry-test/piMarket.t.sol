@@ -312,7 +312,31 @@ function test_AlicePlacesNFTOnSale() public {
 
         assertEq(piNftContract.ownerOf(0), address(PiMarket), "Ownership should be transferred to the market");
            
-               vm.stopPrank();
+               vm.stopPrank();// // Validate piNFT ownership
+    // address newOwner = piNftContract.ownerOf(0);
+    // assertEq(newOwner, alice, "Failed to transfer ownership to alice");
+    // // Check the balances after the transaction
+    // uint256 balance1 = bob.balance;
+    // uint256 balance2 = royaltyReceiver.balance;
+    // uint256 balance3 = feeReceiver.balance;
+    // uint256 balance4 = validator.balance;
+
+    // (  ,
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    //  bool status1,
+    //     ,
+    //     ,
+    //     ,
+    //     ) = PiMarket._tokenMeta(2);
+    //     console.log("qq",status)1;
+    //     assertFalse(status1, "Incorrect piNFT status after the purchase");
+    //         vm.stopPrank();
+
+
 
 }
 function testPauseBeforeEditSalePrice() public {
@@ -433,10 +457,10 @@ testEdit_PriceAfterListingOnSale();
         ,
         address owner,
         ) = PiMarket._tokenMeta(1);
-        console.log("aa",status1);
-                console.log("sss",bidSale);
-                        console.log("bbb",owner);
-                       console.log("ccc",saleId);
+        // console.log("aa",status1);
+                // console.log("sss",bidSale);
+                        // console.log("bbb",owner);
+                    //    console.log("ccc",saleId);
 
 
         assertTrue(status1, "Incorrect piNFT status before the purchase");
@@ -640,14 +664,20 @@ testRepayFundsToNFT();
     );
 
     // Add ERC20, change commission, and royalties by validator
-    // piNFTMethodsContract.addERC20(
-    //     address(piNftContract),
-    //     0,
-    //     address(sampleERC20),
-    //     500,
-    //     time.latest().add(3601).toString(),
-    //     100,
-    //     [
+        LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(300));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+        address(piNftContract),
+        0,
+        address(sampleERC20),
+        500,
+        100,
+        royArray1
+    );
     //         [validator.getAddress(), 300]
     //     ]
     // );
@@ -663,6 +693,107 @@ testRepayFundsToNFT();
     // assertEq(commission.commission.value, 100, "Incorrect commission value");
 }
 
+function testBobPlaceNFTOnSaleAgain() public {
+    // should let bob place piNFT on sale again
+    testValidatorAddERC20AndChangeCommission();
+    vm.startPrank(bob);
+
+    // Approve NFT for sale by bob
+    piNftContract.approve(address(PiMarket), 0);
+
+    // Place piNFT on sale again by bob
+    PiMarket.sellNFT(
+        address(piNftContract),
+        0,
+        50000,
+        0x0000000000000000000000000000000000000000
+    );
+    vm.stopPrank();
+
+    // Check the ownership of piNFT after placing it on sale
+    address owner = piNftContract.ownerOf(0);
+    assertEq(owner, address(PiMarket), "Incorrect owner after placing NFT on sale");
+}
+function testAliceBuyPiNFT() public {
+    // should let alice buy piNFT
+    testBobPlaceNFTOnSaleAgain();
+    vm.startPrank(alice);
+
+ (   uint256 saleId1,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale1,
+     bool status,
+        ,
+        ,
+        address owner1,
+        ) = PiMarket._tokenMeta(2);
+        console.log("aa",status);
+                console.log("sss",bidSale1);
+                        console.log("bbb",owner1);
+                       console.log("ccc",saleId1);
+
+
+        assertTrue(status, "Incorrect piNFT status before the purchase");
+
+        // Get initial balances
+    uint256 _balance1 = bob.balance;
+    uint256 _balance2 = royaltyReceiver.balance;
+    uint256 _balance3 = feeReceiver.balance;
+    uint256 _balance4 = validator.balance;
+
+    // Alice buys piNFT
+     PiMarket.BuyNFT { value: 50000 }(2, false);
+
+
+
+    // Validate piNFT ownership
+    address newOwner = piNftContract.ownerOf(0);
+    assertEq(newOwner, alice, "Failed to transfer ownership to alice");
+    // Check the balances after the transaction
+    uint256 balance1 = bob.balance;
+    uint256 balance2 = royaltyReceiver.balance;
+    uint256 balance3 = feeReceiver.balance;
+    uint256 balance4 = validator.balance;
+
+
+     // Check the amount received by bob
+    // uint256 aliceGotAmount = (50000 * 9100) / 10000;
+    // assertEq(balance1 - _balance1, bobGotAmount, "Incorrect amount received by bob");
+
+    // // Check the amount received by Royalty Receiver
+    // uint256 royaltyGotAmount = (50000 * 500) / 10000;
+    // assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+
+    // // Check the amount received by Fee Receiver
+    // uint256 feeGotAmount = (50000 * 100) / 10000;
+    // assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+
+    // // Check the amount received by Validator
+    // uint256 validatorGotAmount = (50000 * 300) / 10000;
+    // assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+
+
+    (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status1,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(2);
+        console.log("qq",status)1;
+        assertFalse(status1, "Incorrect piNFT status after the purchase");
+            vm.stopPrank();
+
+
+
+}
 }
 
    
