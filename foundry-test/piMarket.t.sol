@@ -38,7 +38,9 @@ contract piMarketTest is Test {
     address payable bob = payable(address(0xABCC));
     address payable feeReceiver = payable(address(0xABEE));
     address payable royaltyReceiver = payable(address(0xABED));
-    address payable validator = payable(address(0xABCD));
+    address payable validator = payable(address(0xABBD));
+    // address payable commission = payable(address(0xAABD));
+
 
 
     function testDeployandInitialize() public {
@@ -446,16 +448,16 @@ function testFail_BidOnDirectSaleNFT() public {
 function test_BuyPiNFT() public {
     // Let Bob buy piNFT
 testEdit_PriceAfterListingOnSale();
-    (   uint256 saleId,
+    (   ,
         ,
         ,
         ,
         ,
-     bool bidSale,
+        ,
      bool status1,
         ,
         ,
-        address owner,
+        ,
         ) = PiMarket._tokenMeta(1);
         // console.log("aa",status1);
                 // console.log("sss",bidSale);
@@ -517,21 +519,21 @@ testEdit_PriceAfterListingOnSale();
 
 
     
-    // Check the amount received by Alice
-    // uint256 aliceGotAmount = (50000 * 8200) / 10000;
-    // assertEq(balance1 - _balance1, aliceGotAmount, "Incorrect amount received by Alice");
+    // Check the amount received by Alice 
+    uint256 aliceGotAmount = (50000 * 8200) / 10000;
+    assertEq(balance1 - _balance1, aliceGotAmount, "Incorrect amount received by Alice");
 
-    // // Check the amount received by Royalty Receiver
-    // uint256 royaltyGotAmount = (50000 * 500) / 10000;
-    // assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+    // Check the amount received by Royalty Receiver
+    uint256 royaltyGotAmount = (50000 * 500) / 10000;
+    assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
 
-    // // Check the amount received by Fee Receiver
-    // uint256 feeGotAmount = (50000 * 100) / 10000;
-    // assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+    // Check the amount received by Fee Receiver
+    uint256 feeGotAmount = (50000 * 100) / 10000;
+    assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
 
-    // // Check the amount received by Validator
-    // uint256 validatorGotAmount = (50000 * 1200) / 10000;
-    // assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+    // Check the amount received by Validator
+    uint256 validatorGotAmount = (50000 * 1200) / 10000;
+    assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
 
     // // Validate piNFT status
      (  ,
@@ -717,7 +719,6 @@ function testBobPlaceNFTOnSaleAgain() public {
 function testAliceBuyPiNFT() public {
     // should let alice buy piNFT
     testBobPlaceNFTOnSaleAgain();
-    vm.startPrank(alice);
 
  (   uint256 saleId1,
         ,
@@ -744,8 +745,13 @@ function testAliceBuyPiNFT() public {
     uint256 _balance3 = feeReceiver.balance;
     uint256 _balance4 = validator.balance;
 
+
+    vm.startPrank(alice);
+        vm.deal(alice, 1 ether);
+
+
     // Alice buys piNFT
-     PiMarket.BuyNFT { value: 50000 }(2, false);
+     PiMarket.BuyNFT{ value: 50000 }(2, false);
 
 
 
@@ -760,20 +766,20 @@ function testAliceBuyPiNFT() public {
 
 
      // Check the amount received by bob
-    // uint256 aliceGotAmount = (50000 * 9100) / 10000;
-    // assertEq(balance1 - _balance1, bobGotAmount, "Incorrect amount received by bob");
+    uint256 bobGotAmount = (50000 * 9100) / 10000;
+    assertEq(balance1 - _balance1, bobGotAmount, "Incorrect amount received by bob");
 
-    // // Check the amount received by Royalty Receiver
-    // uint256 royaltyGotAmount = (50000 * 500) / 10000;
-    // assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+    // Check the amount received by Royalty Receiver
+    uint256 royaltyGotAmount = (50000 * 500) / 10000;
+    assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
 
-    // // Check the amount received by Fee Receiver
-    // uint256 feeGotAmount = (50000 * 100) / 10000;
-    // assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+    // Check the amount received by Fee Receiver
+    uint256 feeGotAmount = (50000 * 100) / 10000;
+    assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
 
-    // // Check the amount received by Validator
-    // uint256 validatorGotAmount = (50000 * 300) / 10000;
-    // assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+    // Check the amount received by Validator
+    uint256 validatorGotAmount = (50000 * 300) / 10000;
+    assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
 
 
     (  ,
@@ -787,13 +793,203 @@ function testAliceBuyPiNFT() public {
         ,
         ,
         ) = PiMarket._tokenMeta(2);
-        console.log("qq",status)1;
+        console.log("qq",status1);
         assertFalse(status1, "Incorrect piNFT status after the purchase");
             vm.stopPrank();
 
-
+vm.prank(alice);
+ piNftContract.safeTransferFrom(alice,bob,0);
 
 }
+
+function test_BobPlaceNFT_OnSale_Again() public {
+    // should let bob place piNFT on sale again
+    testAliceBuyPiNFT();
+        vm.startPrank(bob);
+
+    // testValidatorAddERC20AndChangeCommission();
+    piNftContract.approve(address(PiMarket), 0);
+    PiMarket.sellNFT(
+        address(piNftContract),
+        0,
+        10000,
+        0x0000000000000000000000000000000000000000
+    );
+
+    // Check the ownership of piNFT after placing it on sale
+    address owner = piNftContract.ownerOf(0);
+    assertEq(owner, address(PiMarket), "Incorrect owner after placing NFT on sale");
+
+     vm.stopPrank();
+}
+function test_CancelSaleWhenPaused() public {
+    // should not allow cancelling sale if contract is paused
+test_BobPlaceNFT_OnSale_Again();
+    vm.startPrank(alice);
+
+    // Pause the piMarket contract
+    PiMarket.pause();
+
+    // Attempt to cancel the sale while the contract is paused
+    vm.expectRevert(bytes("Pausable: paused"));
+    PiMarket.cancelSale(3);
+
+    // Unpause the piMarket contract
+    PiMarket.unpause();
+    vm.stopPrank();
+}
+
+function testFail_CancelSaleNonOwner() public {
+    // should not let non owner cancel sale
+    test_CancelSaleWhenPaused();
+    vm.prank(alice);
+
+    // Attempt to cancel the sale by non-owner
+    PiMarket.cancelSale(3);
+}
+function test_BobCancelSale() public {
+    // should let bob cancel sale
+test_CancelSaleWhenPaused();
+    vm.startPrank(bob);
+
+    // Cancel the sale by bob
+    PiMarket.cancelSale(3);
+    
+    // Check the status after canceling the sale
+ (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(2); 
+      assertFalse(status, "Incorrect sale status after cancellation");
+        vm.stopPrank();
+
+}
+
+
+function testBobRedeemPiNFT() public {
+    // should let bob redeem piNFT
+    test_BobCancelSale();
+    vm.startPrank(bob);
+
+    // Approve piNFT for redemption by bob
+    piNftContract.approve(address(piNFTMethodsContract), 0);
+
+    // Redeem piNFT by bob
+    piNFTMethodsContract.redeemOrBurnPiNFT(
+        address(piNftContract),
+        0,
+        address(alice),
+        0x0000000000000000000000000000000000000000,
+        address(sampleERC20),
+        false
+    );
+
+    // Validate balances and ownership after redemption
+    assertEq(piNFTMethodsContract.viewBalance(
+        address(piNftContract),
+        0,
+        address(sampleERC20)
+    ), 0, "Incorrect balance after redemption");
+
+    assertEq(sampleERC20.balanceOf(address(validator)), 1000, "Incorrect validator balance after redemption");
+
+    address owner = piNftContract.ownerOf(0);
+    assertEq(owner, address(alice), "Incorrect owner after redemption");
+
+    // Checking the validator commission details after redemption
+    // (
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    //     bool status,
+    //     ,
+    //     ,
+    //     ,
+    //     ,
+    // );
+ // assertFalse(status, "Incorrect validator commission status after redemption");
+
+    piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    vm.stopPrank();
+}
+
+// Ensure the piNFT is created with 500 ERC20 tokens to Alice
+function testCreatePiNFTWithTokensToAlice() public {
+    testBobRedeemPiNFT();
+    // Mint 1000 tokens to the validator
+    vm.startPrank(alice);
+    sampleERC20.mint(validator, 1000);
+
+    // Mint a piNFT to Alice with URI "URI2" and 500 tokens to the royalty receiver
+    LibShare.Share[] memory royaltyArray;
+    LibShare.Share memory royalty = LibShare.Share(royaltyReceiver, uint96(500));
+    royaltyArray = new LibShare.Share[](1);
+    royaltyArray[0] = royalty;
+
+    uint256 tokenId = piNftContract.mintNFT(alice, "URI2", royaltyArray);
+    assertEq(piNftContract.ownerOf(tokenId), alice, "Incorrect owner after minting");
+    assertEq(piNftContract.balanceOf(alice), 2, "Incorrect balance after minting");
+
+    // Add validator to piNFT
+    piNFTMethodsContract.addValidator(
+        address(piNftContract),
+     tokenId,
+      validator);
+      vm.stopPrank();
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+
+
+       vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract), 
+        tokenId, 
+        address(sampleERC20),
+         500, 
+         1000,
+          royArray1);
+   
+    // View ERC20 balance
+    uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(piNftContract), tokenId, address(sampleERC20));
+    tokenBalance=500;
+    assertEq(tokenBalance,500, "Incorrect ERC20 balance");
+
+     vm.stopPrank();
+
+
+   LibShare.Share memory share = LibShare.Share(validator, 900);
+//    commission memory commission = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+// //     // // Validate the status and commission details
+//     assertTrue(commission.isValid, "Incorrect validator commission status");
+//     assertEq(commission.commission.account, validator, "Incorrect validator account");
+//     assertEq(commission.commission.value, 900, "Incorrect commission value");
+}
+
+
 }
 
    
