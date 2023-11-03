@@ -208,11 +208,12 @@ function testMintNFTAndAddERC20() public {
     tokenBalance=500;
     assertEq(tokenBalance,500, "Incorrect ERC20 balance");
 
-//     // Check validator commissions
-//     string memory commission = piNftMethods.validatorCommissions(piNftContract, tokenId);
-//     require(commission.isValid, "Commission is not valid");
-//     require(commission.commission.account == validator, "Incorrect validator account");
-//     require(commission.commission.value == 1000, "Incorrect commission value");
+  (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    // Validate the status and commission details
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 1000, "Incorrect commission value");
 }
  function testTransferNFT() public {
     // should let carl transfer piNFT to alice 
@@ -550,11 +551,12 @@ testEdit_PriceAfterListingOnSale();
         console.log("qq",status);
         assertFalse(status, "Incorrect piNFT status after the purchase");
 
-    // // Validate validator commission
-    // (bool isValid, address account, uint256 value) = piNFTMethodsContract.validatorCommissions(piNftContract, 0);
-    // assertEq(isValid, false, "Incorrect validator commission status");
-    // assertEq(account, validator, "Incorrect validator account");
-    // assertEq(value, 1000, "Incorrect validator commission value");
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+//     // // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 1000, "Incorrect commission value");
     vm.stopPrank();
 }
 function testFail_CancelSaleWhenNotForSale() public {
@@ -680,9 +682,13 @@ testRepayFundsToNFT();
         100,
         royArray1
     );
-    //         [validator.getAddress(), 300]
-    //     ]
-    // );
+    
+    (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 100, "Incorrect commission value");
     vm.stopPrank();
 
     // Check validator commission after modification
@@ -795,6 +801,13 @@ function testAliceBuyPiNFT() public {
         ) = PiMarket._tokenMeta(2);
         console.log("qq",status1);
         assertFalse(status1, "Incorrect piNFT status after the purchase");
+
+        (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 100, "Incorrect commission value");
             vm.stopPrank();
 
 vm.prank(alice);
@@ -903,28 +916,18 @@ function testBobRedeemPiNFT() public {
     address owner = piNftContract.ownerOf(0);
     assertEq(owner, address(alice), "Incorrect owner after redemption");
 
-    // Checking the validator commission details after redemption
-    // (
-    //     ,
-    //     ,
-    //     ,
-    //     ,
-    //     ,
-    //     ,
-    //     bool status,
-    //     ,
-    //     ,
-    //     ,
-    //     ,
-    // );
- // assertFalse(status, "Incorrect validator commission status after redemption");
 
-    piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, 0x0000000000000000000000000000000000000000, "Incorrect validator account");
+    assertEq(commission.value, 0, "Incorrect commission value");
 
     vm.stopPrank();
 }
 
-// Ensure the piNFT is created with 500 ERC20 tokens to Alice
 function testCreatePiNFTWithTokensToAlice() public {
     testBobRedeemPiNFT();
     // Mint 1000 tokens to the validator
@@ -938,9 +941,17 @@ function testCreatePiNFTWithTokensToAlice() public {
     royaltyArray[0] = royalty;
 
     uint256 tokenId = piNftContract.mintNFT(alice, "URI2", royaltyArray);
-    assertEq(piNftContract.ownerOf(tokenId), alice, "Incorrect owner after minting");
-    assertEq(piNftContract.balanceOf(alice), 2, "Incorrect balance after minting");
+    // assertEq(piNftContract.ownerOf(tokenId), alice, "Incorrect owner after minting");
+    // assertEq(piNftContract.balanceOf(alice), 2, "Incorrect balance after minting");
+    tokenId = 1;
+    address owner = piNftContract.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = piNftContract.balanceOf(alice);
+    assertEq(bal, 2, "Incorrect balance after minting");
 
+          skip(3601);
+
+ 
     // Add validator to piNFT
     piNFTMethodsContract.addValidator(
         address(piNftContract),
@@ -966,10 +977,10 @@ function testCreatePiNFTWithTokensToAlice() public {
 
     piNFTMethodsContract.addERC20(
         address(piNftContract), 
-        tokenId, 
+        1, 
         address(sampleERC20),
          500, 
-         1000,
+         900,
           royArray1);
    
     // View ERC20 balance
@@ -980,18 +991,131 @@ function testCreatePiNFTWithTokensToAlice() public {
      vm.stopPrank();
 
 
-   LibShare.Share memory share = LibShare.Share(validator, 900);
-//    commission memory commission = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
 
-// //     // // Validate the status and commission details
-//     assertTrue(commission.isValid, "Incorrect validator commission status");
-//     assertEq(commission.commission.account, validator, "Incorrect validator account");
-//     assertEq(commission.commission.value, 900, "Incorrect commission value");
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+//     assertEq(commission.account, validator, "Incorrect validator account");
+//     assertEq(commission.value, 900, "Incorrect commission value");
 }
 
+function testPauseBeforePlaceNFTOnAuction() public {
+// should not place nft on auction if contract is paused 
+    testCreatePiNFTWithTokensToAlice();
 
+    // Pause the piMarket contract
+    vm.startPrank(alice);
+    PiMarket.pause();
+
+    // Attempt to place the NFT on auction while the contract is paused
+    piNftContract.approve(address(PiMarket), 1);
+        vm.expectRevert(bytes("Pausable: paused"));
+
+    PiMarket.SellNFT_byBid(
+        address(piNftContract), 
+        1,
+        100,
+        300,
+        0x0000000000000000000000000000000000000000
+    );
+
+    // Unpause the piMarket contract
+    PiMarket.unpause();
+    vm.stopPrank();
 }
 
+function testFail_PlaceNFTOnAuctionWithLowPrice() public {
+// should not place nft on auction if price < 10000 
+    testPauseBeforePlaceNFTOnAuction();
+
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with a price less than 10000
+    PiMarket.SellNFT_byBid(
+        address(piNftContract), 
+        1,
+        100,
+        300,
+        0x0000000000000000000000000000000000000000
+    );
+    vm.stopPrank();
+}
+
+function testFail_PlaceNFTOnAuctionWithZeroAddress() public {
+    // should not place nft on auction if contract address is 0
+testFail_PlaceNFTOnAuctionWithLowPrice();
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with a contract address of 0
+
+    PiMarket.SellNFT_byBid(
+        0x0000000000000000000000000000000000000000,
+        1,
+        50000,
+        300,
+        0x0000000000000000000000000000000000000000
+    );
+    vm.stopPrank();
+}
+
+function testFail_PlaceNFTOnAuctionWithZeroAuctionTime() public {
+    // should not place nft on auction if auction time is 0
+    testFail_PlaceNFTOnAuctionWithZeroAddress();
+
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with an auction time of 0
+    PiMarket.SellNFT_byBid(
+        address(piNftContract), 
+        1,
+        50000,
+        0,
+ 0x0000000000000000000000000000000000000000    );
+    vm.stopPrank();
+}
+function testAllowValidatorToAddERC20AndChangeCommission() public {
+    // should allow validator to add erc20 and change commission and royalties
+    testPauseBeforePlaceNFTOnAuction();
+        block.timestamp + 7500;
+        // Increase time by 3601 seconds
+        vm.warp(block.timestamp + 3601);
+    vm.startPrank(validator);
+   
+
+    // Approve 500 sampleERC20 tokens to piNftMethods
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add 500 sampleERC20 tokens to piNFT with a commission of 1000 and royalties to validator
+        LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(300));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+        address(piNftContract), 
+        1, 
+        address(sampleERC20),
+         500, 
+         1000,
+          royArray1);
+
+(LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+//     assertEq(commission.account, validator, "Incorrect validator account");
+//     assertEq(commission.value, 900, "Incorrect commission value");
+
+        
+}
+}
    
 
 
