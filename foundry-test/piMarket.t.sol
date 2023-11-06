@@ -39,7 +39,9 @@ contract piMarketTest is Test {
     address payable feeReceiver = payable(address(0xABEE));
     address payable royaltyReceiver = payable(address(0xABED));
     address payable validator = payable(address(0xABBD));
-    // address payable commission = payable(address(0xAABD));
+    address payable bidder1 = payable(address(0xAABD));
+        address payable bidder2 = payable(address(0xABFE));
+
 
 
 
@@ -943,11 +945,12 @@ function testCreatePiNFTWithTokensToAlice() public {
     uint256 tokenId = piNftContract.mintNFT(alice, "URI2", royaltyArray);
     // assertEq(piNftContract.ownerOf(tokenId), alice, "Incorrect owner after minting");
     // assertEq(piNftContract.balanceOf(alice), 2, "Incorrect balance after minting");
-    tokenId = 1;
+    // tokenId = 1;
     address owner = piNftContract.ownerOf(tokenId);
     assertEq(owner,alice, "inValid owner");
     uint256 bal = piNftContract.balanceOf(alice);
     assertEq(bal, 2, "Incorrect balance after minting");
+    console.log("vvv",tokenId);
 
           skip(3601);
 
@@ -991,12 +994,12 @@ function testCreatePiNFTWithTokensToAlice() public {
      vm.stopPrank();
 
 
-   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 1);
 
     // Validate the status and commission details
-    assertFalse(isValid, "Incorrect validator commission status");
-//     assertEq(commission.account, validator, "Incorrect validator account");
-//     assertEq(commission.value, 900, "Incorrect commission value");
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 900, "Incorrect commission value");
 }
 
 function testPauseBeforePlaceNFTOnAuction() public {
@@ -1106,16 +1109,226 @@ function testAllowValidatorToAddERC20AndChangeCommission() public {
          1000,
           royArray1);
 
-(LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 0);
+(LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 1);
 
     // Validate the status and commission details
-    assertFalse(isValid, "Incorrect validator commission status");
-//     assertEq(commission.account, validator, "Incorrect validator account");
-//     assertEq(commission.value, 900, "Incorrect commission value");
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 1000, "Incorrect commission value");
 
         
 }
+
+function testAlicePlacePiNFTOnAuction() public {
+    // should let alice place piNFT on auction
+testAllowValidatorToAddERC20AndChangeCommission();
+    vm.startPrank(alice);
+
+    // Approve the NFT for auction by alice
+    piNftContract.approve(address(PiMarket), 1);
+
+    // Place the NFT on auction by alice
+    PiMarket.SellNFT_byBid(
+        address(piNftContract),
+        1,
+        50000,
+        300,
+        0x0000000000000000000000000000000000000000
+    );
+    vm.stopPrank();
+
+    // Check the ownership of piNFT after placing it on auction
+    address owner = piNftContract.ownerOf(1);
+    assertEq(owner, address(PiMarket), "Incorrect owner after placing NFT on auction");
+
+    // Check the bidSale status after placing it on auction
+    (
+        ,
+        ,
+        ,
+        ,
+        ,
+        bool bidSale,
+        ,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(4);
+    assertTrue(bidSale, "Incorrect bidSale status after placing NFT on auction");
 }
-   
+
+function test_AliceChangeAuctionStartPrice() public {
+    // should let alice change the start price of the auction
+testAlicePlacePiNFTOnAuction();
+    vm.startPrank(alice);
+
+    // Change the start price of the auction by alice
+    PiMarket.editSalePrice(4, 10000);
+(
+        ,
+        ,
+        ,
+        uint256 price,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(4);
+            assertEq(price, 10000, "Incorrect start price after changing");
+
+    // Change the start price of the auction again by alice
+    PiMarket.editSalePrice(4, 50000);
+    (
+        ,
+        ,
+        ,
+        uint256 price1,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(4);
+    assertEq(price1, 50000, "Incorrect start price after changing again");
+
+    vm.stopPrank();
+}
+
+function testFail_PlaceBidWhenPaused() public {
+    // should not place bids if contract is paused
+    test_AliceChangeAuctionStartPrice();
+
+    // Pause the piMarket contract
+    vm.prank(alice);
+    PiMarket.pause();
+
+    // Attempt to place a bid while the contract is paused
+        vm.startPrank(bidder1);
+
+    // vm.expectRevert(bytes("Pausable: paused"));
+    PiMarket.Bid{ value: 60000 }(4, 60000);
+
+        vm.stopPrank();
+
+
+    // Unpause the piMarket contract
+        vm.prank(alice);
+
+    PiMarket.unpause();
+}
+
+function testFail_PlaceBidWithIncorrectValue() public {
+    // should not place bids if bid price is not equal to msg.value
+        test_AliceChangeAuctionStartPrice();
+
+    // testFail_PlaceBidWhenPaused();
+    vm.startPrank(bidder1);
+
+    // Attempt to place a bid with bid price not equal to msg.value
+    PiMarket.Bid{ value: 60000 }(4, 50000);
+    vm.stopPrank();
+}
+function testFail_PlaceBidBy_alice() public {
+// should let bidders place bid on piNFT    
+     test_AliceChangeAuctionStartPrice();
+
+    // testFail_PlaceBidWhenPaused();
+    vm.startPrank(alice);
+
+    // Attempt to place a bid by alice
+    PiMarket.Bid{ value: 60000 }(4, 60000);
+    vm.stopPrank();
+}
+function testFail_PlaceBid() public {
+// should let bidders place bid on piNFT    (with incorrect value)
+        test_AliceChangeAuctionStartPrice();
+
+    // testFail_PlaceBidWhenPaused();
+    vm.startPrank(bidder1);
+
+    // Attempt to place a bid with bid price not equal to msg.value
+    PiMarket.Bid{ value: 50000 }(4, 50000);
+    vm.stopPrank();
+}
+function test_PlaceBid() public {
+    // should let bidders place bid on piNFT 
+test_AliceChangeAuctionStartPrice();
+    //  Bid by bidder1 
+     vm.prank(bidder1);
+         vm.deal(bidder1, 1 ether);
+
+    PiMarket.Bid{ value: 60000 }(4, 60000);
+
+
+            //  Bid by bidder2
+
+             vm.prank(bidder2);
+             vm.deal(bidder2, 1 ether);
+
+            PiMarket.Bid{ value: 65000 }(4, 65000);
+
+               // Again place a Bid by bidder1 
+
+                  vm.prank(bidder1);
+                 PiMarket.Bid{ value: 70000 }(4, 70000);
+
+
+}
+ function testFail_withdrawBid() public {
+//should not let highest bidder withdraw before auction end time
+       test_PlaceBid();
+                 
+         vm.prank(bidder1);
+
+        PiMarket.withdrawBidMoney(4, 2);
+
+
+}
+function testFail_PlaceBidAfterAuctionEnd() public {
+testFail_withdrawBid();  
+ // Increase time to simulate the end of the auction
+       vm.startPrank(bidder2);
+
+ vm.warp(block.timestamp + 300);    
+            PiMarket.Bid{ value: 75000 }(4, 75000);
+            vm.stopPrank();
+
+
+
+}
+function test_AliceChangeAuctionPriceAfterBidding() public {
+    // should not let alice change the auction price after bidding has begun
+       test_PlaceBid();
+    vm.startPrank(alice);
+
+    // Attempt to change the auction price after bidding has begun
+        vm.expectRevert(bytes("Bid has started"));
+
+    PiMarket.editSalePrice(4, 10000);
+
+    vm.stopPrank();
+}
+
+function test_ExecuteBidWhenPaused() public {
+    // should not execute bid if contract is paused
+ test_AliceChangeAuctionPriceAfterBidding();
+     vm.startPrank(alice);
+
+    // Pause the piMarket contract
+    PiMarket.pause();
+
+    // Attempt to execute a bid while the contract is paused
+     vm.expectRevert(bytes("Pausable: paused"));
+    PiMarket.executeBidOrder(4, 2, false);
+
+    // Unpause the piMarket contract
+    PiMarket.unpause();
+    vm.stopPrank();
+}
+
+}
 
 
