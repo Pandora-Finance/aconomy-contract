@@ -1329,6 +1329,142 @@ function test_ExecuteBidWhenPaused() public {
     vm.stopPrank();
 }
 
+function testFail_ExecuteHighestBid() public {
+    // should let alice execute highest bid
+test_ExecuteBidWhenPaused();
+   
+
+     uint256 _balance1 = alice.balance;
+     assertEq(_balance1,0,"invalid balance");
+
+    uint256 _balance2 =royaltyReceiver.balance;
+         assertEq(_balance2,0,"invalid balance");
+
+
+    uint256 _balance3 =feeReceiver.balance;
+             assertEq(_balance3,0,"invalid balance");
+
+    
+
+    uint256 _balance4 =validator.balance;
+                 assertEq(_balance4,0,"invalid balance");
+
+    // attempt to  execute bid by bob 
+     vm.prank(bob);
+     PiMarket.executeBidOrder(4, 2, false);
+
+}
+function test_AliceExecuteHighestBid() public {
+    // should let alice execute highest bid
+    test_ExecuteBidWhenPaused();
+
+
+       vm.startPrank(alice);
+     uint256 _balance1 = alice.balance;
+
+    uint256 _balance2 =royaltyReceiver.balance;
+
+    uint256 _balance3 =feeReceiver.balance;
+
+    uint256 _balance4 =validator.balance;
+    // attempt to  execute bid by bob 
+     PiMarket.executeBidOrder(4, 2, false);
+ address owner = piNftContract.ownerOf(1);
+    assertEq(owner, bidder1, "Incorrect owner of the NFT");
+
+       // Get updated balances
+
+     uint256 balance1 = alice.balance;
+    
+
+        uint256 balance2 = royaltyReceiver.balance;
+
+            uint256 balance3 = feeReceiver.balance;
+
+    uint256 balance4 = validator.balance;
+
+
+
+
+     // Check the amount received by alice
+    uint256 AliceGotAmount = (70000 * 8100) / 10000;
+    assertEq(balance1 - _balance1, AliceGotAmount, "Incorrect amount received by alice");
+
+    // Check the amount received by Royalty Receiver
+    uint256 royaltyGotAmount = (70000 * 500) / 10000;
+    assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+
+    // Check the amount received by Fee Receiver
+    uint256 feeGotAmount = (70000 * 100) / 10000;
+    assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+
+    // Check the amount received by Validator
+    uint256 validatorGotAmount = (70000 * 1300) / 10000;
+    assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+
+
+(LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 1);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 1000, "Incorrect commission value");
+    vm.stopPrank();
+
+
 }
 
+function testFail_WithdrawAnotherBid() public {
+    // should not let wallet withdraw another's bid
+        test_AliceExecuteHighestBid();
 
+    // Try to withdraw bid by bidder2
+    vm.startPrank(bidder2);
+
+    // Attempt to withdraw bid by bidder2
+    PiMarket.withdrawBidMoney(4, 0);
+
+    vm.stopPrank();
+}
+
+function test_WithdrawBidWhenPaused() public {
+    // should not allow bids to be withdrawn if contract is paused
+    test_AliceExecuteHighestBid();
+
+    // Pause the piMarket contract
+        vm.prank(alice);
+
+    PiMarket.pause();
+
+    // Try to withdraw bid by bidder1 while the contract is paused
+    vm.startPrank(bidder1);
+         vm.expectRevert(bytes("Pausable: paused"));
+
+    PiMarket.withdrawBidMoney(4, 0);
+    vm.stopPrank();
+
+    // Unpause the piMarket contract
+    vm.prank(alice);
+    PiMarket.unpause();
+}
+
+function test_OtherBiddersWithdrawBids() public {
+// should let other bidders withdraw their bids
+test_WithdrawBidWhenPaused();
+vm.prank(bidder1);
+    PiMarket.withdrawBidMoney(4, 0);
+    vm.prank(bidder2);
+
+    PiMarket.withdrawBidMoney(4, 1);
+
+    // Check the balance of the piMarket contract
+    uint256 balance1 = address(PiMarket).balance;
+    assertEq(balance1, 0, "Incorrect balance after withdrawing bids");
+
+    // Transfer the NFT from bidder1 to alice
+    vm.prank(bidder1);
+
+    piNftContract.safeTransferFrom(bidder1, alice, 1);
+}
+
+}
