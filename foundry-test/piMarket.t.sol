@@ -2167,6 +2167,214 @@ function test_CreatePiNFTWithTokensToBob() public {
     assertEq(commission.account, validator, "Incorrect validator account");
     assertEq(commission.value, 900, "Incorrect commission value");
 }
+function test_NewPiNFTWithTokensToAlice() public {
+// should create a piNFT again with 500 erc20 tokens to alice
+test_CreatePiNFTWithTokensToBob();
+ vm.startPrank(alice);
+    // Mint ERC20 tokens for the validator
+    sampleERC20.mint(address(validator), 1000);
+
+    // Mint a new piNFT with 500 erc20 tokens to Alice
+   LibShare.Share[] memory royaltyArray;
+    LibShare.Share memory royalty = LibShare.Share(royaltyReceiver, uint96(500));
+    royaltyArray = new LibShare.Share[](1);
+    royaltyArray[0] = royalty;
+
+    uint256 tokenId = piNftContract.mintNFT(
+        alice, 
+        "URI2", 
+        royaltyArray);
+   
+    // tokenId = 3;
+    assertEq(tokenId,5,"inavlid token ID");
+    address owner = piNftContract.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = piNftContract.balanceOf(alice);
+    assertEq(bal, 3, "Incorrect balance after minting");
+    // Get the current block timestamp
+        uint256 currentTime = block.timestamp;
+        // Warp the time ahead by 3600 seconds (1 hour)
+        vm.warp(currentTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, currentTime + 3600);
+    //  skip(3601);
+ // Add a validator to the piNFT
+    piNFTMethodsContract.addValidator(
+        address(piNftContract),
+         5, 
+         address(validator));
+         vm.stopPrank();
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add ERC20 tokens to the piNFT
+      vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract), 
+        5, 
+        address(sampleERC20),
+         500, 
+         900,
+          royArray1);
+   
+    // View ERC20 balance
+    uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(piNftContract), tokenId, address(sampleERC20));
+    tokenBalance=500;
+    assertEq(tokenBalance,500, "Incorrect ERC20 balance");
+
+     vm.stopPrank();
+
+     (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 5);
+
+    // Validate the status and commission details
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 900, "Incorrect commission value");
+}
+function test_InitiateSwapWhenPaused() public {
+    // should not allow initiating a swap if contract is paused
+    test_NewPiNFTWithTokensToAlice();
+    // Pause the contract and attempt to initiate a swap
+    vm.prank(alice);
+    PiMarket.pause();
+
+            vm.prank(alice);
+        vm.expectRevert(bytes("Pausable: paused"));
+        PiMarket.makeSwapRequest(
+        address(piNftContract), 
+        address(piNftContract), 
+            3,
+            4
+        );
+  vm.prank(alice);
+  PiMarket.unpause();
+}
+
+function test_InitiateSwapNotTokenOwner() public {
+    // should not allow initiating a swap if caller is not token owner
+test_InitiateSwapWhenPaused();
+    // Attempt to initiate a swap by bob who is not the token owner
+    vm.startPrank(bob);
+       vm.expectRevert(bytes("Only token owner can execute"));
+        PiMarket.makeSwapRequest(
+        address(piNftContract), 
+        address(piNftContract), 
+            3,
+            4
+        );
+    vm.stopPrank();
+}
+function testFail_InitiateSwapWithZeroAddress() public {
+    // should not allow initiating a swap if either contract address is 0
+test_InitiateSwapNotTokenOwner();
+
+    // Attempt to initiate a swap with one of the contract addresses set to 0
+    vm.startPrank(bob);
+        PiMarket.makeSwapRequest(
+            0x0000000000000000000000000000000000000000,
+        address(piNftContract), 
+            3,
+            4
+        );
+            vm.stopPrank();
+}
+function test_InitiateSwap_WithZeroAddress() public {
+    // should not allow initiating a swap if either contract address is 0
+test_InitiateSwapNotTokenOwner();
+    vm.startPrank(bob);
+
+
+               vm.expectRevert(bytes("Only token owner can execute"));
+
+        PiMarket.makeSwapRequest(
+        address(piNftContract), 
+            0x0000000000000000000000000000000000000000,
+            3,
+            4
+        );
+    vm.stopPrank();
+}
+
+function testFail_InitiateSwapTokenOwner2() public {
+    // should not allow initiating a swap if caller is token2 owner
+ test_InitiateSwap_WithZeroAddress();
+    // Attempt to initiate a swap with the caller as the owner of token2
+    vm.startPrank(bob);
+        PiMarket.makeSwapRequest(
+        address(piNftContract), 
+        address(piNftContract), 
+            3,
+            5
+        );
+    vm.stopPrank();
+}
+function testFail_InitiateSwapBy_alice() public {
+// should let alice initiate swap request 
+ test_InitiateSwap_WithZeroAddress();
+    vm.startPrank(alice);
+        piNftContract.approve(address(PiMarket), 3);
+
+        PiMarket.makeSwapRequest(
+        address(piNftContract), 
+            0x0000000000000000000000000000000000000000,
+            5,
+            4
+        );
+    vm.stopPrank();
+}
+function testFail_Initiate_SwapBy_alice() public {
+// should let alice initiate swap request 
+ test_InitiateSwap_WithZeroAddress();
+    vm.startPrank(alice);
+        piNftContract.approve(address(PiMarket), 3);
+
+        PiMarket.makeSwapRequest(
+        0x0000000000000000000000000000000000000000,
+        address(piNftContract), 
+            5,
+            4
+        );
+    vm.stopPrank();
+}
+function test_initiate_SwapBy_alice() public {
+// should let alice initiate swap request 
+ test_InitiateSwap_WithZeroAddress();
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 3);
+PiMarket.makeSwapRequest(
+        address(piNftContract), 
+        address(piNftContract), 
+        3,
+        4
+      );
+ 
+ 
+ 
+     (  ,
+        address initiator,
+        ,
+        ,
+        ,
+        ,
+        ) = PiMarket._swaps(0);
+                //   vm.stopPrank();
+        assertEq(initiator,alice,"incorrect address");
+        assertEq(piNftContract.ownerOf(3), address(PiMarket), "Ownership should be transferred to the market");
+        vm.stopPrank();
 
 }
 
+}
