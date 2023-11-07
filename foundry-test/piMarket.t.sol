@@ -2729,5 +2729,141 @@ aconomyFee.setAconomyPiMarketFee(0);
     assertEq(commission.account, validator, "Incorrect validator account");
     assertEq(commission.value, 0, "Incorrect commission value");
 }
+function test_CarlTransferPiNFTToAlice() public {
+    // should let carl transfer piNFT to alice
+    test_PiNFTWithTokensToCarl();
 
+    // Transfer the piNFT from Carl to Alice
+    vm.startPrank(carl);
+    piNftContract.safeTransferFrom(carl, alice, 6);
+
+    // Validate the new owner of the piNFT
+    assertEq(piNftContract.ownerOf(6), alice, "Incorrect owner after transfer");
+    vm.stopPrank();
+}
+
+function test_AlicePlacePiNFTOnSale() public {
+    // should let alice place piNFT on sale
+     test_CarlTransferPiNFTToAlice();
+
+    // Approve the piMarket to handle the piNFT
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 6);
+
+    // Validate the current owner of the piNFT
+    assertEq(piNftContract.ownerOf(6), alice, "Incorrect owner before sale");
+
+    // Place the piNFT on sale
+        PiMarket.sellNFT(
+            address(piNftContract),
+            6,
+            50000,
+            0x0000000000000000000000000000000000000000
+        );
+
+        // .to.emit(PiMarket, "SaleCreated")
+        // .withArgs(6, await PiNFT.getAddress(), 9);
+
+            // piMarket.emitSaleCreated(6, address(piNFT), 9);
+        
+        // piMarket.createSale(6, address(piNftContract), 9);
+
+    // Validate the metadata of the sale
+    (   ,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(9);
+    assertTrue(status, "Incorrect sale status");
+    assertFalse(bidSale, "Incorrect bid sale status");
+
+    // Validate the new owner of the piNFT
+    assertEq(piNftContract.ownerOf(6), address(PiMarket), "Incorrect owner after sale");
+    vm.stopPrank();
+}
+
+function testFail_BobBuyPiNFT() public {
+    // should let bob buy piNFT
+test_AlicePlacePiNFTOnSale();
+
+    // Get the metadata of the sale
+   (   ,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(9);
+    assertTrue(status, "Incorrect sale status");
+        assertFalse(bidSale, "Incorrect bid sale status");
+
+    // Attempt to buy piNFT with incorrect value
+    vm.prank(bob);
+        PiMarket.BuyNFT{ value: 5000 }(9, false );
+
+    // Buy piNFT with correct value
+    // await PiMarket.connect(bob).BuyNFT(9, false, { value: 50000 });
+
+    // // Attempt to buy piNFT again
+    // await expect(
+    //     PiMarket.connect(bob).BuyNFT(9, false, { value: 50000 })
+    // ).to.be.revertedWithoutReason();
+}
+function test_BobBuyPiNFT() public {
+    // should let bob buy piNFT
+test_AlicePlacePiNFTOnSale();
+
+    // Get the metadata of the sale
+   (   ,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(9);
+    assertTrue(status, "Incorrect sale status");
+        assertFalse(bidSale, "Incorrect bid sale status");
+
+    // Attempt to buy piNFT with incorrect value
+    vm.prank(bob);
+        PiMarket.BuyNFT{ value: 50000}(9, false );
+            assertEq(piNftContract.ownerOf(6), bob, "Incorrect owner");
+
+}
+function testFail_BobBuyPiNFT_Again() public {
+    //  let bob buy piNFT again
+ test_BobBuyPiNFT();
+    // Get the metadata of the sale
+   (   ,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(9);
+    assertTrue(status, "Incorrect sale status");
+        assertFalse(bidSale, "Incorrect bid sale status");
+
+    // Attempt to buy piNFT with incorrect value
+    vm.prank(bob);
+        PiMarket.BuyNFT{ value: 50000}(9, false );
+}
 }
