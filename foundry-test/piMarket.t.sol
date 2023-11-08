@@ -3103,4 +3103,307 @@ function test_Alice_ExecuteBidOrder() public {
 
 
 }
+function test_Create_PiNFT_TokensToCarl() public {
+// should create a piNFT again with 500 erc20 tokens to carl
+test_Alice_ExecuteBidOrder();
+vm.prank(feeReceiver);
+aconomyFee.setAconomyPiMarketFee(0);
+
+ vm.startPrank(carl);
+    // Mint ERC20 tokens for the validator
+    sampleERC20.mint(address(validator), 1000);
+
+    // Mint a new piNFT with 500 erc20 tokens to carl
+   LibShare.Share[] memory royaltyArray;
+    LibShare.Share memory royalty = LibShare.Share(royaltyReceiver, uint96(500));
+    royaltyArray = new LibShare.Share[](1);
+    royaltyArray[0] = royalty;
+
+    uint256 tokenId = piNftContract.mintNFT(
+        carl, 
+        "URI2", 
+        royaltyArray);
+   
+    assertEq(tokenId,8,"inavlid token ID");
+    address owner = piNftContract.ownerOf(tokenId);
+    assertEq(owner,carl, "inValid owner");
+    uint256 bal = piNftContract.balanceOf(carl);
+    assertEq(bal, 1, "Incorrect balance after minting");
+    // Get the current block timestamp
+        uint256 currentTime = block.timestamp;
+        // Warp the time ahead by 3600 seconds (1 hour)
+        vm.warp(currentTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, currentTime + 3600);
+
+ // Add a validator to the piNFT
+    piNFTMethodsContract.addValidator(
+        address(piNftContract),
+         8, 
+         address(validator));
+         vm.stopPrank();
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add ERC20 tokens to the piNFT
+      vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(piNftContract), 
+        8, 
+        address(sampleERC20),
+         500, 
+         0,
+          royArray1);
+   
+    // View ERC20 balance
+    uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(piNftContract), tokenId, address(sampleERC20));
+    tokenBalance=500;
+    assertEq(tokenBalance,500, "Incorrect ERC20 balance");
+
+     vm.stopPrank();
+
+     (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(piNftContract), 8);
+
+    // Validate the status and commission details
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 0, "Incorrect commission value");
+}
+
+function test_Carl_TransferPiNFT_To_Alice() public {
+    // should let carl transfer piNFT to alice
+test_Create_PiNFT_TokensToCarl();
+    // Transfer the piNFT from Carl to Alice
+    vm.startPrank(carl);
+    piNftContract.safeTransferFrom(carl, alice, 8);
+
+    // Validate the new owner of the piNFT
+    assertEq(piNftContract.ownerOf(8), alice, "Incorrect owner after transfer");
+    vm.stopPrank();
+}
+
+function test_Alice_Place_PiNFTOnSale() public {
+    // should let alice place piNFT on sale
+test_Carl_TransferPiNFT_To_Alice();
+    // Approve the piMarket to handle the piNFT
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 8);
+
+    // Validate the current owner of the piNFT
+    assertEq(piNftContract.ownerOf(8), alice, "Incorrect owner before sale");
+
+    // Place the piNFT on sale
+        PiMarket.sellNFT(
+            address(piNftContract),
+            8,
+            50000,
+            0x0000000000000000000000000000000000000000
+        );
+
+        // .to.emit(PiMarket, "SaleCreated")
+        // .withArgs(6, await PiNFT.getAddress(), 9);
+
+            // piMarket.emitSaleCreated(6, address(piNFT), 9);
+        
+        // piMarket.createSale(6, address(piNftContract), 9);
+
+    // Validate the metadata of the sale
+    (   ,
+        ,
+        ,
+        ,
+        ,
+     bool bidSale,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(11);
+    assertTrue(status, "Incorrect sale status");
+    assertFalse(bidSale, "Incorrect bid sale status");
+
+    // Validate the new owner of the piNFT
+    assertEq(piNftContract.ownerOf(8), address(PiMarket), "Incorrect owner");
+    vm.stopPrank();
+}
+
+function test_AliceCancelSale() public {
+    // should let alice cancel sale
+    test_Alice_Place_PiNFTOnSale();
+        vm.startPrank(alice);
+
+    PiMarket.cancelSale(11);
+     (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(11);
+    assertFalse(status, "Incorrect sale status");
+        vm.stopPrank();
+
+}
+
+function testFail_PlaceBid_On_PiNFT() public {
+    // should not let bidders place bid on piNFT
+test_AliceCancelSale();
+    // Place bid by bidder1
+        vm.startPrank(bidder1);
+
+        PiMarket.Bid{value: 60000}(11, 60000);  
+                vm.stopPrank();
+
+}
+function test_Alice_Place_PiNFT_OnSale() public {
+    // should let alice agin place piNFT on sale
+test_AliceCancelSale();
+    // Approve the piMarket to handle the piNFT
+    vm.startPrank(alice);
+    piNftContract.approve(address(PiMarket), 8);
+
+    // Validate the current owner of the piNFT
+    assertEq(piNftContract.ownerOf(8), alice, "Incorrect owner before sale");
+
+    // Place the piNFT on sale
+        PiMarket.SellNFT_byBid(
+            address(piNftContract),
+            8,
+            50000,
+            300,
+            0x0000000000000000000000000000000000000000
+        );
+}
+
+function testFail_PlaceBid_OnPiNFT() public {
+    // should let bidders place bid on piNFT
+test_Alice_Place_PiNFT_OnSale();
+    // lets try an attempt, bid by owner(alice), it should be reverted 
+    vm.startPrank(alice);
+        PiMarket.Bid{ value: 60000 }(12, 60000);
+        vm.stopPrank();
+}
+
+function testFail_PlaceBidOn_PiNFT() public {
+    // should let bidders place bid on piNFT
+test_Alice_Place_PiNFT_OnSale();
+    // Checking, bid by bidder1 with less value, it should be reverted 
+    vm.startPrank(bidder1);
+        PiMarket.Bid{ value: 50000 }(12, 50000);
+        vm.stopPrank();
+}
+
+function test_PlaceBid_On_PiNFT() public {
+    // should let bidders place bid on piNFT
+test_Alice_Place_PiNFT_OnSale();
+    // Place bid by bidder1
+        vm.startPrank(bidder1);
+
+        PiMarket.Bid{value: 60000}(12, 60000);  
+
+// Place bid by bidder2 
+vm.startPrank(bidder2);
+
+        PiMarket.Bid{value: 65000}(12, 65000);
+        vm.stopPrank();
+        // Another bid by bidder1
+        vm.startPrank(bidder1);
+
+        PiMarket.Bid{value: 70000}(12, 70000);  
+
+
+          (
+          ,
+          ,
+          ,
+          address buyerAddress,
+          ,
+          ) = PiMarket.Bids(12, 2);
+
+    // Validate bid details
+    assertEq(buyerAddress, bidder1, "Incorrect buyer address in bid");
+
+    vm.stopPrank();
+
+
+}
+function test_OtherBiddersWithdrawOthersBids() public {
+    // should let other bidders withdraw others' bids
+    test_PlaceBid_On_PiNFT();
+        vm.startPrank(bidder1);
+
+    PiMarket.withdrawBidMoney(12, 0);
+        vm.stopPrank();
+
+}
+
+function testFail_Other_BiddersWithdrawOthersBids() public {
+    // should not let other bidders withdraw others' bids
+test_OtherBiddersWithdrawOthersBids();
+vm.warp(block.timestamp + 400); 
+       vm.startPrank(bidder1);
+
+    PiMarket.withdrawBidMoney(12, 1);
+        vm.stopPrank();
+}
+
+function testFail_OtherBidders_WithdrawOthersBids() public {
+    // should not let other bidders withdraw others' bids
+testFail_Other_BiddersWithdrawOthersBids();
+// vm.warp(block.timestamp + 400); 
+        vm.startPrank(bidder1);
+
+    PiMarket.withdrawBidMoney(12, 0);
+        vm.stopPrank();
+}
+
+function test_Alice_Cancel_Sale() public {
+    // should let alice cancel sale
+test_OtherBiddersWithdrawOthersBids();
+        vm.startPrank(alice);
+
+    PiMarket.cancelSale(12);
+     (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(12);
+    assertFalse(status, "Incorrect sale status");
+        vm.stopPrank();
+
+}
+
+function testFail_Place_Bid_On_PiNFT() public {
+    // should not let bidders place bid on piNFT
+test_Alice_Cancel_Sale();
+    // Place a bid by bidder1
+        vm.startPrank(bidder1);
+
+        PiMarket.Bid{value: 60000}(12, 60000);  
+
+
+}
 }
