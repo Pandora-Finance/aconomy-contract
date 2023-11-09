@@ -70,7 +70,7 @@ contract CollectionMethods is
      * @param _to address to mint the piNFT to.
      * @param _uri The uri of the piNFT.
      */
-    function mintNFT(address _to, string memory _uri) public {
+    function mintNFT(address _to, string memory _uri) public returns(uint256 ) {
         require(msg.sender == collectionOwner);
         require(_to != address(0));
         uint256 tokenId_ = _tokenIdCounter.current();
@@ -78,6 +78,7 @@ contract CollectionMethods is
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
         emit TokenMinted(tokenId_, _to);
+        return tokenId_;
     }
 
     /**
