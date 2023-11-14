@@ -1542,4 +1542,192 @@ function test_HighestBidderWithdrawAfterAuctionExpires() public {
     assertTrue(withdrawn, "Bidder1 should be able to withdraw after auction expires");
      vm.stopPrank();
 }
+//   describe("Swap NFTs") 
+function test_Create_PiNFTWithTokensToAlice() public {
+    // should create a piNFT with 500 erc20 tokens to alice
+    test_HighestBidderWithdrawAfterAuctionExpires();
+ vm.startPrank(alice);
+    // Mint ERC20 tokens for the validator
+    sampleERC20.mint(address(validator), 1000);
+
+    // Mint a new piNFT with 500 erc20 tokens to Alice
+
+    uint256 tokenId = collectionMethodsInstance.mintNFT(
+        alice, 
+        "URI2"
+        );
+   
+    assertEq(tokenId,3,"inavlid token ID");
+    address owner = collectionMethodsInstance.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = collectionMethodsInstance.balanceOf(alice);
+    assertEq(bal, 2, "Incorrect balance after minting");
+ // Add a validator to the piNFT
+    piNFTMethodsContract.addValidator(
+        address(collectionMethodsInstance),
+         3, 
+         address(validator));
+         vm.stopPrank();
+       
+
+    // // Approve ERC20 tokens to piNftMethods
+         vm.prank(validator);
+
+      // Get the current block timestamp
+        uint256 currentTime = block.timestamp;
+        // Warp the time ahead by 3600 seconds (1 hour)
+        vm.warp(currentTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, currentTime + 3600);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add ERC20 tokens to the piNFT
+      vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(collectionMethodsInstance), 
+        3, 
+        address(sampleERC20),
+         500, 
+         1000,
+          royArray1);
+   
+     vm.stopPrank();
+
+}
+    
+
+function test_Create_Again_PiNFTWithTokensToAlice() public {
+    // should again create a piNFT with 500 erc20 tokens to alice
+test_Create_PiNFTWithTokensToAlice();
+ vm.startPrank(alice);
+    // Mint ERC20 tokens for the validator
+    sampleERC20.mint(address(validator), 1000);
+
+    // Mint a new piNFT with 500 erc20 tokens to Alice
+
+    uint256 tokenId = collectionMethodsInstance.mintNFT(
+        alice, 
+        "URI2"
+        );
+   
+    assertEq(tokenId,4,"inavlid token ID");
+    address owner = collectionMethodsInstance.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = collectionMethodsInstance.balanceOf(alice);
+    assertEq(bal, 3, "Incorrect balance after minting");
+ // Add a validator to the piNFT
+    piNFTMethodsContract.addValidator(
+        address(collectionMethodsInstance),
+         4, 
+         address(validator));
+         vm.stopPrank();
+         // Get the current block timestamp
+        uint256 currentTime = block.timestamp;
+        // Warp the time ahead by 3600 seconds (1 hour)
+        vm.warp(currentTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, currentTime + 3600);
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add ERC20 tokens to the piNFT
+      vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(collectionMethodsInstance), 
+        4, 
+        address(sampleERC20),
+         500, 
+         0,
+          royArray1);
+   
+     vm.stopPrank();
+
+}
+
+function test_CreatePiNFTWithTokensToBob() public {
+        // should create a piNFT with 500 erc20 tokens to bob
+test_Create_Again_PiNFTWithTokensToAlice();
+     vm.startPrank(alice);
+        // Mint ERC20 tokens for the validator
+        sampleERC20.mint(address(validator), 1000);
+
+        // Mint a new piNFT with 500 erc20 tokens to Alice
+
+        uint256 tokenId = collectionMethodsInstance.mintNFT(
+            alice, 
+            "URI2"
+            );
+
+   
+    assertEq(tokenId,5,"inavlid token ID");
+    address owner = collectionMethodsInstance.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = collectionMethodsInstance.balanceOf(alice);
+    assertEq(bal, 4, "Incorrect balance after minting");
+ // Add a validator to the piNFT
+    piNFTMethodsContract.addValidator(
+        address(collectionMethodsInstance),
+         5, 
+         address(validator));
+         vm.stopPrank();
+         // Get the current block timestamp
+        uint256 currentTime = block.timestamp;
+        // Warp the time ahead by 3600 seconds (1 hour)
+        vm.warp(currentTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, currentTime + 3600);
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+
+    // Add ERC20 tokens to the piNFT
+      vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(collectionMethodsInstance), 
+        5, 
+        address(sampleERC20),
+         500, 
+         0,
+          royArray1);
+   
+     vm.stopPrank();
+
+}
+
 }
