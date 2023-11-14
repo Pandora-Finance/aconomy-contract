@@ -377,13 +377,10 @@ testEdit_PriceAfterListingOnSale();
  sampleERC20.mint(bob, 50000);
     
     uint256 _balance1 =  sampleERC20.balanceOf(alice);
-    console.log("aa",_balance1);
     uint256 _balance2 =  sampleERC20.balanceOf(royaltyReceiver);
     uint256 _balance3 =  sampleERC20.balanceOf(feeReceiver);
     uint256 _balance4 =  sampleERC20.balanceOf(validator);
-        console.log("bb",_balance2);
-            console.log("cc",_balance3);
-                console.log("dd",_balance4);
+                // console.log("dd",_balance4); 
 
 
 
@@ -561,6 +558,363 @@ testRepayFundsToNFT();
 
         
 }
+function testBobPlaceNFTOnSaleAgain() public {
+    // should let bob place piNFT on sale 
+    testValidatorAddERC20AndChangeCommission();
+    vm.startPrank(bob);
 
+    // Approve NFT for sale by bob
+    collectionMethodsInstance.approve(address(PiMarket), 0);
+
+    // Place piNFT on sale again by bob
+    PiMarket.sellNFT(
+        address(collectionMethodsInstance),
+        0,
+        50000,
+        address(sampleERC20)
+    );
+    vm.stopPrank();
+
+    // Check the ownership of piNFT after placing it on sale
+    address owner = collectionMethodsInstance.ownerOf(0);
+    assertEq(owner, address(PiMarket), "Incorrect owner after placing NFT on sale");
 }
 
+function testAliceBuyPiNFT() public {
+    // should let alice buy piNFT
+    testBobPlaceNFTOnSaleAgain();
+
+ (   ,
+        ,
+        ,
+        ,
+        ,
+     ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(2);
+
+        assertTrue(status, "Incorrect piNFT status before the purchase");
+
+        // Get initial balances
+    
+    uint256 _balance1 =  sampleERC20.balanceOf(bob);
+    uint256 _balance2 =  sampleERC20.balanceOf(royaltyReceiver);
+    uint256 _balance3 =  sampleERC20.balanceOf(feeReceiver);
+    uint256 _balance4 =  sampleERC20.balanceOf(validator);
+
+
+    vm.startPrank(alice);
+         sampleERC20.mint(alice, 50000);
+
+           sampleERC20.approve(address(PiMarket), 50000);
+
+        
+
+
+    // Alice buys piNFT
+     PiMarket.BuyNFT(2, true);
+
+
+
+    // Validate piNFT ownership
+    address newOwner = collectionMethodsInstance.ownerOf(0);
+    assertEq(newOwner, alice, "Failed to transfer ownership to alice");
+    // Check the balances after the transaction
+    uint256 balance1 =  sampleERC20.balanceOf(bob);
+    uint256 balance2 =  sampleERC20.balanceOf(royaltyReceiver);
+    uint256 balance3 =  sampleERC20.balanceOf(feeReceiver);
+    uint256 balance4 =  sampleERC20.balanceOf(validator);
+
+
+     // Check the amount received by bob
+    uint256 bobGotAmount = (50000 * 9100) / 10000;
+    assertEq(balance1 - _balance1, bobGotAmount, "Incorrect amount received by bob");
+
+    // Check the amount received by Royalty Receiver
+    uint256 royaltyGotAmount = (50000 * 500) / 10000;
+    assertEq(balance2 - _balance2, royaltyGotAmount, "Incorrect amount received by Royalty Receiver");
+
+    // Check the amount received by Fee Receiver
+    uint256 feeGotAmount = (50000 * 100) / 10000;
+    assertEq(balance3 - _balance3, feeGotAmount, "Incorrect amount received by Fee Receiver");
+
+    // Check the amount received by Validator
+    uint256 validatorGotAmount = (50000 * 300) / 10000;
+    assertEq(balance4 - _balance4, validatorGotAmount, "Incorrect amount received by Validator");
+
+
+    (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status1,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(1);
+        assertFalse(status1, "Incorrect piNFT status after the purchase");
+
+        (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 100, "Incorrect commission value");
+            vm.stopPrank();
+
+vm.prank(alice);
+ collectionMethodsInstance.safeTransferFrom(alice,bob,0);
+
+}
+function test_BobPlaceNFT_OnSale_Again() public {
+    // should let bob place piNFT on sale again
+    testAliceBuyPiNFT();
+        vm.startPrank(bob);
+
+    // testValidatorAddERC20AndChangeCommission();
+    collectionMethodsInstance.approve(address(PiMarket), 0);
+    PiMarket.sellNFT(
+        address(collectionMethodsInstance),
+        0,
+        10000,
+        address(sampleERC20)
+    );
+
+    // Check the ownership of piNFT after placing it on sale
+    address owner = collectionMethodsInstance.ownerOf(0);
+    assertEq(owner, address(PiMarket), "Incorrect owner after placing NFT on sale");
+
+     vm.stopPrank();
+}
+function testFail_CancelSaleNonOwner() public {
+    // should not let non owner cancel sale
+ test_BobPlaceNFT_OnSale_Again();
+     vm.prank(alice);
+
+    // Attempt to cancel the sale by non-owner
+    PiMarket.cancelSale(3);
+}
+function test_BobCancelSale() public {
+    // should let bob cancel sale
+ test_BobPlaceNFT_OnSale_Again();
+    vm.startPrank(bob);
+
+    // Cancel the sale by bob
+    PiMarket.cancelSale(3);
+    
+    // Check the status after canceling the sale
+ (  ,
+        ,
+        ,
+        ,
+        ,
+        ,
+     bool status,
+        ,
+        ,
+        ,
+        ) = PiMarket._tokenMeta(3); 
+      assertFalse(status, "Incorrect sale status after cancellation");
+        vm.stopPrank();
+
+}
+function testBobRedeemPiNFT() public {
+    // should let bob redeem piNFT
+    test_BobCancelSale();
+    vm.startPrank(bob);
+
+    // Approve piNFT for redemption by bob
+    collectionMethodsInstance.approve(address(piNFTMethodsContract), 0);
+
+    // Redeem piNFT by bob
+    piNFTMethodsContract.redeemOrBurnPiNFT(
+        address(collectionMethodsInstance),
+        0,
+        address(alice),
+        0x0000000000000000000000000000000000000000,
+        address(sampleERC20),
+        false
+    );
+
+    // Validate balances and ownership after redemption
+    assertEq(piNFTMethodsContract.viewBalance(
+        address(collectionMethodsInstance),
+        0,
+        address(sampleERC20)
+    ), 0, "Incorrect balance after redemption");
+
+    assertEq(sampleERC20.balanceOf(address(validator)), 8500, "Incorrect validator balance after redemption");
+
+    address owner = collectionMethodsInstance.ownerOf(0);
+    assertEq(owner, address(alice), "Incorrect owner after redemption");
+
+
+
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, 0x0000000000000000000000000000000000000000, "Incorrect validator account");
+    assertEq(commission.value, 0, "Incorrect commission value");
+
+    vm.stopPrank();
+}
+
+//  describe("Auction sale") 
+function testCreatePiNFTWithTokensToAlice() public {
+// should create a piNFT with 500 erc20 tokens to alice 
+    testBobRedeemPiNFT();
+
+
+    vm.startPrank(alice);
+    sampleERC20.mint(validator, 1000);
+
+    // Mint a piNFT to Alice with URI "URI2" 
+
+    uint256 tokenId = collectionMethodsInstance.mintNFT(alice, "URI2");
+    address owner = collectionMethodsInstance.ownerOf(tokenId);
+    assertEq(owner,alice, "inValid owner");
+    uint256 bal = collectionMethodsInstance.balanceOf(alice);
+    assertEq(bal, 2, "Incorrect balance after minting");
+
+        
+ 
+    // Add validator to piNFT
+    piNFTMethodsContract.addValidator(
+        address(collectionMethodsInstance),
+     1,
+      validator);
+      vm.stopPrank();
+
+    // // Approve ERC20 tokens to piNftMethods
+     vm.prank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+      skip(3601);
+
+
+
+
+       vm.startPrank(validator);
+
+            LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+
+
+    piNFTMethodsContract.addERC20(
+        address(collectionMethodsInstance), 
+        1, 
+        address(sampleERC20),
+         500, 
+         1000,
+          royArray1);
+   
+
+     vm.stopPrank();
+
+
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 1);
+
+    // Validate the status and commission details
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 1000, "Incorrect commission value");
+}
+
+function testFail_PlaceNFTOnAuctionWithLowPrice() public {
+// should not place nft on auction if price < 10000 
+testCreatePiNFTWithTokensToAlice();
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    collectionMethodsInstance.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with a price less than 10000
+    PiMarket.SellNFT_byBid(
+        address(collectionMethodsInstance), 
+        1,
+        100,
+        300,
+        address(sampleERC20)
+    );
+    vm.stopPrank();
+}
+function testFail_PlaceNFTOnAuctionWithZeroAddress() public {
+    // should not place nft on auction if contract address is 0
+testCreatePiNFTWithTokensToAlice();
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    collectionMethodsInstance.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with a contract address of 0
+
+    PiMarket.SellNFT_byBid(
+        0x0000000000000000000000000000000000000000,
+        1,
+        50000,
+        300,
+        address(sampleERC20)
+    );
+    vm.stopPrank();
+}
+function testFail_PlaceNFTOnAuctionWithZeroAuctionTime() public {
+    // should not place nft on auction if auction time is 0
+testCreatePiNFTWithTokensToAlice();
+
+    // Approve the NFT for auction
+    vm.startPrank(alice);
+    collectionMethodsInstance.approve(address(PiMarket), 1);
+
+    // Attempt to place the NFT on auction with an auction time of 0
+    PiMarket.SellNFT_byBid(
+        address(collectionMethodsInstance), 
+        1,
+        50000,
+        0,
+        address(sampleERC20)
+    );
+    vm.stopPrank();
+}
+function testAllowValidatorToAddERC20AndChangeCommission() public {
+    // should allow validator to add erc20 and change commission and royalties
+testCreatePiNFTWithTokensToAlice();
+       
+    vm.startPrank(validator);
+   // Approve 500 sampleERC20 tokens to piNftMethods
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+     block.timestamp + 7500;
+        // Increase time by 3601 seconds
+        vm.warp(block.timestamp + 3601);
+
+    // Add 500 sampleERC20 tokens to piNFT with a commission of 1000 and royalties to validator
+        LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(300));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+        address(collectionMethodsInstance), 
+        1, 
+        address(sampleERC20),
+         500, 
+         100,
+          royArray1);
+
+(LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 1);
+
+    // Validate the status and commission details
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 100, "Incorrect commission value");
+
+        
+}
+}
