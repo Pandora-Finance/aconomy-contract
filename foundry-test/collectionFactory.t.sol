@@ -519,7 +519,399 @@ function testFail_DeleteIfCallerNotOwner() public {
         vm.stopPrank();
 
 }
+// function testTokenURIAndRoyalties() public {
+//         test_Mint_ERC721TokenToAlice();
+
+//         // Arrange
+//         string memory expectedURI = "URI1";
+//         uint256 expectedRoyalty = 500;
+//         string memory uri = collectionMethodsInstance.tokenURI(0);
+//         (address receiver, uint256 royaltyAmount) = factory.getCollectionRoyalties(1);
+//         // Assert
+//         assertEq(uri, expectedURI);
+//         assertEq(receiver, royaltyReceiver);
+//         assertEq(royaltyAmount, expectedRoyalty);
+//     }
+function test_MintERC20TokensToValidator() public {
+    // should mint ERC20 tokens to validator
+        test_Mint_ERC721TokenToAlice();
+
+    sampleERC20.mint(validator, 1000);
+    uint256 balance = sampleERC20.balanceOf(validator);
+    assertEq(balance, 1000, "Invalid ERC20 balance for validator");
+}
+function test_ShouldNotAllowNonOwnerToAddValidator() public {
+    // "should not allow non owner to add a validator 
+    test_MintERC20TokensToValidator();
+    
+
+    vm.startPrank(bob);
+    vm.expectRevert(bytes(""));
+    piNFTMethodsContract.addValidator(address(collectionMethodsInstance), 0, validator);
+    vm.stopPrank();
+
+}
+function test_ShouldAllowAliceToAddValidatorToTheNFT() public {
+    // should allow alice to add a validator to the nft 
+     test_ShouldNotAllowNonOwnerToAddValidator();
+        vm.startPrank(alice);
+
+   
+    piNFTMethodsContract.addValidator(address(collectionMethodsInstance), 0, validator);
+
+    address approvedValidator = piNFTMethodsContract.approvedValidator(address(collectionMethodsInstance), 0);
+    assertEq(approvedValidator, validator);
+        vm.stopPrank();
+
+}
+function testShouldNotLetNonValidatorAddFunds() public {
+    // should not let non validator add funds 
+     test_ShouldAllowAliceToAddValidatorToTheNFT();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    // Set an expiration time for the transaction
+    // Simulate Alice approving the ERC20 transfer
+    vm.startPrank(alice);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with Alice, expecting it to revert
+    vm.startPrank(alice);
+    vm.expectRevert(bytes(""));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+
+
+function test_ShouldNot_ERC20_zero() public {
+// should not let erc20 contract be address 0 
+
+testShouldNotLetNonValidatorAddFunds();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    // Set an expiration time for the transaction
+    // Simulate Alice approving the ERC20 transfer
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with Alice, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes(""));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        0x0000000000000000000000000000000000000000,
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+function test_Validator_Funds_zero() public {
+    // should not let non validator add funds 
+test_ShouldNot_ERC20_zero();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    // Set an expiration time for the transaction
+    // Simulate Alice approving the ERC20 transfer
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with Alice, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes(""));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        0,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+function test_Validator_commission() public {
+// should not let validator commission value be 4901 
+test_Validator_Funds_zero();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes(""));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        4901,
+        royArray1
+    );
+    vm.stopPrank();
+}
+function test_Check_validator_Royalties_strength() public {
+
+// should not let validator royalties have more than 10 addresses 
+test_Validator_commission();
+ // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+ 
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    vm.startPrank(validator);
+        vm.expectRevert(bytes(""));
+
+LibShare.Share[] memory royArray;
+royArray = new LibShare.Share[](11); 
+for (uint i = 0; i < 11; i++) {
+    royArray[i] = LibShare.Share(validator, uint96(100));
+}
+     piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray
+    );
+    vm.stopPrank();
 
 }
 
+function test_ValidatorRoyality_zero() public {
+// should not let validator royalties value be 0 
+test_Check_validator_Royalties_strength();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes("Royalty 0"));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(0));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+
+function test_ValidatorRoyality_address() public {
+// should not let validator royalties address be 0 
+test_ValidatorRoyality_zero();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes(""));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(payable(0x0000000000000000000000000000000000000000), uint96(100));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+function test_Check_ValidatorRoyality_4901() public {
+// should not let validator royalties be greater than 4901 
+test_ValidatorRoyality_address();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    vm.expectRevert(bytes("overflow"));
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(4901));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+}
+
+function test_ValidatorAdd_ERC20_toNFT() public {
+// should let validator add ERC20 tokens to alice's NFT 
+test_Check_ValidatorRoyality_4901();
+    // Set an expiration time for the transaction
+    // Warp the time ahead by 3600 seconds (1 hour)
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 3600);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(500));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        500,
+        royArray1
+    );
+    vm.stopPrank();
+     uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(collectionMethodsInstance),0,address(sampleERC20));
+    assertEq(tokenBalance,500, "Incorrect ERC20 balance");
+          uint256 validatorBal =  sampleERC20.balanceOf(validator);
+              assertEq(validatorBal,500, "Incorrect validator balance");
+
+            
+    // Validate the status and commission details
+      (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 500, "Incorrect commission value");
+
+
+
+}
+}
 
