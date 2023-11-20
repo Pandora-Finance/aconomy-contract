@@ -47,12 +47,16 @@ contract collectionFactoryTest is Test {
            collectionMethods = new CollectionMethods();
         collectionMethods.initialize(address(factory),alice,"Aconomy","ACO");
 
+
+
          address CollectionFactoryimplementation = address(new CollectionFactory());
          address CollectionFactoryproxy = address(new ERC1967Proxy(CollectionFactoryimplementation, ""));
         factory = CollectionFactory(CollectionFactoryproxy);
         factory.initialize(address(collectionMethods),address(piNFTMethodsContract));
         factory.transferOwnership(alice);
          assertEq(factory.owner(),alice, "Incorret owner");
+        // console.log("owner", factory.owner());
+
 
          
 
@@ -162,13 +166,16 @@ test_royality_length_should_be_ten();
 
 function testDeployingCollectionsWithCollectionFactory() public {
     test_Check_Royalty_Value();
+    vm.startPrank(alice);
     LibShare.Share[] memory royArray ;
         LibShare.Share memory royalty;
         royalty = LibShare.Share(royaltyReceiver, uint96(500));
         
         royArray= new LibShare.Share[](1);
         royArray[0] = royalty;
-    factory.createCollection("PANDORA", "PAN", "xyz", "xyz", royArray);
+   uint256 collectionId = factory.createCollection("PANDORA", "PAN", "xyz", "xyz", royArray);
+      assertEq(collectionId,1,"incorrect ID");
+
     // Step 2: Retrieve the address of the newly created collection
  ( ,
        ,
@@ -180,6 +187,7 @@ function testDeployingCollectionsWithCollectionFactory() public {
     // Step 3: Deploy the LibShare contract (if not already deployed in setUp)
     // LibShare libShare = new LibShare();
     // collectionMethods collectionMethods = CollectionMethods(collectionAddress);
+    vm.stopPrank();
 
     
 }
@@ -239,6 +247,8 @@ function test_SetURIWhenPaused() public {
 function test_ChangeURI() public {
     // should change the URI
     test_SetURIWhenPaused();
+        vm.startPrank(alice);
+
     ( ,
        ,
         string memory URI,
@@ -255,6 +265,8 @@ function test_ChangeURI() public {
        ,
         )=factory.collections(1);
             assertEq(newURI, "SRS", "URI not changed successfully");
+                    vm.stopPrank();
+
 }
 function test_SetSymbolNonOwner() public {
     // should not allow symbol to be set by non-owner
@@ -283,6 +295,8 @@ function test_ChangeCollectionSymbol() public {
     // should change the Collection Symbol
 
     test_SetSymbolWhenPaused();
+        vm.startPrank(alice);
+
     ( ,
        string memory symbol,
         ,
@@ -299,6 +313,213 @@ function test_ChangeCollectionSymbol() public {
        ,
         )=factory.collections(1);
         assertEq(newSymbol, "PNDR", "incorrect symbol");
+            vm.stopPrank();
+
+}
+function test_SetName_NonOwner() public {
+// should not allow name to be set by non owner 
+    test_ChangeCollectionSymbol();
+        vm.startPrank(royaltyReceiver);
+
+    vm.expectRevert(bytes("Not the owner"));
+    factory.setCollectionName(1, "XYZ");
+        vm.stopPrank();
+
+}
+function test_SetNameContractPaused() public {
+    // should not allow name to be set when contract is paused
+    test_SetName_NonOwner();
+    vm.startPrank(alice);
+    factory.pause();
+      vm.expectRevert(bytes("Pausable: paused"));
+     factory.setCollectionName(1, "XYZ");
+    factory.unpause();
+    vm.stopPrank();
+}
+function test_ChangeCollectionName() public {
+    // should change the Collection Name
+test_SetNameContractPaused();
+    vm.startPrank(alice);
+      ( string memory name,
+       ,
+        ,
+       ,
+       ,
+        )=factory.collections(1);
+        assertEq(name, "PANDORA", "invalid name");
+
+    factory.setCollectionName(1, "Pan");
+   
+    ( string memory NewName,
+       ,
+        ,
+       ,
+       ,
+        )=factory.collections(1);
+        assertEq(NewName, "Pan", "incorrect name");
+            vm.stopPrank();
+
+}
+function test_SetDescriptionNonOwner() public {
+    // should not allow description to be set by non owner
+    test_ChangeCollectionName();
+
+    vm.startPrank(royaltyReceiver);
+        vm.expectRevert(bytes("Not the owner"));
+    factory.setCollectionDescription(1, "XYZ");
+    vm.stopPrank();
+}
+
+function test_SetDescriptionContractPaused() public {
+    // should not allow description to be set when contract is paused
+    test_SetDescriptionNonOwner();
+
+    vm.startPrank(alice);
+    factory.pause();
+    vm.expectRevert(bytes("Pausable: paused"));
+    factory.setCollectionDescription(1, "XYZ");
+    factory.unpause();
+    vm.stopPrank();
+}
+function test_ChangeCollectionDescription() public {
+    // should change the Collection Description
+    test_SetDescriptionContractPaused();
+        vm.startPrank(alice);
+
+
+     (,
+      ,
+      ,
+      ,
+      ,
+    string memory description
+ ) = factory.collections(1);
+
+    assertEq(description, "xyz", "invalid description");
+
+    factory.setCollectionDescription(1, "I am Token");
+
+    ( ,
+      ,
+      ,
+      ,
+      ,
+    string memory newDescription
+ ) = factory.collections(1);
+
+    assertEq(newDescription, "I am Token", "incorrect description");
+        vm.stopPrank();
+
+}
+function testFail_ToMintNonOwner() public {
+    // should fail to mint if the caller is not the collection owner
+test_ChangeCollectionDescription();
+    vm.startPrank(bob);
+ // Attempt to mint from a non-owner account
+collectionMethods.mintNFT(bob, "xyz");
+    vm.stopPrank();
+
+}
+
+function testFail_ToMintToZeroAddress() public {
+    // should fail to mint if the to address is address 0
+test_ChangeCollectionDescription();
+
+    // Attempt to mint to address 0
+   
+        collectionMethods.mintNFT(
+            0x0000000000000000000000000000000000000000,
+            "xyz"
+        );
+}
+function test_MintERC721TokenToAlice() public {
+    // should mint an ERC721 token to alice
+test_ChangeCollectionDescription();
+        vm.startPrank(alice);
+
+
+
+    // Mint an ERC721 token to alice with URI "URI1"
+   
+   
+
+
+  
+        (
+        ,
+        ,
+        ,
+        address contractAddress,
+        ,
+        )=factory.collections(1);
+
+
+
+       collectionMethodsInstance = CollectionMethods(contractAddress);
+
+
+
+
+ string memory uri = "www.adya.com";
+ uint256 tokenId = collectionMethodsInstance.mintNFT(alice, uri);
+    assertEq(tokenId, 0, "Failed to mint NFT");
+     // Check balance of alice after minting
+        uint256 bal = collectionMethodsInstance.balanceOf(alice);
+       assertEq(bal,1,"incorrect balamce after minting");
+           vm.stopPrank();
+
+
+}
+function test_Mint_ERC721TokenToAlice() public {
+    // should mint an ERC721 token to alice
+test_MintERC721TokenToAlice();
+        vm.startPrank(alice);
+
+
+
+    // Mint an ERC721 token to alice with URI "URI1"
+   
+   
+
+
+  
+        (
+        ,
+        ,
+        ,
+        address contractAddress,
+        ,
+        )=factory.collections(1);
+
+
+
+       collectionMethodsInstance = CollectionMethods(contractAddress);
+
+
+
+
+ string memory uri = "www.adya.com";
+ uint256 tokenId = collectionMethodsInstance.mintNFT(alice, uri);
+    assertEq(tokenId, 1, "Failed to mint NFT");
+     // Check balance of alice after minting
+        uint256 bal = collectionMethodsInstance.balanceOf(alice);
+       assertEq(bal,2,"incorrect balamce after minting");
+    vm.stopPrank();
+
+}
+function testFail_DeleteIfCallerNotOwner() public {
+    // should not delete an ERC721 token if the caller isn't the owner
+    test_Mint_ERC721TokenToAlice();
+            vm.startPrank(bob);
+
+    
+
+    // Attempt to delete an ERC721 token by bob, expect revert
+    collectionMethodsInstance.deleteNFT(1);
+        vm.stopPrank();
+
 }
 
 }
+
+
