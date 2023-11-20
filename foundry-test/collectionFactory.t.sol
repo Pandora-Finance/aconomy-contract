@@ -913,5 +913,122 @@ address(collectionMethodsInstance),
 
 
 }
+function test_ValidatorChangingAfterFunding() public {
+    // should not allow validator changing after funding
+    test_ValidatorAdd_ERC20_toNFT();
+        vm.expectRevert(bytes(""));
+
+        piNFTMethodsContract.addValidator(
+            address(collectionMethodsInstance),
+             0,
+            validator
+        );
+}
+function test_DeleteNFTAfterValidatorFunding() public {
+    // should not delete an ERC721 token after validator funding
+    test_ValidatorChangingAfterFunding();
+    vm.expectRevert(bytes(""));
+
+    collectionMethodsInstance.deleteNFT(0);
+}
+function test_ValidatorAdd_Change_commission() public {
+// should let validator add more ERC20 tokens to alice's NFT and change commission 
+test_DeleteNFTAfterValidatorFunding();
+      uint256 latestTime = block.timestamp;
+        vm.warp(latestTime + 7500);
+        // Now block.timestamp will return the warped time
+        uint256 newTime = block.timestamp;
+        // Check that the new time is indeed 3600 seconds ahead
+        assertEq(newTime, latestTime + 7500);
+        skip(3600);
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 200);
+    vm.stopPrank();
+
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(500));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        200,
+        0,
+        royArray1
+    );
+
+
+    
+    vm.stopPrank();
+     uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(collectionMethodsInstance),0,address(sampleERC20));
+    assertEq(tokenBalance,700, "Incorrect ERC20 balance");
+          uint256 validatorBal =  sampleERC20.balanceOf(validator);
+              assertEq(validatorBal,300, "Incorrect validator balance");
+
+            
+    // Validate the status and commission details
+      (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 0, "Incorrect commission value");
+
+
+
+}
+function testFail_ValidatorAddFundsDifferentERC20() public {
+    // should not let validator add funds of a different ERC20
+test_ValidatorAdd_Change_commission();
+     uint256 exp = block.timestamp + 10000;
+        vm.warp(exp + 7501);
+
+     LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+            vm.expectRevert(bytes("invalid"));
+
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        feeReceiver,
+        200,
+        500,
+        royArray1
+    );
+}
+function test_AliceTransferNFTtoBob() public {
+    // should let Alice transfer NFT to Bob
+test_ValidatorAdd_Change_commission();
+vm.startPrank(alice);
+    collectionMethodsInstance.safeTransferFrom(alice, bob, 0);
+    assertEq(
+        collectionMethodsInstance.ownerOf(0),
+        bob,"incorrect owner after transfer"
+    );
+           vm.stopPrank();
+
+}
+function test_TransferNFTFromBobToAlice() public {
+    // should let Bob transfer NFT to Alice
+test_AliceTransferNFTtoBob();
+vm.startPrank(bob);
+
+    collectionMethodsInstance.safeTransferFrom(bob, alice, 0);
+    assertEq(
+        collectionMethodsInstance.ownerOf(0),
+        alice, "Invalid owner after transfer"
+    );
+       vm.stopPrank();
+}
+
 }
 
