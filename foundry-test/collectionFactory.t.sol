@@ -1029,6 +1029,202 @@ vm.startPrank(bob);
     );
        vm.stopPrank();
 }
+function testFail_NonOwnerWithdrawValidatorFunds() public {
+    // should not let non-owner withdraw validator funds
+test_TransferNFTFromBobToAlice();
+vm.startPrank(carl);
+    vm.expectRevert(bytes("ERC721: caller is not token owner or approved"));
+
+        piNFTMethodsContract.withdraw(
+            address(collectionMethodsInstance),
+            0,
+            address(sampleERC20),
+            300
+                );
+         vm.stopPrank();
+
+}
+function test_WithdrawERC20AndRepayBid() public {
+    // should let Alice withdraw ERC20
+    test_TransferNFTFromBobToAlice();
+     vm.startPrank(alice);
+
+  
+    uint256 initialBalance = sampleERC20.balanceOf(alice);
+
+    collectionMethodsInstance.approve(address(piNFTMethodsContract), 0);
+
+    piNFTMethodsContract.withdraw(
+        address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        300
+    );
+
+    uint256 withdrawnAmount = piNFTMethodsContract.viewWithdrawnAmount(address(collectionMethodsInstance), 0);
+    assertEq(withdrawnAmount, 300, "Invalid withdrawn amount");
+
+    assertEq(collectionMethodsInstance.ownerOf(0), address(piNFTMethodsContract), "Invalid NFT owner after withdrawal");
+
+    uint256 finalBalance = sampleERC20.balanceOf(alice);
+    assertEq(finalBalance - initialBalance, 300, "Invalid ERC20 balance after withdrawal");
+
+    piNFTMethodsContract.withdraw(
+        address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        200
+    );
+
+    withdrawnAmount = piNFTMethodsContract.viewWithdrawnAmount(address(collectionMethodsInstance), 0);
+    assertEq(withdrawnAmount, 500, "Invalid withdrawn amount after second withdrawal");
+
+         vm.stopPrank();
+
+}
+function test_WithdrawERC20() public {
+// should let Alice withdraw ERC20
+test_WithdrawERC20AndRepayBid();
+     vm.startPrank(alice);
+        vm.expectRevert(bytes(""));
+
+piNFTMethodsContract.withdraw(
+        address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        201
+    );
+         vm.stopPrank();
+}
+
+function test_external_repay() public {
+ // should not let external account (Bob) to repay the bid
+ test_WithdrawERC20();
+ vm.startPrank(bob);
+    sampleERC20.approve(address(piNFTMethodsContract), 300);
+    vm.expectRevert(bytes("not owner"));
+        piNFTMethodsContract.Repay(
+            address(collectionMethodsInstance),
+            0,
+            address(sampleERC20),
+            300
+        );
+        vm.stopPrank();
+
+        
+}
+function test_Repay_more() public{
+// Should not let Alice repay more than what's borrowed
+test_external_repay();
+
+ vm.startPrank(alice);
+
+sampleERC20.approve(address(piNFTMethodsContract), 800);
+    vm.expectRevert(bytes(""));
+
+    piNFTMethodsContract.Repay(
+            address(collectionMethodsInstance),
+            0,
+            address(sampleERC20),
+            800
+        );
+                vm.stopPrank();
+
+
+}
+
+
+function test_AliceRepayERC20() public {
+// should let alice repay erc20 
+test_Repay_more();
+ vm.startPrank(alice);
+
+    uint256 initialBalance = sampleERC20.balanceOf(alice);
+
+    // Approve ERC20 transfer for repayment
+    sampleERC20.approve(address(piNFTMethodsContract),300);
+
+    // Repay 300 ERC20 tokens
+      piNFTMethodsContract.Repay(
+            address(collectionMethodsInstance),
+            0,
+            address(sampleERC20),
+            300
+        );
+
+    // Expect NFT still owned by piNftMethods
+  address   nftOwner =  collectionMethodsInstance.ownerOf(0);
+    assertEq(nftOwner, address(piNFTMethodsContract), "NFT not owned by piNftMethods");
+
+    // Check Alice's updated ERC20 balance after repayment
+    uint256 updatedBalance =  sampleERC20.balanceOf(alice);
+    assertEq(initialBalance - updatedBalance, 300, "Incorrect ERC20 balance after repayment");
+
+    // Approve additional ERC20 transfer for further repayment
+    sampleERC20.approve(address(piNFTMethodsContract),200);
+
+    // Repay another 200 ERC20 tokens
+    piNFTMethodsContract.Repay(
+            address(collectionMethodsInstance),
+            0,
+            address(sampleERC20),
+            200
+        );
+
+    // Expect NFT now owned by Alice
+    nftOwner =  collectionMethodsInstance.ownerOf(0);
+    assertEq(nftOwner, alice, "NFT not owned by Alice");
+
+    // Check Alice's final ERC20 balance after additional repayment
+    uint256 finalBalance =  sampleERC20.balanceOf(alice);
+    assertEq(initialBalance - finalBalance, 500, "Incorrect final ERC20 balance");
+}
+
+function test_RedeemCollectionFactory() public {
+  // should redeem CollectionFactory
+  test_AliceRepayERC20();
+  vm.startPrank(alice);
+
+  // Redeem CollectionFactory NFT
+  piNFTMethodsContract.redeemOrBurnPiNFT(
+    address(collectionMethodsInstance),
+    0,
+    alice,
+    0x0000000000000000000000000000000000000000,
+    address(sampleERC20),
+    false
+  );
+
+  // Check validator's ERC20 balance after redemption
+  uint256 balance = sampleERC20.balanceOf(validator);
+  assertEq(balance, 1000, "Incorrect ERC20 balance after redemption");
+
+  // Expect NFT to be owned by Alice
+  address nftOwner = collectionMethodsInstance.ownerOf(0);
+  assertEq(nftOwner, alice, "NFT not owned by Alice");
+
+  // Check NFT owner and approved validator after redemption
+  address nftOwnerAfterRedemption = piNFTMethodsContract.NFTowner(
+    address(collectionMethodsInstance),
+    0
+  );
+  assertEq(nftOwnerAfterRedemption, 0x0000000000000000000000000000000000000000, "Incorrect NFT owner after redemption");
+
+  address approvedValidatorAfterRedemption = piNFTMethodsContract.approvedValidator(
+     address(collectionMethodsInstance),
+    0
+  );
+  assertEq(approvedValidatorAfterRedemption, 0x0000000000000000000000000000000000000000, "Incorrect approved validator after redemption");
+
+  // Check validator commission after redemption
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+
+    // Validate the status and commission details
+    assertFalse(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, 0x0000000000000000000000000000000000000000, "Incorrect  account");
+    assertEq(commission.value, 0, "Incorrect commission value");
+  vm.stopPrank();
+}
 
 }
 
