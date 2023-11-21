@@ -1225,6 +1225,152 @@ function test_RedeemCollectionFactory() public {
     assertEq(commission.value, 0, "Incorrect commission value");
   vm.stopPrank();
 }
+function test_TransferNFToBob() public {
+  // should transfer NFT to bob
+  test_RedeemCollectionFactory();
+  vm.startPrank(alice);
+
+  // Transfer NFT from Alice to Bob
+  collectionMethodsInstance.safeTransferFrom(alice, bob, 0);
+
+  // Expect NFT to be owned by Bob
+  address nftOwner = collectionMethodsInstance.ownerOf(0);
+  assertEq(nftOwner, bob, "NFT not owned by Bob");
+
+  vm.stopPrank();
+}
+function test_ValidatorAddERC20ToBobsNFT() public {
+  // should let validator add ERC20 tokens to bob's NFT
+  test_TransferNFToBob();
+
+  // Increase time to simulate the wait period
+  uint256 exp = block.timestamp + 10000;
+        vm.warp(exp + 7501);
+
+   
+    
+    vm.startPrank(validator);
+    sampleERC20.approve(address(piNFTMethodsContract), 500);
+    vm.stopPrank();
+vm.prank(bob);
+
+        piNFTMethodsContract.addValidator(
+            address(collectionMethodsInstance),
+             0,
+            validator
+        );
+    // Try to add ERC20 funds with validator, expecting it to revert
+    vm.startPrank(validator);
+    LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(200));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+    piNFTMethodsContract.addERC20(
+address(collectionMethodsInstance),
+        0,
+        address(sampleERC20),
+        500,
+        600,
+        royArray1
+    );
+    vm.stopPrank();
+     uint256 tokenBalance = piNFTMethodsContract.viewBalance(address(collectionMethodsInstance),0,address(sampleERC20));
+    assertEq(tokenBalance,500, "Incorrect ERC20 balance");
+          uint256 validatorBal =  sampleERC20.balanceOf(validator);
+              assertEq(validatorBal,500, "Incorrect validator balance");
+
+            
+    // Validate the status and commission details
+      (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(address(collectionMethodsInstance), 0);
+    assertTrue(isValid, "Incorrect validator commission status");
+    assertEq(commission.account, validator, "Incorrect validator account");
+    assertEq(commission.value, 600, "Incorrect commission value");
+
+
+}
+function test_BobBurnCollectionFactory() public {
+  // should let bob burn CollectionFactory
+test_ValidatorAddERC20ToBobsNFT();
+  vm.startPrank(bob);
+
+  // Ensure Bob's ERC20 balance is initially 0
+  assertEq(sampleERC20.balanceOf(bob), 0, "Bob's ERC20 balance not initially 0");
+
+  // Approve NFT transfer to piNftMethods
+  collectionMethodsInstance.approve(address(piNFTMethodsContract), 0);
+
+  // Bob burns the NFT to redeem ERC20 tokens
+  piNFTMethodsContract.redeemOrBurnPiNFT(
+    address(collectionMethodsInstance),
+    0,
+    address(0),
+    bob,
+    address(sampleERC20),
+    true
+  );
+
+  // Check Bob's updated ERC20 balance
+  uint256 bobBal = sampleERC20.balanceOf(bob);
+  assertEq(bobBal, 500, "Incorrect ERC20 balance for Bob");
+
+  // Check NFT is owned by the validator
+  address nftOwner = collectionMethodsInstance.ownerOf(0);
+  assertEq(nftOwner, validator, "NFT not owned by validator");
+
+  // Check validator's commission details
+   (LibShare.Share memory commission ,bool isValid) = piNFTMethodsContract.validatorCommissions(
+    address(collectionMethodsInstance),
+    0
+  );
+  assertFalse(isValid, "Commission should be invalid");
+  assertEq(commission.account, 0x0000000000000000000000000000000000000000, "Commission account should be 0x0");
+  assertEq(commission.value, 0, "Commission value should be 0");
+
+  vm.stopPrank();
+}
+function test_ExternalAddressPreventPiNFTMethodsCallableFunctions() public {
+  // should prevent an external address to call piNFTMethods callable functions
+  test_BobBurnCollectionFactory();
+  vm.startPrank(alice);
+
+  // Attempt to call piNFTMethods callable functions from an external address
+      vm.expectRevert(bytes("methods"));
+      LibShare.Share[] memory royArray1 ;
+        LibShare.Share memory royalty1;
+        royalty1 = LibShare.Share(validator, uint96(0));
+        
+        royArray1= new LibShare.Share[](1);
+        royArray1[0] = royalty1;
+      collectionMethodsInstance.setRoyaltiesForValidator(1,3000, royArray1);
+
+          vm.expectRevert(bytes("methods"));
+         collectionMethodsInstance.deleteValidatorRoyalties(1);
+
+  vm.stopPrank();
+}
+
+function test_NonOwnerCannotChangeCollectionMethodImplementation() public {
+  // should not let non owner change collection method implementation
+  test_ExternalAddressPreventPiNFTMethodsCallableFunctions();
+  vm.startPrank(royaltyReceiver);
+
+  // Attempt to change collection method implementation by non-owner
+            vm.expectRevert(bytes("Ownable: caller is not the owner"));
+
+    factory.changeCollectionMethodImplementation(
+      0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d
+    );
+  vm.stopPrank();
+
+  // Change collection method implementation by the owner
+  vm.prank(alice);
+   factory.changeCollectionMethodImplementation(
+    0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d
+  );
+
+}
 
 }
 
