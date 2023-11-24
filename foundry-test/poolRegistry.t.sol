@@ -28,12 +28,13 @@ contract poolRegistryTest is Test {
     uint32 public loanDuration = 150 days;
     uint32 public loanDefaultDuration = 90 days;
     uint32 public loanExpirationDuration = 180 days;
+    uint256 public t = block.timestamp;
 
 
     // uint256 public poolId1;
     // uint256 public poolId2;
     // uint256 public loanId1;
-    uint256 public newpoolId;
+    // uint256 public newpoolId;
 
 
 
@@ -418,7 +419,7 @@ test_ChangeLoanExpirationTime();
 
     // Try to add a lender (should revert)
     vm.expectRevert(bytes("Pausable: paused"));
-    poolRegis.addLender(newpoolId, account3);
+    poolRegis.addLender(3, account3);
 
     // Unpause the contract
     poolRegis.unpause();
@@ -435,7 +436,7 @@ function test_AddBorrowerContractPaused() public {
 
     // Try to add a borrower (should revert)
     vm.expectRevert(bytes("Pausable: paused"));
-    poolRegis.addBorrower(newpoolId, account1);
+    poolRegis.addBorrower(3, account1);
 
     // Unpause the contract
     poolRegis.unpause();
@@ -451,7 +452,7 @@ function test_OnlyOwnerCanAddLenderBorrower() public {
 
     // Try to add a borrower as non-owner (should revert)
     vm.expectRevert(bytes("Not the owner"));
-    poolRegis.addBorrower(newpoolId, account1);
+    poolRegis.addBorrower(3, account1);
     vm.stopPrank();
 
     // Perform lender verification for account3 (should fail)
@@ -465,7 +466,358 @@ function test_OnlyOwnerCanAddLenderBorrower() public {
     // Try to add a lender as non-owner (should revert)
     vm.startPrank(account2);
     vm.expectRevert(bytes("Not the owner"));
-    poolRegis.addLender(newpoolId, account3);
+    poolRegis.addLender(3, account3);
+    vm.stopPrank();
+}
+
+function test_CheckLenderBorrowerRemoval() public {
+    // should check lender and borrower are removed or not
+    test_OnlyOwnerCanAddLenderBorrower();
+        vm.startPrank(account0);
+
+    // Perform lender verification for account3 (should fail)
+    (bool isVerified_ ,) = poolRegis.lenderVerification(3, account3);
+    assertFalse(isVerified_, "Lender verification unexpectedly passed");
+
+
+    // Add account3 as a lender
+
+    poolRegis.addLender(3, account3);
+
+    // Verify lender status for account3
+    ( bool isVerified ,) = poolRegis.lenderVerification(3, account3);
+    assertTrue(isVerified, "Failed to add account3 as a lender");
+        vm.stopPrank();
+
+
+    // Try to remove lender as non-owner (should revert)
+    vm.startPrank(random);
+    vm.expectRevert(bytes("Not the owner"));
+    poolRegis.removeLender(3, account3);
+    vm.stopPrank();
+
+    // Pause the contract 
+        vm.startPrank(account0);
+
+     poolRegis.pause();
+
+    // Try to remove lender while contract is paused (should revert)
+    vm.expectRevert(bytes("Pausable: paused"));
+    poolRegis.removeLender(3, account3);
+
+    // Unpause the contract
+    poolRegis.unpause();
+
+    // Remove lender account3
+    poolRegis.removeLender(3, account3);
+
+    // Verify that lender account3 is removed
+   ( bool isVerified1 ,) = poolRegis.lenderVerification(3, account3);
+    assertFalse(isVerified1, "Failed to remove account3 as a lender");
+
+    // Add account1 as a borrower
+    poolRegis.addBorrower(3, account1);
+
+    // Verify borrower status for account1
+   ( bool isVerified2 ,) = poolRegis.borrowerVerification(3, account1);
+    assertTrue(isVerified2, "Failed to add account1 as a borrower");
+        vm.stopPrank();
+
+
+    // Try to remove borrower as non-owner (should revert)
+    vm.startPrank(random);
+    vm.expectRevert(bytes("Not the owner"));
+    poolRegis.removeBorrower(3, account1);
+    vm.stopPrank();
+
+    // Pause the contract
+    vm.startPrank(account0);
+
+    poolRegis.pause();
+
+    // Try to remove borrower while contract is paused (should revert)
+    vm.expectRevert(bytes("Pausable: paused"));
+    poolRegis.removeBorrower(3, account1);
+
+    // Unpause the contract
+     poolRegis.unpause();
+
+    // Remove borrower account1
+    poolRegis.removeBorrower(3, account1);
+
+    // Verify that borrower account1 is removed
+   ( bool isVerified3 ,) = poolRegis.borrowerVerification(3, account1);
+    assertFalse(isVerified3, "Failed to remove account1 as a borrower");
+    vm.stopPrank();
+}
+function test_VerifyPoolDetails() public {
+    // should verify the details of pool2
+    test_CheckLenderBorrowerRemoval();
+    vm.startPrank(account0);
+
+    // Get Payment Default Duration for poolId2
+    uint256 DefaultDuration = poolRegis.getPaymentDefaultDuration(2);
+    assertEq(DefaultDuration, 211111111, "Incorrect Payment Default Duration for pool2");
+
+    // Get Loan Expiration Time for poolId2
+    uint256 ExpirationTime = poolRegis.getloanExpirationTime(2);
+    assertEq(ExpirationTime, 2111111222, "Incorrect Loan Expiration Time for pool2");
+
+    // Verify lender status for account2
+    (bool isVerified_ ,) = poolRegis.lenderVerification(2, account2);
+    assertTrue(isVerified_, "Failed to verify lender status for account2 in pool2");
+
+    // Verify borrower status for account2
+    (bool isVerified ,) = poolRegis.borrowerVerification(2, account2);
+    assertTrue(isVerified, "Failed to verify borrower status for account2 in pool2");
+        vm.stopPrank();
+
+}
+function test_ChangePoolSetting() public {
+    // should change the setting of new pool
+    test_VerifyPoolDetails();
+    vm.startPrank(random);
+
+    // Try to change the pool setting as a non-owner (should revert)
+    vm.expectRevert(bytes("Not the owner"));
+    poolRegis.changePoolSetting(
+        2,
+        11111111,
+        111111222,
+        200,
+        2000,
+        "adya.com"
+    );
+    vm.stopPrank();
+        vm.startPrank(account0);
+         poolRegis.changePoolSetting(
+        2,
+        11111111,
+        111111222,
+        200,
+        2000,
+        "adya.com"
+    );
+
+
+    // Verify the changes in pool settings
+    uint16 apr = poolRegis.getPoolApr(2);
+    assertEq(apr, 2000, "Failed to change APR for pool2");
+
+    uint256 DefaultDuration = poolRegis.getPaymentDefaultDuration(2);
+    assertEq(DefaultDuration, 11111111, "Failed to change Payment Default Duration for pool2");
+
+    uint256 ExpirationTime = poolRegis.getloanExpirationTime(2);
+    assertEq(ExpirationTime, 111111222, "Failed to change Loan Expiration Time for pool2");
+
+    // Verify lender status for account2
+    (bool isVerified ,) = poolRegis.lenderVerification(2, account2);
+    assertTrue(isVerified, "Failed to verify lender status for account2 in pool2");
+
+    // Verify borrower status for account2
+    (bool isVerified_ ,) = poolRegis.borrowerVerification(2, account2);
+    assertTrue(isVerified_, "Failed to verify borrower status for account2 in pool2");
+            vm.stopPrank();
+
+}
+function test_PauseBeforeCreatingPool() public {
+    // should not create if the contract is paused
+test_ChangePoolSetting();
+    vm.startPrank(account0);
+
+    // Pause the contract
+    poolRegis.pause();
+
+    // Try to create a new pool (should revert)
+    vm.expectRevert(bytes("Pausable: paused"));
+    poolRegis.createPool(
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        1000,
+        "adya.com",
+        true,
+        true
+    );
+
+    // Unpause the contract
+    poolRegis.unpause();
+        vm.stopPrank();
+
+}
+function test_AddLenderToPool() public {
+    // should add Lender to the pool
+test_PauseBeforeCreatingPool();
+    vm.startPrank(account0);
+
+    // Verify lender status for account3 (should be false initially)
+    (bool isVerified ,) = poolRegis.lenderVerification(1, account3);
+    assertFalse(isVerified, "Lender status for account3 is not false initially");
+
+    // Add account3 as a lender to pool1
+    poolRegis.addLender(1, account3);
+
+    // Verify lender status for account3 (should be true now)
+    (bool isVerified_ ,) = poolRegis.lenderVerification(1, account3);
+    assertTrue(isVerified_, "Failed to add account3 as a lender to pool1");
+    vm.stopPrank();
+}
+function test_AddBorrowerToPool() public {
+    // should add Borrower to the pool
+test_AddLenderToPool();
+    vm.startPrank(account0);
+
+    // Add account1 as a borrower to pool1
+    poolRegis.addBorrower(1, account1);
+
+    // Verify borrower status for account1 (should be true now)
+    (bool isVerified_ ,) = poolRegis.borrowerVerification(1, account1);
+    assertTrue(isVerified_, "Failed to add account1 as a borrower to pool1");
+        vm.stopPrank();
+
+}
+function test_AttestedBorrowerRequestLoan() public {
+    // should allow Attested Borrower to Request Loan in a Pool
+    test_AddBorrowerToPool();
+    vm.startPrank(account0);
+
+    // Mint ERC20 tokens for account0
+    sampleERC20.mint(account0, 10000000000);
+            vm.stopPrank();
+
+
+    // Borrower (account1) requests a loan in pool1
+        vm.startPrank(account1);
+
+    uint256 loanId1 = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDuration,
+        expiration,
+        1000,
+        account1
+    );
+    // Validate loanId assigned to the request
+    assertEq(loanId1, 0, "Incorrect loanId assigned to the request");
+    
+}
+function test_AcceptLoan() public {
+    // should Accept loan
+    test_AttestedBorrowerRequestLoan();
+    vm.startPrank(account0);
+
+    // Approve ERC20 tokens for the pool contract
+    sampleERC20.approve(address(poolAddressInstance), 10000000000);
+
+    // Record borrower's ERC20 balance before accepting the loan
+    uint256 initialBalance =  sampleERC20.balanceOf(account0);
+assertEq(initialBalance,10000000000,"incorrect balance");
+
+    // Borrower (account1) accepts the loan
+    (
+            uint256 amountToAconomy,
+            uint256 amountToPool,
+            uint256 amountToBorrower
+        )= poolAddressInstance.AcceptLoan(0);
+
+        console.log("hh",amountToAconomy);
+        console.log("hh1",amountToPool);
+        console.log("hh2",amountToBorrower);
+
+    // Record borrower's ERC20 balance after accepting the loan
+    uint256 finalBalance =  sampleERC20.balanceOf(account1);
+
+    assertEq(finalBalance,9700000000,"incorrect finalBalance");
+    vm.stopPrank();
+
+}
+
+  
+function test_RepayLoan() public {
+    // anyone can repay Loan
+    test_AcceptLoan();
+    vm.startPrank(account1);
+    
+    // Increase time to cover the first installment
+    //  skip(paymentCycleDuration + currentTime + 1);
+     vm.warp(17008064978 + paymentCycleDuration + 1);
+     console.log("sss112",block.timestamp);
+    // Get the installment amount
+    uint256 installmentAmount =  poolAddressInstance.viewInstallmentAmount(0);
+    console.log("sss",installmentAmount);
+    // assertEq(installmentAmount, , "incorrect installmentAmount"); 
+
+    // Approve ERC20 tokens for repaying the monthly installment
+     sampleERC20.approve(address(poolAddressInstance), installmentAmount);
+
+    // Repay the first monthly installment
+     poolAddressInstance.repayMonthlyInstallment(0);
+
+    // // Try to repay the second installment from a different account (should revert)
+    //  skip(1000);
+    // // vm.startPrank(account1);
+    // uint256 installmentAmount1 =  poolAddressInstance.viewInstallmentAmount(0);
+    // console.log("ssk",installmentAmount1);
+        // vm.expectRevert(bytes(""));
+
+    //  poolAddressInstance.repayMonthlyInstallment(0);
+
+    // // Get the full repayment amount
+
+    // uint256 fullRepayAmount =  poolAddressInstance.viewFullRepayAmount(0);
+    //     console.log("tttt",fullRepayAmount);
+    //         // assertEq(fullRepayAmount, , "incorrect fullRepayAmount"); 
+
+
+
+    // // Approve ERC20 tokens for repaying the full loan
+    //  sampleERC20.approve(address(poolAddressInstance), fullRepayAmount);
+
+    // // Repay the full loan
+    // poolAddressInstance.repayFullLoan(0);
+
+    //  skip(paymentCycleDuration + 1);
+
+    // // Try to repay the full loan again (should revert)
+    // poolAddressInstance.repayFullLoan(0)).to.be.revertedWithoutReason();
+}
+function test_ClosePool() public {
+    // should not allow closing pool if contract is paused
+test_RepayLoan();
+    vm.startPrank(account0);
+
+    // Pause the pool registry contract
+     poolRegis.pause();
+
+    // Try to close the pool (should revert)
+        vm.expectRevert(bytes("Pausable: paused"));
+    poolRegis.closePool(3);
+
+    // Unpause the pool registry contract
+    poolRegis.unpause();
+        vm.stopPrank();
+
+}
+function test_ClosePoolNotOwner() public {
+    // should not allow closing pool if caller is not pool owner
+    test_ClosePool();
+    vm.startPrank(random);
+
+    // Try to close the pool (should revert)
+            vm.expectRevert(bytes("Not the owner"));
+
+    poolRegis.closePool(3);
+
+    vm.stopPrank();
+}
+function test_ChangeFundingPoolImplementation() public {
+    // should not let non owner change funding pool implementation
+    test_ClosePoolNotOwner();
+        vm.startPrank(random);
+
+    vm.expectRevert(bytes("Ownable: caller is not the owner"));
+    poolRegis.changeFundingPoolImplementation(0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d);
     vm.stopPrank();
 }
 

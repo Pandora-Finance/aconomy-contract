@@ -7,4 +7,7 @@ contract SampleERC20 is ERC20("SampleERC20", "TT") {
     function mint(address _recipient, uint256 _amount) external {
         _mint(_recipient, _amount);
     }
+    function getTime() external view returns(uint256) {
+        return block.timestamp;
+    }
 }
