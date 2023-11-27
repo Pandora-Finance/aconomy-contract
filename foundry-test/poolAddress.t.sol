@@ -7,6 +7,8 @@ import "contracts/poolRegistry.sol";
 import "contracts/AconomyFee.sol";
 import "contracts/poolAddress.sol";
 import "contracts/FundingPool.sol";
+import "contracts/poolStorage.sol";
+
 
 
 import "contracts/AttestationServices.sol";
@@ -405,6 +407,96 @@ test_RevertAcceptLoan_NonLender();
 
     poolAddressInstance.unpause();
     vm.stopPrank();
+}function test_AcceptLoanWithFee() public {
+    // should Accept loan with fee
+test_LoanRequest();
+    vm.startPrank(poolOwner);
+
+    // Transfer ownership to a random address
+    aconomyFee.transferOwnership(random);
+    address feeAddress = aconomyFee.getAconomyOwnerAddress();
+            vm.stopPrank();
+
+        vm.startPrank(random);
+
+    aconomyFee.setAconomyPoolFee(200);
+    assertEq(feeAddress, random, "incorrect");
+    uint256 b1 = sampleERC20.balanceOf(feeAddress);
+                vm.stopPrank();
+
+
+    // Approve and accept the loan
+        vm.startPrank(poolOwner);
+
+
+ sampleERC20.approve(address(poolAddressInstance), 10000000000);
+    uint256 _balance1 = sampleERC20.balanceOf(poolOwner);
+
+    poolAddressInstance.AcceptLoan(0);
+    uint256 b2 = sampleERC20.balanceOf(feeAddress);
+        assertEq((b2 - b1),100000000);
+
+
+     _balance1 = sampleERC20.balanceOf(borrower);
+    assertEq(_balance1,9800000000);
+
+// //     // Check the loan state
+// (poolAddress.Loan memory loan)= poolAddressInstance.loans(0);
+//         assertEq(uint(loan.state), 2);
+    //   (  ,,,,,,poolAddress.LoanState memory state) = poolAddressInstance.loans(0);
+      //         assertEq(uint(loan.state), 2);
+
+
+
+    vm.stopPrank();
+}
+
+function test_RevertAcceptLoanIfNotPending() public {
+    // should not accept loan if loan is not pending
+test_AcceptLoanWithFee();
+    vm.startPrank(poolOwner);
+
+    // Try to accept the loan again (should revert)
+ sampleERC20.approve(address(poolAddressInstance), 10000000000);
+      vm.expectRevert(bytes("loan not pending"));
+
+     poolAddressInstance.AcceptLoan(0);
+
+}
+function test_CalculateNextDueDate() public {
+    // should calculate the next due date
+test_AcceptLoanWithFee();
+
+    // Assuming loanId1 and poolAddressInstance are already set up.
+//    poolStorage.Loan memory loan = poolAddressInstance.loans(0);
+
+      (  ,,,,poolAddress.LoanDetails memory loanDetails,poolAddress.Terms memory terms,) = poolAddressInstance.loans(0);
+
+        // Perform the test.
+        uint32 dueDate = poolAddressInstance.calculateNextDueDate(0);
+        uint32 acceptedTimeStamp = loanDetails.acceptedTimestamp;
+        uint32 paymentCycle = terms.paymentCycle;
+        assertEq(dueDate, acceptedTimeStamp + paymentCycle, "Next due date calculation is incorrect");
+}
+function test_WorkAfterLoanExpires() public {
+    // should not work after the loan expires
+    test_CalculateNextDueDate();
+
+    // Check if the loan is expired
+    bool isExpired = poolAddressInstance.isLoanExpired(0);
+
+    // Increase time to simulate loan expiration
+   
+    assertFalse(isExpired, "Loan should not be expired after");
+}
+function test_PaymentDoneInTime() public {
+    // should check the payment done in time
+ test_WorkAfterLoanExpires();
+    // Check if the payment is late
+    bool isPaymentLate = poolAddressInstance.isPaymentLate(0);
+
+    // Verify that the payment is not late
+    assertFalse(isPaymentLate, "Payment should not be late");
 }
 
 }
