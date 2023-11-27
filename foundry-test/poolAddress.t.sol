@@ -39,6 +39,8 @@ contract poolAddressTest is Test {
     address payable random = payable(address(0xABCC));
     address payable borrower = payable(address(0xABDE));
     address payable account2 = payable(address(0xABCE));
+    address payable receiver = payable(address(0xABCC));
+
 
     function testDeployandInitialize() public {
         vm.startPrank(poolOwner);
@@ -209,6 +211,199 @@ test_AddRemoveBorrower();
     // Verify loan state is 0 (Pending)
     // assertEq(loan.state, 0, "Incorrect loan state");
 
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidLendingToken() public {
+    // should not request if lending token is 0 address
+    test_LoanRequest();
+    vm.startPrank(borrower);
+
+    // Attempt to request a loan with 0 address as lending token (should revert)
+    vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        0x0000000000000000000000000000000000000000,
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidReceiver() public {
+    // should not request if receiver is 0 address
+test_LoanRequest_InvalidLendingToken();
+    vm.startPrank(borrower);
+
+    // Attempt to request a loan with 0 address as receiver (should revert)
+    vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        0x0000000000000000000000000000000000000000
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_UnverifiedLender() public {
+    // should not request if lender is unverified
+test_LoanRequest_InvalidReceiver();
+    vm.startPrank(receiver);
+
+    // Attempt to request a loan with unverified lender (should revert)
+    vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidDuration() public {
+    // should not request if duration is not divisible by 30
+test_LoanRequest_UnverifiedLender();
+    vm.startPrank(borrower);
+
+    // Attempt to request a loan with invalid duration (should revert)
+    vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration + 1,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidAPR() public {
+    // should not request if apr < 100
+test_LoanRequest_InvalidDuration();
+    vm.startPrank(borrower);
+
+    // Attempt to request a loan with invalid APR (should revert)
+     vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        10,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidPrincipal() public {
+    // should not request if principal < 1000000
+test_LoanRequest_InvalidAPR();
+    vm.startPrank(borrower);
+
+    // Attempt to request a loan with invalid principal (should revert)
+     vm.expectRevert(bytes("low"));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        100000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_InvalidExpirationDuration() public {
+    // should not request if expiration duration is 0
+ test_LoanRequest_InvalidPrincipal();
+     vm.startPrank(borrower);
+
+    // Attempt to request a loan with invalid expiration duration (should revert)
+     vm.expectRevert(bytes(""));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        0,
+        100,
+        borrower
+    );
+    vm.stopPrank();
+}
+function test_LoanRequest_PausedContract() public {
+    // should not request if the contract is paused
+test_LoanRequest_InvalidExpirationDuration();
+    vm.startPrank(poolOwner);
+
+    // Pause the contract
+    poolAddressInstance.pause();
+        vm.stopPrank();
+
+
+    // Attempt to request a loan while the contract is paused (should revert)
+        vm.startPrank(borrower);
+
+    vm.expectRevert(bytes("Pausable: paused"));
+    poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+        vm.stopPrank();
+
+
+    // Unpause the contract
+        vm.startPrank(poolOwner);
+    poolAddressInstance.unpause();
+
+    vm.stopPrank();
+}
+function test_RevertAcceptLoan_NonLender() public {
+    // should not accept loan if caller is not lender
+test_LoanRequest_PausedContract();
+    vm.startPrank(account2);
+ sampleERC20.approve(address(poolAddressInstance), 10000000000);
+    // Try to accept the loan as a non-lender (should revert)
+    vm.expectRevert(bytes("Not verified lender"));
+    poolAddressInstance.AcceptLoan(0);
+
+    vm.stopPrank();
+}
+function testFail_RevertAcceptLoan_Paused() public {
+    // should not accept loan if contract is paused
+test_RevertAcceptLoan_NonLender();
+    // Pause the contract
+        vm.startPrank(poolOwner);
+    poolAddressInstance.pause();
+        vm.stopPrank();
+
+
+    // Try to accept the loan while the contract is paused (should revert)
+        vm.startPrank(borrower);
+
+     vm.expectRevert(bytes("Pausable: paused"));
+ sampleERC20.approve(address(poolAddressInstance), 10000000000);
+    poolAddressInstance.AcceptLoan(0);
+        vm.stopPrank();
+
+
+//     // Unpause the contract
+        vm.startPrank(poolOwner);
+
+    poolAddressInstance.unpause();
     vm.stopPrank();
 }
 
