@@ -33,7 +33,7 @@ contract poolAddressTest is Test {
     uint32 public loanDuration = 150 days;
     uint32 public loanDefaultDuration = 90 days;
     uint32 public loanExpirationDuration = 180 days;
-    uint256 unixTimestamp = 1701156989;
+    uint256 unixTimestamp = 1701174441;
 
 
 
@@ -700,6 +700,391 @@ vm.stopPrank();
 //     // Repay the full loan
     vm.prank(borrower);
     poolAddressInstance.repayFullLoan(1);
+
+}
+function test_NoFurtherPaymentAfterRepayment() public {
+    // should not allow further payment after the loan has been repaid
+    test_RepayFullAmount();
+    
+
+    // Attempt to repay the full loan again (expecting a revert)
+    vm.startPrank(borrower);
+        vm.expectRevert(bytes(""));
+    poolAddressInstance.repayFullLoan(1);
+      vm.stopPrank();
+
+}
+function test_FullRepaymentAmountIsZero() public {
+    // should check that full repayment amount is 0
+    test_NoFurtherPaymentAfterRepayment();
+
+      (   ,,,,poolAddress.LoanDetails memory loanDetails,,) = poolAddressInstance.loans(0);
+
+//  uint256 lastRepaidTimestamp1=loanDetails.lastRepaidTimestamp;
+ uint256 paymentCycleDuration1;
+vm.warp(loanDetails.lastRepaidTimestamp + paymentCycleDuration1 + 20);
+    // Get the full repayment amount
+    uint256 fullRepayAmount = poolAddressInstance.viewFullRepayAmount(1);
+
+    // Assert that the full repayment amount is 0
+    assertEq(fullRepayAmount, 0, "Full repayment amount should be 0");
+}
+function test_Request_AnotherLoan() public {
+    // should request another loan
+    test_FullRepaymentAmountIsZero();
+vm.startPrank(borrower);
+
+    // Request another loan
+  uint256 loanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+
+    // Update the loanId
+
+    // Assert that the loanId is 2
+    assertEq(loanId, 2, "Loan ID should be 2");
+    vm.stopPrank();
+}
+function test_ExpireAfterExpiryDeadline() public {
+    // should expire after the expiry deadline
+    test_Request_AnotherLoan();
+
+    // Increase time beyond loanExpirationDuration
+    skip(loanExpirationDuration + 1);
+
+    // Check if the loan is expired
+    bool isExpired = poolAddressInstance.isLoanExpired(2);
+
+    // Assert that the loan is expired
+    assertTrue(isExpired, "Loan should be expired after the expiry deadline");
+}
+function test_NotAllowExpiredLoanToBeAccepted() public {
+    // should not allow an expired loan to be accepted
+    test_ExpireAfterExpiryDeadline();
+
+    // Attempt to accept an expired loan
+        vm.expectRevert(bytes(""));
+
+        poolAddressInstance.AcceptLoan(2);
+}
+function test_RequestAnother_Loan() public {
+    // should request another loan
+    test_NotAllowExpiredLoanToBeAccepted();
+    vm.startPrank(borrower);
+
+
+    // Request another loan
+    uint256 newLoanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+
+    // Check that the new loan ID matches the expected value
+assertEq(newLoanId, 3, "Incorrect new loan ID");
+    vm.stopPrank();
+
+}
+
+
+function test_Accept_Loan() public {
+    // should Accept loan
+test_RequestAnother_Loan();
+    // Approve lending tokens for the loan
+            vm.startPrank(poolOwner);
+
+    sampleERC20.approve(address(poolAddressInstance), 10000000000);
+
+
+    // Accept the loan
+
+    poolAddressInstance.AcceptLoan(3);
+
+    // Get the updated balance of the borrower after accepting the loan
+    uint256 updatedBalance = sampleERC20.balanceOf(borrower);
+        console.log("updatedBalance",updatedBalance);
+vm.stopPrank();
+
+}
+
+function test_CheckLoanDefaulted() public {
+    // should show loan defaulted
+test_Accept_Loan();
+    // Increase time to almost the loan default duration
+    skip(loanDefaultDuration + paymentCycleDuration - 10);
+
+    // Check that the loan is not defaulted yet
+    bool isDefaultedBefore = poolAddressInstance.isLoanDefaulted(3);
+    assertFalse(isDefaultedBefore, "Loan should not be defaulted yet");
+
+    // Increase time to exceed the loan default duration
+    skip(11);
+
+    // Check that the loan is now defaulted
+    bool isDefaultedAfter = poolAddressInstance.isLoanDefaulted(3);
+    assertTrue(isDefaultedAfter, "Loan should be defaulted");
+}
+
+
+function test_RequestLoanAgainWithLowAmount() public {
+    // should revert if principal < 1000000
+    test_CheckLoanDefaulted();
+
+    // First attempt with 100000 should revert
+    vm.startPrank(borrower);
+
+        vm.expectRevert(bytes("low"));
+
+   poolAddressInstance.loanRequest(
+        address(sampleERC20),
+            1,
+            100000,
+            loanDefaultDuration,
+            loanExpirationDuration,
+            100,
+            borrower
+        );
+
+vm.stopPrank();
+
+    // Second attempt with 1000000 should succeed
+    vm.startPrank(borrower);
+
+
+    // Request another loan
+    uint256 loanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        1000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+
+    // Check that the loanId is incremented
+    assertEq(loanId, 4, "Unexpected loanId");
+    vm.stopPrank();
+
+}
+function test_AcceptLoanAfterLowAmountRequest() public {
+    // should accept the loan
+     test_RequestLoanAgainWithLowAmount();
+                 vm.startPrank(poolOwner);
+
+    sampleERC20.approve(address(poolAddressInstance), 1000000);
+
+    poolAddressInstance.AcceptLoan(4);
+    vm.stopPrank();
+}
+
+function test_RepayMonthlyInstallmentWithLowAmount() public {
+    // should not allow monthly installments as amount is too low
+    test_AcceptLoanAfterLowAmountRequest();
+    uint256 installmentAmount = poolAddressInstance.viewInstallmentAmount(4);
+        vm.startPrank(borrower);
+
+    sampleERC20.approve(address(poolAddressInstance), installmentAmount);
+    
+    // This call should revert with "low" error
+            vm.expectRevert(bytes("low"));
+    poolAddressInstance.repayMonthlyInstallment(4);
+        vm.stopPrank();
+
+}
+function test_RepayFullLoan() public {
+    // should repay the full amount
+     test_RepayMonthlyInstallmentWithLowAmount();
+    uint256 fullRepayAmount = poolAddressInstance.viewFullRepayAmount(4);
+    assertEq(fullRepayAmount,1000000,"incorrect RepayAmount");
+    // Additional time increase if needed
+   skip(3600);
+            vm.prank(poolOwner);
+            sampleERC20.mint(borrower, 100000000);
+                        vm.startPrank(borrower);
+    sampleERC20.approve(address(poolAddressInstance), fullRepayAmount);
+    
+    // Repay the full loan
+    // poolAddressInstance.repayFullLoan(4);
+vm.stopPrank();
+}
+function test_Request_Another_Loan() public {
+    // should request another loan
+    test_RepayFullLoan();
+    vm.prank(random);
+    aconomyFee.setAconomyPoolFee(0);
+    
+    vm.startPrank(borrower);
+
+// Request another loan
+    uint256 loanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    
+   
+    // check  assertions 
+       assertEq(loanId, 5, "Unexpected loanId");
+vm.stopPrank();
+
+}
+function test_AcceptLoanWithZeroAconomyFee() public {
+    // should accept loan with aconomy fee of 0
+    test_Request_Another_Loan();
+                             vm.startPrank(poolOwner);
+                             sampleERC20.mint(poolOwner,100000000000);
+
+        sampleERC20.approve(address(poolAddressInstance), 10000000000);
+
+
+    
+    // Get borrower's balance before accepting the loan
+    uint256 balanceBefore = sampleERC20.balanceOf(borrower);
+    
+    // // Accept the loan
+    poolAddressInstance.AcceptLoan(5);
+    
+    // Get borrower's balance after accepting the loan
+    uint256 balanceAfter = sampleERC20.balanceOf(borrower);
+    
+    // Additional checks or assertions can be added if needed
+    assertEq(balanceAfter - balanceBefore, 9900000000, "Incorrect balance after accepting loan");
+    vm.stopPrank();
+}
+function test_RequesttAnother_Loan() public {
+    // should request another loan
+    test_AcceptLoanWithZeroAconomyFee();
+        vm.startPrank(borrower);
+
+    // Request another loan
+   uint256 loanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        1000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+    
+    
+    // Additional checks
+    assertEq(loanId, 6, "Incorrect loan ID");
+    vm.stopPrank();
+
+}
+function test_ClosePool() public {
+    // should close the pool
+    test_RequesttAnother_Loan();
+    // Close the pool
+            vm.startPrank(poolOwner);
+
+    poolRegis.closePool(1);
+    
+    // Check if the pool is closed
+    bool closed = poolRegis.ClosedPool(1);
+    assertTrue(closed, "Pool not closed");
+        vm.stopPrank();
+
+}
+function test_RequestLoanInClosedPool() public {
+    // should not request loan in a closed pool
+test_ClosePool();    
+    // Attempt to request a loan in a closed pool
+     vm.startPrank(borrower);
+    vm.expectRevert(bytes(""));
+
+ poolAddressInstance.loanRequest(
+        address(sampleERC20),
+            1,
+            10000000000,
+            loanDefaultDuration,
+            loanExpirationDuration,
+            100,
+            borrower
+        );
+        
+            vm.stopPrank();
+
+    
+}
+function test_AcceptLoanInClosedPool() public {
+    // should not allow accepting the loan in a closed pool
+    test_RequestLoanInClosedPool();
+    vm.startPrank(poolOwner);
+    // Try to accept the loan in a closed pool and expect revert
+        vm.expectRevert(bytes("pool closed"));
+
+    poolAddressInstance.AcceptLoan(6);
+    vm.stopPrank();
+}
+function test_Create_Pool() public {
+    // should create Pool
+    test_AcceptLoanInClosedPool();
+    vm.startPrank(poolOwner);
+
+    // Create a new pool
+    poolRegis.createPool(
+        paymentCycleDuration,
+        loanExpirationDuration,
+        0,
+        100,
+        "adya.com",
+        false,
+        false
+    );
+        vm.stopPrank();
+}
+function test_RequestFunction() public {
+// testing loan request function 
+test_Create_Pool();
+    vm.prank(random);
+aconomyFee.setAconomyPoolFee(100);
+vm.prank(poolOwner);
+sampleERC20.mint(poolOwner, 10000000000);
+
+        vm.startPrank(borrower);
+
+    // Request another loan
+  uint256 loanId = poolAddressInstance.loanRequest(
+        address(sampleERC20),
+          2,
+          10000000000,
+          loanDefaultDuration,
+          loanExpirationDuration,
+          100,
+          borrower
+    );
+            vm.stopPrank();
+console.log("vvvv",loanId);
+}  
+function test_Accept_the_loan() public {
+
+// should Accept loan 
+ test_RequestFunction();
+         vm.startPrank(poolOwner);
+
+        sampleERC20.approve(address(poolAddressInstance), 10000000000);
+
+
+    // Accept the loan
+     poolAddressInstance.AcceptLoan(7);
+
 
 }
 
