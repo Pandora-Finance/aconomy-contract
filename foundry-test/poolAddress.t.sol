@@ -3,6 +3,7 @@ pragma solidity 0.8.11;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "forge-std/console.sol";
+import "forge-std/Vm.sol";
 import "contracts/poolRegistry.sol";
 import "contracts/AconomyFee.sol";
 import "contracts/poolAddress.sol";
@@ -32,7 +33,7 @@ contract poolAddressTest is Test {
     uint32 public loanDuration = 150 days;
     uint32 public loanDefaultDuration = 90 days;
     uint32 public loanExpirationDuration = 180 days;
-
+    uint256 unixTimestamp = 1701156989;
 
 
 
@@ -497,6 +498,209 @@ function test_PaymentDoneInTime() public {
 
     // Verify that the payment is not late
     assertFalse(isPaymentLate, "Payment should not be late");
+}
+function testViewAndPayFirstInstallment() public {
+    test_PaymentDoneInTime();
+    vm.startPrank(poolOwner);
+
+
+      (  ,,,,poolAddress.LoanDetails memory loanDetails,poolAddress.Terms memory terms,) = poolAddressInstance.loans(0);
+        uint256 acceptedTimeStamp = loanDetails.acceptedTimestamp;
+        uint256 paymentCycle = terms.paymentCycle;
+        // Simulate time passing
+        vm.warp( unixTimestamp + paymentCycleDuration + 5000); 
+        uint256 dueDate = poolAddressInstance.calculateNextDueDate(0);
+        assertEq(dueDate, acceptedTimeStamp + paymentCycle);
+        uint256 installmentAmount = poolAddressInstance.viewInstallmentAmount(0);
+        vm.stopPrank();
+
+                vm.startPrank(borrower); 
+                sampleERC20.mint(borrower,100000000);
+        sampleERC20.approve(address(poolAddressInstance), installmentAmount);
+        // vm.prank(borrower);
+        poolAddressInstance.repayMonthlyInstallment(0);
+    //   (   ,,,,poolAddress.LoanDetails memory loanDetails1,poolAddress.Terms memory terms1,) = poolAddressInstance.loans(0);
+        // assertEq(loanDetails1.lastRepaidTimestamp, acceptedTimeStamp + paymentCycle);
+        // assertEq(loanDetails1.totalRepaid.principal + loanDetails1.totalRepaid.interest);
+                vm.stopPrank();
+
+}
+function testContinuedPaymentAfterSkippingCycle() public {
+        // Simulate time to skip a payment cycle
+        testViewAndPayFirstInstallment();
+        vm.warp(unixTimestamp + 2 * paymentCycleDuration + 50000);
+        assertTrue(poolAddressInstance.isPaymentLate(0));
+        // Calculate and verify next due date
+        uint256 dueDate = poolAddressInstance.calculateNextDueDate(0);
+      (   ,,,,poolAddress.LoanDetails memory loanDetails,poolAddress.Terms memory terms,) = poolAddressInstance.loans(0);
+        assertEq(dueDate, loanDetails.acceptedTimestamp + 2 * terms.paymentCycle);
+        // Repay the installment after skipping one cycle
+        uint256 installmentAmount = poolAddressInstance.viewInstallmentAmount(0);
+
+         vm.startPrank(borrower); 
+                sampleERC20.mint(borrower,100000000);
+        sampleERC20.approve(address(poolAddressInstance), installmentAmount);
+        poolAddressInstance.repayMonthlyInstallment(0);
+        // Assertions after repayment
+      (   ,,,,poolAddress.LoanDetails memory loanDetails1,poolAddress.Terms memory terms1,) = poolAddressInstance.loans(0);
+        assertEq(loanDetails1.lastRepaidTimestamp, loanDetails1.acceptedTimestamp + 2 * terms1.paymentCycle);
+        assertEq(terms1.installmentsPaid, 2);
+        assertTrue(poolAddressInstance.isPaymentLate(0));
+        // Calculate and verify next due date
+        dueDate = poolAddressInstance.calculateNextDueDate(0);
+                assertTrue(poolAddressInstance.isPaymentLate(0));
+        assertEq(dueDate, loanDetails.acceptedTimestamp + 3 * terms.paymentCycle);
+        vm.stopPrank();
+        // Pause and attempt to repay
+        vm.prank(poolOwner);
+        poolAddressInstance.pause();
+
+     vm.expectRevert(bytes("Pausable: paused"));
+        vm.prank(borrower);
+        poolAddressInstance.repayMonthlyInstallment(0);
+        // Unpause and repay
+                vm.prank(poolOwner);
+        poolAddressInstance.unpause();
+        vm.startPrank(borrower); 
+                uint256 installmentAmount2 = poolAddressInstance.viewInstallmentAmount(0);
+
+                sampleERC20.mint(borrower,1000000000000);
+        sampleERC20.approve(address(poolAddressInstance), installmentAmount2);
+                        console.log("ddd",installmentAmount);
+        poolAddressInstance.repayMonthlyInstallment(0);
+        // Assertions after repayment
+      (   ,,,,,poolAddress.Terms memory terms2,) = poolAddressInstance.loans(0);
+        // assertEq(loanDetails2.lastRepaidTimestamp,loanDetails2.acceptedTimestamp + 6 * terms2.paymentCycle);
+        assertEq(terms2.installmentsPaid, 2);
+        assertFalse(poolAddressInstance.isPaymentLate(0));
+
+          uint256  FullRepayAmount = poolAddressInstance. viewFullRepayAmount(0);
+
+                sampleERC20.mint(borrower,1000000000000);
+        sampleERC20.approve(address(poolAddressInstance), FullRepayAmount);
+                        console.log("ddd",FullRepayAmount);
+                          uint256  installmentAmount3 = poolAddressInstance. viewInstallmentAmount(0);
+
+                sampleERC20.mint(borrower,1000000000000);
+        sampleERC20.approve(address(poolAddressInstance), installmentAmount3);
+                        console.log("ddd",installmentAmount3);
+        // poolAddressInstance.repayMonthlyInstallment(0);
+}
+function test_LoanNotDefaultedIfStateNotAccepted() public {
+    // should show loan is not defaulted if state is not accepted
+    testContinuedPaymentAfterSkippingCycle();
+
+    bool isLoanDefaulted = poolAddressInstance.isLoanDefaulted(0);
+
+    // Verify that the loan is not defaulted
+    assertFalse(isLoanDefaulted, "Loan should not be defaulted");
+}
+function test_PaymentNotLateIfStateNotAccepted() public {
+    // should show payment is not late if state is not accepted
+    test_LoanNotDefaultedIfStateNotAccepted();
+    
+    bool isPaymentLate = poolAddressInstance.isPaymentLate(0);
+
+    // Verify that the payment is not late
+    assertFalse(isPaymentLate, "Payment should not be late");
+}
+
+function test_CheckFullRepaymentAmountIsZero() public {
+    // should check that full repayment amount is 0
+    test_PaymentNotLateIfStateNotAccepted();
+
+    // Get the full repayment amount
+    uint256 fullRepaymentAmount = poolAddressInstance.viewFullRepayAmount(0);
+
+    // Verify that the full repayment amount is 0
+    assertEq(fullRepaymentAmount, 0, "Full repayment amount should be 0");
+}
+function test_RequestAnotherLoan() public {
+    // should request another loan
+     test_CheckFullRepaymentAmountIsZero();
+
+vm.startPrank(borrower);
+  uint256 loanId1 =  poolAddressInstance.loanRequest(
+        address(sampleERC20),
+        1,
+        10000000000,
+        loanDefaultDuration,
+        loanExpirationDuration,
+        100,
+        borrower
+    );
+
+    // Update loanId1 to the new loan ID
+
+    // Verify that the new loan ID is 1
+    assertEq(loanId1, 1, "New loan ID should be 1");
+    vm.stopPrank();
+
+}
+function test_AcceptLoan() public {
+    // should Accept loan
+    test_RequestAnotherLoan();
+
+    // Approve lending tokens for the loan
+            vm.startPrank(poolOwner);
+
+    sampleERC20.approve(address(poolAddressInstance), 10000000000);
+
+    // Get the initial balance of the borrower
+    // uint256 initialBalance = sampleERC20.balanceOf(borrower);
+    // console.log("initialBalance",initialBalance);
+
+    // Accept the loan
+
+    poolAddressInstance.AcceptLoan(1);
+
+    // Get the updated balance of the borrower after accepting the loan
+    uint256 updatedBalance = sampleERC20.balanceOf(borrower);
+        console.log("updatedBalance",updatedBalance);
+vm.stopPrank();
+
+}
+function test_RepayFullAmount() public {
+    // should repay full amount
+     test_AcceptLoan();
+
+    // Get loan details
+      (   ,,,,poolAddress.LoanDetails memory loanDetails,,) = poolAddressInstance.loans(0);
+
+ uint256 lastRepaidTimestamp1=loanDetails.lastRepaidTimestamp;
+ uint256 paymentCycleDuration1;
+vm.warp(loanDetails.lastRepaidTimestamp + paymentCycleDuration1 + 20);
+    // Advance blocks to simulate the passage of time
+        // Simulate the passage of time
+        console.log("kkk",lastRepaidTimestamp1);
+    // Get the full repayment amount
+    uint256 fullRepayAmount = poolAddressInstance.viewFullRepayAmount(1);
+
+    // Get the current balance of the borrower
+    // uint256 borrowerBalance = sampleERC20.balanceOf(borrower);
+
+    // Approve lending tokens for the full repayment amount
+    vm.prank(borrower);
+    sampleERC20.approve(address(poolAddressInstance), fullRepayAmount);
+
+    // Pause the contract temporarily
+    vm.prank(poolOwner);
+    poolAddressInstance.pause();
+
+    // Attempt to repay the full loan while the contract is paused (expecting a revert)
+    vm.startPrank(borrower);
+            vm.expectRevert(bytes("Pausable: paused"));
+            poolAddressInstance.repayFullLoan(1);
+vm.stopPrank();
+
+    // Unpause the contract
+        vm.prank(poolOwner);
+    poolAddressInstance.unpause();
+
+//     // Repay the full loan
+    vm.prank(borrower);
+    poolAddressInstance.repayFullLoan(1);
+
 }
 
 }
