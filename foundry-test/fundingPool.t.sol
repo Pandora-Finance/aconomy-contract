@@ -239,6 +239,8 @@ function testLenderCanSupplyFundsToThePool() public {
         assertEq(interestRate, 1000);
         assertEq(fundExpiration, expiration);
         // assertEq(state, 0); // BidState.PENDING
+                vm.stopPrank();
+
     }
 function test_nonLender_supplyToPool() public {
     // should not allow non-lender to supply funds to the pool 
@@ -317,6 +319,266 @@ vm.warp(block.timestamp + 3600);
         1000);
 
     vm.stopPrank();
+
+
+}
+function test_supply_with_lowAPR() public {
+
+// should not allow lender to supply an apr less than 100 bps 
+ test_loanDuration_Days();
+
+vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes("apr too low"));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        erc20Amount,
+        loanDefaultDuration , 
+        expiration,
+        10);
+
+    vm.stopPrank();
+
+
+
+}
+function test_low_supply_amount() public {
+// should not allow lender to supply 100000 amount to the pool 
+test_supply_with_lowAPR();
+vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes("amount too low"));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        100000,
+        loanDefaultDuration,
+        expiration,
+        1000);
+
+    vm.stopPrank();
+
+}
+function test_duration_not_Divisible() public {
+// should not allow lender to set a duration not divisible by 30 
+test_low_supply_amount();
+
+vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes(""));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        10000000000,
+        31,
+        expiration,
+        1000);
+
+    vm.stopPrank();
+
+
+}
+function test_faulty_expiration() public {
+// should not allow lender to supply a faulty expiration 
+test_duration_not_Divisible();
+vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes("wrong timestamp"));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        erc20Amount,
+        loanDefaultDuration,
+        10,
+        1000);
+
+    vm.stopPrank();
+
+}
+function test_cancelBid_by_nonLender() public {
+// should not allow non-lender to cancel a bid 
+test_faulty_expiration();
+
+vm.startPrank(nonLender);
+
+  vm.expectRevert(bytes("You are not a Lender"));
+fundingpoolInstance.Withdraw(
+       1,         
+       address(sampleERC20),
+        0, 
+        lender);
+
+        vm.stopPrank();
+
+}
+function test_acceptBid_andEmit() public{
+// should accept the bid and emit AcceptedBid event  
+testLenderCanSupplyFundsToThePool();
+
+vm.prank(poolOwner);
+aconomyFee.transferOwnership(newFeeOwner);
+
+        address feeAddress =  aconomyFee.getAconomyOwnerAddress();
+        vm.prank(newFeeOwner);
+
+        aconomyFee.setAconomyPoolFee(200);
+        assertEq(feeAddress,newFeeOwner,"ownership not transfer");
+         aconomyFee.AconomyPoolFee();
+        uint256 b1 =  sampleERC20.balanceOf(feeAddress);
+
+  vm.startPrank(receiver);
+  vm.expectRevert(bytes("You are not the Pool Owner"));
+
+ fundingpoolInstance.AcceptBid(
+          1,         
+       address(sampleERC20),
+          0,
+          lender,
+          receiver
+        );
+        vm.stopPrank();
+
+  vm.startPrank(poolOwner);
+
+         fundingpoolInstance.AcceptBid(
+           1,         
+           address(sampleERC20),
+           0,
+           lender,
+           receiver
+        );
+        uint256 b2 =  sampleERC20.balanceOf(feeAddress);
+
+assertEq((b2-b1),100000000,"incorrect balance");
+
+ (,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        uint32 acceptBidTimestamp,
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+            lender,
+             1, 
+             address(sampleERC20),
+            0);
+
+// assertEq(acceptBidTimestamp != moment.now);
+        vm.stopPrank();
+
+}
+function test_pendingBid() public {
+//  should revert if bid is not pending
+test_acceptBid_andEmit();
+        // await fundingpoolInstance.AcceptBid(
+        //   poolId,
+        //   await erc20.getAddress(),
+        //   bidId,
+        //   lender,
+        //   receiver
+        // );
+         vm.startPrank(poolOwner);
+  vm.expectRevert(bytes("Bid must be pending"));
+
+          fundingpoolInstance.AcceptBid(
+           1,         
+           address(sampleERC20),
+           0,
+            lender,
+            receiver
+          );
+              vm.stopPrank();
+
+}
+function test_rejecet_revert() public {
+//  should revert reject if bid is not pending
+test_pendingBid();
+
+         vm.startPrank(poolOwner);
+
+          vm.expectRevert(bytes("Bid must be pending"));
+
+          fundingpoolInstance.RejectBid(
+            1,         
+           address(sampleERC20),
+           0,
+            lender
+          );
+                        vm.stopPrank();
+
+}
+function test_reject_Bid()public {
+// should reject the bid and emit RejectBid event 
+test_rejecet_revert();
+          vm.startPrank(poolOwner);
+
+       fundingpoolInstance.RejectBid(
+           1,         
+           address(sampleERC20),
+           1,
+            lender
+        );
+  
+         (uint256 amount,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+            lender,
+             1, 
+             address(sampleERC20),
+            1);
+
+             uint256 balance =  sampleERC20.balanceOf(lender);
+
+
+assertEq(amount,10000000000,"incorrect Amount");
+assertEq(balance,10100000000,"incorrect Amount");
 
 
 }
