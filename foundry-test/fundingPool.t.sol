@@ -32,6 +32,9 @@ contract poolAddressTest is Test {
 
     uint256 unixTimestamp = 1701174441;
 
+     uint256 poolId;
+    uint256 expiration;
+
 
     address payable poolOwner = payable(address(0xABEE));
     address payable lender = payable(address(0xABCC));
@@ -167,5 +170,154 @@ function test_AddRemoveBorrower() public {
     assertTrue(isVerifiedAfterSecondAdd, "Borrower should be a verified borrower after the second addition");
 
     vm.stopPrank();
+}
+
+function testLenderCanSupplyFundsToThePool() public {
+// should allow lender to supply funds to the pool 
+        test_AddRemoveBorrower();
+        vm.warp(block.timestamp + 3600);
+        // unixTimestamp
+        // uint256 currentBlock = block.number;
+         unixTimestamp = block.number;
+
+        expiration = block.timestamp + 3600;
+        address fundingpooladdress = poolRegis.getPoolAddress(1);
+        // console.log(fundingpooladdress);
+        fundingpoolInstance = FundingPool(fundingpooladdress);
+        vm.prank(poolOwner);
+        sampleERC20.mint(poolOwner,10000000000000);
+                vm.prank(poolOwner);
+        sampleERC20.transfer(lender,erc20Amount);
+
+                vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId;
+        bidId = 0;
+
+                vm.stopPrank();
+        vm.prank(poolOwner);
+
+        sampleERC20.transfer(address(lender), 10000000000);
+                        vm.startPrank(lender);
+
+        sampleERC20.approve(address(fundingpoolInstance), 10000000000);
+        fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          10000000000, 
+          loanDefaultDuration,
+           expiration, 
+           1000);
+
+        uint256 bidId1;
+        bidId1 = 1;
+        // vm.stopPrank();
+        uint256 balance = sampleERC20.balanceOf(lender);
+        assertEq(balance, 0);
+
+        (uint256 amount,
+        uint256 fundExpiration,
+        uint32 maxDuration,
+        uint16 interestRate, 
+        , 
+        ,
+        ,
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+            lender, 1, address(sampleERC20), bidId);
+        assertEq(amount, erc20Amount);
+        assertEq(loanDefaultDuration, maxDuration);
+        assertEq(interestRate, 1000);
+        assertEq(fundExpiration, expiration);
+        // assertEq(state, 0); // BidState.PENDING
+    }
+function test_nonLender_supplyToPool() public {
+    // should not allow non-lender to supply funds to the pool 
+    testLenderCanSupplyFundsToThePool();
+     vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(nonLender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes("Not verified lender"));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        erc20Amount,
+        loanDefaultDuration, 
+        expiration,
+        1000);
+
+    vm.stopPrank();
+
+
+}
+function test_supply_zero_address() public {
+// should not allow lender to supply 0 address to the pool 
+test_nonLender_supplyToPool();
+ vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes("you can't do this with zero address"));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+0x0000000000000000000000000000000000000000,
+        erc20Amount,
+        loanDefaultDuration, 
+        expiration,
+        1000);
+
+    vm.stopPrank();
+
+
+}
+function test_loanDuration_Days() public {
+// should not allow lender to input a duration not divisible by 30 days
+
+test_supply_zero_address();
+
+vm.warp(block.timestamp + 3600);
+        // Rest of your test logic
+         unixTimestamp = block.number;
+        expiration = block.timestamp + 3600;
+
+                        vm.startPrank(lender);
+
+  sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+  vm.expectRevert(bytes(""));
+
+       fundingpoolInstance.supplyToPool(
+        1,
+        address(sampleERC20),
+        erc20Amount,
+        loanDefaultDuration + 1, 
+        expiration,
+        1000);
+
+    vm.stopPrank();
+
+
 }
 }
