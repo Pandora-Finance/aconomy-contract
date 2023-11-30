@@ -712,4 +712,340 @@ assertEq(paymentCycleAmount,1715613940,"incorrect amount");
 assertEq(installmentAmount1,1715613940,"incorrect amount");
 
 }
+function testContinuedPaymentAfterSkippingCycle() public {
+// should continue paying installments after skipping a cycle 
+test_viewPay_1st_installment();
+(       ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        uint32 acceptBidTimestamp,
+         uint256 paymentCycleAmount,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+
+
+bool PaymentLate = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertFalse(PaymentLate,"incorrect status");
+
+uint256 _now =  sampleERC20.getTime();
+
+uint256 currentTime = block.timestamp;
+        vm.warp(currentTime + paymentCycleDuration + paymentCycleDuration + 604800);
+        uint256 newTime = block.timestamp;
+        // Checking increased time
+        assertEq(newTime, currentTime + 2*paymentCycleDuration + 604800);
+        _now =  sampleERC20.getTime();
+        assertEq(_now, 11476501);
+
+
+        bool IsPaymentLate = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertTrue(IsPaymentLate,"Payment status");
+
+uint256 dueDate = fundingpoolInstance.calculateNextDueDate(
+    1,  
+    address(sampleERC20),
+    0, 
+    lender
+);
+
+        uint256 acceptedTimeStamp = acceptBidTimestamp;
+        uint256 paymentCycle = paymentCycleDuration;
+
+        assertEq(dueDate, acceptedTimeStamp + 2*paymentCycle);
+
+uint256 installmentAmount  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertEq(installmentAmount,paymentCycleAmount,"incorrect installmentAmount");
+
+ vm.startPrank(poolOwner); 
+                // sampleERC20.mint(borrower,100000000);
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+assertEq(installment.installmentsPaid,2);
+
+
+bool PaymentLate1 = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertTrue(PaymentLate1,"incorrect status");
+
+uint256 dueDate1 = fundingpoolInstance.calculateNextDueDate(
+    1,  
+    address(sampleERC20),
+    0, 
+    lender
+);
+        assertEq(dueDate1, acceptedTimeStamp + 3*paymentCycle);
+
+
+
+uint256 installmentAmount3  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+
+ vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount3);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment1,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+assertEq(installment1.installmentsPaid,3);
+
+bool PaymentLate2 = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertTrue(PaymentLate2,"incorrect PaymentLate2 status");
+uint256 dueDate2 = fundingpoolInstance.calculateNextDueDate(
+    1,  
+    address(sampleERC20),
+    0, 
+    lender
+);
+        assertEq(dueDate2, acceptedTimeStamp + 4*paymentCycle);
+// vm.warp(paymentCycleDuration); 
+uint256 installmentAmount4  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+
+ vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount4);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+// attempt to repay installment again should revert 
+        vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount4);
+        
+  vm.expectRevert(bytes(""));
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment4,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+assertEq(installment4.installmentsPaid,4);
+
+
+bool PaymentLate4 = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertFalse(PaymentLate4,"incorrect status");
+
+uint256 dueDate3 = fundingpoolInstance.calculateNextDueDate(
+    1,  
+    address(sampleERC20),
+    0, 
+    lender
+);
+        // assertEq(dueDate3, acceptedTimeStamp + 5 * paymentCycle);
+uint256 currentTime3 = block.timestamp;
+        vm.warp(currentTime3 + paymentCycleDuration + 100);
+        uint256 _newTime1 = block.timestamp;
+        // Checking increased time
+        assertEq(_newTime1, currentTime3 + paymentCycleDuration+100);
+        uint256 installmentAmount5  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+// console.log("lll",installmentAmount5);
+ vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount5);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment5,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+assertEq(installment5.installmentsPaid,5);
+
+
+bool PaymentLate5 = fundingpoolInstance.isPaymentLate(
+            1,
+            address(sampleERC20),
+            0,
+            lender
+          );
+assertFalse(PaymentLate5,"incorrect status");
+
+
+uint256 currentTime4 = block.timestamp;
+        vm.warp(currentTime4 + paymentCycleDuration + 100);
+        uint256 _newTime2 = block.timestamp;
+        // Checking increased time
+        assertEq(_newTime2, currentTime4 + paymentCycleDuration+100);
+
+        uint256 installmentAmount6  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+// console.log("lll",installmentAmount5);
+ vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount6);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment6,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+assertEq(installment6.installmentsPaid,5);
+
+
+
+}
 }
