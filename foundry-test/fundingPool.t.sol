@@ -30,7 +30,7 @@ contract poolAddressTest is Test {
     uint32 public loanDefaultDuration = 180 days;
     uint32 public loanExpirationDuration = 1 days;
 
-    uint256 unixTimestamp = 1701174441;
+    uint256 unixTimestamp = 1701321683;
 
      uint256 poolId;
     uint256 expiration;
@@ -579,7 +579,137 @@ test_rejecet_revert();
 
 assertEq(amount,10000000000,"incorrect Amount");
 assertEq(balance,10100000000,"incorrect Amount");
+                        vm.stopPrank();
 
+
+}
+function test_cancelling_notPending_Bid() public {
+// should not allow cancelling a bid that is not pending 
+test_reject_Bid();
+vm.startPrank(lender);
+
+vm.expectRevert(bytes("Bid must be pending"));
+fundingpoolInstance.Withdraw(
+    1,
+  
+address(sampleERC20),
+ 0, 
+ lender);
+vm.stopPrank();
+     
+}
+function test_viewPay_1st_installment() public {
+    // should view and pay 1st intallment amount 
+test_cancelling_notPending_Bid();
+ (      ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        uint32 acceptBidTimestamp,
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+        // console.log(loan);
+        uint256 _installmentAmount  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertEq(_installmentAmount,0);
+        // vm.warp( unixTimestamp + paymentCycleDuration + 500000); 
+        uint256 currentTime = block.timestamp;
+        vm.warp(currentTime + paymentCycleDuration + 500000);
+        uint256 newTime = block.timestamp;
+        // Checking increased time
+        assertEq(newTime, currentTime + paymentCycleDuration+500000);
+
+ uint256 installmentAmount  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+// console.log("kkk",installmentAmount1);
+uint256 dueDate = fundingpoolInstance.calculateNextDueDate(
+    1,  
+    address(sampleERC20),
+    0, 
+    lender
+);
+
+        uint256 acceptedTimeStamp = acceptBidTimestamp;
+        uint256 paymentCycle = paymentCycleDuration;
+
+        assertEq(dueDate, acceptedTimeStamp + paymentCycle);
+
+ vm.startPrank(receiver); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount);
+
+          vm.expectRevert(bytes("You are not the Pool Owner"));
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+ vm.startPrank(poolOwner); 
+                // sampleERC20.mint(borrower,100000000);
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount);
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+        vm.stopPrank();
+
+    (   ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        uint256 paymentCycleAmount,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+// console.log("kkk",paymentCycleAmount);
+assertEq(paymentCycleAmount,1715613940,"incorrect amount");
+
+ uint256 currentTime1 = block.timestamp;
+        vm.warp(currentTime1 + paymentCycleDuration + 100);
+        uint256 _newTime = block.timestamp;
+        // Checking increased time
+        assertEq(_newTime, currentTime1 + paymentCycleDuration+100);
+
+
+ uint256 installmentAmount1  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertEq(installmentAmount1,1715613940,"incorrect amount");
 
 }
 }
