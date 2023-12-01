@@ -945,12 +945,7 @@ bool PaymentLate4 = fundingpoolInstance.isPaymentLate(
           );
 assertFalse(PaymentLate4,"incorrect status");
 
-uint256 dueDate3 = fundingpoolInstance.calculateNextDueDate(
-    1,  
-    address(sampleERC20),
-    0, 
-    lender
-);
+
         // assertEq(dueDate3, acceptedTimeStamp + 5 * paymentCycle);
 uint256 currentTime3 = block.timestamp;
         vm.warp(currentTime3 + paymentCycleDuration + 100);
@@ -1047,5 +1042,243 @@ assertEq(installment6.installmentsPaid,5);
 
 
 
+}
+
+function test_check_fullRepayment_amount() public {
+
+// should check that full repayment amount is 0 
+testContinuedPaymentAfterSkippingCycle();
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        FundingPool.Installments memory installment,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+        assertEq(installment.installmentsPaid,5);
+
+// vm.warp(installment.lastRepaidTimestamp + paymentCycleDuration + 20);
+ uint256 installmentAmount  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertEq(installmentAmount,0,"installmentAmount should be 0");
+}
+
+function test_check_BidExpiry() public {
+// should check that bid expiry is false if state is not accepted 
+ test_check_fullRepayment_amount();
+
+bool expired = fundingpoolInstance.isBidExpired(
+          1,
+          address(sampleERC20),
+          0,
+          lender);
+assertFalse(expired,"incorrect status");
+}
+function test_checkBid_expiry_for_nonExistantLoan() public {
+// should check that bid expiry is false if loan is non existant and expiry is 0 
+test_check_BidExpiry();
+bool expired = fundingpoolInstance.isBidExpired(
+          1,
+          address(sampleERC20),
+          5,
+          lender);
+assertFalse(expired,"incorrect status");
+}
+function test_check_DefaultedLoan() public {
+// should check that loan defaulted is false if state is not accepted 
+test_checkBid_expiry_for_nonExistantLoan();
+bool Defaulted = fundingpoolInstance.isLoanDefaulted(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertFalse(Defaulted,"loan should not be defaulted");
+
+
+}
+function test_latePayement() public {
+// should show that late payment is false if state is not accepted 
+test_check_DefaultedLoan();
+
+ bool PaymentLate = fundingpoolInstance.isPaymentLate(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertFalse(PaymentLate," should not be PaymentLate");
+
+}
+function test_dueDate() public {
+// should show that due date is 0 if state is not accepted 
+ test_latePayement();
+
+uint256 DueDate = fundingpoolInstance.calculateNextDueDate(
+          1,
+          address(sampleERC20),
+          0,
+          lender
+        );
+assertEq(DueDate,0,"Due Date must be 0");
+}
+function test_Supply_To_Pool() public {
+// should supply funds to pool again
+test_dueDate();
+
+        uint256 currentBlock = block.timestamp;
+        expiration = currentBlock + 3600;
+
+vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId;
+        bidId = 2;
+assertEq(bidId,2);
+                vm.stopPrank();
+}
+function test_AcceptBid() public {
+// should accept the bid 
+test_Supply_To_Pool();
+  vm.startPrank(poolOwner);
+
+fundingpoolInstance.AcceptBid(
+          1,
+         address(sampleERC20),
+          2,
+          lender,
+          receiver
+        );
+
+          vm.stopPrank();
+
+}
+function test_Repay_Full_loan() public {
+// should repay full amount 
+test_AcceptBid();
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+         uint32 lastRepaidTimestamp,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+
+        vm.warp(lastRepaidTimestamp + paymentCycleDuration + 20);
+
+    uint256 FullRepayAmount = fundingpoolInstance.viewFullRepayAmount(
+          1,
+          address(sampleERC20),
+          2,
+          lender
+        );
+
+       vm.prank(poolOwner);
+       sampleERC20.approve(address(fundingpoolInstance), FullRepayAmount);
+
+                vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), FullRepayAmount);
+
+vm.expectRevert(bytes("You are not the Pool Owner"));
+fundingpoolInstance.RepayFullAmount(
+          1,
+          address(sampleERC20),
+          2,
+          lender
+       );
+          vm.stopPrank();
+
+ vm.startPrank(poolOwner);
+ sampleERC20.approve(address(fundingpoolInstance), FullRepayAmount);
+
+fundingpoolInstance.RepayFullAmount(
+          1,
+          address(sampleERC20),
+          2,
+          lender
+       );
+          vm.stopPrank();
+
+// (       ,
+//         ,
+//         ,
+//         ,
+//         FundingPool.BidState memory state, 
+//         ,  
+//         ,
+//         ,
+//         ,
+//         ,
+//         ,
+//         ) = fundingpoolInstance.lenderPoolFundDetails(
+//           lender,
+//           1,
+//           address(sampleERC20),
+//           0
+//         );
+// assertEq(state,2);
+}
+function test_Check_FullRepayAmout() public {
+ // should check that full repayment amount is 0 
+ test_Repay_Full_loan();
+
+(       ,
+        ,
+        ,
+        ,
+        , 
+        ,  
+        ,
+        ,
+        ,
+         uint32 lastRepaidTimestamp,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+
+        vm.warp(lastRepaidTimestamp + paymentCycleDuration + 20);
+
+   uint256 FullRepayAmount = fundingpoolInstance.viewFullRepayAmount(
+          1,
+          address(sampleERC20),
+          2,
+          lender
+        );
+        assertEq(FullRepayAmount,0,"FullRepayAmount should be 0");
 }
 }
