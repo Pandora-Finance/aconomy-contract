@@ -1127,11 +1127,10 @@ function testFailBurnIf_ERC20_IsZeroAddress() public {
 function testBobBurnPiNFT() public {
 
 // should let bob burn piNFT
-    // initial balance of bob
     test_Validator_add_ERC20_tokenTo_bob();
-    uint256 initialBobBal = sampleERC20.balanceOf(bob);
+    vm.startPrank(bob);
+    // uint256 initialBobBal = sampleERC20.balanceOf(bob);
     piNftContract.approve(address(piNFTMethodsContract), 0);
-vm.prank(alice);
     // Bob burns piNFT
     piNFTMethodsContract.redeemOrBurnPiNFT(
         address(piNftContract),
@@ -1170,10 +1169,12 @@ vm.prank(alice);
     //     ).isValid,
     //     "Validator commission should be set to 0 after burning"
     // );
+    vm.stopPrank();
 }
 
 
 function testFailPreventExternalAddressToCallCallableFunctions() public {
+    // should prevent an external address to call piNFTMethods callable functions 
     LibShare.Share[] memory royArray ;
         LibShare.Share memory royalty;
         royalty = LibShare.Share(validator, uint96(200));

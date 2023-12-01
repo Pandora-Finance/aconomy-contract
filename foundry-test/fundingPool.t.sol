@@ -1380,8 +1380,11 @@ fundingpoolInstance.repayMonthlyInstallment(
 function test_Supply_To_Pool_again() public {
 // should supply funds to pool again
 test_repayment_after_ChangeLoan_state();
-        uint256 currentBlock = block.timestamp;
-        expiration = currentBlock + 3600;
+        // uint256 currentBlock = block.timestamp;
+
+        // expiration = currentBlock + 3600;
+        uint256 blockTimestamp = block.timestamp;
+         expiration = blockTimestamp + 3600;
 
 vm.startPrank(lender);
 
@@ -1504,5 +1507,301 @@ vm.startPrank(lender);
         bidId = 4;
 assertEq(bidId,4);
                 vm.stopPrank();
+}
+function test_Accept() public {
+// should accept the bid 
+ test_Supply_To_PoolAgain();
+vm.startPrank(poolOwner);
+
+fundingpoolInstance.AcceptBid(
+          1,
+         address(sampleERC20),
+          4,
+          lender,
+          receiver
+        );
+        vm.stopPrank();
+
+}
+function test_defaulted_Loan() public {
+// should show loan defaulted after default time 
+test_Accept();
+vm.warp(loanDefaultDuration + loanExpirationDuration - 10); 
+bool Defaulted = fundingpoolInstance.isLoanDefaulted(
+          1,
+          address(sampleERC20),
+          4,
+          lender
+        );
+assertFalse(Defaulted,"loan should not be defaulted");
+
+vm.warp(360000000);
+bool Defaulted_ = fundingpoolInstance.isLoanDefaulted(
+          1,
+          address(sampleERC20),
+          4,
+          lender
+        );
+assertTrue(Defaulted_,"loan should be defaulted");
+
+}
+
+function test_Supply_To_Pool_again_with_usdt() public {
+// should supply funds to pool again, this time 1 usdt 
+test_defaulted_Loan();
+        uint256 blockTimestamp = block.timestamp;
+         expiration = blockTimestamp + 3600;
+
+vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+
+         vm.expectRevert(bytes("amount too low"));
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          100000,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           
+                vm.stopPrank();
+
+                vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          1000000,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId = 5;
+
+           assertEq(bidId,5,"incorrect bidId");
+                vm.stopPrank();
+}
+
+function test_Accept_Bid() public {
+// should accept the bid 
+test_Supply_To_Pool_again_with_usdt();
+vm.startPrank(poolOwner);
+
+fundingpoolInstance.AcceptBid(
+          1,
+         address(sampleERC20),
+          5,
+          lender,
+          receiver
+        );
+        vm.stopPrank();
+
+}
+function test_Repay_monthelyInstallment() public {
+        // should not allow monthly installments as amount is too low 
+         test_Accept_Bid();
+
+ uint256 installmentAmount  =  fundingpoolInstance.viewInstallmentAmount(
+          1,
+          address(sampleERC20),
+          5,
+          lender
+        );
+
+        vm.startPrank(poolOwner); 
+        sampleERC20.approve(address(fundingpoolInstance), installmentAmount);
+        
+  vm.expectRevert(bytes("low"));
+
+        fundingpoolInstance.repayMonthlyInstallment(
+             1,
+          address(sampleERC20),
+          5,
+          lender
+        );
+        vm.stopPrank();
+}
+function test_Full_Repay() public {
+        // should repay the full amount 
+        test_Repay_monthelyInstallment();
+        uint256 FullRepayAmount = fundingpoolInstance.viewFullRepayAmount(
+          1,
+          address(sampleERC20),
+          5,
+          lender
+        );
+
+    assertEq(FullRepayAmount, 1000000);           
+ vm.startPrank(poolOwner);
+ sampleERC20.approve(address(fundingpoolInstance), FullRepayAmount);
+
+fundingpoolInstance.RepayFullAmount(
+          1,
+          address(sampleERC20),
+          5,
+          lender
+       );
+          vm.stopPrank();
+
+}
+
+function test_SupplyTo_Pool() public {
+// should supply funds to pool again
+test_Full_Repay();
+
+       uint256 blockTimestamp = block.timestamp;
+         expiration = blockTimestamp + 3600;
+
+vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(
+            1,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId;
+        bidId = 6;
+assertEq(bidId,6);
+                vm.stopPrank();
+}
+
+function test_acceptBid_With_zeroFee() public {
+// should accept the bid with aconomy fee of 0 
+ test_SupplyTo_Pool();
+ vm.prank(newFeeOwner);
+aconomyFee.setAconomyPoolFee(0);
+ uint256 b1 =  sampleERC20.balanceOf(receiver);
+
+vm.startPrank(poolOwner);
+
+         fundingpoolInstance.AcceptBid(
+           1,         
+           address(sampleERC20),
+           6,
+           lender,
+           receiver
+        );
+        uint256 b2 =  sampleERC20.balanceOf(receiver);
+
+assertEq((b2-b1),9800000000,"incorrect balance");
+                vm.stopPrank();
+
+}
+
+function test_Close_Pool() public {
+// should close the pool \
+test_acceptBid_With_zeroFee();
+      vm.startPrank(poolOwner);
+
+ poolRegis.closePool(1);
+bool closed = poolRegis.ClosedPool(1);
+        assertTrue(closed);
+         vm.stopPrank();
+
+}
+function test_RequestLoan_in_a_closedPool() public {
+// should not request loan in a closed pool 
+test_Close_Pool();
+      vm.startPrank(lender);
+  vm.expectRevert(bytes("pool closed"));
+
+       fundingpoolInstance.supplyToPool(
+         1,
+         address(sampleERC20),
+          1000000,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+        vm.stopPrank();
+
+}
+
+ function test_Create_another_Pool() public {
+    // should create Pool
+    test_RequestLoan_in_a_closedPool();
+vm.startPrank(poolOwner);
+
+   // Create a new pool
+  uint256 poolId1 = poolRegis.createPool(
+         paymentCycleDuration,
+          loanExpirationDuration,
+          100,
+          1000,
+          "adya.com",
+          true,
+          true
+    );
+assertEq(poolId1,2,"invalid poolId");
+    // Get the pool address
+    pool1Address = poolRegis.getPoolAddress(2);
+
+    // Perform lender verification
+   (bool isVerified ,) = poolRegis.lenderVerification(2, poolOwner);
+    assertTrue(isVerified, "Lender verification failed");
+
+    // Perform borrower verification
+    (bool isVerified_ ,) = poolRegis.borrowerVerification(2, poolOwner);
+    assertTrue(isVerified_, "Borrower verification failed");
+    vm.stopPrank();
+    
+}
+function test_Supply()public{
+// should supply to pool 
+test_Create_another_Pool();
+
+       uint256 blockTimestamp = block.timestamp;
+         expiration = blockTimestamp + 3600;
+
+vm.startPrank(poolOwner);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(
+            2,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+               vm.stopPrank();
+
+}
+function test_ClosePool() public {
+// should close the pool 
+ test_Supply();
+vm.startPrank(poolOwner);
+
+ poolRegis.closePool(2);
+bool closed = poolRegis.ClosedPool(2);
+        assertTrue(closed);
+         vm.stopPrank();
+
+}
+function test_accepting_rejectingBid() public {
+// should not allow accepting and rejecting bid after pool is closed 
+test_ClosePool();
+
+vm.startPrank(poolOwner);
+        vm.expectRevert(bytes("pool closed"));
+         fundingpoolInstance.AcceptBid(
+           2,         
+           address(sampleERC20),
+           0,
+           lender,
+           receiver
+        );
+        vm.stopPrank();
+
+
+         vm.startPrank(poolOwner);
+        vm.expectRevert(bytes("pool closed"));
+        fundingpoolInstance.RejectBid(
+            2,         
+            address(sampleERC20),
+            0,
+            lender
+          );
+        vm.stopPrank();
 }
 }
