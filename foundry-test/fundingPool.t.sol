@@ -239,6 +239,25 @@ function testLenderCanSupplyFundsToThePool() public {
         assertEq(interestRate, 1000);
         assertEq(fundExpiration, expiration);
         // assertEq(state, 0); // BidState.PENDING
+        (       ,
+        ,
+        ,
+        ,
+        FundingPool.BidState   state,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+        assertEq(uint256(state),0,"incorrect status");
+
                 vm.stopPrank();
 
     }
@@ -500,9 +519,27 @@ assertEq((b2-b1),100000000,"incorrect balance");
              1, 
              address(sampleERC20),
             0);
-
+assertEq(acceptBidTimestamp,3601);
 // assertEq(acceptBidTimestamp != moment.now);
         vm.stopPrank();
+(       ,
+        ,
+        ,
+        ,
+        FundingPool.BidState   state,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+        assertEq(uint256(state),1,"incorrect status");
 
 }
 function test_pendingBid() public {
@@ -561,7 +598,7 @@ test_rejecet_revert();
         ,
         ,
         , 
-        ,  
+        FundingPool.BidState   state,  
         ,
         ,
         ,
@@ -574,6 +611,8 @@ test_rejecet_revert();
              address(sampleERC20),
             1);
 
+  assertEq(uint256(state),4,"incorrect status");
+
              uint256 balance =  sampleERC20.balanceOf(lender);
 
 
@@ -581,6 +620,16 @@ assertEq(amount,10000000000,"incorrect Amount");
 assertEq(balance,10100000000,"incorrect Amount");
                         vm.stopPrank();
 
+          vm.startPrank(lender);
+
+vm.expectRevert(bytes("You are not the Pool Owner"));
+ fundingpoolInstance.RejectBid(
+           1,         
+           address(sampleERC20),
+           1,
+            lender
+        );
+         vm.stopPrank();
 
 }
 function test_cancelling_notPending_Bid() public {
@@ -1039,7 +1088,24 @@ uint256 currentTime4 = block.timestamp;
           0
         );
 assertEq(installment6.installmentsPaid,5);
-
+(       ,
+        ,
+        ,
+        ,
+        FundingPool.BidState   state,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          0
+        );
+        assertEq(uint256(state),2,"incorrect status");
 
 
 }
@@ -1230,24 +1296,28 @@ fundingpoolInstance.RepayFullAmount(
        );
           vm.stopPrank();
 
-// (       ,
-//         ,
-//         ,
-//         ,
-//         FundingPool.BidState memory state, 
-//         ,  
-//         ,
-//         ,
-//         ,
-//         ,
-//         ,
-//         ) = fundingpoolInstance.lenderPoolFundDetails(
-//           lender,
-//           1,
-//           address(sampleERC20),
-//           0
-//         );
-// assertEq(state,2);
+
+(       ,
+        ,
+        ,
+        ,
+        FundingPool.BidState   state,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          2
+        );
+        assertEq(uint256(state),2,"incorrect status");
+
+
+
 }
 function test_Check_FullRepayAmout() public {
  // should check that full repayment amount is 0 
@@ -1268,7 +1338,7 @@ function test_Check_FullRepayAmout() public {
           lender,
           1,
           address(sampleERC20),
-          0
+          2
         );
 
         vm.warp(lastRepaidTimestamp + paymentCycleDuration + 20);
@@ -1280,5 +1350,159 @@ function test_Check_FullRepayAmout() public {
           lender
         );
         assertEq(FullRepayAmount,0,"FullRepayAmount should be 0");
+}
+function test_repayment_after_ChangeLoan_state() public {
+// should not allow repayment after loan state change 
+test_Check_FullRepayAmout();
+vm.startPrank(poolOwner);
+
+vm.expectRevert(bytes("Bid must be accepted"));
+fundingpoolInstance.RepayFullAmount(
+          1,
+          address(sampleERC20),
+          2,
+          lender
+       );
+          vm.stopPrank();
+
+vm.startPrank(poolOwner);
+
+vm.expectRevert(bytes("Loan must be accepted"));
+fundingpoolInstance.repayMonthlyInstallment(
+          1,
+          address(sampleERC20),
+          2,
+          lender);
+          vm.stopPrank();
+
+}
+
+function test_Supply_To_Pool_again() public {
+// should supply funds to pool again
+test_repayment_after_ChangeLoan_state();
+        uint256 currentBlock = block.timestamp;
+        expiration = currentBlock + 3600;
+
+vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId;
+        bidId = 3;
+assertEq(bidId,3);
+                vm.stopPrank();
+}
+function test_notAllow_Widhraw() public {
+// should not allow withdrawal within the expiration 
+ test_Supply_To_Pool_again();
+ vm.startPrank(lender);
+
+ vm.expectRevert(bytes("You can't Withdraw"));
+ fundingpoolInstance.Withdraw(
+   1,
+   address(sampleERC20),
+   3, 
+   lender);
+
+}
+function test_show_bid_expired() public {
+// should show the bid has expired 
+test_notAllow_Widhraw();
+bool expired = fundingpoolInstance.isBidExpired(
+          1,
+          address(sampleERC20),
+          3,
+          lender);
+assertFalse(expired,"incorrect status");
+      uint256 currentTime = block.timestamp;
+        vm.warp(currentTime + 36000);
+        uint256 _newTime = block.timestamp;
+        // Checking increased time
+        assertEq(_newTime, currentTime + 36000);
+
+bool expired_ = fundingpoolInstance.isBidExpired(
+          1,
+          address(sampleERC20),
+          3,
+          lender);
+assertTrue(expired_,"incorrect status");
+}
+function test_notAccept_ExpiredBid() public {
+// should not allow expired bid to be accepted 
+test_show_bid_expired();
+vm.startPrank(poolOwner);
+
+ vm.expectRevert(bytes("bid expired"));
+ fundingpoolInstance.AcceptBid(
+            1,
+            address(sampleERC20),
+            3,
+            lender,
+            receiver);
+
+        vm.stopPrank();
+
+}
+function test_Witdhraw_ExpiredBid() public {
+
+// Should withdraw the expired bid 
+test_notAccept_ExpiredBid();
+
+uint256 b1 =  sampleERC20.balanceOf(lender);
+vm.startPrank(lender);
+
+ fundingpoolInstance.Withdraw(
+   1,
+   address(sampleERC20),
+   3, 
+   lender);
+
+uint256 b2 =  sampleERC20.balanceOf(lender);
+
+assertEq((b2-b1),10000000000,"incorrect balance");
+
+(       ,
+        ,
+        ,
+        ,
+        FundingPool.BidState   state,
+        , 
+        ,  
+        ,
+        ,
+        ,
+        ,
+        ) = fundingpoolInstance.lenderPoolFundDetails(
+          lender,
+          1,
+          address(sampleERC20),
+          3
+        );
+        assertEq(uint256(state),3,"incorrect status");
+}
+function test_Supply_To_PoolAgain() public {
+// should supply funds to pool again
+test_Witdhraw_ExpiredBid();
+        uint256 currentBlock = block.timestamp;
+        expiration = currentBlock + 3600;
+
+vm.startPrank(lender);
+
+       sampleERC20.approve(address(fundingpoolInstance), erc20Amount);
+       fundingpoolInstance.supplyToPool(1,
+         address(sampleERC20),
+          erc20Amount,
+           loanDefaultDuration, 
+           expiration,
+           1000);
+           uint256 bidId;
+        bidId = 4;
+assertEq(bidId,4);
+                vm.stopPrank();
 }
 }
