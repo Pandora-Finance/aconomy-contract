@@ -59,6 +59,34 @@ describe("piNFT", function () {
     ]);
     sampleERC20 = await mintToken.waitForDeployment();
 
+    const validateNFT = await hre.ethers.getContractFactory("validatedNFT")
+
+    validatedNFT = await upgrades.deployProxy(
+      validateNFT,
+      ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d", await piNftMethods.getAddress()],
+      {
+        initializer: "initialize",
+        kind: "uups",
+      }
+    );
+
+    console.log("add",await validatedNFT.getAddress())
+
+    await sampleERC20.mint("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 1000);
+
+    let exp = new BN(await time.latest()).add(new BN(3600));
+
+    const tx = await validatedNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1", sampleERC20.getAddress(), 500, exp.toString(), 500, [["0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 500]]);
+    // const tx = await validatedNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1");
+    const owner = await validatedNFT.ownerOf(0);
+    console.log("ss",owner.toString());
+      const bal = await validatedNFT.balanceOf("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
+      expect(bal).to.equal(1);
+
+      expect(
+      await piNftMethods.approvedValidator(validatedNFT.getAddress(), 0)
+    ).to.equal("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
+
     return {
       piNFT,
       sampleERC20,
@@ -274,6 +302,20 @@ describe("piNFT", function () {
       expect(owner).to.equal(await alice.getAddress());
       expect(bal).to.equal(2);
     });
+
+    // expect(
+    //   await piNftMethods.approvedValidator(piNFT.getAddress(), 0)
+    // ).to.equal(await validator.getAddress());
+
+    // it("should mint an ERC721 token to alice", async () => {
+    //   let exp = new BN(await time.latest()).add(new BN(3600));
+    //   const tx = await piNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1", sampleERC20.getAddress(), 500, exp.toString(), 500, [[royaltyReciever, 500]]);
+    //   // const owner = await piNFT.ownerOf(0);
+    //   // console.log("dhvdh",alice.getAddress())
+    //   const bal = await piNFT.balanceOf("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
+    //   // expect(owner).to.equal(await alice.getAddress());
+    //   expect(bal).to.equal(1);
+    // });
 
     it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
       await expect(
