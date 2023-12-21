@@ -70,22 +70,22 @@ describe("piNFT", function () {
       }
     );
 
-    console.log("add",await validatedNFT.getAddress())
+    // console.log("add",await validatedNFT.getAddress())
 
-    await sampleERC20.mint("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 1000);
+    // await sampleERC20.mint("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 1000);
 
-    let exp = new BN(await time.latest()).add(new BN(3600));
+    // let exp = new BN(await time.latest()).add(new BN(3600));
 
-    const tx = await validatedNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1", sampleERC20.getAddress(), 500, exp.toString(), 500, [["0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 500]]);
+    // const tx = await validatedNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1", sampleERC20.getAddress(), 500, exp.toString(), 500, [["0xf69F75EB0c72171AfF58D79973819B6A3038f39f", 500]]);
     // const tx = await validatedNFT.mintValidatedNFT("0xf69F75EB0c72171AfF58D79973819B6A3038f39f", "URI1");
-    const owner = await validatedNFT.ownerOf(0);
-    console.log("ss",owner.toString());
-      const bal = await validatedNFT.balanceOf("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
-      expect(bal).to.equal(1);
+    // const owner = await validatedNFT.ownerOf(0);
+    // console.log("ss",owner.toString());
+    //   const bal = await validatedNFT.balanceOf("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
+    //   expect(bal).to.equal(1);
 
-      expect(
-      await piNftMethods.approvedValidator(validatedNFT.getAddress(), 0)
-    ).to.equal("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
+    //   expect(
+    //   await piNftMethods.approvedValidator(validatedNFT.getAddress(), 0)
+    // ).to.equal("0xf69F75EB0c72171AfF58D79973819B6A3038f39f");
 
     return {
       piNFT,
@@ -95,6 +95,7 @@ describe("piNFT", function () {
       validator,
       bob,
       royaltyReciever,
+      validatedNFT,
     };
   }
 
@@ -108,6 +109,7 @@ describe("piNFT", function () {
         validator,
         bob,
         royaltyReciever,
+        validatedNFT,
       } = await deploypiNFT();
     });
 
@@ -1509,6 +1511,269 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
+  })
+
+  describe("ValidatedNFT", function () {
+    it("should should mint a validated NFT", async () => {
+      const tx = await validatedNFT.mintValidatedNFT(validator, "URI1");
+    const owner = await validatedNFT.ownerOf(0);
+    // console.log("ss",owner.toString());
+      const bal = await validatedNFT.balanceOf(validator);
+      expect(bal).to.equal(1);
+
+      expect(
+      await piNftMethods.approvedValidator(validatedNFT.getAddress(), 0)
+    ).to.equal(await validator.getAddress());
+  })
+
+  it("should not pause by non owner", async () => {
+    await expect(
+      validatedNFT.connect(royaltyReciever).pause()
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+
+    await validatedNFT.pause();
+
+
+    await expect(
+      validatedNFT.mintValidatedNFT(alice, "URI1")
+    ).to.be.revertedWith("Pausable: paused");
+
+    await expect(
+      validatedNFT.connect(royaltyReciever).unpause()
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+
+    await validatedNFT.unpause();
+
+    const tx = await validatedNFT.mintValidatedNFT(alice, "URI1");
+    const owner = await validatedNFT.ownerOf(1);
+    // console.log("ss",owner.toString());
+      const bal = await validatedNFT.balanceOf(alice);
+      expect(bal).to.equal(1);
+
+      expect(
+      await piNftMethods.approvedValidator(validatedNFT.getAddress(), 1)
+    ).to.equal(await alice.getAddress());
+
+  });
+
+  it("should let validator add ERC20 tokens to his NFT", async () => {
+
+    await sampleERC20.mint(validator.getAddress(), 1000);
+    const validatorBal1 = await sampleERC20.balanceOf(
+      await validator.getAddress()
+    );
+    await sampleERC20
+      .connect(validator)
+      .approve(piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
+    await piNftMethods
+      .connect(validator)
+      .addERC20(
+        await validatedNFT.getAddress(),
+        0,
+        sampleERC20.getAddress(),
+        500,
+        exp.toString(),
+        500,
+        [[await validator.getAddress(), 200]]
+      );
+    const tokenBal = await piNftMethods.viewBalance(
+      validatedNFT.getAddress(),
+      0,
+      sampleERC20.getAddress()
+    );
+    expect(tokenBal).to.equal(500);
+    const validatorBal = await sampleERC20.balanceOf(
+      await validator.getAddress()
+    );
+    expect(validatorBal).to.equal(500);
+    let commission = await piNftMethods.validatorCommissions(
+      validatedNFT.getAddress(),
+      0
+    );
+    expect(commission.isValid).to.equal(true);
+    expect(commission.commission.account).to.equal(
+      await validator.getAddress()
+    );
+    expect(commission.commission.value).to.equal(500);
+  });
+
+  it("should let validator transfer NFT to alice", async () => {
+    await validatedNFT
+      .connect(validator)
+      .safeTransferFrom(validator.getAddress(), alice.getAddress(), 0);
+    expect(await validatedNFT.ownerOf(0)).to.equal(await alice.getAddress());
+  });
+
+  it("should redeem piNft", async () => {
+    const validatorBal1 = await sampleERC20.balanceOf(
+      await validator.getAddress()
+    );
+
+    expect(validatorBal1).to.equal(500);
+
+    const aliceBal1 = await sampleERC20.balanceOf(
+      await alice.getAddress()
+    );
+
+    expect(aliceBal1).to.equal(100000000000);
+
+    // console.log("Validator", validatorBal1);
+    // console.log("aliceBal1", aliceBal1.toString());
+
+    await validatedNFT.approve(piNftMethods.getAddress(), 0);
+    await piNftMethods.redeemOrBurnPiNFT(
+      validatedNFT.getAddress(),
+      0,
+      alice.getAddress(),
+      "0x0000000000000000000000000000000000000000",
+      sampleERC20.getAddress(),
+      false
+    );
+    const balance = await sampleERC20.balanceOf(validator.getAddress());
+    console.log("Validator", balance);
+
+    const aliceBal2 = await sampleERC20.balanceOf(
+      await alice.getAddress()
+    );
+
+    expect(aliceBal2).to.equal(100000000000);
+
+    // console.log("Validator", validatorBal1);
+    // console.log("aliceBal2", aliceBal2.toString());
+    expect(balance).to.equal(1000);
+    expect(await validatedNFT.ownerOf(0)).to.equal(await alice.getAddress());
+    expect(await piNftMethods.NFTowner(validatedNFT.getAddress(), 0)).to.equal(
+      "0x0000000000000000000000000000000000000000"
+    );
+    expect(
+      await piNftMethods.approvedValidator(validatedNFT.getAddress(), 0)
+    ).to.equal("0x0000000000000000000000000000000000000000");
+    let commission = await piNftMethods.validatorCommissions(
+      validatedNFT.getAddress(),
+      0
+    );
+    expect(commission.isValid).to.equal(false);
+    expect(commission.commission.account).to.equal(
+      "0x0000000000000000000000000000000000000000"
+    );
+    expect(commission.commission.value).to.equal(0);
+  });
+
+  it("should should mint a validated NFT again", async () => {
+    const tx = await validatedNFT.mintValidatedNFT(validator, "URI1");
+  const owner = await validatedNFT.ownerOf(2);
+    const bal = await validatedNFT.balanceOf(validator);
+    expect(bal).to.equal(1);
+    expect(owner).to.equal(await validator.getAddress());
+
+    expect(
+    await piNftMethods.approvedValidator(validatedNFT.getAddress(), 2)
+  ).to.equal(await validator.getAddress());
+})
+
+
+
+
+it("should let validator add ERC20 tokens to his NFT", async () => {
+
+  const validatorBal1 = await sampleERC20.balanceOf(
+    await validator.getAddress()
+  );
+  await sampleERC20
+    .connect(validator)
+    .approve(piNftMethods.getAddress(), 500);
+    let exp = new BN(await time.latest()).add(new BN(3600));
+  await piNftMethods
+    .connect(validator)
+    .addERC20(
+      await validatedNFT.getAddress(),
+      2,
+      sampleERC20.getAddress(),
+      500,
+      exp.toString(),
+      500,
+      [[await validator.getAddress(), 200]]
+    );
+  const tokenBal = await piNftMethods.viewBalance(
+    validatedNFT.getAddress(),
+    2,
+    sampleERC20.getAddress()
+  );
+  expect(tokenBal).to.equal(500);
+  const validatorBal = await sampleERC20.balanceOf(
+    await validator.getAddress()
+  );
+  expect(validatorBal).to.equal(500);
+  let commission = await piNftMethods.validatorCommissions(
+    validatedNFT.getAddress(),
+    2
+  );
+  expect(commission.isValid).to.equal(true);
+  expect(commission.commission.account).to.equal(
+    await validator.getAddress()
+  );
+  expect(commission.commission.value).to.equal(500);
+});
+
+it("should let validator transfer NFT to alice again", async () => {
+  await validatedNFT
+    .connect(validator)
+    .safeTransferFrom(validator.getAddress(), alice.getAddress(), 2);
+  expect(await validatedNFT.ownerOf(2)).to.equal(await alice.getAddress());
+});
+
+it("should Burn piNft", async () => {
+  const validatorBal1 = await sampleERC20.balanceOf(
+    await validator.getAddress()
+  );
+
+  expect(validatorBal1).to.equal(500);
+
+  const aliceBal1 = await sampleERC20.balanceOf(
+    await alice.getAddress()
+  );
+
+  expect(aliceBal1).to.equal(100000000000);
+
+
+  await validatedNFT.connect(alice).approve(piNftMethods.getAddress(), 2);
+  await piNftMethods.connect(alice).redeemOrBurnPiNFT(
+    validatedNFT.getAddress(),
+    2,
+    "0x0000000000000000000000000000000000000000",
+    alice.getAddress(),
+    sampleERC20.getAddress(),
+    true
+  );
+
+  const balance = await sampleERC20.balanceOf(validator.getAddress());
+  console.log("Validator", balance);
+
+  const aliceBal2 = await sampleERC20.balanceOf(
+    await alice.getAddress()
+  );
+
+  expect(aliceBal2).to.equal(100000000500);
+
+  expect(balance).to.equal(500);
+  expect(await validatedNFT.ownerOf(2)).to.equal(await validator.getAddress());
+  expect(await piNftMethods.NFTowner(validatedNFT.getAddress(), 2)).to.equal(
+    "0x0000000000000000000000000000000000000000"
+  );
+  expect(
+    await piNftMethods.approvedValidator(validatedNFT.getAddress(), 2)
+  ).to.equal("0x0000000000000000000000000000000000000000");
+  let commission = await piNftMethods.validatorCommissions(
+    validatedNFT.getAddress(),
+    2
+  );
+  expect(commission.isValid).to.equal(false);
+  expect(commission.commission.account).to.equal(
+    "0x0000000000000000000000000000000000000000"
+  );
+  expect(commission.commission.value).to.equal(0);
+});
 
 
 
