@@ -42,6 +42,7 @@ contract validatedNFT is
     function initialize( address _piNFTmethodAddress) public initializer {
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
+        __Ownable_init();
         piNFTMethodsAddress = _piNFTmethodAddress;
     }
 

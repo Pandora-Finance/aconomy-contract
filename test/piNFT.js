@@ -1527,25 +1527,21 @@ describe("piNFT", function () {
   })
 
   it("should not pause by non owner", async () => {
-  //   await expect(
-  //     validatedNFT.connect(royaltyReciever).pause()
-  //   ).to.be.revertedWith("Ownable: caller is not the owner");
-  // await validatedNFT.transferOwnership(alice.getAddress());
-  //   await validatedNFT.pause();
-  console.log("qqqq", await validatedNFT.owner())
-
-  console.log("qqwwwqq", alice.getAddress())
+    await expect(
+      validatedNFT.connect(royaltyReciever).pause()
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+    await validatedNFT.pause();
 
 
-  //   await expect(
-  //     validatedNFT.mintValidatedNFT(alice, "URI1")
-  //   ).to.be.revertedWith("Pausable: paused");
+    await expect(
+      validatedNFT.mintValidatedNFT(alice, "URI1")
+    ).to.be.revertedWith("Pausable: paused");
 
-  //   await expect(
-  //     validatedNFT.connect(royaltyReciever).unpause()
-  //   ).to.be.revertedWith("Ownable: caller is not the owner");
+    await expect(
+      validatedNFT.connect(royaltyReciever).unpause()
+    ).to.be.revertedWith("Ownable: caller is not the owner");
 
-  //   await validatedNFT.unpause();
+    await validatedNFT.unpause();
 
     const tx = await validatedNFT.mintValidatedNFT(alice, "URI1");
     const owner = await validatedNFT.ownerOf(1);
