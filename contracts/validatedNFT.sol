@@ -8,8 +8,9 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./AconomyERC2771Context.sol";
 import "./piNFTMethods.sol";
 import "./utils/LibShare.sol";
 
@@ -17,8 +18,8 @@ contract validatedNFT is
     ERC721URIStorageUpgradeable,
     ReentrancyGuardUpgradeable,
     PausableUpgradeable,
-    AconomyERC2771Context,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    OwnableUpgradeable
 {
 
     using Counters for Counters.Counter;
@@ -38,10 +39,9 @@ contract validatedNFT is
         LibShare.Share[] royalties
     );
 
-    function initialize(address trustedForwarder, address _piNFTmethodAddress) public initializer {
+    function initialize( address _piNFTmethodAddress) public initializer {
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
-        AconomyERC2771Context_init(trustedForwarder);
         piNFTMethodsAddress = _piNFTmethodAddress;
     }
 
@@ -125,27 +125,6 @@ contract validatedNFT is
         delete royaltiesForValidator[_tokenId];
     }
 
-
-
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
-        returns (address sender)
-    {
-        return AconomyERC2771Context._msgSender();
-    }
-
-    function _msgData()
-        internal
-        view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
-        returns (bytes calldata)
-    {
-        return AconomyERC2771Context._msgData();
-    }
 
     function onERC721Received(
         address,

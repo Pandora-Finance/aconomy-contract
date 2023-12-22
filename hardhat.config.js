@@ -24,5 +24,11 @@ module.exports = {
   gasReporter: {
     currency: 'CHF',
     gasPrice: 21
+  },
+  etherscan: {
+    apiKey: {
+      arbitrumGoerli: `${process.env.ARBISCAN}`,
+      polygonMumbai : `${process.env.MATICSCAN}`
+    }
   }
 };
