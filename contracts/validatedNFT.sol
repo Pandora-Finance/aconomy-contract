@@ -110,6 +110,13 @@ contract validatedNFT is
         emit RoyaltiesSetForValidator(_tokenId, royalties);
     }
 
+    function getRoyalties(
+        uint256 _tokenId
+    ) external pure returns (LibShare.Share[] memory) {
+        LibShare.Share[] memory share;
+        return share ;
+    }
+
     /**
      * @notice Fetches the validator royalties.
      * @dev Returns a LibShare.Share[] array.
