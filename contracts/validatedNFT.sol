@@ -118,6 +118,21 @@ contract validatedNFT is
     }
 
     /**
+     * @notice deletes the nft.
+     * @param _tokenId The Id of the token.
+     */
+    function deleteNFT(uint256 _tokenId) external whenNotPaused nonReentrant {
+        require(
+            piNFTMethods(piNFTMethodsAddress).NFTowner(
+                address(this),
+                _tokenId
+            ) == address(0)
+        );
+        require(ownerOf(_tokenId) == msg.sender);
+        _burn(_tokenId);
+    }
+
+    /**
      * @notice Fetches the validator royalties.
      * @dev Returns a LibShare.Share[] array.
      * @param _tokenId The id of the token.

@@ -1961,6 +1961,30 @@ it("should let bob buy piNFT", async () => {
   expect(commission.commission.value).to.equal(1000);
 });
 
+it("should not Delete an ERC721 token if the caller isn't the owner", async () => {
+  await expect(
+    validatedNFT.connect(bob).deleteNFT(0)
+  ).to.be.revertedWithoutReason();
+});
+
+it("should not allow delete if contract is paused", async () => {
+  await validatedNFT.pause();
+
+  await expect(
+    validatedNFT.deleteNFT(0)
+  ).to.be.revertedWith("Pausable: paused");
+
+  await validatedNFT.unpause();
+});
+
+it("should Delete an ERC721 token to alice", async () => {
+  const bal = await validatedNFT.balanceOf(alice);
+  expect(bal).to.equal(2);
+  await validatedNFT.deleteNFT(0);
+  const bal1 = await validatedNFT.balanceOf(alice);
+  expect(bal1).to.equal(1);
+});
+
 
 
 
