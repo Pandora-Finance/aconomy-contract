@@ -16,7 +16,7 @@ library LibMarket {
         address collection, 
         uint256 tokenId
         ) private returns(uint256){
-        (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+        (LibShare.Share memory comm, bool commValid,) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
             collection, 
             tokenId
             );
@@ -59,7 +59,7 @@ library LibMarket {
         address collection, 
         uint256 tokenId
         ) private returns(uint256){
-        (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+        (LibShare.Share memory comm, bool commValid,) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
             collection, 
             tokenId
             );
@@ -334,7 +334,7 @@ library LibMarket {
         piMarket.BidOrder storage bids
     ) external {
         //require(msg.sender != meta.currentOwner);
-        if(block.timestamp > meta.bidEndTime) {
+        if(block.timestamp > meta.bidEndTime || !meta.status) {
             require(!bids.withdrawn);
             require(bids.buyerAddress == msg.sender);
         } else {

@@ -119,9 +119,7 @@ const {
           true
         );
         poolId1 = 1;
-        // console.log(poolId1, "poolId1");
         pool1Address = await poolRegis.getPoolAddress(poolId1);
-        // console.log(pool1Address, "poolAdress");
         res = await poolRegis.lenderVerification(poolId1, poolOwner);
         expect(
           res.isVerified_).to.equal(true);
@@ -773,5 +771,43 @@ const {
         "pool closed"
         )
       })
+    })
+
+
+    describe("Deployment", function () {
+      it("should create Pool", async () => {
+        let { aconomyFee, erc20, poolRegis, poolAddressInstance, poolOwner, borrower, account2, receiver, random } = await deployContractFactory()
+        res = await poolRegis.createPool(
+          paymentCycleDuration,
+          loanExpirationDuration,
+          0,
+          100,
+          "sk.com",
+          false,
+          false
+        );
+      });
+
+      it("testing loan request function", async () => {
+        await aconomyFee.setAconomyPoolFee(100);
+        await erc20.mint(poolOwner, "10000000000");
+        res = await poolAddressInstance.connect(borrower).loanRequest(
+          await erc20.getAddress(),
+          1,
+          10000000000,
+          loanDefaultDuration,
+          loanExpirationDuration,
+          100,
+          borrower
+        );
+
+      });
+
+      it("should Accept loan ", async () => {
+        await erc20.approve(await poolAddressInstance.getAddress(), 10000000000);
+        res = await poolAddressInstance.AcceptLoan(0);
+      });
+
+
     })
   })

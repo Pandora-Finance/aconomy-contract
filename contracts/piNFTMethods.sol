@@ -11,6 +11,7 @@ import "./utils/LibShare.sol";
 import "./piNFT.sol";
 import "./CollectionMethods.sol";
 import "./AconomyERC2771Context.sol";
+import "./Libraries/LibPiNFTMethods.sol";
 
 contract piNFTMethods is
     ReentrancyGuardUpgradeable,
@@ -42,12 +43,8 @@ contract piNFTMethods is
     mapping(address => mapping(uint256 => address)) public approvedValidator;
 
     // collection Address => tokenId => commission
-    mapping (address => mapping(uint256 => Commission)) public validatorCommissions;
+    mapping (address => mapping(uint256 => LibPiNFTMethods.Commission)) public validatorCommissions;
 
-     struct Commission {
-        LibShare.Share commission;
-        bool isValid;
-    }
     //STORAGE END -------------------------------------------------------------------------
 
     event ERC20Added(
@@ -191,14 +188,15 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _value,
+        uint256 _expiration,
         uint96 _commission,
         LibShare.Share[] memory royalties
     ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
-        require(approvedValidator[_collectionAddress][_tokenId] != address(0));
-        require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
+        LibPiNFTMethods.checkApprovedValidator(approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
+        LibPiNFTMethods.setExpiration(validatorCommissions[_collectionAddress][_tokenId], _expiration);
         if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
             require(
                 _erc20Contract ==
@@ -220,9 +218,11 @@ contract piNFTMethods is
                 royalties
             );
         }
-        NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
-            _collectionAddress
-        ).ownerOf(_tokenId);
+        if(IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) != address(this)) {
+            NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
+                _collectionAddress
+            ).ownerOf(_tokenId);
+        }
         updateERC20(_collectionAddress, _tokenId, _erc20Contract, _value);
         require(
             IERC20Upgradeable(_erc20Contract).transferFrom(
@@ -534,12 +534,10 @@ contract piNFTMethods is
             "not owner"
         );
         require(
-            erc20Balances[_collectionAddress][_tokenId][_erc20Contract] != 0,
-            "Balances repaid"
+            erc20Balances[_collectionAddress][_tokenId][_erc20Contract] != 0
         );
         require(
-            _amount <= withdrawnAmount[_collectionAddress][_tokenId],
-            "Invalid repayment amount"
+            _amount <= withdrawnAmount[_collectionAddress][_tokenId]
         );
 
         withdrawnAmount[_collectionAddress][_tokenId] -= _amount;

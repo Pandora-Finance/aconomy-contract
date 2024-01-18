@@ -27,9 +27,13 @@ async function main() {
   const LibShare = await hre.ethers.deployContract("LibShare", []);
   await LibShare.waitForDeployment();
 
+  const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+  await LibPiNFTMethods.waitForDeployment();
+
   const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
     libraries: {
-      LibShare: await LibShare.getAddress()
+      LibShare: await LibShare.getAddress(),
+      LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
     }
   })
   const piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
@@ -147,19 +151,31 @@ async function main() {
 
   await piNftMethods.setPiMarket(market.getAddress());
 
-  console.log("AconomyFee : ", await aconomyfee.getAddress())
-  console.log("AttestationRegistry : ", await attestRegistry.getAddress())
-  console.log("AttestationServices : ", await attestServices.getAddress())
-  console.log("CollectionMethods : ", await CollectionMethod.getAddress())
-  console.log("CollectionFactory : ", await collectionFactory.getAddress())
-  console.log("FundingPool : ", await fundingPool.getAddress())
-  console.log("poolRegistry : ", await poolRegis.getAddress())
-  console.log("poolAddress : ", await pooladdress.getAddress())
-  console.log("NFTlendingBorrowing : ", await lending.getAddress())
-  console.log("mintToken : ", await token.getAddress())
-  console.log("piNFT: ", await pi.getAddress());
-  console.log("piNFTMethods", await piNftMethods.getAddress());
-  console.log("piMarket:", await market.getAddress());
+  const validateNFT = await hre.ethers.getContractFactory("validatedNFT")
+
+    validatedNFT = await upgrades.deployProxy(
+      validateNFT,
+      [await piNftMethods.getAddress()],
+      {
+        initializer: "initialize",
+        kind: "uups",
+      }
+    );
+
+  // console.log("AconomyFee : ", await aconomyfee.getAddress())
+  // console.log("AttestationRegistry : ", await attestRegistry.getAddress())
+  // console.log("AttestationServices : ", await attestServices.getAddress())
+  // console.log("CollectionMethods : ", await CollectionMethod.getAddress())
+  // console.log("CollectionFactory : ", await collectionFactory.getAddress())
+  // console.log("FundingPool : ", await fundingPool.getAddress())
+  // console.log("poolRegistry : ", await poolRegis.getAddress())
+  // console.log("poolAddress : ", await pooladdress.getAddress())
+  // console.log("NFTlendingBorrowing : ", await lending.getAddress())
+  // console.log("mintToken : ", await token.getAddress())
+  // console.log("piNFT: ", await pi.getAddress());
+  // console.log("piNFTMethods", await piNftMethods.getAddress());
+  // console.log("piMarket:", await market.getAddress());
+  console.log("validatedNFT:", await validatedNFT.getAddress());
 
 
 

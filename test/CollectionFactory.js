@@ -5,6 +5,7 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { BN } = require("@openzeppelin/test-helpers");
 
 describe("Collection Factory", function (){
   let collectionInstance;
@@ -18,9 +19,13 @@ describe("Collection Factory", function (){
     const LibShare = await hre.ethers.deployContract("LibShare", []);
     await LibShare.waitForDeployment();
 
+    const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+    await LibPiNFTMethods.waitForDeployment();
+
     const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
       libraries: {
-        LibShare: await LibShare.getAddress()
+        LibShare: await LibShare.getAddress(),
+        LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
       }
     })
     piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
@@ -314,24 +319,28 @@ describe("Collection Factory", function (){
     });
   
     it("should not let non validator add funds", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(alice).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(alice).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
   
     it("should not let erc20 contract be address 0", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         "0x0000000000000000000000000000000000000000",
         500,
+        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
@@ -339,35 +348,41 @@ describe("Collection Factory", function (){
   
     it("should not let validator fund value be 0", async () => {
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         0,
+        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
   
     it("should not let validator commission value be 4901", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         4901,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
 
     it("should not let validator royalties have more than 10 addresses", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [[validator, 100],
         [validator, 100],
@@ -384,48 +399,56 @@ describe("Collection Factory", function (){
     })
 
     it("should not let validator royalties value be 0", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [[validator, 0]]
       )).to.be.revertedWith("Royalty 0");
     })
 
     it("should not let validator royalties address be 0", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [["0x0000000000000000000000000000000000000000", 100]]
       )).to.be.revertedWithoutReason();
     })
 
     it("should not let validator royalties be greater than 4901", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await expect(piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [[validator, 4901]]
       )).to.be.revertedWith("overflow");
     })
   
     it("should let validator add ERC20 tokens to alice's NFT", async () => {
+      let exp = new BN(await time.latest()).add(new BN(3600));
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       const tx = await piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         500,
         [[validator, 200]]
       );
@@ -455,12 +478,15 @@ describe("Collection Factory", function (){
     });
   
     it("should let validator add more ERC20 tokens to alice's NFT and change commission", async () => {
+      let exp = new BN(await time.latest()).add(new BN(7500));
+      await time.increase(3601);
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 200);
       const tx = await piNftMethods.connect(validator).addERC20(
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
         200,
+        exp.toString(),
         0,
         [[validator, 200]]
       );
@@ -482,12 +508,15 @@ describe("Collection Factory", function (){
     });
   
     it("should not let validator add funds of a different erc20", async () => {
+      let exp = new BN(await time.latest()).add(new BN(10000));
+      await time.increase(7501);
       await expect(
         piNftMethods.connect(validator).addERC20(
           await collectionInstance.getAddress(),
           0,
           (await ethers.getSigners())[5],
           200,
+          exp.toString(),
           500,
           [[validator, 200]]
         )).to.be.revertedWith("invalid");
@@ -569,7 +598,7 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         800
-      )).to.be.revertedWith("Invalid repayment amount")
+      )).to.be.revertedWithoutReason();
     })
   
     it("should let alice repay erc20", async () => {
@@ -628,6 +657,8 @@ describe("Collection Factory", function (){
     });
   
     it("should let validator add ERC20 tokens to bob's NFT", async () => {
+      let exp = new BN(await time.latest()).add(new BN(10000));
+      await time.increase(7501);
       await sampleERC20.connect(validator).approve(await piNftMethods.getAddress(), 500);
       await piNftMethods.connect(bob).addValidator(await collectionInstance.getAddress(), 0, validator);
       const tx = await piNftMethods.connect(validator).addERC20(
@@ -635,6 +666,7 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
+        exp.toString(),
         600,
         [[validator, 200]]
       );
