@@ -43,7 +43,12 @@ contract piNFTMethods is
     mapping(address => mapping(uint256 => address)) public approvedValidator;
 
     // collection Address => tokenId => commission
-    mapping (address => mapping(uint256 => LibPiNFTMethods.Commission)) public validatorCommissions;
+    mapping (address => mapping(uint256 => Commission)) public validatorCommissions;
+
+    struct Commission {
+        LibShare.Share commission;
+        bool isValid;
+    }
 
     //STORAGE END -------------------------------------------------------------------------
 
@@ -188,15 +193,16 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _erc20Contract,
         uint256 _value,
-        uint256 _expiration,
         uint96 _commission,
         LibShare.Share[] memory royalties
     ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
-        LibPiNFTMethods.checkApprovedValidator(approvedValidator[_collectionAddress][_tokenId]);
+        require(approvedValidator[_collectionAddress][_tokenId] != address(0));
+        require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
+        // LibPiNFTMethods.checkApprovedValidator(approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
-        LibPiNFTMethods.setExpiration(validatorCommissions[_collectionAddress][_tokenId], _expiration);
+        // LibPiNFTMethods.setExpiration(validatorCommissions[_collectionAddress][_tokenId], _expiration);
         if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
             require(
                 _erc20Contract ==
@@ -239,6 +245,60 @@ contract piNFTMethods is
             _value
         );
     }
+
+    //   function addERC20(
+    //     address _collectionAddress,
+    //     uint256 _tokenId,
+    //     address _erc20Contract,
+    //     uint256 _value,
+    //     uint96 _commission,
+    //     LibShare.Share[] memory royalties
+    // ) public whenNotPaused nonReentrant{
+    //     require(piNFT(_collectionAddress).exists(_tokenId));
+    //     require(approvedValidator[_collectionAddress][_tokenId] != address(0));
+    //     require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
+    //     require(_erc20Contract != address(0));
+    //     require(_value != 0);
+    //     if (erc20Contracts[_collectionAddress][_tokenId].length >= 1) {
+    //         require(
+    //             _erc20Contract ==
+    //                 erc20Contracts[_collectionAddress][_tokenId][0],
+    //             "invalid"
+    //         );
+    //         LibShare.setCommission(validatorCommissions[_collectionAddress][_tokenId].commission, _commission);
+    //         piNFT(_collectionAddress).setRoyaltiesForValidator(
+    //             _tokenId,
+    //             _commission,
+    //             royalties
+    //         );
+    //     } else {
+    //         LibShare.setCommission(validatorCommissions[_collectionAddress][_tokenId].commission, _commission);
+    //         validatorCommissions[_collectionAddress][_tokenId].isValid = true;
+    //         piNFT(_collectionAddress).setRoyaltiesForValidator(
+    //             _tokenId,
+    //             _commission,
+    //             royalties
+    //         );
+    //     }
+    //     NFTowner[_collectionAddress][_tokenId] = IERC721Upgradeable(
+    //         _collectionAddress
+    //     ).ownerOf(_tokenId);
+    //     updateERC20(_collectionAddress, _tokenId, _erc20Contract, _value);
+    //     require(
+    //         IERC20Upgradeable(_erc20Contract).transferFrom(
+    //             msg.sender,
+    //             address(this),
+    //             _value
+    //         )
+    //     );
+    //     emit ERC20Added(
+    //         _collectionAddress,
+    //         msg.sender,
+    //         _tokenId,
+    //         _erc20Contract,
+    //         _value
+    //     );
+    // }
 
     /**
      * @notice Updates the ERC20 mappings.

@@ -36,13 +36,13 @@ describe("piMarketCollection", function () {
         const LibShare = await hre.ethers.deployContract("LibShare", []);
         await LibShare.waitForDeployment();
 
-        const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
-        await LibPiNFTMethods.waitForDeployment();
+        // const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+        // await LibPiNFTMethods.waitForDeployment();
 
         const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
             libraries: {
                 LibShare: await LibShare.getAddress(),
-                LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
+                // LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
             },
         });
         piNftMethods = await upgrades.deployProxy(
@@ -220,7 +220,6 @@ describe("piMarketCollection", function () {
                     0,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     1000,
                     [[validator.getAddress(), 200]]
                 );
@@ -444,7 +443,6 @@ describe("piMarketCollection", function () {
                     0,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     100,
                     [[validator.getAddress(), 300]]
                 );
@@ -642,7 +640,6 @@ describe("piMarketCollection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     1000,
                     [[validator.getAddress(), 200]]
                 );
@@ -736,7 +733,6 @@ describe("piMarketCollection", function () {
                     1,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     900,
                     [[validator.getAddress(), 300]]
                 );
@@ -1038,7 +1034,6 @@ describe("piMarketCollection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     1000,
                     [[validator.getAddress(), 200]]
                 );
@@ -1133,7 +1128,6 @@ describe("piMarketCollection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     1000,
                     [[validator.getAddress(), 200]]
                 );
@@ -1166,7 +1160,6 @@ describe("piMarketCollection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     0,
                     [[validator.getAddress(), 200]]
                 );
@@ -1197,7 +1190,6 @@ describe("piMarketCollection", function () {
                     tokenId,
                     sampleERC20.getAddress(),
                     500,
-                    exp.toString(),
                     0,
                     [[validator.getAddress(), 200]]
                 );

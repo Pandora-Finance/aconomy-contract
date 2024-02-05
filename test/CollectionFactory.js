@@ -19,13 +19,13 @@ describe("Collection Factory", function (){
     const LibShare = await hre.ethers.deployContract("LibShare", []);
     await LibShare.waitForDeployment();
 
-    const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
-    await LibPiNFTMethods.waitForDeployment();
+    // const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
+    // await LibPiNFTMethods.waitForDeployment();
 
     const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
       libraries: {
         LibShare: await LibShare.getAddress(),
-        LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
+        // LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
       }
     })
     piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
@@ -326,7 +326,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
@@ -340,7 +339,6 @@ describe("Collection Factory", function (){
         0,
         "0x0000000000000000000000000000000000000000",
         500,
-        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
@@ -354,7 +352,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         0,
-        exp.toString(),
         500,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
@@ -368,7 +365,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         4901,
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
@@ -382,7 +378,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [[validator, 100],
         [validator, 100],
@@ -406,7 +401,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [[validator, 0]]
       )).to.be.revertedWith("Royalty 0");
@@ -420,7 +414,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [["0x0000000000000000000000000000000000000000", 100]]
       )).to.be.revertedWithoutReason();
@@ -434,7 +427,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [[validator, 4901]]
       )).to.be.revertedWith("overflow");
@@ -448,7 +440,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         500,
         [[validator, 200]]
       );
@@ -486,7 +477,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         200,
-        exp.toString(),
         0,
         [[validator, 200]]
       );
@@ -516,7 +506,6 @@ describe("Collection Factory", function (){
           0,
           (await ethers.getSigners())[5],
           200,
-          exp.toString(),
           500,
           [[validator, 200]]
         )).to.be.revertedWith("invalid");
@@ -666,7 +655,6 @@ describe("Collection Factory", function (){
         0,
         await sampleERC20.getAddress(),
         500,
-        exp.toString(),
         600,
         [[validator, 200]]
       );
