@@ -16,7 +16,7 @@ library LibMarket {
         address collection, 
         uint256 tokenId
         ) private returns(uint256){
-        (LibShare.Share memory comm, bool commValid,) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+        (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
             collection, 
             tokenId
             );
@@ -59,7 +59,7 @@ library LibMarket {
         address collection, 
         uint256 tokenId
         ) private returns(uint256){
-        (LibShare.Share memory comm, bool commValid,) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
+            (LibShare.Share memory comm, bool commValid) = piNFTMethods(piNFTMethodsAddress).validatorCommissions(
             collection, 
             tokenId
             );
