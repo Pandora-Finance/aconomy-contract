@@ -33,13 +33,9 @@ describe("piMarket", function () {
     const LibShare = await hre.ethers.deployContract("LibShare", []);
     await LibShare.waitForDeployment();
 
-    // const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
-    // await LibPiNFTMethods.waitForDeployment();
-
     const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
       libraries: {
         LibShare: await LibShare.getAddress(),
-        // LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
       },
     });
     piNftMethods = await upgrades.deployProxy(
