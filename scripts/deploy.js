@@ -219,11 +219,11 @@ async function main() {
   await aconomyfee.setAconomyPiMarketFee(50)
   await aconomyfee.setAconomyNFTLendBorrowFee(50)
 
-  const attestRegistry = await hre.ethers.deployContract("AttestationRegistry", []);
-  await attestRegistry.waitForDeployment();
+  // const attestRegistry = await hre.ethers.deployContract("AttestationRegistry", []);
+  // await attestRegistry.waitForDeployment();
 
-  const attestServices = await hre.ethers.deployContract("AttestationServices", [attestRegistry.getAddress()]);
-  await attestServices.waitForDeployment();
+  // const attestServices = await hre.ethers.deployContract("AttestationServices", [attestRegistry.getAddress()]);
+  // await attestServices.waitForDeployment();
 
   const LibShare = await hre.ethers.deployContract("LibShare", []);
   await LibShare.waitForDeployment();
@@ -264,52 +264,52 @@ async function main() {
   const LibNFTLendingBorrowing = await hre.ethers.deployContract("LibNFTLendingBorrowing", []);
   await LibNFTLendingBorrowing.waitForDeployment();
 
-  const LibPool = await hre.ethers.deployContract("LibPool", []);
-  await LibPool.waitForDeployment();
+  // const LibPool = await hre.ethers.deployContract("LibPool", []);
+  // await LibPool.waitForDeployment();
 
-  const FundingPool = await hre.ethers.getContractFactory("FundingPool", {
-    libraries: {
-      LibCalculations: await LibCalculations.getAddress()
-    }
-  })
-  const fundingPool = await FundingPool.deploy();
-  await fundingPool.waitForDeployment();
+  // const FundingPool = await hre.ethers.getContractFactory("FundingPool", {
+  //   libraries: {
+  //     LibCalculations: await LibCalculations.getAddress()
+  //   }
+  // })
+  // const fundingPool = await FundingPool.deploy();
+  // await fundingPool.waitForDeployment();
 
-  const poolRegistry = await hre.ethers.getContractFactory("poolRegistry", {
-    libraries: {
-      LibPool: await LibPool.getAddress()
-    }
-  })
-  const poolRegis = await upgrades.deployProxy(poolRegistry, [await attestServices.getAddress(), await aconomyfee.getAddress(), await fundingPool.getAddress()], {
-    initializer: "initialize",
-    kind: "uups",
-    unsafeAllow: ["external-library-linking"],
-  })
+  // const poolRegistry = await hre.ethers.getContractFactory("poolRegistry", {
+  //   libraries: {
+  //     LibPool: await LibPool.getAddress()
+  //   }
+  // })
+  // const poolRegis = await upgrades.deployProxy(poolRegistry, [await attestServices.getAddress(), await aconomyfee.getAddress(), await fundingPool.getAddress()], {
+  //   initializer: "initialize",
+  //   kind: "uups",
+  //   unsafeAllow: ["external-library-linking"],
+  // })
 
-  await fundingPool.initialize(walletAddress, await poolRegis.getAddress())
+  // await fundingPool.initialize(walletAddress, await poolRegis.getAddress())
 
-  const BokkyPooBahsDateTimeLibrary = await hre.ethers.deployContract("BokkyPooBahsDateTimeLibrary", []);
-  await BokkyPooBahsDateTimeLibrary.waitForDeployment();
+  // const BokkyPooBahsDateTimeLibrary = await hre.ethers.deployContract("BokkyPooBahsDateTimeLibrary", []);
+  // await BokkyPooBahsDateTimeLibrary.waitForDeployment();
 
-  const LibPoolAddress = await hre.ethers.getContractFactory("LibPoolAddress", {
-    libraries: {
-      LibCalculations: await LibCalculations.getAddress()
-    }
-  })
-  const libPoolAddress = await LibPoolAddress.deploy();
-  await libPoolAddress.waitForDeployment();
+  // const LibPoolAddress = await hre.ethers.getContractFactory("LibPoolAddress", {
+  //   libraries: {
+  //     LibCalculations: await LibCalculations.getAddress()
+  //   }
+  // })
+  // const libPoolAddress = await LibPoolAddress.deploy();
+  // await libPoolAddress.waitForDeployment();
 
-  const poolAddress = await hre.ethers.getContractFactory("poolAddress", {
-    libraries: {
-      LibCalculations: await LibCalculations.getAddress(),
-      LibPoolAddress: await libPoolAddress.getAddress()
-    }
-  })
-  const pooladdress = await upgrades.deployProxy(poolAddress, [await poolRegis.getAddress(), await aconomyfee.getAddress()], {
-    initializer: "initialize",
-    kind: "uups",
-    unsafeAllow: ["external-library-linking"],
-  })
+  // const poolAddress = await hre.ethers.getContractFactory("poolAddress", {
+  //   libraries: {
+  //     LibCalculations: await LibCalculations.getAddress(),
+  //     LibPoolAddress: await libPoolAddress.getAddress()
+  //   }
+  // })
+  // const pooladdress = await upgrades.deployProxy(poolAddress, [await poolRegis.getAddress(), await aconomyfee.getAddress()], {
+  //   initializer: "initialize",
+  //   kind: "uups",
+  //   unsafeAllow: ["external-library-linking"],
+  // })
 
   const NFTlendingBorrowing = await hre.ethers.getContractFactory("NFTlendingBorrowing", {
     libraries: {
@@ -323,8 +323,8 @@ async function main() {
     unsafeAllow: ["external-library-linking"],
   })
 
-  const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
-  let token = await mintToken.waitForDeployment();
+  // const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
+  // let token = await mintToken.waitForDeployment();
 
   const piNFT = await hre.ethers.getContractFactory("piNFT")
   const pi = await upgrades.deployProxy(piNFT, ["Aconomy", "ACO", await piNftMethods.getAddress(), "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
@@ -349,15 +349,15 @@ async function main() {
   await piNftMethods.setPiMarket(market.getAddress());
 
   console.log("AconomyFee : ", await aconomyfee.getAddress())
-  console.log("AttestationRegistry : ", await attestRegistry.getAddress())
-  console.log("AttestationServices : ", await attestServices.getAddress())
+  // console.log("AttestationRegistry : ", await attestRegistry.getAddress())
+  // console.log("AttestationServices : ", await attestServices.getAddress())
   console.log("CollectionMethods : ", await CollectionMethod.getAddress())
   console.log("CollectionFactory : ", await collectionFactory.getAddress())
-  console.log("FundingPool : ", await fundingPool.getAddress())
-  console.log("poolRegistry : ", await poolRegis.getAddress())
-  console.log("poolAddress : ", await pooladdress.getAddress())
+  // console.log("FundingPool : ", await fundingPool.getAddress())
+  // console.log("poolRegistry : ", await poolRegis.getAddress())
+  // console.log("poolAddress : ", await pooladdress.getAddress())
   console.log("NFTlendingBorrowing : ", await lending.getAddress())
-  console.log("mintToken : ", await token.getAddress())
+  // console.log("mintToken : ", await token.getAddress())
   console.log("piNFT: ", await pi.getAddress());
   console.log("piNFTMethods", await piNftMethods.getAddress());
   console.log("piMarket:", await market.getAddress());

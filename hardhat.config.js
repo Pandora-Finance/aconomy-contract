@@ -28,7 +28,8 @@ module.exports = {
   etherscan: {
     apiKey: {
       arbitrumGoerli: `${process.env.ARBISCAN}`,
-      polygonMumbai : `${process.env.MATICSCAN}`
+      polygonMumbai : `${process.env.MATICSCAN}`,
+      bscTestnet: `${process.env.BSCSCAN}`,
     }
   }
 };
