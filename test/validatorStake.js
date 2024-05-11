@@ -35,6 +35,28 @@ describe("Validator fund stake", function() {
             let {ValidatorStake, sampleERC20, alice, bob, carl} = await deployContractValidatorStake()
         });
 
+
+        it("should not pause by non owner", async function() {
+            await expect(
+             ValidatorStake.connect(carl).pause()
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+
+            // const details = await ValidatorStake.validatorStakes(bob);
+            // expect(details.stakedAmount).to.equal("100000000000000000000");
+        });
+
+
+
+
+        it("should not Unpause by non owner", async function() {
+            await expect(
+             ValidatorStake.connect(carl).unpause()
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+
+            // const details = await ValidatorStake.validatorStakes(bob);
+            // expect(details.stakedAmount).to.equal("100000000000000000000");
+        });
+
         it("should let validator add fund", async () => {
             await sampleERC20.mint(bob, "100000000000000000000");
             await sampleERC20.connect(bob).approve(await ValidatorStake.getAddress(), "100000000000000000000");
