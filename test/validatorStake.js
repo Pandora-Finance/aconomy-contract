@@ -265,5 +265,12 @@ describe("Validator fund stake", function() {
             expect(details.stakedAmount).to.equal("100000000000000000000");
         });
 
+
+        // it("should revert if ERC20 transfer fails", async function () {
+            
+        //     await expect(ValidatorStake.RefundStake(validator.address, sampleERC20.address, ethers.utils.parseEther("10")))
+        //         .to.be.revertedWith("Transfer failed");
+        // });
+
     });
 });
