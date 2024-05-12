@@ -54,8 +54,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         uint256 _amount,
         address _ERC20Address
     ) external whenNotPaused nonReentrant {
-        require(msg.sender != address(0));
-        require(_amount >= 0);
+        require(_amount > 0, "Low Amount");
+        require(_ERC20Address != address(0),"zero Address");
 
         StakeDetail memory stakeDetail = StakeDetail(
             _amount,
@@ -80,8 +80,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         uint256 _amount,
         address _ERC20Address
     ) external whenNotPaused nonReentrant {
-        require(msg.sender != address(0));
-        require(_amount >= 0);
+        require(_ERC20Address != address(0),"zero Address");
+        require(_amount > 0, "Low Amount");
 
         StakeDetail storage stakes = validatorStakes[msg.sender];
         stakes.stakedAmount += _amount;
@@ -97,18 +97,23 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     }
 
     function RefundStake(
-        address validatorAddress,
+        address _validatorAddress,
         address _ERC20Address,
         uint256 _refundAmount
     ) external whenNotPaused nonReentrant onlyOwner {
-        StakeDetail storage stakes = validatorStakes[validatorAddress];
+        require(_ERC20Address != address(0),"zero Address");
+        require(_validatorAddress != address(0),"zero Address");
+        require(_refundAmount > 0, "Low Amount");
+        // require(_refundAmount > _amount, "Amount excedded");
+
+        StakeDetail storage stakes = validatorStakes[_validatorAddress];
 
         bool isSuccess = IERC20(_ERC20Address).transfer(
-                validatorAddress,
+                _validatorAddress,
                 _refundAmount
             );
         require(isSuccess, "Transfer failed");
-        emit RefundedStake(validatorAddress, _refundAmount, stakes.stakedAmount-stakes.refundedAmount);
+        emit RefundedStake(_validatorAddress, _refundAmount, stakes.stakedAmount-stakes.refundedAmount);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
