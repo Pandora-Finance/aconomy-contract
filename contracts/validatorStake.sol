@@ -22,13 +22,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
     struct StakeDetail {
         uint256 stakedAmount;
         uint256 refundedAmount;
+        address ERC20Address;
     }
 
     mapping(address => StakeDetail) public validatorStakes;
 
-    event Staked(address validator, uint256 amount);
-    event NewStake(address validator, uint256 amount, uint256 TotalStakedAmount);
-    event RefundedStake(address validator, uint256 refundedAmount, uint256 LeftStakedAmount);
+    event Staked(address validator, address ERC20Address, uint256 amount, uint256 TotalStakedAmount, bool Paid);
+    event RefundedStake(address validator, address ERC20Address, uint256 refundedAmount, uint256 LeftStakedAmount);
 
 
 
@@ -52,7 +52,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         _unpause();
     }
 
-     function _stake(uint256 _amount, address _ERC20Address, address _validator) internal {
+     function _stake(uint256 _amount, address _ERC20Address, address _validator, bool _paid) internal {
         require(_amount > 0, "Low Amount");
         require(_ERC20Address != address(0), "Zero Address");
 
@@ -62,15 +62,15 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
         require(isSuccess, "Transfer failed");
 
-        emit Staked(_validator, _amount);
+        emit Staked(_validator, _ERC20Address, _amount, validatorStakes[_validator].stakedAmount, _paid);
     }
 
-    function stake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
-        _stake(_amount, _ERC20Address, msg.sender);
+    function stake(uint256 _amount, address _ERC20Address, bool _paid) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender, _paid);
     }
 
-    function addStake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
-        _stake(_amount, _ERC20Address, msg.sender);
+    function addStake(uint256 _amount, address _ERC20Address, bool _paid) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender, _paid);
     }
 
     function refundStake(address _validatorAddress, address _ERC20Address, uint256 _refundAmount) external whenNotPaused nonReentrant onlyOwner {
@@ -87,7 +87,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
         require(isSuccess, "Transfer failed");
 
-        emit RefundedStake(_validatorAddress, _refundAmount, stakes.stakedAmount);
+        emit RefundedStake(_validatorAddress, _ERC20Address, _refundAmount, stakes.stakedAmount);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
