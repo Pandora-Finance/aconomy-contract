@@ -7,6 +7,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
  contract validatorStake is
     OwnableUpgradeable,
@@ -15,6 +17,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     UUPSUpgradeable
 {
     using Counters for Counters.Counter;
+    using SafeERC20 for IERC20;
 
     struct StakeDetail {
         uint256 stakedAmount;
@@ -49,71 +52,42 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         _unpause();
     }
 
-
-    function Stake(
-        uint256 _amount,
-        address _ERC20Address
-    ) external whenNotPaused nonReentrant {
+     function _stake(uint256 _amount, address _ERC20Address, address _validator) internal {
         require(_amount > 0, "Low Amount");
-        require(_ERC20Address != address(0),"zero Address");
+        require(_ERC20Address != address(0), "Zero Address");
 
-        StakeDetail memory stakeDetail = StakeDetail(
-            _amount,
-            0
-        );
+        validatorStakes[_validator].stakedAmount += _amount;
 
-        validatorStakes[msg.sender] = stakeDetail;
+        bool isSuccess = IERC20(_ERC20Address).transferFrom(_validator, address(this), _amount);
 
-        require(
-            IERC20(_ERC20Address).transferFrom(
-                msg.sender,
-                address(this),
-                _amount
-            ),
-            "Unable to tansfer Your ERC20"
-        );
+        require(isSuccess, "Transfer failed");
 
-        emit Staked(msg.sender, _amount);
+        emit Staked(_validator, _amount);
     }
 
-    function addStake(
-        uint256 _amount,
-        address _ERC20Address
-    ) external whenNotPaused nonReentrant {
-        require(_ERC20Address != address(0),"zero Address");
-        require(_amount > 0, "Low Amount");
-
-        StakeDetail storage stakes = validatorStakes[msg.sender];
-        stakes.stakedAmount += _amount;
-        require(
-            IERC20(_ERC20Address).transferFrom(
-                msg.sender,
-                address(this),
-                _amount
-            ),
-            "Unable to tansfer Your ERC20"
-        );
-        emit NewStake(msg.sender, _amount, stakes.stakedAmount);
+    function stake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender);
     }
 
-    function RefundStake(
-        address _validatorAddress,
-        address _ERC20Address,
-        uint256 _refundAmount
-    ) external whenNotPaused nonReentrant onlyOwner {
-        require(_ERC20Address != address(0),"zero Address");
-        require(_validatorAddress != address(0),"zero Address");
+    function addStake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender);
+    }
+
+    function refundStake(address _validatorAddress, address _ERC20Address, uint256 _refundAmount) external whenNotPaused nonReentrant onlyOwner {
+        require(_ERC20Address != address(0), "Zero Address");
+        require(_validatorAddress != address(0), "Zero Address");
         require(_refundAmount > 0, "Low Amount");
-        // require(_refundAmount > _amount, "Amount excedded");
 
         StakeDetail storage stakes = validatorStakes[_validatorAddress];
 
-        bool isSuccess = IERC20(_ERC20Address).transfer(
-                _validatorAddress,
-                _refundAmount
-            );
+        stakes.stakedAmount -= _refundAmount;
+        stakes.refundedAmount += _refundAmount;
+
+        bool isSuccess = IERC20(_ERC20Address).transfer(_validatorAddress, _refundAmount);
+
         require(isSuccess, "Transfer failed");
-        emit RefundedStake(_validatorAddress, _refundAmount, stakes.stakedAmount-stakes.refundedAmount);
+
+        emit RefundedStake(_validatorAddress, _refundAmount, stakes.stakedAmount);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
