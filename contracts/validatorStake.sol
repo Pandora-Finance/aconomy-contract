@@ -90,5 +90,5 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         emit RefundedStake(_validatorAddress, _ERC20Address, _refundAmount, stakes.stakedAmount);
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
