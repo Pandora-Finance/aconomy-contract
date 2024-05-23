@@ -60,7 +60,7 @@ describe("Validator fund stake", function() {
         it("should let validator add fund", async () => {
             await sampleERC20.mint(bob, "100000000000000000000");
             await sampleERC20.connect(bob).approve(await ValidatorStake.getAddress(), "100000000000000000000");
-            const tx = await ValidatorStake.connect(bob).stake("100000000000000000000", await sampleERC20.getAddress(), true);
+            const tx = await ValidatorStake.connect(bob).stake("100000000000000000000", await sampleERC20.getAddress());
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("100000000000000000000");
 
@@ -72,7 +72,7 @@ describe("Validator fund stake", function() {
         it("should let validator add more fund", async () => {
             await sampleERC20.mint(bob, "100000000000000000000");
             await sampleERC20.connect(bob).approve(await ValidatorStake.getAddress(), "100000000000000000000");
-            const tx = await ValidatorStake.connect(bob).addStake("100000000000000000000", await sampleERC20.getAddress(),true);
+            const tx = await ValidatorStake.connect(bob).addStake("100000000000000000000", await sampleERC20.getAddress());
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
             
@@ -94,7 +94,7 @@ describe("Validator fund stake", function() {
         });
         it("should prevent staking when paused", async function() {
             await ValidatorStake.pause();
-            await expect(ValidatorStake.connect(bob).stake("50000000000000000000", await sampleERC20.getAddress(),true))
+            await expect(ValidatorStake.connect(bob).stake("50000000000000000000", await sampleERC20.getAddress()))
                 .to.be.revertedWith("Pausable: paused");
             await ValidatorStake.unpause();
         });
@@ -106,9 +106,9 @@ describe("Validator fund stake", function() {
             console.log("kkk",bal.toString());
             expect(bal).to.equal("100000000000000000000");
 
-            await expect(ValidatorStake.connect(bob).stake("100000000000000000000", sampleERC20.getAddress(),true))
+            await expect(ValidatorStake.connect(bob).stake("100000000000000000000", sampleERC20.getAddress()))
                 .to.emit(ValidatorStake, 'Staked')
-                .withArgs(bob.address,await sampleERC20.getAddress(),"100000000000000000000", "200000000000000000000", true);
+                .withArgs(bob.address,await sampleERC20.getAddress(),"100000000000000000000", "200000000000000000000", false);
                 // expect(bal).to.equal("100000000000000000000");
 
                 let bal1 = await sampleERC20.balanceOf(ValidatorStake);
@@ -125,7 +125,7 @@ describe("Validator fund stake", function() {
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
     
-            await expect(ValidatorStake.connect(bob).stake(0, sampleERC20.getAddress(),false))
+            await expect(ValidatorStake.connect(bob).stake(0, sampleERC20.getAddress()))
                 .to.be.revertedWith("Low Amount");
         });
 
@@ -134,7 +134,7 @@ describe("Validator fund stake", function() {
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
     
-            await expect(ValidatorStake.connect(bob).stake("100000000000000000000",  "0x0000000000000000000000000000000000000000",true))
+            await expect(ValidatorStake.connect(bob).stake("100000000000000000000",  "0x0000000000000000000000000000000000000000"))
                 .to.be.revertedWith("Zero Address");
 
                 let bal1 = await sampleERC20.balanceOf(ValidatorStake);
@@ -150,7 +150,7 @@ describe("Validator fund stake", function() {
 
         it("should not add stake when paused", async function() {
             await ValidatorStake.pause();
-            await expect(ValidatorStake.connect(bob).addStake("50000000000000000000", await sampleERC20.getAddress(),true))
+            await expect(ValidatorStake.connect(bob).addStake("50000000000000000000", await sampleERC20.getAddress()))
                 .to.be.revertedWith("Pausable: paused");
             await ValidatorStake.unpause();
         });
@@ -159,7 +159,7 @@ describe("Validator fund stake", function() {
 
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
-            await expect(ValidatorStake.connect(bob).addStake("0", await sampleERC20.getAddress(),true))
+            await expect(ValidatorStake.connect(bob).addStake("0", await sampleERC20.getAddress()))
                 .to.be.revertedWith("Low Amount");
 
                 let bal1 = await sampleERC20.balanceOf(ValidatorStake);
@@ -175,7 +175,7 @@ describe("Validator fund stake", function() {
 
 
         it("should not add stake with 0 _ERC20Address", async function() {
-            await expect(ValidatorStake.connect(bob).addStake("50000000000000000000","0x0000000000000000000000000000000000000000",true))
+            await expect(ValidatorStake.connect(bob).addStake("50000000000000000000","0x0000000000000000000000000000000000000000"))
                 .to.be.revertedWith("Zero Address");
         });
 
@@ -183,8 +183,8 @@ describe("Validator fund stake", function() {
         it("should handle multiple stakes and keep correct total", async function() {
             await sampleERC20.mint(bob, "100000000000000000000");
             await sampleERC20.connect(bob).approve(await ValidatorStake.getAddress(), "100000000000000000000");
-            await ValidatorStake.connect(bob).stake("50000000000000000000", sampleERC20.getAddress(),true);
-            await ValidatorStake.connect(bob).addStake("50000000000000000000", sampleERC20.getAddress(),true);
+            await ValidatorStake.connect(bob).stake("50000000000000000000", sampleERC20.getAddress());
+            await ValidatorStake.connect(bob).addStake("50000000000000000000", sampleERC20.getAddress());
             const details = await ValidatorStake.validatorStakes(bob.address);
             expect(details.stakedAmount).to.equal("300000000000000000000");
 
@@ -264,9 +264,9 @@ describe("Validator fund stake", function() {
             let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("0");
 
-            await expect(ValidatorStake.connect(bob).stake("100000000000000000000", sampleERC20.getAddress(),true))
+            await expect(ValidatorStake.connect(bob).stake("100000000000000000000", sampleERC20.getAddress()))
                 .to.emit(ValidatorStake, 'Staked')
-                .withArgs(bob.address,await sampleERC20.getAddress(),"100000000000000000000", "100000000000000000000", true);
+                .withArgs(bob.address,await sampleERC20.getAddress(),"100000000000000000000", "100000000000000000000", false);
 
                 let bal1 = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal1).to.equal("100000000000000000000");
