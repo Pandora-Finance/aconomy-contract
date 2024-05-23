@@ -27,7 +27,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
     mapping(address => StakeDetail) public validatorStakes;
 
-    event Staked(address validator, address ERC20Address, uint256 amount, uint256 TotalStakedAmount, bool Paid);
+    event Staked(address validator, address ERC20Address, uint256 amount, uint256 TotalStakedAmount, bool positionChange);
     event RefundedStake(address validator, address ERC20Address, uint256 refundedAmount, uint256 LeftStakedAmount);
 
 
@@ -69,8 +69,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         _stake(_amount, _ERC20Address, msg.sender, false);
     }
 
-    function addStake(uint256 _amount, address _ERC20Address, bool _paid) external whenNotPaused nonReentrant {
-        _stake(_amount, _ERC20Address, msg.sender, _paid);
+    function addStake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender, true);
     }
 
     function refundStake(address _validatorAddress, address _ERC20Address, uint256 _refundAmount) external whenNotPaused nonReentrant onlyOwner {
