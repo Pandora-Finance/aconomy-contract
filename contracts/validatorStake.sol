@@ -65,8 +65,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         emit Staked(_validator, _ERC20Address, _amount, validatorStakes[_validator].stakedAmount, _paid);
     }
 
-    function stake(uint256 _amount, address _ERC20Address, bool _paid) external whenNotPaused nonReentrant {
-        _stake(_amount, _ERC20Address, msg.sender, _paid);
+    function stake(uint256 _amount, address _ERC20Address) external whenNotPaused nonReentrant {
+        _stake(_amount, _ERC20Address, msg.sender, false);
     }
 
     function addStake(uint256 _amount, address _ERC20Address, bool _paid) external whenNotPaused nonReentrant {
