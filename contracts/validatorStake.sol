@@ -56,6 +56,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         require(_amount > 0, "Low Amount");
         require(_ERC20Address != address(0), "Zero Address");
 
+        if(!_paid && validatorStakes[_validator].stakedAmount > 0) {
+            return;
+        }
+
         validatorStakes[_validator].stakedAmount += _amount;
 
         bool isSuccess = IERC20(_ERC20Address).transferFrom(_validator, address(this), _amount);
