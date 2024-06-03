@@ -57,7 +57,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         require(_ERC20Address != address(0), "Zero Address");
 
         if(!_paid && validatorStakes[_validator].stakedAmount > 0) {
-            return;
+            revert("more than one time");
         }
 
         validatorStakes[_validator].stakedAmount += _amount;
