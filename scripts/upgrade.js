@@ -13,13 +13,13 @@ async function main() {
 //       LibShare: await LibShare.getAddress(),
 //     }
 //   })
-const ValidatorStake = await hre.ethers.getContractFactory("validatorStake")
-    // const instance = await upgrades.forceImport("0x26Cd55C405a4FD18Cca86e6549A6a6a93924d473", ValidatorStake)
-    const Stake = await upgrades.upgradeProxy("0x26Cd55C405a4FD18Cca86e6549A6a6a93924d473", ValidatorStake, {
+const PiNFT = await hre.ethers.getContractFactory("piNFT")
+    const instance = await upgrades.forceImport("0x1216FB6d886B82F5aefcEc1c709cbFef4b788413", PiNFT)
+    const Stake = await upgrades.upgradeProxy("0xE0F30A4BF5fdAe8cff3cc8b50B4344C5306143A3", PiNFT, {
         kind: "uups",
         // unsafeAllow: ["external-library-linking"],
       })
-    console.log("ValidatorStake upgraded to: ", Stake.target);
+    console.log("piNFT upgraded to: ", Stake.target);
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

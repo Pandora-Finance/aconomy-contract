@@ -1342,7 +1342,7 @@ describe("piNFT", function () {
         await piNFT.mintNFT(alice, "URI1", [[royaltyReciever, 500]])
       )
       .to.emit(piNFT, "TokenMinted")
-      .withArgs(3, await alice.getAddress());
+      .withArgs(3, await alice.getAddress(),"URI1");
 
       const owner = await piNFT.ownerOf(3);
       const bal = await piNFT.balanceOf(alice);

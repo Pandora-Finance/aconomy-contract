@@ -38,7 +38,7 @@ contract piNFT is
         LibShare.Share[] royalties
     );
 
-    event TokenMinted(uint256 tokenId, address to);
+    event TokenMinted(uint256 tokenId, address to, string uri);
 
     /**
      * @notice Modifier enabling only the piNFTMethods contract to call.
@@ -92,7 +92,7 @@ contract piNFT is
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
-        emit TokenMinted(tokenId_, _to);
+        emit TokenMinted(tokenId_, _to, _uri);
         return tokenId_;
     }
 
