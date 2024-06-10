@@ -28,7 +28,7 @@ contract piNFTMethods is
         internal erc20Balances;
 
     // collectionAddress => tokenId => token contract
-    mapping(address => mapping(uint256 => address[])) public erc20Contracts;
+    mapping(address => mapping(uint256 => address[])) private erc20Contracts;
 
     // collectionAddress => tokenId => (token contract => token contract index)
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc20ContractIndex;
@@ -57,7 +57,9 @@ contract piNFTMethods is
         address indexed from,
         uint256 indexed tokenId,
         address indexed erc20Contract,
-        uint256 value
+        uint256 value,
+        string URI,
+        uint256 TotalBalance
     );
     event ERC20Transferred(
         address collectionAddress,
@@ -195,6 +197,7 @@ contract piNFTMethods is
         address _erc20Contract,
         uint256 _value,
         uint96 _commission,
+        string memory _uri,
         LibShare.Share[] memory royalties
     ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
@@ -241,7 +244,9 @@ contract piNFTMethods is
             msg.sender,
             _tokenId,
             _erc20Contract,
-            _value
+            _value,
+            _uri,
+            erc20Balances[_collectionAddress][_tokenId][_erc20Contract]
         );
     }
 

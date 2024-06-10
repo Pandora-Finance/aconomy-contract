@@ -327,6 +327,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
@@ -340,6 +341,7 @@ describe("Collection Factory", function (){
         "0x0000000000000000000000000000000000000000",
         500,
         500,
+        "uri",
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
@@ -353,6 +355,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         0,
         500,
+        "uri",
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
@@ -366,6 +369,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         4901,
+        "uri",
         [[validator, 200]]
       )).to.be.revertedWithoutReason();
     })
@@ -379,6 +383,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [[validator, 100],
         [validator, 100],
         [validator, 100],
@@ -402,6 +407,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [[validator, 0]]
       )).to.be.revertedWith("Royalty 0");
     })
@@ -415,6 +421,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [["0x0000000000000000000000000000000000000000", 100]]
       )).to.be.revertedWithoutReason();
     })
@@ -428,6 +435,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [[validator, 4901]]
       )).to.be.revertedWith("overflow");
     })
@@ -441,6 +449,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         500,
+        "uri",
         [[validator, 200]]
       );
       const tokenBal = await piNftMethods.viewBalance(
@@ -478,6 +487,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         200,
         0,
+        "uri",
         [[validator, 200]]
       );
       const tokenBal = await piNftMethods.viewBalance(
@@ -507,6 +517,7 @@ describe("Collection Factory", function (){
           (await ethers.getSigners())[5],
           200,
           500,
+          "uri",
           [[validator, 200]]
         )).to.be.revertedWith("invalid");
     });
@@ -656,6 +667,7 @@ describe("Collection Factory", function (){
         await sampleERC20.getAddress(),
         500,
         600,
+        "uri",
         [[validator, 200]]
       );
       const tokenBal = await piNftMethods.viewBalance(

@@ -456,6 +456,7 @@ describe("piNFT", function () {
             sampleERC20.getAddress(),
             500,
             500,
+            500,
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
@@ -505,6 +506,7 @@ describe("piNFT", function () {
             sampleERC20.getAddress(),
             500,
             500,
+            500,
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
@@ -520,6 +522,7 @@ describe("piNFT", function () {
             await piNFT.getAddress(),
             0,
             sampleERC20.getAddress(),
+            500,
             500,
             500,
             [
@@ -552,6 +555,7 @@ describe("piNFT", function () {
             sampleERC20.getAddress(),
             500,
             500,
+            500,
             [
               [alice, 100],
               [alice, 100],
@@ -579,6 +583,7 @@ describe("piNFT", function () {
             await piNFT.getAddress(),
             0,
             sampleERC20.getAddress(),
+            500,
             500,
             500,
             [
@@ -626,6 +631,7 @@ describe("piNFT", function () {
             500,
             // exp.toString(),
             500,
+            500,
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
@@ -644,6 +650,7 @@ describe("piNFT", function () {
             await piNFT.getAddress(),
             5,
             sampleERC20.getAddress(),
+            500,
             500,
             500,
             [[await validator.getAddress(), 200]]
@@ -665,6 +672,7 @@ describe("piNFT", function () {
             sampleERC20.getAddress(),
             0,
             500,
+            500,
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
@@ -684,6 +692,7 @@ describe("piNFT", function () {
             sampleERC20.getAddress(),
             500,
             4901,
+            500,
             [[await validator.getAddress(), 200]]
           )
       ).to.be.revertedWithoutReason();
@@ -706,6 +715,7 @@ describe("piNFT", function () {
           sampleERC20.getAddress(),
           500,
           500,
+          500,
           [[await validator.getAddress(), 200]]
         )
       ).to.be.revertedWith("Pausable: paused");
@@ -724,6 +734,7 @@ describe("piNFT", function () {
           await piNFT.getAddress(),
           0,
           sampleERC20.getAddress(),
+          500,
           500,
           500,
           [[await validator.getAddress(), 200]]
@@ -772,7 +783,7 @@ describe("piNFT", function () {
         // console.log("gh222acv",await time.latest());
       await piNftMethods
         .connect(validator)
-        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200, 300, [
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 200, 300, 500, [
           [validator, 200],
         ]);
       const tokenBal = await piNftMethods.viewBalance(
@@ -804,7 +815,7 @@ describe("piNFT", function () {
       await expect(
         piNftMethods
           .connect(validator)
-          .addERC20(await piNFT.getAddress(), 0, alice.getAddress(), 500, 400, [
+          .addERC20(await piNFT.getAddress(), 0, alice.getAddress(), 500, 400, 500, [
             [await validator.getAddress(), 200],
           ])
       ).to.be.revertedWith("invalid");
@@ -1185,7 +1196,7 @@ describe("piNFT", function () {
       await expect(
         piNftMethods
           .connect(validator)
-          .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, [
+          .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, 500,[
             [validator.getAddress(), 2900],
             [bob.getAddress(), 2001],
           ])
@@ -1206,7 +1217,7 @@ describe("piNFT", function () {
 
       await piNftMethods
         .connect(validator)
-        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, [
+        .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 400, 500,[
           [validator, 200],
         ]);
       const tokenBal = await piNftMethods.viewBalance(
@@ -1389,6 +1400,7 @@ describe("piNFT", function () {
           sampleERC20.getAddress(),
           500,
           500,
+          500,
           [[await validator.getAddress(), 200]]
         );
       const tokenBal = await piNftMethods.viewBalance(
@@ -1494,6 +1506,7 @@ describe("piNFT", function () {
           await piNFT.getAddress(),
           3,
           sampleERC20.getAddress(),
+          500,
           500,
           500,
           [[await validator.getAddress(), 200]]
@@ -1730,6 +1743,7 @@ describe("piNFT", function () {
         sampleERC20.getAddress(),
         500,
         500,
+        500,
         [[await validator.getAddress(), 200]]
       );
     const tokenBal = await piNftMethods.viewBalance(
@@ -1847,6 +1861,7 @@ it("should let validator add ERC20 tokens to his NFT", async () => {
       sampleERC20.getAddress(),
       500,
       500,
+      500,
       [[await validator.getAddress(), 200]]
     );
   const tokenBal = await piNftMethods.viewBalance(
@@ -1957,6 +1972,7 @@ it("should let validator add ERC20 tokens to his tokenId one", async () => {
       sampleERC20.getAddress(),
       500,
       1000,
+      500,
       [[await validator.getAddress(), 200]]
     );
   const tokenBal = await piNftMethods.viewBalance(

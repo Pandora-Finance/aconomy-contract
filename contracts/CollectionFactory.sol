@@ -59,7 +59,7 @@ contract CollectionFactory is
 
     event CollectionSymbolSet(uint256 collectionId, string Symbol);
 
-    event CollectionCreated(uint256 collectionId, address CollectionAddress);
+    event CollectionCreated(uint256 collectionId, address CollectionAddress, string URI);
 
     event CollectionRoyaltiesSet(
         uint256 indexed collectionId,
@@ -144,7 +144,7 @@ contract CollectionFactory is
         addressToCollectionId[collectionAddress] = collectionId_;
         setRoyaltiesForCollection(collectionId_, royalties);
 
-        emit CollectionCreated(collectionId_, collectionAddress);
+        emit CollectionCreated(collectionId_, collectionAddress, _uri);
     }
 
     /**

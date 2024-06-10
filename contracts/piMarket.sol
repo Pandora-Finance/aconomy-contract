@@ -101,15 +101,14 @@ contract piMarket is
     address public piNFTMethodsAddress;
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
-    mapping(uint256 => Swap) public _swaps;
+    mapping(uint256 => Swap) private _swaps;
 
     //STORAGE END -------------------------------------------------------------------------------------
 
-    event SaleCreated(uint256 tokenId, address tokenContract, uint256 saleId);
-    event NFTBought(uint256 saleId, address buyer);
+    event SaleCreated(uint256 tokenId, address tokenContract, uint256 saleId, uint256 BidTimeDuration, uint256 Price);
+    event NFTBought(uint256 tokenId, address collectionAddress);
     event SaleCancelled(uint256 saleId);
-    event BidCreated(uint256 saleId, uint256 bidId);
-    event BidExecuted(uint256 saleId, uint256 bidId, uint256 price);
+    event BidEvent(uint256 tokenId, uint256 saleId, uint256 bidId, uint256 Amount, address collectionAddress, bool BidCreated);
     event BidWithdrawn(uint256 saleId, uint256 bidId);
     event SwapCancelled(uint256 swapId);
     event SwapAccepted(uint256 swapId);
@@ -202,7 +201,7 @@ contract piMarket is
 
         _tokenMeta[_saleIdCounter.current()] = meta;
 
-        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
+        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current(), 0, _price);
     }
 
     /**
@@ -337,7 +336,7 @@ contract piMarket is
             msg.sender,
             meta.tokenId
         );
-        emit NFTBought(_saleId, msg.sender);
+        emit NFTBought(meta.tokenId, meta.tokenContractAddress);
     }
 
     /**
@@ -408,7 +407,7 @@ contract piMarket is
 
         _tokenMeta[_saleIdCounter.current()] = meta;
 
-        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current());
+        emit SaleCreated(_tokenId, _contractAddress, _saleIdCounter.current(), _bidTime, _price);
     }
 
     /**
@@ -449,7 +448,7 @@ contract piMarket is
         );
         Bids[_saleId].push(bid);
 
-        emit BidCreated(_saleId, Bids[_saleId].length - 1);
+        emit BidEvent(_tokenMeta[_saleId].tokenId ,_saleId, Bids[_saleId].length - 1, _bidPrice, _tokenMeta[_saleId].tokenContractAddress, true);
     }
 
     /**
@@ -500,10 +499,13 @@ contract piMarket is
             _tokenMeta[_saleId].tokenId
         );
 
-        emit BidExecuted(
+        emit BidEvent(
+            _tokenMeta[_saleId].tokenId,
             _saleId,
             _bidOrderID,
-            Bids[_saleId][_bidOrderID].price
+            Bids[_saleId][_bidOrderID].price,
+            _tokenMeta[_saleId].tokenContractAddress,
+            false
         );
     }
 

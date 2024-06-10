@@ -198,7 +198,7 @@ describe("piMarketERC20", function () {
                 let exp = new BN(await time.latest()).add(new BN(3600));
             await piNftMethods
                 .connect(validator)
-                .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 1000, [
+                .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 1000, "uri",[
                     [validator.getAddress(), 200],
                 ]);
 
@@ -383,7 +383,7 @@ describe("piMarketERC20", function () {
                 await time.increase(3601);
             await piNftMethods
                 .connect(validator)
-                .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 100, [
+                .addERC20(piNFT.getAddress(), 0, sampleERC20.getAddress(), 500, 100, "uri",[
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(
@@ -561,6 +561,7 @@ describe("piMarketERC20", function () {
                     sampleERC20.getAddress(),
                     500,
                     1000,
+                    "uri",
                     [[validator.getAddress(), 200]]
                 );
 
@@ -646,7 +647,7 @@ describe("piMarketERC20", function () {
                 await time.increase(3601);
             await piNftMethods
                 .connect(validator)
-                .addERC20(piNFT.getAddress(), 1, sampleERC20.getAddress(), 500, 100, [
+                .addERC20(piNFT.getAddress(), 1, sampleERC20.getAddress(), 500, 100, "uri",[
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(
@@ -934,7 +935,7 @@ describe("piMarketERC20", function () {
               ])
           )
           .to.emit(piNFT, "TokenMinted")
-          .withArgs(2, await carl.getAddress());
+          .withArgs(2, await carl.getAddress(), "URI1");
 
 
           const owner = await piNFT.ownerOf(2);
@@ -951,7 +952,7 @@ describe("piMarketERC20", function () {
             .approve(piNftMethods.getAddress(), 500);
           const tx = await piNftMethods
             .connect(validator)
-            .addERC20(piNFT.getAddress(), 2, sampleERC20.getAddress(), 500, 0, [
+            .addERC20(piNFT.getAddress(), 2, sampleERC20.getAddress(), 500, 0, "uri",[
               [validator.getAddress(), 200],
             ]);
 
@@ -992,7 +993,7 @@ describe("piMarketERC20", function () {
             sampleERC20.getAddress()
           ))
           .to.emit(piMarket, "SaleCreated")
-          .withArgs(2, await piNFT.getAddress(), 6);
+          .withArgs(2, await piNFT.getAddress(), 6, 0, 50000);
 
 
 
@@ -1034,7 +1035,7 @@ describe("piMarketERC20", function () {
                 ])
             )
             .to.emit(piNFT, "TokenMinted")
-            .withArgs(3, await carl.getAddress());
+            .withArgs(3, await carl.getAddress(), "URI1");
 
 
             const owner = await piNFT.ownerOf(3);
@@ -1051,7 +1052,7 @@ describe("piMarketERC20", function () {
               let exp = new BN(await time.latest()).add(new BN(3600));
             const tx = await piNftMethods
               .connect(validator)
-              .addERC20(piNFT.getAddress(), 3, sampleERC20.getAddress(), 500, 0, [
+              .addERC20(piNFT.getAddress(), 3, sampleERC20.getAddress(), 500, 0, "uri",[
                 [validator.getAddress(), 200],
               ]);
 
@@ -1093,7 +1094,7 @@ describe("piMarketERC20", function () {
               sampleERC20.getAddress()
             ))
             .to.emit(piMarket, "SaleCreated")
-            .withArgs(3, await piNFT.getAddress(), 7);
+            .withArgs(3, await piNFT.getAddress(), 7, 300, 50000);
 
             let meta = await piMarket._tokenMeta(7);
             expect(meta.status).to.equal(true);

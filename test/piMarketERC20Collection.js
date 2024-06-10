@@ -213,7 +213,7 @@ describe("piMarketERC20Collection", function () {
                 let exp = new BN(await time.latest()).add(new BN(3600));
             await piNftMethods
                 .connect(validator)
-                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 1000, [
+                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 1000, "uri",[
                     [validator.getAddress(), 200],
                 ]);
 
@@ -411,7 +411,7 @@ describe("piMarketERC20Collection", function () {
                 await time.increase(3601);
             await piNftMethods
                 .connect(validator)
-                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 100, [
+                .addERC20(collectionContract.getAddress(), 0, sampleERC20.getAddress(), 500, 100, "uri",[
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(
@@ -589,6 +589,7 @@ describe("piMarketERC20Collection", function () {
                     sampleERC20.getAddress(),
                     500,
                     1000,
+                    "uri",
                     [[validator.getAddress(), 200]]
                 );
 
@@ -675,7 +676,7 @@ describe("piMarketERC20Collection", function () {
                 await time.increase(3601);
             await piNftMethods
                 .connect(validator)
-                .addERC20(collectionContract.getAddress(), 1, sampleERC20.getAddress(), 500, 100, [
+                .addERC20(collectionContract.getAddress(), 1, sampleERC20.getAddress(), 500, 100, "uri",[
                     [validator.getAddress(), 300],
                 ]);
             let commission = await piNftMethods.validatorCommissions(

@@ -93,7 +93,7 @@ contract NFTlendingBorrowing is
     event PercentSet(uint256 NFTid, uint16 Percent);
     event DurationSet(uint256 NFTid, uint32 Duration);
     event ExpectedAmountSet(uint256 NFTid, uint256 expectedAmount);
-    event NFTlisted(uint256 NFTid, uint256 TokenId, address ContractAddress);
+    event NFTlisted(uint256 NFTid, uint256 TokenId, address ContractAddress, uint256 ExpectedAmount, uint16 Percent, uint32 Duration, uint256 Expiration);
     event repaid(uint256 NFTid, uint256 BidId, uint256 Amount);
     event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
     event NFTRemoved(uint256 NFTId);
@@ -188,7 +188,7 @@ contract NFTlendingBorrowing is
 
         NFTdetails[_NFTid] = details;
 
-        emit NFTlisted(_NFTid, _tokenId, _contractAddress);
+        emit NFTlisted(_NFTid, _tokenId, _contractAddress, _expectedAmount, _percent, _duration, _expiration);
     }
 
     /**
