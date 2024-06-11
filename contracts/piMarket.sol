@@ -113,9 +113,12 @@ contract piMarket is
     event SwapCancelled(uint256 swapId);
     event SwapAccepted(uint256 swapId);
     event SwapProposed(
-        address indexed from,
         address indexed to,
-        uint256 indexed swapId
+        uint256 indexed swapId,
+        uint256 outTokenId,
+        address outTokenIdAddress,
+        uint256 inTokenId,
+        address inTokenIdAddress
     );
     event updatedSalePrice(uint256 saleId, uint256 Price);
 
@@ -567,7 +570,7 @@ contract piMarket is
 
         _swapIdCounter.increment();
 
-        emit SwapProposed(msg.sender, token2Owner, swapsId);
+        emit SwapProposed(token2Owner, swapsId, token1, contractAddress1, token2, contractAddress2);
 
         return swapsId;
     }
