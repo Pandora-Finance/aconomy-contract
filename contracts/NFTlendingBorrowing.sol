@@ -89,25 +89,27 @@ contract NFTlendingBorrowing is
     //STORAGE END ----------------------------------------------------------------------------
 
     // Events
-    event AppliedBid(uint256 BidId, uint256 NFTid);
+    event AppliedBid(uint256 BidId, uint256 NFTid, uint256 TokenId, address ContractAddress, uint256 BidAmount, uint16 APY, uint32 Duration, uint256 Expiration, address ERC20Address);
     event PercentSet(uint256 NFTid, uint16 Percent);
     event DurationSet(uint256 NFTid, uint32 Duration);
     event ExpectedAmountSet(uint256 NFTid, uint256 expectedAmount);
     event NFTlisted(uint256 NFTid, uint256 TokenId, address ContractAddress, uint256 ExpectedAmount, uint16 Percent, uint32 Duration, uint256 Expiration);
-    event repaid(uint256 NFTid, uint256 BidId, uint256 Amount);
+    event repaid(uint256 NFTid, uint256 BidId, uint256 Amount, address ContractAddress);
     event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
-    event NFTRemoved(uint256 NFTId);
+    event NFTRemoved(uint256 NFTId, address ContractAddress);
     event BidRejected(
         uint256 NFTid,
         uint256 BidId,
         address recieverAddress,
-        uint256 Amount
+        uint256 Amount,
+        address ContractAddress
     );
     event AcceptedBid(
         uint256 NFTid,
         uint256 BidId,
         uint256 Amount,
-        uint256 ProtocolAmount
+        uint256 ProtocolAmount,
+        address ContractAddress
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -291,7 +293,7 @@ contract NFTlendingBorrowing is
             ),
             "Unable to tansfer Your ERC20"
         );
-        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid);
+        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid, NFTdetails[_NFTid].NFTtokenId, NFTdetails[_NFTid].contractAddress, _bidAmount, NFTdetails[_NFTid].percent, _duration, _expiration, _ERC20Address);
     }
 
     /**
@@ -323,7 +325,8 @@ contract NFTlendingBorrowing is
             _NFTid,
             _bidId,
             Bids[_NFTid][_bidId].Amount - amountToAconomy,
-            amountToAconomy
+            amountToAconomy,
+            NFTdetails[_NFTid].contractAddress
         );
     }
 
@@ -345,7 +348,8 @@ contract NFTlendingBorrowing is
             _NFTid,
             _bidId,
             Bids[_NFTid][_bidId].bidderAddress,
-            Bids[_NFTid][_bidId].Amount
+            Bids[_NFTid][_bidId].Amount,
+            NFTdetails[_NFTid].contractAddress
         );
     }
 
@@ -411,7 +415,8 @@ contract NFTlendingBorrowing is
         emit repaid(
             _NFTid,
             _bidId,
-            Bids[_NFTid][_bidId].Amount + percentageAmount
+            Bids[_NFTid][_bidId].Amount + percentageAmount,
+            NFTdetails[_NFTid].contractAddress
         );
     }
 
@@ -474,7 +479,7 @@ contract NFTlendingBorrowing is
 
         NFTdetails[_NFTid].listed = false;
 
-        emit NFTRemoved(_NFTid);
+        emit NFTRemoved(_NFTid, NFTdetails[_NFTid].contractAddress);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
