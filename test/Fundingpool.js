@@ -10,7 +10,6 @@ const {
   
   describe("Funding pool", function (){
     let fundingpoolInstance, res, poolId1, pool1Address, expiration, poolId, bidId, bidId1;
-    // let aconomyFee, erc20, poolRegis;
     const erc20Amount = 10000000000;
     const paymentCycleDuration = moment.duration(30, "days").asSeconds();
     const loanDefaultDuration = moment.duration(180, "days").asSeconds();
@@ -90,7 +89,6 @@ const {
         let { aconomyFee, erc20, poolRegis, poolOwner, lender, nonLender, receiver } = await deployContractFactory()
         await aconomyFee.setAconomyPoolFee(100);
         const feee = await aconomyFee.AconomyPoolFee();
-        // console.log("protocolFee", feee.toString());
         res = await poolRegis.connect(poolOwner).createPool(
             loanExpirationDuration,
             loanExpirationDuration,
@@ -101,7 +99,6 @@ const {
             true
         );
         poolId1 = 1;
-        // console.log(poolId1, "poolId1");
         poolId = poolId1;
         pool1Address = await poolRegis.getPoolAddress(poolId1);
         fundingpooladdress = pool1Address;
@@ -138,7 +135,6 @@ const {
         const blockTimestamp = (await provider.getBlock(currentBlock)).timestamp;
         expiration = blockTimestamp + 3600;
         let fundingpooladdress = await poolRegis.getPoolAddress(poolId1);
-        console.log(fundingpooladdress)
         fundingpoolInstance = await hre.ethers.getContractAt("FundingPool", fundingpooladdress);
   
         await erc20.connect(poolOwner).transfer(await lender.getAddress(), erc20Amount);
@@ -153,7 +149,6 @@ const {
           1000
         );
         bidId = 0;
-        //console.log(bidId, "bidid111");
   
         await erc20.connect(poolOwner).transfer(await lender.getAddress(), 10000000000);
         await erc20.connect(lender).approve(await fundingpoolInstance.getAddress(), 10000000000);
@@ -170,19 +165,15 @@ const {
         const balance = await erc20.balanceOf(lender);
         expect(balance).to.equal(0)
   
-        // console.log(bidId1, "bidid");
-        // console.log(tx.logs[0].args);
         const fundDetail = await fundingpoolInstance.lenderPoolFundDetails(
           lender,
           poolId,
           await erc20.getAddress(),
           bidId
         );
-        // console.log(fundDetail);
         expect(fundDetail.amount).to.equal(erc20Amount);
         expect(fundDetail.maxDuration).to.equal(loanDefaultDuration);
         expect(fundDetail.interestRate).to.equal(1000);
-        // console.log(expiration.toString());
         expect(fundDetail.expiration).to.equal(expiration.toString());
         expect(fundDetail.state).to.equal(0); // BidState.PENDING
       });
@@ -319,7 +310,6 @@ const {
         await aconomyFee.connect(newFeeOwner).setAconomyPoolFee(200);
         expect(feeAddress).to.equal(await newFeeOwner.getAddress());
         const feee = await aconomyFee.AconomyPoolFee();
-        // console.log("protocolFee", feee.toString());
         let b1 = await erc20.balanceOf(feeAddress);
   
         await expect(fundingpoolInstance.connect(receiver).AcceptBid(
@@ -330,7 +320,6 @@ const {
           receiver
         )).to.be.revertedWith("You are not the Pool Owner")
   
-        // console.log("owner1", b1.toString());
         const tx = await fundingpoolInstance.AcceptBid(
           poolId,
           await erc20.getAddress(),
@@ -339,8 +328,6 @@ const {
           receiver
         );
         let b2 = await erc20.balanceOf(feeAddress);
-        // console.log("owner2", b2.toString());
-        // console.log(poolId);
         expect(b2 - b1).to.equal(100000000);
         // const expectedPaymentCycleAmount = ethers.utils.parseEther('0.421875'); // calculated using LibCalculations      // expect(tx)
         //   .to.emit(fundingpoolInstance, 'AcceptedBid')
@@ -398,7 +385,6 @@ const {
   
       it("should reject the bid and emit RejectBid event", async () => {
         const balance = await erc20.balanceOf(lender);
-        // console.log("bbb", balance.toString());
         const tx = await fundingpoolInstance.RejectBid(
           poolId,
           await erc20.getAddress(),
@@ -413,9 +399,7 @@ const {
           bidId1
         );
         expect(fundDetail.state).to.equal(4); 
-        // console.log(poolId)
         const balance1 = await erc20.balanceOf(lender);
-        // console.log("bbb", balance1.toString());
         expect(balance1).to.equal(10000000000);
   
         await expect(

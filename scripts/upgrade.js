@@ -5,14 +5,6 @@ let walletAddress = process.env.WALLET_ADDRESS
 async function main() {
 //   const LibShare = await hre.ethers.deployContract("LibShare", []);
 //   await LibShare.waitForDeployment();
-//   const LibPiNFTMethods = await hre.ethers.deployContract("LibPiNFTMethods", []);
-//   await LibPiNFTMethods.waitForDeployment();
-//   const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
-//     libraries: {
-//       LibPiNFTMethods: await LibPiNFTMethods.getAddress(),
-//       LibShare: await LibShare.getAddress(),
-//     }
-//   })
 const PiNFT = await hre.ethers.getContractFactory("piNFT")
     const instance = await upgrades.forceImport("0x1216FB6d886B82F5aefcEc1c709cbFef4b788413", PiNFT)
     const Stake = await upgrades.upgradeProxy("0xE0F30A4BF5fdAe8cff3cc8b50B4344C5306143A3", PiNFT, {

@@ -332,8 +332,6 @@ contract piMarket is
             validatorRoyalties
         );
 
-        //transfer(_tokenMeta[_saleId], msg.sender);
-
         ERC721(meta.tokenContractAddress).safeTransferFrom(
             address(this),
             msg.sender,
@@ -430,7 +428,6 @@ contract piMarket is
 
         require(block.timestamp <= _tokenMeta[_saleId].bidEndTime);
         _tokenMeta[_saleId].price = _bidPrice;
-        //  require(_timeOfAuction[_saleId] >= block.timestamp,"Auction Over");
 
         if (_tokenMeta[_saleId].currency != address(0)) {
             bool success = IERC20(_tokenMeta[_saleId].currency).transferFrom(

@@ -55,7 +55,6 @@ const {
                     disableStorage: true,
                 },
             ]);
-            //console.log(trace.returnValue)
             schemaUUID = `0x${trace.returnValue}`;
             let res = await registry.getAS(schemaUUID);
             expect(res.schema).to.equal("0x2875696e7432353620706f6f6c49642c2061646472657373206c656e64657241")
