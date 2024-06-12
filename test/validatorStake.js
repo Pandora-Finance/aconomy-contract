@@ -23,7 +23,7 @@ describe("Validator fund stake", function() {
           const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
     sampleERC20 = await mintToken.waitForDeployment();
 
-          console.log("deployment", await ValidatorStake.getAddress())
+        //   console.log("deployment", await ValidatorStake.getAddress())
 
           return { ValidatorStake, sampleERC20, alice, bob, carl };
     }

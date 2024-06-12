@@ -489,7 +489,7 @@ const {
           await erc20.getAddress(),
           bidId
         );
-        console.log(loan[11])
+        // console.log(loan[11])
         // console.log(result.logs[0].args.PaidAmount);
         expect(
           loan[11][0] + loan[11][1]).to.equal(loan.paymentCycleAmount
@@ -1101,7 +1101,7 @@ const {
           lender
         );
   
-        console.log(bal.toString())
+        // console.log(bal.toString())
         
         await erc20.approve(await fundingpoolInstance.getAddress(), bal);
   

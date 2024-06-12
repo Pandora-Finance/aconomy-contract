@@ -60,8 +60,9 @@ contract poolAddress is
     );
     event AcceptedLoanDetail(
         uint256 indexed loanId,
-        string indexed feeType,
-        uint256 indexed amount
+        uint256 indexed amountToAconomy,
+        uint256 amountToPool,
+        uint256 amountToBorrower
     );
 
     event LoanRepaid(uint256 indexed loanId, uint256 Amount);
@@ -199,9 +200,7 @@ contract poolAddress is
 
         emit loanAccepted(_loanId, loan.lender);
 
-        emit AcceptedLoanDetail(_loanId, "protocol", amountToAconomy);
-        emit AcceptedLoanDetail(_loanId, "Pool", amountToPool);
-        emit AcceptedLoanDetail(_loanId, "Borrower", amountToBorrower);
+        emit AcceptedLoanDetail(_loanId, amountToAconomy, amountToPool, amountToBorrower);
     }
 
     /**

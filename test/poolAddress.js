@@ -373,9 +373,9 @@ const {
         expect(`${new BN(dueDate)}`).to.equal(`${acceptedTimeStamp.add(paymentCycle)}`);
         
         let r = await poolAddressInstance.viewInstallmentAmount(loanId1);
-        console.log(acceptedTimeStamp.toString())
-        console.log(await time.latest())
-        console.log("installment after 1 cycle", r.toString());
+        // console.log(acceptedTimeStamp.toString())
+        // console.log(await time.latest())
+        // console.log("installment after 1 cycle", r.toString());
     
         await erc20.connect(borrower).approve(await poolAddressInstance.getAddress(), r);
         let result = await poolAddressInstance.connect(borrower).repayMonthlyInstallment(loanId1);
@@ -702,7 +702,7 @@ const {
     
         bal = await poolAddressInstance.viewFullRepayAmount(loanId1);
     
-        console.log(bal.toString())
+        // console.log(bal.toString())
         
         await erc20.approve(await poolAddressInstance.getAddress(), bal);
     

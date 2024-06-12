@@ -1800,7 +1800,7 @@ describe("piNFT", function () {
       false
     );
     const balance = await sampleERC20.balanceOf(validator.getAddress());
-    console.log("Validator", balance);
+    // console.log("Validator", balance);
 
     const aliceBal2 = await sampleERC20.balanceOf(
       await alice.getAddress()
@@ -1917,7 +1917,7 @@ it("should Burn piNft", async () => {
   );
 
   const balance = await sampleERC20.balanceOf(validator.getAddress());
-  console.log("Validator", balance);
+  // console.log("Validator", balance);
 
   const aliceBal2 = await sampleERC20.balanceOf(
     await alice.getAddress()

@@ -127,13 +127,13 @@ describe("piMarket", function () {
     ]);
     sampleERC20 = await mintToken.waitForDeployment();
 
-    console.log("AconomyFee : ", await aconomyFee.getAddress());
-    console.log("CollectionMethods : ", await CollectionMethod.getAddress());
-    console.log("CollectionFactory : ", await collectionFactory.getAddress());
-    console.log("mintToken : ", await sampleERC20.getAddress());
-    console.log("piNFT: ", await piNFT.getAddress());
-    console.log("piNFTMethods", await piNftMethods.getAddress());
-    console.log("piMarket:", await piMarket.getAddress());
+    // console.log("AconomyFee : ", await aconomyFee.getAddress());
+    // console.log("CollectionMethods : ", await CollectionMethod.getAddress());
+    // console.log("CollectionFactory : ", await collectionFactory.getAddress());
+    // console.log("mintToken : ", await sampleERC20.getAddress());
+    // console.log("piNFT: ", await piNFT.getAddress());
+    // console.log("piNFTMethods", await piNftMethods.getAddress());
+    // console.log("piMarket:", await piMarket.getAddress());
 
     return {
       piNFT,
