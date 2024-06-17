@@ -96,9 +96,9 @@ contract piMarket is
         bool status;
     }
 
-    address internal feeAddress;
-    address public collectionFactoryAddress;
-    address public piNFTMethodsAddress;
+    address private feeAddress;
+    address private collectionFactoryAddress;
+    address private piNFTMethodsAddress;
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
     mapping(uint256 => Swap) private _swaps;
@@ -120,7 +120,7 @@ contract piMarket is
         uint256 inTokenId,
         address inTokenIdAddress
     );
-    event updatedSalePrice(uint256 saleId, uint256 Price);
+    event updatedSalePrice(uint256 saleId, uint256 Price, uint256 Duration);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -214,7 +214,8 @@ contract piMarket is
      */
     function editSalePrice(
         uint256 _saleId,
-        uint256 _price
+        uint256 _price,
+        uint256 _duration
     ) public whenNotPaused {
         require(
             msg.sender == _tokenMeta[_saleId].currentOwner,
@@ -229,7 +230,7 @@ contract piMarket is
         if (_price != _tokenMeta[_saleId].price) {
             _tokenMeta[_saleId].price = _price;
 
-            emit updatedSalePrice(_saleId, _price);
+            emit updatedSalePrice(_saleId, _price, _duration);
         }
     }
 

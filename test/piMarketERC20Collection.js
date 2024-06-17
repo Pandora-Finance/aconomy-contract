@@ -285,18 +285,18 @@ describe("piMarketERC20Collection", function () {
 
 
         it("should edit the price after listing on sale", async () => {
-            await piMarket.connect(alice).editSalePrice(1, 60000);
+            await piMarket.connect(alice).editSalePrice(1, 60000, 500);
             await expect(
-                piMarket.connect(bob).editSalePrice(1, 60000)
+                piMarket.connect(bob).editSalePrice(1, 60000, 500)
             ).to.be.revertedWith("You are not the owner");
 
             await expect(
-                piMarket.connect(alice).editSalePrice(1, 60)
+                piMarket.connect(alice).editSalePrice(1, 60, 500)
             ).to.be.revertedWithoutReason();
 
             let data = await piMarket._tokenMeta(1);
             expect(await data.price).to.equal("60000");
-            await piMarket.connect(alice).editSalePrice(1, 50000);
+            await piMarket.connect(alice).editSalePrice(1, 50000, 500);
             let newdata = await piMarket._tokenMeta(1);
             expect(await newdata.price).to.equal(50000);
         });
@@ -706,10 +706,10 @@ describe("piMarketERC20Collection", function () {
         });
 
         it("should let alice change the start price of the auction", async () => {
-            await piMarket.editSalePrice(4, 10000);
+            await piMarket.editSalePrice(4, 10000, 500);
             let result = await piMarket._tokenMeta(4);
             expect(result.price).to.equal(10000);
-            await piMarket.editSalePrice(4, 50000);
+            await piMarket.editSalePrice(4, 50000, 500);
             result = await piMarket._tokenMeta(4);
             expect(result.price).to.equal(50000);
         })
@@ -737,7 +737,7 @@ describe("piMarketERC20Collection", function () {
         });
 
         it("should not let alice change the auction price after bidding has begun", async () => {
-            await expect(piMarket.editSalePrice(4, 10000)).to.be.revertedWith(
+            await expect(piMarket.editSalePrice(4, 10000, 500)).to.be.revertedWith(
                 "Bid has started"
             );
         })

@@ -27,7 +27,7 @@ contract CollectionMethods is
 
     event RoyaltiesSet(uint256 indexed tokenId, LibShare.Share[] royalties);
 
-    event TokenMinted(uint256 tokenId, address to);
+    event TokenMinted(uint256 tokenId, address to, string URI);
 
     /**
      * @notice Modifier enabling only the piNFTMethods contract to call.
@@ -77,7 +77,7 @@ contract CollectionMethods is
         _safeMint(_to, tokenId_);
         _setTokenURI(tokenId_, _uri);
         _tokenIdCounter.increment();
-        emit TokenMinted(tokenId_, _to);
+        emit TokenMinted(tokenId_, _to, _uri);
     }
 
     /**

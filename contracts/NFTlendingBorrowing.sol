@@ -293,7 +293,7 @@ contract NFTlendingBorrowing is
             ),
             "Unable to tansfer Your ERC20"
         );
-        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid, NFTdetails[_NFTid].NFTtokenId, NFTdetails[_NFTid].contractAddress, _bidAmount, NFTdetails[_NFTid].percent, _duration, _expiration, _ERC20Address);
+        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid, NFTdetails[_NFTid].NFTtokenId, NFTdetails[_NFTid].contractAddress, _bidAmount, _percent, _duration, _expiration, _ERC20Address);
     }
 
     /**

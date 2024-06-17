@@ -294,26 +294,26 @@ describe("piMarket", function () {
       await piMarket.pause();
 
       await expect(
-        piMarket.connect(alice).editSalePrice(1, 60000)
+        piMarket.connect(alice).editSalePrice(1, 60000, 200)
       ).to.be.revertedWith("Pausable: paused");
 
       await piMarket.unpause();
     });
 
     it("should edit the price after listing on sale", async () => {
-      await piMarket.connect(alice).editSalePrice(1, 60000);
+      await piMarket.connect(alice).editSalePrice(1, 60000, 200);
       await expect(
-        piMarket.connect(bob).editSalePrice(1, 60000)
+        piMarket.connect(bob).editSalePrice(1, 60000, 200)
       ).to.be.revertedWith("You are not the owner");
 
       await expect(
-        piMarket.connect(alice).editSalePrice(1, 60)
+        piMarket.connect(alice).editSalePrice(1, 60, 200)
       ).to.be.revertedWithoutReason();
       let meta = await piMarket._tokenMeta(1);
       let price = meta.price;
       expect(price).to.equal(60000);
-      await piMarket.connect(alice).editSalePrice(1, 60000);
-      await piMarket.connect(alice).editSalePrice(1, 50000);
+      await piMarket.connect(alice).editSalePrice(1, 60000, 200);
+      await piMarket.connect(alice).editSalePrice(1, 50000, 200);
       let newmeta = await piMarket._tokenMeta(1);
       expect(newmeta.price).to.equal(50000);
     });
@@ -408,7 +408,7 @@ describe("piMarket", function () {
 
     it("should not allow sale price edit if sale status is false", async () => {
       await expect(
-        piMarket.connect(alice).editSalePrice(1, 60000)
+        piMarket.connect(alice).editSalePrice(1, 60000, 200)
       ).to.be.revertedWithoutReason();
     });
 
@@ -733,10 +733,10 @@ describe("piMarket", function () {
     // });
 
     // it("should let alice change the start price of the auction", async () => {
-    //   await piMarket.editSalePrice(4, 10000);
+    //   await piMarket.editSalePrice(4, 10000, 200);
     //   let result = await piMarket._tokenMeta(4);
     //   expect(result.price).to.equal(10000);
-    //   await piMarket.editSalePrice(4, 50000);
+    //   await piMarket.editSalePrice(4, 50000, 200);
     //   result = await piMarket._tokenMeta(4);
     //   expect(result.price).to.equal(50000);
     // });
@@ -779,10 +779,10 @@ describe("piMarket", function () {
     });
 
     it("should let alice change the start price of the auction", async () => {
-      await piMarket.editSalePrice(4, 10000);
+      await piMarket.editSalePrice(4, 10000, 200);
       let result = await piMarket._tokenMeta(4);
       expect(result.price).to.equal(10000);
-      await piMarket.editSalePrice(4, 50000);
+      await piMarket.editSalePrice(4, 50000, 200);
       result = await piMarket._tokenMeta(4);
       expect(result.price).to.equal(50000);
     });
@@ -828,7 +828,7 @@ describe("piMarket", function () {
     });
 
     it("should not let alice change the auction price after bidding has begun", async () => {
-      await expect(piMarket.editSalePrice(4, 10000)).to.be.revertedWith(
+      await expect(piMarket.editSalePrice(4, 10000, 200)).to.be.revertedWith(
         "Bid has started"
       );
     });
