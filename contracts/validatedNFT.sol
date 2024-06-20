@@ -32,7 +32,7 @@ contract validatedNFT is
 
     address public piNFTMethodsAddress;
 
-    event TokenMinted(uint256 tokenId, address to);
+    event TokenMinted(uint256 tokenId, address to, string uri);
 
     event RoyaltiesSetForValidator(
         uint256 indexed tokenId,
@@ -78,7 +78,7 @@ contract validatedNFT is
                 tokenId_
         );
         _tokenIdCounter.increment();
-        emit TokenMinted(tokenId_, _to);
+        emit TokenMinted(tokenId_, _to, _uri);
         return tokenId_;
     }
 
