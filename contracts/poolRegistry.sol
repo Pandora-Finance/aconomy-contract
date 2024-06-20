@@ -126,7 +126,8 @@ contract poolRegistry is
     event poolCreated(
         address indexed owner,
         address poolAddress,
-        uint256 poolId
+        uint256 poolId,
+        string URI
     );
     event SetPaymentCycleDuration(uint256 poolId, uint32 duration);
     event SetPaymentDefaultDuration(uint256 poolId, uint32 duration);
@@ -191,7 +192,7 @@ contract poolRegistry is
             addBorrower(poolId_, msg.sender);
         }
 
-        emit poolCreated(msg.sender, poolAddress, poolId_);
+        emit poolCreated(msg.sender, poolAddress, poolId_, _uri);
     }
 
     /**

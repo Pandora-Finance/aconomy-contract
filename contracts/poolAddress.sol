@@ -51,24 +51,27 @@ contract poolAddress is
         _unpause();
     }
 
-    event loanAccepted(uint256 indexed loanId, address indexed lender);
+    event loanAccepted(uint256 poolId, uint256 indexed loanId, address indexed lender);
 
     event repaidAmounts(
+        uint256 poolId,
         uint256 owedPrincipal,
         uint256 duePrincipal,
         uint256 interest
     );
     event AcceptedLoanDetail(
+        uint256 poolId,
         uint256 indexed loanId,
         uint256 indexed amountToAconomy,
         uint256 amountToPool,
         uint256 amountToBorrower
     );
 
-    event LoanRepaid(uint256 indexed loanId, uint256 Amount);
-    event LoanRepayment(uint256 indexed loanId, uint256 Amount);
+    event LoanRepaid(uint256 poolId, uint256 indexed loanId, uint256 Amount);
+    event LoanRepayment(uint256 poolId, uint256 indexed loanId, uint256 Amount);
 
     event SubmittedLoan(
+        uint256 poolId,
         uint256 indexed loanId,
         address indexed borrower,
         address receiver,
@@ -152,6 +155,7 @@ contract poolAddress is
         loan.state = LoanState.PENDING;
 
         emit SubmittedLoan(
+            _poolId,
             loanId,
             loan.borrower,
             loan.receiver,
@@ -198,9 +202,9 @@ contract poolAddress is
         // Store Borrower's active loan
         require(borrowerActiveLoans[loan.borrower].add(_loanId));
 
-        emit loanAccepted(_loanId, loan.lender);
+        emit loanAccepted(loan.poolId,_loanId, loan.lender);
 
-        emit AcceptedLoanDetail(_loanId, amountToAconomy, amountToPool, amountToBorrower);
+        emit AcceptedLoanDetail(loan.poolId,_loanId, amountToAconomy, amountToPool, amountToBorrower);
     }
 
     /**
@@ -447,9 +451,9 @@ contract poolAddress is
             // Remove borrower's active loan
             require(borrowerActiveLoans[loan.borrower].remove(_loanId));
 
-            emit LoanRepaid(_loanId, paymentAmount);
+            emit LoanRepaid(loan.poolId, _loanId, paymentAmount);
         } else {
-            emit LoanRepayment(_loanId, paymentAmount);
+            emit LoanRepayment(loan.poolId, _loanId, paymentAmount);
         }
 
         loan.loanDetails.totalRepaid.principal += _payment.principal;
