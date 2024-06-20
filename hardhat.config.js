@@ -4,6 +4,10 @@ require('solidity-coverage')
 require("hardhat-gas-reporter");
 require('dotenv').config()
 
+require("solidity-docgen");
+
+// import 'solidity-docgen';
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.11",

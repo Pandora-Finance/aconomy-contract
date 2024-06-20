@@ -56,7 +56,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
     );
 
     event SuppliedToPool(
-        address indexed lender,
         uint256 indexed poolId,
         uint256 BidId,
         address indexed ERC20Token,
@@ -240,7 +239,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         );
 
         emit SuppliedToPool(
-            msg.sender,
             _poolId,
             _bidId,
             _ERC20Address,
