@@ -60,7 +60,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 indexed poolId,
         uint256 BidId,
         address indexed ERC20Token,
-        uint256 tokenAmount
+        uint256 tokenAmount,
+        uint16 APR,
+        uint256 Duration,
+        uint256 Expiration
     );
 
     event InstallmentRepaid(
@@ -241,7 +244,10 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
             _poolId,
             _bidId,
             _ERC20Address,
-            _amount
+            _amount,
+            _APR,
+            _maxLoanDuration,
+            _expiration
         );
     }
 
