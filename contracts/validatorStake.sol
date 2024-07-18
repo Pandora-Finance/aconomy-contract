@@ -22,6 +22,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
     struct StakeDetail {
         uint256 stakedAmount;
         uint256 refundedAmount;
+        address ERC20Token;
     }
 
     mapping(address => StakeDetail) public validatorStakes;
@@ -58,8 +59,12 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         if(!_paid && validatorStakes[_validator].stakedAmount > 0) {
             revert("more than one time");
         }
+        if(validatorStakes[_validator].stakedAmount > 0) {
+            require(_ERC20Address == validatorStakes[_validator].ERC20Token, "Token mismatch");
+        }
 
         validatorStakes[_validator].stakedAmount += _amount;
+        validatorStakes[_validator].ERC20Token = _ERC20Address;
 
         bool isSuccess = IERC20(_ERC20Address).transferFrom(_validator, address(this), _amount);
 
@@ -76,8 +81,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
         _stake(_amount, _ERC20Address, msg.sender, true);
     }
 
-    function refundStake(address _validatorAddress, address _ERC20Address, uint256 _refundAmount) external whenNotPaused nonReentrant onlyOwner {
-        require(_ERC20Address != address(0), "Zero Address");
+    function refundStake(address _validatorAddress, uint256 _refundAmount) external whenNotPaused nonReentrant onlyOwner {
         require(_validatorAddress != address(0), "Zero Address");
         require(_refundAmount > 0, "Low Amount");
 
@@ -85,6 +89,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
         stakes.stakedAmount -= _refundAmount;
         stakes.refundedAmount += _refundAmount;
+
+        address _ERC20Address = validatorStakes[_validatorAddress].ERC20Token;
 
         bool isSuccess = IERC20(_ERC20Address).transfer(_validatorAddress, _refundAmount);
 

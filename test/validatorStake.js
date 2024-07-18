@@ -23,16 +23,21 @@ describe("Validator fund stake", function() {
           const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
     sampleERC20 = await mintToken.waitForDeployment();
 
+        const mintToken1 = await hre.ethers.deployContract("mintToken", ["100000000000"]);
+    sampleERC20Token = await mintToken1.waitForDeployment();
+
+    
+
         //   console.log("deployment", await ValidatorStake.getAddress())
 
-          return { ValidatorStake, sampleERC20, alice, bob, carl };
+          return { ValidatorStake, sampleERC20, sampleERC20Token, alice, bob, carl };
     }
 
 
 
     describe("Deployment", function () {
         it("should deploy the ValidatorStake Contract", async () => {
-            let {ValidatorStake, sampleERC20, alice, bob, carl} = await deployContractValidatorStake()
+            let {ValidatorStake, sampleERC20, sampleERC20Token, alice, bob, carl} = await deployContractValidatorStake()
         });
 
 
@@ -104,11 +109,21 @@ describe("Validator fund stake", function() {
 
         });
 
+        it("should not let validator add more fund using different ERC20Token ", async () => {
+            
+            await sampleERC20Token.mint(bob, "50000000000000000000");
+            await sampleERC20Token.connect(bob).approve(await ValidatorStake.getAddress(), "50000000000000000000");
+
+            await expect(ValidatorStake.connect(bob).addStake("50000000000000000000",await sampleERC20Token.getAddress()))
+                .to.be.revertedWith("Token mismatch");
+
+        });
+
         it("should let validator RefundStake", async () => {
             await sampleERC20.mint(bob, "100000000000000000000");
             let bal3 = await sampleERC20.balanceOf(bob);
             expect(bal3).to.equal("100000000000000000000");
-            const tx = await ValidatorStake.refundStake(await bob.getAddress(), await sampleERC20.getAddress(), "200000000000000000000");
+            const tx = await ValidatorStake.refundStake(await bob.getAddress(), "200000000000000000000");
                     let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("0");
 
@@ -315,7 +330,7 @@ describe("Validator fund stake", function() {
             expect(bal4).to.equal("0");
     
 
-            await expect(ValidatorStake.connect(alice).refundStake(bob.address, sampleERC20.getAddress(), "300000000000000000000"))
+            await expect(ValidatorStake.connect(alice).refundStake(bob.address, "300000000000000000000"))
             .to.be.revertedWith("Pausable: paused");
 
                
@@ -340,7 +355,7 @@ describe("Validator fund stake", function() {
     
 
 
-            await expect(ValidatorStake.connect(alice).refundStake(bob.address, sampleERC20.getAddress(), "0"))
+            await expect(ValidatorStake.connect(alice).refundStake(bob.address, "0"))
             .to.be.revertedWith("Low Amount");
 
                
@@ -361,12 +376,7 @@ describe("Validator fund stake", function() {
 
             let bal4 = await sampleERC20.balanceOf(carl);
             expect(bal4).to.equal("0");
-    
-
-            await expect(ValidatorStake.connect(alice).refundStake(bob.address, "0x0000000000000000000000000000000000000000", "300000000000000000000"))
-            .to.be.revertedWith("Zero Address");
-
-               
+                   
                 let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
 
@@ -384,11 +394,6 @@ describe("Validator fund stake", function() {
 
             let bal4 = await sampleERC20.balanceOf(carl);
             expect(bal4).to.equal("0");
-    
-
-            await expect(ValidatorStake.connect(alice).refundStake("0x0000000000000000000000000000000000000000",  sampleERC20.getAddress(), "300000000000000000000"))
-            .to.be.revertedWith("Zero Address");
-
                
                 let bal = await sampleERC20.balanceOf(ValidatorStake);
             expect(bal).to.equal("200000000000000000000");
@@ -410,7 +415,7 @@ describe("Validator fund stake", function() {
             let bal3 = await sampleERC20.balanceOf(carl);
             expect(bal3).to.equal("0");
 
-            await expect(ValidatorStake.connect(alice).refundStake(carl.address, sampleERC20.getAddress(), "200000000000000000000"))
+            await expect(ValidatorStake.connect(alice).refundStake(carl.address, "200000000000000000000"))
                 .to.emit(ValidatorStake, 'RefundedStake')
                 .withArgs(carl.address,await sampleERC20.getAddress(), "200000000000000000000","0");
 
@@ -485,7 +490,7 @@ describe("Validator fund stake", function() {
 
 
             await expect(
-             ValidatorStake.connect(carl).refundStake(validator,await sampleERC20.getAddress(), "50000000000")
+             ValidatorStake.connect(carl).refundStake(validator, "50000000000")
             ).to.be.revertedWith("Ownable: caller is not the owner");
 
             const stakeDetail = await ValidatorStake.validatorStakes(validator.getAddress());
@@ -502,12 +507,12 @@ describe("Validator fund stake", function() {
             expect(bal1).to.equal("100000000000000000000");
 
 
-            await ValidatorStake.connect(alice).refundStake(validator.address, sampleERC20.getAddress(), "50000000000000000000");
+            await ValidatorStake.connect(alice).refundStake(validator.address, "50000000000000000000");
             const details = await ValidatorStake.validatorStakes(validator.address);
             expect(details.stakedAmount).to.equal("50000000000000000000");
             expect(details.refundedAmount).to.equal("50000000000000000000");
 
-            await ValidatorStake.connect(alice).refundStake(validator.address, sampleERC20.getAddress(), "50000000000000000000");
+            await ValidatorStake.connect(alice).refundStake(validator.address, "50000000000000000000");
             const stakeDetail = await ValidatorStake.validatorStakes(validator.address);
             expect(stakeDetail.stakedAmount).to.equal("0");
             expect(stakeDetail.refundedAmount).to.equal("100000000000000000000");
@@ -520,6 +525,8 @@ describe("Validator fund stake", function() {
             expect(bal4).to.equal("0");
 
         });
+
+        
 
 
 
