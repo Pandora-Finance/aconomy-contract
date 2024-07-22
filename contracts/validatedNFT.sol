@@ -42,6 +42,7 @@ contract validatedNFT is
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
         __Ownable_init();
+        __Pausable_init();
         piNFTMethodsAddress = _piNFTmethodAddress;
     }
 

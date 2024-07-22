@@ -77,6 +77,7 @@ contract CollectionFactory is
     ) public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
         collectionMethodAddress = _collectionMethodAddress;
         piNFTMethodsAddress = _piNFTMethodsAddress;
     }
