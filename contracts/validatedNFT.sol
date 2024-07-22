@@ -36,7 +36,9 @@ contract validatedNFT is
         LibShare.Share[] royalties
     );
 
-    function initialize( address _piNFTmethodAddress) public initializer {
+    function initialize(string memory _name,
+        string memory _symbol, address _piNFTmethodAddress) public initializer {
+            __ERC721_init(_name, _symbol);
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
         __Ownable_init();

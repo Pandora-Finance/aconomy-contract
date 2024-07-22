@@ -59,7 +59,11 @@ describe("piNFT", function () {
 
     validatedNFT = await upgrades.deployProxy(
       validateNFT,
-      [await piNftMethods.getAddress()],
+      [
+        "Aconomy",
+        "ACO",
+        await piNftMethods.getAddress()
+      ],
       {
         initializer: "initialize",
         kind: "uups",
@@ -2086,6 +2090,11 @@ it("should Delete an ERC721 token to alice", async () => {
   await validatedNFT.deleteNFT(0);
   const bal1 = await validatedNFT.balanceOf(alice);
   expect(bal1).to.equal(1);
+});
+
+it("should show validated NFT dose have name", async () => {
+  console.log("Contract name is", await validatedNFT.name());
+  console.log("Contract name is", await validatedNFT.symbol());
 });
 
 
