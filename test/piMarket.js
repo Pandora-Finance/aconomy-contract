@@ -187,6 +187,22 @@ describe("piMarket", function () {
       await piMarket.unpause();
     })
 
+    it("should not allow AconomyFee more than 50%", async () => {
+
+      await expect(
+        aconomyFee.setAconomyPoolFee(5001)
+      ).to.be.revertedWith("Fee can not be more than 50%");
+
+      await expect(
+        aconomyFee.setAconomyPiMarketFee(5001)
+      ).to.be.revertedWith("Fee can not be more than 50%");
+
+      await expect(
+        aconomyFee.setAconomyNFTLendBorrowFee(5001)
+      ).to.be.revertedWith("Fee can not be more than 50%");
+
+    })
+
     it("should create a piNFT with 500 erc20 tokens to carl", async () => {
       await aconomyFee.setAconomyPiMarketFee(100);
       await aconomyFee.transferOwnership(feeReceiver.getAddress());

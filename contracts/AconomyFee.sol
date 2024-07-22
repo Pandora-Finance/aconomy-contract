@@ -33,6 +33,7 @@ contract AconomyFee is Ownable {
      * @param newFee The value of the new fee percentage in bps.
      */
     function setAconomyPoolFee(uint16 newFee) public onlyOwner {
+        require(newFee <= 5000,"Fee can not be more than 50%");
         if (newFee == _AconomyPoolFee) return;
 
         uint16 oldFee = _AconomyPoolFee;
@@ -41,6 +42,7 @@ contract AconomyFee is Ownable {
     }
 
     function setAconomyPiMarketFee(uint16 newFee) public onlyOwner {
+        require(newFee <= 5000,"Fee can not be more than 50%");
         if (newFee == _AconomyPiMarketFee) return;
 
         uint16 oldFee = _AconomyPiMarketFee;
@@ -49,6 +51,7 @@ contract AconomyFee is Ownable {
     }
 
     function setAconomyNFTLendBorrowFee(uint16 newFee) public onlyOwner {
+        require(newFee <= 5000,"Fee can not be more than 50%");
         if (newFee == _AconomyNFTLendBorrowFee) return;
 
         uint16 oldFee = _AconomyNFTLendBorrowFee;
