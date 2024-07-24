@@ -17,7 +17,7 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
     uint256 public updatedAt;
     // Reward to be paid out per second
     uint256 public rewardRate;
-    // Sum of (reward rate * Duration Time * 1e18 / total supply)
+    // Sum of (reward rate * dt * 1e18 / total supply)
     uint256 public rewardPerTokenStored;
     // User address => rewardPerTokenStored
     mapping(address => uint256) public userRewardPerTokenPaid;
@@ -26,29 +26,21 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
 
     // Total staked
     uint256 public totalSupply;
-    // Reward Tokens
-    uint256 public RewardTokens;
+
+    uint256 public rewardTokens;
     // User address => staked amount
-    mapping(address => userDetails) public balanceOf;
-
-    struct userDetails {
-        uint256 Amount;
-        uint256 StakingTime;
-        bool Blocked;
-    }
-
-    /* ========== EVENTS ========== */
-
-    event RewardAdded(uint256 reward);
-    event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 amount);
-    event RewardPaid(address indexed user, uint256 reward);
-    event RewardsDurationUpdated(uint256 newDuration, uint256 RewardTokens);
-    event Recovered(address token, uint256 amount);
+    mapping(address => uint256) public balanceOf;
+    // User address => staked time
+    mapping(address => uint256) public stakeTimestamps;
 
     constructor(address _stakingToken) {
         Token = IERC20(_stakingToken);
     }
+
+    uint256 constant SIX_MONTHS = 180 days;
+    uint256 constant ONE_YEAR = 365 days;
+    uint256 constant TWO_YEARS = 2 * 365 days;
+    uint256 constant THREE_YEARS = 3 * 365 days;
 
     modifier updateReward(address _account) {
         rewardPerTokenStored = rewardPerToken();
@@ -60,6 +52,7 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         }
         _;
     }
+
 
     function pause() external onlyOwner {
         _pause();
@@ -78,91 +71,96 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
             return rewardPerTokenStored;
         }
 
-        return
-            rewardPerTokenStored +
-            (rewardRate * (lastTimeRewardApplicable() - updatedAt) * 1e18) /
-            totalSupply;
+        return rewardPerTokenStored
+            + (rewardRate * (lastTimeRewardApplicable() - updatedAt) * 1e18)
+                / totalSupply;
     }
 
-    function stake(
-        address _userAddress,
-        uint256 _amount
-    ) external whenNotPaused updateReward(msg.sender) nonReentrant {
+    function stake(uint256 _amount) external updateReward(msg.sender) whenNotPaused nonReentrant {
         require(_amount > 0, "amount = 0");
-        require(_userAddress != address(0), "zero Address");
         Token.transferFrom(msg.sender, address(this), _amount);
-        balanceOf[_userAddress].Amount += _amount;
-        balanceOf[_userAddress].StakingTime = block.timestamp;
+        balanceOf[msg.sender] += _amount;
+        stakeTimestamps[msg.sender] = block.timestamp;
         totalSupply += _amount;
-        emit Staked(_userAddress, _amount);
     }
 
-    function withdraw(
-        uint256 _amount
-    ) external whenNotPaused updateReward(msg.sender) nonReentrant {
-        require(_amount > 0, "amount = 0");
-        balanceOf[msg.sender].Amount -= _amount;
-        totalSupply -= _amount;
-        Token.transfer(msg.sender, _amount);
-        emit Withdrawn(msg.sender, _amount);
+    function withdraw() external updateReward(msg.sender) whenNotPaused nonReentrant {
+        // require(_amount > 0, "amount = 0");
+        uint256 burnAmount = 0;
+        uint256 stakedAmount = balanceOf[msg.sender];
+        uint256 currentTime = block.timestamp;
+        uint256 stakeTime = stakeTimestamps[msg.sender];
+        uint256 withdrawableAmount = stakedAmount;
+
+
+        if (currentTime < stakeTime + SIX_MONTHS) {
+            revert("Cannot withdraw tokens within 6 months");
+        } else if (currentTime < stakeTime + ONE_YEAR) {
+            burnAmount = (stakedAmount * 5000) / 10000;
+        } else if (currentTime < stakeTime + TWO_YEARS) {
+            burnAmount = (stakedAmount * 2000) / 10000;
+        } else if (currentTime < stakeTime + THREE_YEARS) {
+            burnAmount = (stakedAmount * 1000) / 10000;
+        }
+
+        withdrawableAmount -= burnAmount;
+
+
+
+        totalSupply -= stakedAmount;
+        Token.transfer(msg.sender, withdrawableAmount);
+        
     }
 
     function earned(address _account) public view returns (uint256) {
-        return
-            ((balanceOf[_account].Amount *
-                (rewardPerToken() - userRewardPerTokenPaid[_account])) / 1e18) +
-            rewards[_account];
+        return (
+            (
+                balanceOf[_account]
+                    * (rewardPerToken() - userRewardPerTokenPaid[_account])
+            ) / 1e18
+        ) + rewards[_account];
     }
 
-    function getReward()
-        external
-        updateReward(msg.sender)
-        whenNotPaused
-        nonReentrant
-    {
+    function getReward() external updateReward(msg.sender) {
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
             Token.transfer(msg.sender, reward);
-            RewardTokens = RewardTokens - reward;
-            emit RewardPaid(msg.sender, reward);
         }
     }
 
-    function setRewardsDurationAndRewardTokens(uint256 _duration, uint256 _RewardTokens) external onlyOwner {
-        require(finishAt < block.timestamp, "reward duration not finished");
-        duration = _duration;
-        RewardTokens += _RewardTokens;
-        emit RewardsDurationUpdated(_duration, _RewardTokens);
+    function depositRewardToken(uint256 _amount) external onlyOwner whenNotPaused nonReentrant {
+        Token.transferFrom(msg.sender, address(this), _amount);
+        rewardTokens += _amount;
     }
 
-    function notifyRewardAmount(
-        uint256 _amount
-    ) external onlyOwner whenNotPaused updateReward(address(0)) nonReentrant {
+    function setRewardsDuration(uint256 _duration) external onlyOwner {
+        require(finishAt < block.timestamp, "reward duration not finished");
+        duration = _duration;
+    }
+
+    function notifyRewardAmount(uint256 _amount)
+        external
+        onlyOwner
+        nonReentrant
+        whenNotPaused
+        updateReward(address(0))
+    {
         if (block.timestamp >= finishAt) {
             rewardRate = _amount / duration;
         } else {
-            uint256 remainingRewards = (finishAt - block.timestamp) *
-                rewardRate;
+            uint256 remainingRewards = (finishAt - block.timestamp) * rewardRate;
             rewardRate = (_amount + remainingRewards) / duration;
         }
 
         require(rewardRate > 0, "reward rate = 0");
         require(
-            rewardRate * duration <= RewardTokens,
+            rewardRate * duration <= rewardTokens,
             "reward amount > balance"
         );
 
         finishAt = block.timestamp + duration;
         updatedAt = block.timestamp;
-    }
-
-    function recoverERC20(
-        address tokenAddress,
-        uint256 tokenAmount
-    ) external onlyOwner whenNotPaused nonReentrant {
-        Token.transfer(owner(), tokenAmount);
-        emit Recovered(tokenAddress, tokenAmount);
     }
 
     function _min(uint256 x, uint256 y) private pure returns (uint256) {
