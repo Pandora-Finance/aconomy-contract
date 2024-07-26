@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 contract mintToken is ERC20, ERC20Burnable {
-    constructor(uint256 initialSupply) ERC20("Shrish", "srs") {
+    constructor(uint256 initialSupply) ERC20("SHRISH", "SRS") {
         _mint(msg.sender, initialSupply);
     }
 
