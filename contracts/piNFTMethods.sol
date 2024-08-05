@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./utils/LibShare.sol";
 import "./piNFT.sol";
-import "./CollectionMethods.sol";
 import "./AconomyERC2771Context.sol";
 
 contract piNFTMethods is

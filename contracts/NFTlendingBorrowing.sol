@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./AconomyFee.sol";
 import "./Libraries/LibCalculations.sol";
@@ -20,8 +19,6 @@ contract NFTlendingBorrowing is
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable
 {
-    using Counters for Counters.Counter;
-
     //STORAGE START ---------------------------------------------------------------------------
 
     uint256 public NFTid;
