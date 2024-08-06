@@ -118,6 +118,7 @@ contract NFTlendingBorrowing is
         __ReentrancyGuard_init();
         __ERC721Holder_init();
         __Ownable_init();
+        __Pausable_init();
         __UUPSUpgradeable_init();
         AconomyFeeAddress = _aconomyFee;
     }

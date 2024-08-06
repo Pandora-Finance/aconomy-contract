@@ -290,7 +290,7 @@ describe("piMarketCollection", function () {
             await piMarket.connect(alice).editSalePrice(1, 60000, 500);
             await expect(
                 piMarket.connect(bob).editSalePrice(1, 60000, 500)
-            ).to.be.revertedWith("You are not the owner");
+            ).to.be.revertedWithoutReason();
 
             await expect(
                 piMarket.connect(alice).editSalePrice(1, 60, 500)

@@ -115,6 +115,7 @@ contract piNFTMethods is
     function initialize(address trustedForwarder) public initializer {
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
         AconomyERC2771Context_init(trustedForwarder);
     }
 
@@ -539,8 +540,7 @@ contract piNFTMethods is
         uint256 _amount
     ) external nonReentrant whenNotPaused {
         require(
-            NFTowner[_collectionAddress][_tokenId] == msg.sender,
-            "not owner"
+            NFTowner[_collectionAddress][_tokenId] == msg.sender
         );
         require(
             erc20Balances[_collectionAddress][_tokenId][_erc20Contract] != 0

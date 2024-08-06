@@ -135,6 +135,7 @@ contract piMarket is
         __ReentrancyGuard_init();
         __ERC721Holder_init();
         __Ownable_init();
+        __Pausable_init();
         __UUPSUpgradeable_init();
         feeAddress = _feeAddress;
         collectionFactoryAddress = _collectionFactoryAddress;
@@ -216,8 +217,7 @@ contract piMarket is
         uint256 _duration
     ) public whenNotPaused {
         require(
-            msg.sender == _tokenMeta[_saleId].currentOwner,
-            "You are not the owner"
+            msg.sender == _tokenMeta[_saleId].currentOwner
         );
         require(_tokenMeta[_saleId].status);
         require(_price >= 10000);

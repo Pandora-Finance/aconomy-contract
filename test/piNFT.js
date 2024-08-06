@@ -969,7 +969,7 @@ describe("piNFT", function () {
         piNftMethods
           .connect(bob)
           .Repay(piNFT.getAddress(), 0, sampleERC20.getAddress(), 300)
-      ).to.be.revertedWith("not owner");
+      ).to.be.revertedWithoutReason();
     });
 
     it("should not let alice repay more than what's borrowed", async () => {
