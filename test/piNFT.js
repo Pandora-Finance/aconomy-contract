@@ -316,7 +316,6 @@ describe("piNFT", function () {
       ).to.be.revertedWithoutReason();
     });
 
-
     it("should not let non owner setPiMarket Address", async () => {
       await expect(
         piNftMethods.connect(bob).setPiMarket(
@@ -904,6 +903,16 @@ describe("piNFT", function () {
     it("should let alice withdraw erc20", async () => {
       let _bal = await sampleERC20.balanceOf(alice.getAddress());
       await piNFT.approve(piNftMethods.getAddress(), 0);
+
+      await expect(
+        piNftMethods.connect(bob).withdraw(
+          piNFT.getAddress(),
+          0,
+          sampleERC20.getAddress(),
+          0
+        )
+      ).to.be.revertedWithoutReason();
+
       await piNftMethods.withdraw(
         await piNFT.getAddress(),
         0,

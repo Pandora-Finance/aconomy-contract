@@ -478,6 +478,7 @@ contract piNFTMethods is
             );
             NFTowner[_collectionAddress][_tokenId] = msg.sender;
         }
+        require(_amount > 0);
         require(NFTowner[_collectionAddress][_tokenId] == msg.sender);
         require(
             erc20Balances[_collectionAddress][_tokenId][_erc20Contract] != 0
