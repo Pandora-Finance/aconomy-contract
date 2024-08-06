@@ -106,7 +106,7 @@ describe("NFT Lending and Borrowing", function (){
             200,
             300,
             3600,
-            1000000
+            100000
           )).to.be.revertedWithoutReason()
 
           const tx1 = await nftLendBorrow.listNFTforBorrowing(
@@ -246,7 +246,7 @@ describe("NFT Lending and Borrowing", function (){
           await nftLendBorrow.setExpectedAmount(1, 100000000000);
       
           await expect(
-            nftLendBorrow.setExpectedAmount(1, 1000000)).to.be.revertedWithoutReason()
+            nftLendBorrow.setExpectedAmount(1, 100000)).to.be.revertedWithoutReason()
       
           await expect(
             nftLendBorrow.connect(bob).setExpectedAmount(1, 100000000000)).to.be.revertedWith("Not the owner"
@@ -279,7 +279,7 @@ describe("NFT Lending and Borrowing", function (){
       
           await expect(nftLendBorrow.connect(bob).Bid(
             1,
-            1000000,
+            100000,
             await sampleERC20.getAddress(),
             10,
             200,
@@ -1045,7 +1045,7 @@ describe("NFT Lending and Borrowing", function (){
           200,
           300,
           3600,
-          1000000
+          100000
         )).to.be.revertedWithoutReason()
 
         const tx1 = await nftLendBorrow.listNFTforBorrowing(
