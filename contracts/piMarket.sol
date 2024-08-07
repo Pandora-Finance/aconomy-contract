@@ -277,18 +277,6 @@ contract piMarket is
     }
 
     /**
-     * @notice Retrieves the validator royalty.
-     * @param _contractAddress the address of the token contract.
-     * @param _tokenId The Id of the token.
-     */
-    function retrieveValidatorRoyalty(
-        address _contractAddress,
-        uint256 _tokenId
-    ) public view returns (LibShare.Share[] memory) {
-        return piNFT(_contractAddress).getValidatorRoyalties(_tokenId);
-    }
-
-    /**
      * @notice Allows a user to buy an nft on sale.
      * @param _saleId The Id of the sale.
      * @param _fromCollection A boolean indicating if the nft is from a priavte collection.
@@ -315,7 +303,7 @@ contract piMarket is
                 meta.tokenContractAddress,
                 meta.tokenId
             );
-            validatorRoyalties = retrieveValidatorRoyalty(
+            validatorRoyalties = getCollectionValidatorRoyalty(
                 meta.tokenContractAddress,
                 meta.tokenId
             );
@@ -477,7 +465,7 @@ contract piMarket is
                 _tokenMeta[_saleId].tokenContractAddress,
                 _tokenMeta[_saleId].tokenId
             );
-            validatorRoyalties = retrieveValidatorRoyalty(
+            validatorRoyalties = getCollectionValidatorRoyalty(
                 _tokenMeta[_saleId].tokenContractAddress,
                 _tokenMeta[_saleId].tokenId
             );
