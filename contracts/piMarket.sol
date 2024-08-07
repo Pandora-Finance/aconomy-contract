@@ -50,7 +50,6 @@ contract piMarket is
         bool directSale;
         bool bidSale;
         bool status;
-        uint256 bidStartTime;
         uint256 bidEndTime;
         address currentOwner;
         address currency;
@@ -195,7 +194,6 @@ contract piMarket is
             true,
             false,
             true,
-            0,
             0,
             msg.sender,
             _currency
@@ -387,7 +385,6 @@ contract piMarket is
             false,
             true,
             true,
-            block.timestamp,
             block.timestamp + _bidTime,
             msg.sender,
             _currency
