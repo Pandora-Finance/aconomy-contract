@@ -200,7 +200,6 @@ contract piNFTMethods is
         LibShare.Share[] memory royalties
     ) public whenNotPaused nonReentrant{
         require(piNFT(_collectionAddress).exists(_tokenId));
-        require(approvedValidator[_collectionAddress][_tokenId] != address(0));
         require(msg.sender == approvedValidator[_collectionAddress][_tokenId]);
         require(_erc20Contract != address(0));
         require(_value != 0);
