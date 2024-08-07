@@ -326,7 +326,7 @@ contract piNFTMethods is
         uint256 erc20Balance = erc20Balances[_collectionAddress][_tokenId][
             _erc20Contract
         ];
-        require(erc20Balance >= _value);
+        require(erc20Balance >= _value, "value exceeds");
         uint256 newERC20Balance = erc20Balance - _value;
         erc20Balances[_collectionAddress][_tokenId][
             _erc20Contract
