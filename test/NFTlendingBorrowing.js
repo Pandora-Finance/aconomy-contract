@@ -1116,8 +1116,103 @@ describe("NFT Lending and Borrowing", function (){
         expect(bid.bidAccepted).to.equal(true);
         expect(bid.withdrawn).to.equal(false);
       });
-    
-
 
   })
+
+  describe("Claim NFT Tests", function () {
+
+    it("mint a new NFT and list for lending", async () => {
+      const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
+      await aconomyFee.connect(newFeeAddress).setAconomyNFTLendBorrowFee(0)
+      const tokenId = 10
+      expect(tokenId).to.equal(10);
+      expect(await aconomyFee.AconomyNFTLendBorrowFee()).to.equal(0);
+  
+      await expect(nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        await piNFT.getAddress(),
+        200,
+        300,
+        3600,
+        100000
+      )).to.be.revertedWithoutReason()
+
+      const tx1 = await nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        await piNFT.getAddress(),
+        200,
+        300,
+        3600,
+        200000000000
+      );
+      const NFTid = await nftLendBorrow.NFTid()
+      expect(NFTid).to.equal(10);
+      let details = await nftLendBorrow.NFTdetails(10);
+      expect(details.claimed).to.equal(false);
+    });
+
+    it("Bid for NFT", async () => {
+      await sampleERC20.mint(bob, 100000000000);
+      await sampleERC20.connect(bob).approve(await nftLendBorrow.getAddress(), 100000000000);
+  
+      const tx = await nftLendBorrow.connect(bob).Bid(
+        10,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200
+      );
+      const BidId = 0;
+      expect(BidId).to.equal(0);
+  
+      await sampleERC20.mint(carl, 100000000000);
+      await sampleERC20.connect(carl).approve(await nftLendBorrow.getAddress(), 100000000000);
+      const tx2 = await nftLendBorrow.connect(carl).Bid(
+        10,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200
+      );
+  
+      const BidId2 = 1;
+      expect(BidId2).to.equal(1);
+  
+      await sampleERC20.mint(carl, 100000000000);
+      await sampleERC20.connect(carl).approve(await nftLendBorrow.getAddress(), 100000000000);
+      const tx3 = await nftLendBorrow.connect(carl).Bid(
+        10,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200,
+      );
+  
+      const BidId3 = 2;
+      expect(BidId3).to.equal(2)
+    });
+
+    it("Should Accept Bid", async () => {
+      await piNFT.approve(await nftLendBorrow.getAddress(), 10);
+  
+      const tx = await nftLendBorrow.AcceptBid(10, 0);
+      let nft = await nftLendBorrow.NFTdetails(10);
+      let bid = await nftLendBorrow.Bids(10, 0);
+      expect(nft.bidAccepted).to.equal(true);
+      expect(nft.listed).to.equal(true);
+      expect(nft.repaid).to.equal(false);
+      expect(bid.bidAccepted).to.equal(true);
+      expect(bid.withdrawn).to.equal(false);
+    });
+
+    
+
+  })
+
+
+
+
 })

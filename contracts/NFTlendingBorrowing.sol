@@ -47,6 +47,7 @@ contract NFTlendingBorrowing is
         bool listed;
         bool bidAccepted;
         bool repaid;
+        bool claimed;
     }
 
     /**
@@ -86,12 +87,35 @@ contract NFTlendingBorrowing is
     //STORAGE END ----------------------------------------------------------------------------
 
     // Events
-    event AppliedBid(uint256 BidId, uint256 NFTid, uint256 TokenId, address ContractAddress, uint256 BidAmount, uint16 APY, uint32 Duration, uint256 Expiration, address ERC20Address);
+    event AppliedBid(
+        uint256 BidId,
+        uint256 NFTid,
+        uint256 TokenId,
+        address ContractAddress,
+        uint256 BidAmount,
+        uint16 APY,
+        uint32 Duration,
+        uint256 Expiration,
+        address ERC20Address
+    );
     event PercentSet(uint256 NFTid, uint16 Percent);
     event DurationSet(uint256 NFTid, uint32 Duration);
     event ExpectedAmountSet(uint256 NFTid, uint256 expectedAmount);
-    event NFTlisted(uint256 NFTid, uint256 TokenId, address ContractAddress, uint256 ExpectedAmount, uint16 Percent, uint32 Duration, uint256 Expiration);
-    event repaid(uint256 NFTid, uint256 BidId, uint256 Amount, address ContractAddress);
+    event NFTlisted(
+        uint256 NFTid,
+        uint256 TokenId,
+        address ContractAddress,
+        uint256 ExpectedAmount,
+        uint16 Percent,
+        uint32 Duration,
+        uint256 Expiration
+    );
+    event repaid(
+        uint256 NFTid,
+        uint256 BidId,
+        uint256 Amount,
+        address ContractAddress
+    );
     event Withdrawn(uint256 NFTid, uint256 BidId, uint256 Amount);
     event NFTRemoved(uint256 NFTId, address ContractAddress);
     event BidRejected(
@@ -107,6 +131,14 @@ contract NFTlendingBorrowing is
         uint256 Amount,
         uint256 ProtocolAmount,
         address ContractAddress
+    );
+
+    event NFTclaimed(
+        uint256 NFTid,
+        uint256 BidId,
+        address ContractAddress,
+        address prevNFTowner,
+        address newNFTowner
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -183,12 +215,21 @@ contract NFTlendingBorrowing is
             _percent,
             true,
             false,
+            false,
             false
         );
 
         NFTdetails[_NFTid] = details;
 
-        emit NFTlisted(_NFTid, _tokenId, _contractAddress, _expectedAmount, _percent, _duration, _expiration);
+        emit NFTlisted(
+            _NFTid,
+            _tokenId,
+            _contractAddress,
+            _expectedAmount,
+            _percent,
+            _duration,
+            _expiration
+        );
     }
 
     /**
@@ -263,7 +304,10 @@ contract NFTlendingBorrowing is
         require(_percent >= 10, "interest percent too low");
         require(!NFTdetails[_NFTid].bidAccepted, "Bid Already Accepted");
         require(NFTdetails[_NFTid].listed, "You can't Bid on this NFT");
-        require(NFTdetails[_NFTid].expiration > block.timestamp, "Bid time over");
+        require(
+            NFTdetails[_NFTid].expiration > block.timestamp,
+            "Bid time over"
+        );
 
         uint16 fee = AconomyFee(AconomyFeeAddress).AconomyNFTLendBorrowFee();
 
@@ -291,7 +335,17 @@ contract NFTlendingBorrowing is
             ),
             "Unable to tansfer Your ERC20"
         );
-        emit AppliedBid(Bids[_NFTid].length - 1, _NFTid, NFTdetails[_NFTid].NFTtokenId, NFTdetails[_NFTid].contractAddress, _bidAmount, _percent, _duration, _expiration, _ERC20Address);
+        emit AppliedBid(
+            Bids[_NFTid].length - 1,
+            _NFTid,
+            NFTdetails[_NFTid].NFTtokenId,
+            NFTdetails[_NFTid].contractAddress,
+            _bidAmount,
+            _percent,
+            _duration,
+            _expiration,
+            _ERC20Address
+        );
     }
 
     /**
@@ -355,10 +409,10 @@ contract NFTlendingBorrowing is
         uint256 _NFTid,
         uint256 _bidId
     ) external view returns (uint256) {
-        if(!Bids[_NFTid][_bidId].bidAccepted) {
+        if (!Bids[_NFTid][_bidId].bidAccepted) {
             return 0;
         }
-        if(NFTdetails[_NFTid].repaid) {
+        if (NFTdetails[_NFTid].repaid) {
             return 0;
         }
         uint256 percentageAmount = LibCalculations.calculateInterest(
@@ -390,6 +444,10 @@ contract NFTlendingBorrowing is
             Bids[_NFTid][_bidId].percent,
             block.timestamp - Bids[_NFTid][_bidId].acceptedTimestamp
         );
+
+        if(NFTdetails[_NFTid].claimed){
+            revert("It's already claimed");
+        }
 
         NFTdetails[_NFTid].repaid = true;
         NFTdetails[_NFTid].listed = false;
@@ -436,9 +494,10 @@ contract NFTlendingBorrowing is
             !Bids[_NFTid][_bidId].bidAccepted,
             "Your Bid has been Accepted"
         );
-        if(!NFTdetails[_NFTid].bidAccepted) {
+        if (!NFTdetails[_NFTid].bidAccepted) {
             require(
-                block.timestamp > Bids[_NFTid][_bidId].expiration || !NFTdetails[_NFTid].listed,
+                block.timestamp > Bids[_NFTid][_bidId].expiration ||
+                    !NFTdetails[_NFTid].listed,
                 "Can't withdraw Bid before expiration"
             );
         }
@@ -460,24 +519,27 @@ contract NFTlendingBorrowing is
      * @param _NFTid The Id of the NFTDetail
      */
     function removeNFTfromList(uint256 _NFTid) external whenNotPaused {
-        require(
-            msg.sender ==
-                ERC721(NFTdetails[_NFTid].contractAddress).ownerOf(
-                    NFTdetails[_NFTid].NFTtokenId
-                ),
-            "Only token owner can execute"
-        );
-        require(
-            NFTdetails[_NFTid].bidAccepted == false,
-            "bid has been accepted"
-        );
-        if (!NFTdetails[_NFTid].listed) {
-            revert("It's already removed");
-        }
-
-        NFTdetails[_NFTid].listed = false;
+        LibNFTLendingBorrowing.removeNFT(NFTdetails[_NFTid]);
 
         emit NFTRemoved(_NFTid, NFTdetails[_NFTid].contractAddress);
+    }
+
+    function ClaimNFT(
+        uint256 _NFTid,
+        uint256 _bidId
+    ) external whenNotPaused nonReentrant {
+        LibNFTLendingBorrowing.claimNFT(
+            NFTdetails[_NFTid],
+            Bids[_NFTid][_bidId]
+        );
+
+        emit NFTclaimed(
+            _NFTid,
+            _bidId,
+            NFTdetails[_NFTid].contractAddress,
+            NFTdetails[_NFTid].tokenIdOwner,
+            msg.sender
+        );
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

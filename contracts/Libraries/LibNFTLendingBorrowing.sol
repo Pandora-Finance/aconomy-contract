@@ -76,4 +76,47 @@ library LibNFTLendingBorrowing {
             "unable to transfer to bidder Address"
         );
     }
+
+    
+    function removeNFT(
+        NFTlendingBorrowing.NFTdetail storage nftDetail
+    ) external {
+        require(
+            msg.sender ==
+                ERC721(nftDetail.contractAddress).ownerOf(
+                    nftDetail.NFTtokenId
+                ),
+            "Only token owner can execute"
+        );
+        require(
+            nftDetail.bidAccepted == false,
+            "bid has been accepted"
+        );
+        if (!nftDetail.listed) {
+            revert("It's already removed");
+        }
+
+        nftDetail.listed = false;
+    }
+
+    function claimNFT(
+        NFTlendingBorrowing.NFTdetail storage nftDetail, 
+        NFTlendingBorrowing.BidDetail storage bidDetail
+    ) external {
+
+        require(nftDetail.bidAccepted, "Bid Not Accepted yet");
+        require(nftDetail.listed, "It's not listed for Borrowing");
+        require(bidDetail.bidAccepted, "Bid not Accepted");
+        require(!nftDetail.repaid, "Already Repaid");
+        require(block.timestamp > bidDetail.expiration, "!expiration");
+        require(msg.sender == bidDetail.bidderAddress, "!Bidder");
+        nftDetail.claimed = true;
+        // transferring NFT to this address
+        ERC721(nftDetail.contractAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            nftDetail.NFTtokenId
+        );
+    }
+
 }

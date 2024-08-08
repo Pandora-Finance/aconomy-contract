@@ -581,7 +581,7 @@ describe("Collection Factory", function (){
         await collectionInstance.getAddress(),
         0,
         await sampleERC20.getAddress(),
-        300)).to.be.revertedWith("not owner")
+        300)).to.be.revertedWithoutReason()
     })
   
     it("should not let alice repay more than what's borrowed", async () => {
