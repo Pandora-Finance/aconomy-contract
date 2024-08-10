@@ -4,9 +4,9 @@ pragma solidity 0.8.11;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AconomyFee is Ownable {
-    uint16 public _AconomyPoolFee;
-    uint16 public _AconomyPiMarketFee;
-    uint16 public _AconomyNFTLendBorrowFee;
+    uint16 private _AconomyPoolFee;
+    uint16 private _AconomyPiMarketFee;
+    uint16 private _AconomyNFTLendBorrowFee;
 
     event SetAconomyPoolFee(uint16 newFee, uint16 oldFee);
     event SetAconomyPiMarketFee(uint16 newFee, uint16 oldFee);

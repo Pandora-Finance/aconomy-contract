@@ -480,7 +480,7 @@ describe("NFT Lending and Borrowing", function (){
           );
         });
 
-        it("Should Repay Bid", async () => {
+        it("Should not Repay Bid if It's not Accepted", async () => {
           let val = await nftLendBorrow.viewRepayAmount(1, 0);
           await sampleERC20.approve(await nftLendBorrow.getAddress(), val);
           await expect(
@@ -488,7 +488,7 @@ describe("NFT Lending and Borrowing", function (){
           ).to.be.revertedWith("Bid not Accepted")
         });
 
-        it("let alice RejectBid while it's paused", async () => {
+        it("let not alice Repay while it's paused", async () => {
           await nftLendBorrow.pause();
           await expect(
             nftLendBorrow.Repay(1, 0)
@@ -765,7 +765,7 @@ describe("NFT Lending and Borrowing", function (){
       
         });
       
-        it("Should check Anyone can't repay untill Bid is accepted", async () => {
+        it("Should check Anyone can't repay until Bid is accepted", async () => {
       
           const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
           const tokenId = 5;
@@ -1195,6 +1195,15 @@ describe("NFT Lending and Borrowing", function (){
       expect(BidId3).to.equal(2)
     });
 
+    it("Should not let carl claim that NFT If bid not accepted yet", async () => {
+
+      await expect(
+        nftLendBorrow.connect(carl).ClaimNFT(10, 0)
+    ).to.be.revertedWith("Bid Not Accepted yet")
+
+
+    });
+
     it("Should Accept Bid", async () => {
       await piNFT.approve(await nftLendBorrow.getAddress(), 10);
   
@@ -1206,6 +1215,140 @@ describe("NFT Lending and Borrowing", function (){
       expect(nft.repaid).to.equal(false);
       expect(bid.bidAccepted).to.equal(true);
       expect(bid.withdrawn).to.equal(false);
+    });
+
+    it("Should not let carl claim that NFT before expiration", async () => {
+
+      await expect(
+        nftLendBorrow.connect(carl).ClaimNFT(10, 0)
+    ).to.be.revertedWith("!expiration")
+
+
+    });
+
+    it("Should let time increase 200 Seconds", async () => {
+      time.increase(200);
+    });
+
+    it("Should not let carl claim that NFT", async () => {
+
+      await expect(
+        nftLendBorrow.connect(carl).ClaimNFT(10, 0)
+    ).to.be.revertedWith("!Bidder")
+
+
+    });
+
+    it("Should let lender claim that NFT", async () => {
+      await nftLendBorrow.connect(bob).ClaimNFT(10, 0);
+    });
+
+    it("mint a new NFT and list for lending", async () => {
+      const tx = await piNFT.mintNFT(alice, "URI1", [[royaltyReceiver, 500]]);
+      await aconomyFee.connect(newFeeAddress).setAconomyNFTLendBorrowFee(0)
+      const tokenId = 11
+      expect(tokenId).to.equal(11);
+      expect(await aconomyFee.AconomyNFTLendBorrowFee()).to.equal(0);
+
+
+  
+      await expect(nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        await piNFT.getAddress(),
+        200,
+        300,
+        3600,
+        100000
+      )).to.be.revertedWithoutReason()
+
+      const tx1 = await nftLendBorrow.listNFTforBorrowing(
+        tokenId,
+        await piNFT.getAddress(),
+        200,
+        300,
+        3600,
+        200000000000
+      );
+      const NFTid = await nftLendBorrow.NFTid()
+      expect(NFTid).to.equal(11);
+      let details = await nftLendBorrow.NFTdetails(11);
+      expect(details.claimed).to.equal(false);
+    });
+
+
+
+    it("Bid for NFT", async () => {
+      await sampleERC20.mint(bob, 100000000000);
+      await sampleERC20.connect(bob).approve(await nftLendBorrow.getAddress(), 100000000000);
+  
+      const tx = await nftLendBorrow.connect(bob).Bid(
+        11,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200
+      );
+      const BidId = 0;
+      expect(BidId).to.equal(0);
+  
+      await sampleERC20.mint(carl, 100000000000);
+      await sampleERC20.connect(carl).approve(await nftLendBorrow.getAddress(), 100000000000);
+      const tx2 = await nftLendBorrow.connect(carl).Bid(
+        11,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200
+      );
+  
+      const BidId2 = 1;
+      expect(BidId2).to.equal(1);
+  
+      await sampleERC20.mint(carl, 100000000000);
+      await sampleERC20.connect(carl).approve(await nftLendBorrow.getAddress(), 100000000000);
+      const tx3 = await nftLendBorrow.connect(carl).Bid(
+        11,
+        100000000000,
+        await sampleERC20.getAddress(),
+        10,
+        200,
+        200,
+      );
+  
+      const BidId3 = 2;
+      expect(BidId3).to.equal(2)
+    });
+
+    it("Should Accept Bid", async () => {
+      await piNFT.approve(await nftLendBorrow.getAddress(), 11);
+  
+      const tx = await nftLendBorrow.AcceptBid(11, 0);
+      let nft = await nftLendBorrow.NFTdetails(11);
+      let bid = await nftLendBorrow.Bids(11, 0);
+      expect(nft.bidAccepted).to.equal(true);
+      expect(nft.listed).to.equal(true);
+      expect(nft.repaid).to.equal(false);
+      expect(bid.bidAccepted).to.equal(true);
+      expect(bid.withdrawn).to.equal(false);
+    });
+
+    it("Should Repay Bid", async () => {
+      let val = await nftLendBorrow.viewRepayAmount(11, 0);
+      await sampleERC20.approve(await nftLendBorrow.getAddress(), val);
+      const tx = await nftLendBorrow.Repay(11, 0);
+      let nft = await nftLendBorrow.NFTdetails(11);
+      expect(nft[7]).to.equal(false);
+    });
+
+    it("Should not let bob claim that NFT If It's repaid", async () => {
+
+      await expect(
+        nftLendBorrow.connect(bob).ClaimNFT(11, 0)
+    ).to.be.revertedWith("It's not listed for Borrowing")
+
+
     });
 
     

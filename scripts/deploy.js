@@ -11,12 +11,12 @@ require('dotenv').config()
 let walletAddress = process.env.WALLET_ADDRESS
 
 async function main() {
-  // const aconomyfee = await hre.ethers.deployContract("AconomyFee", []);
-  // await aconomyfee.waitForDeployment();
+  const aconomyfee = await hre.ethers.deployContract("AconomyFee", []);
+  await aconomyfee.waitForDeployment();
 
-  // await aconomyfee.setAconomyPoolFee(50)
-  // await aconomyfee.setAconomyPiMarketFee(50)
-  // await aconomyfee.setAconomyNFTLendBorrowFee(50)
+  await aconomyfee.setAconomyPoolFee(100)
+  await aconomyfee.setAconomyPiMarketFee(100)
+  await aconomyfee.setAconomyNFTLendBorrowFee(100)
 
   // const attestRegistry = await hre.ethers.deployContract("AttestationRegistry", []);
   // await attestRegistry.waitForDeployment();
@@ -27,16 +27,16 @@ async function main() {
   const LibShare = await hre.ethers.deployContract("LibShare", []);
   await LibShare.waitForDeployment();
 
-  // const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
-  //   libraries: {
-  //     LibShare: await LibShare.getAddress()
-  //   }
-  // })
-  // const piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
-  //   initializer: "initialize",
-  //   kind: "uups",
-  //   unsafeAllow: ["external-library-linking"],
-  // })
+  const piNFTMethods = await hre.ethers.getContractFactory("piNFTMethods", {
+    libraries: {
+      LibShare: await LibShare.getAddress()
+    }
+  })
+  const piNftMethods = await upgrades.deployProxy(piNFTMethods, ["0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
+    initializer: "initialize",
+    kind: "uups",
+    unsafeAllow: ["external-library-linking"],
+  })
 
   const LibCollection = await hre.ethers.deployContract("LibCollection", []);
   await LibCollection.waitForDeployment();
@@ -116,7 +116,7 @@ async function main() {
       LibNFTLendingBorrowing: await LibNFTLendingBorrowing.getAddress()
     }
   })
-  const lending = await upgrades.deployProxy(NFTlendingBorrowing, ["0x31f5A49609e61F58e95F96665ec5c95c8EC70137"], {
+  const lending = await upgrades.deployProxy(NFTlendingBorrowing, [await aconomyfee.getAddress()], {
     initializer: "initialize",
     kind: "uups",
     unsafeAllow: ["external-library-linking"],
@@ -125,11 +125,11 @@ async function main() {
   // const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
   // let token = await mintToken.waitForDeployment();
 
-  // const piNFT = await hre.ethers.getContractFactory("piNFT")
-  // const pi = await upgrades.deployProxy(piNFT, ["Aconomy", "ACO", await piNftMethods.getAddress(), "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
-  //   initializer: "initialize",
-  //   kind: "uups"
-  // })
+  const piNFT = await hre.ethers.getContractFactory("piNFT")
+  const pi = await upgrades.deployProxy(piNFT, ["Aconomy", "ACO", await piNftMethods.getAddress(), "0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d"], {
+    initializer: "initialize",
+    kind: "uups"
+  })
 
   const LibMarket = await hre.ethers.deployContract("LibMarket", []);
   await LibMarket.waitForDeployment();
@@ -145,7 +145,7 @@ async function main() {
     unsafeAllow: ["external-library-linking"],
   })
 
-  // await piNftMethods.setPiMarket(market.getAddress());
+  await piNftMethods.setPiMarket(market.getAddress());
 
   // const ValidatorStake = await hre.ethers.getContractFactory("validatorStake")
   // const Stake = await upgrades.deployProxy(ValidatorStake, [], {
@@ -153,7 +153,7 @@ async function main() {
   //   kind: "uups"
   // })
   // console.log("ValidatorStake : ", await Stake.getAddress())
-  // console.log("AconomyFee : ", await aconomyfee.getAddress())
+  console.log("AconomyFee : ", await aconomyfee.getAddress())
   // console.log("AttestationRegistry : ", await attestRegistry.getAddress())
   // console.log("AttestationServices : ", await attestServices.getAddress())
   console.log("CollectionMethods : ", await CollectionMethod.getAddress())
@@ -163,8 +163,8 @@ async function main() {
   // console.log("poolAddress : ", await pooladdress.getAddress())
   console.log("NFTlendingBorrowing : ", await lending.getAddress())
   // console.log("mintToken : ", await token.getAddress())
-  // console.log("piNFT: ", await pi.getAddress());
-  // console.log("piNFTMethods", await piNftMethods.getAddress());
+  console.log("piNFT: ", await pi.getAddress());
+  console.log("piNFTMethods", await piNftMethods.getAddress());
   console.log("piMarket:", await market.getAddress());
 
 
