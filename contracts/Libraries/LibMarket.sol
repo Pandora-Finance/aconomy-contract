@@ -218,7 +218,8 @@ library LibMarket {
         require(meta.currentOwner != msg.sender);
         require(meta.status);
         require(meta.bidSale);
-        require(meta.price + ((5 * meta.price) / 100) <= amount);
+        // Next Bid will always be 0.5% extra
+        require(meta.price + ((5 * meta.price) / 1000) <= amount);
         if (meta.currency != address(0)) {
             require(
                 IERC20(meta.currency).balanceOf(msg.sender) >= amount
