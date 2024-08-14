@@ -57,11 +57,6 @@ contract CollectionMethods is
         collectionFactoryAddress = _collectionFactoryAddress;
     }
 
-    modifier onlyOwnerOfToken(uint256 _tokenId) {
-        require(msg.sender == ERC721Upgradeable.ownerOf(_tokenId), "Not Owner");
-        _;
-    }
-
     /**
      * @notice Mints an nft to a specified address.
      * @param _to address to mint the piNFT to.
