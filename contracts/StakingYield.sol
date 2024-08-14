@@ -34,6 +34,8 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
     mapping(address => uint256) public balanceOf;
     // User address => staked time
     mapping(address => uint256) public stakeTimestamps;
+    // User address => bool
+    mapping(address => bool) public withdrawable;
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
@@ -99,12 +101,20 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         emit Staked(_userAddress, _amount);
     }
 
+    function withdrawPermission(
+        address _userAddress,
+        bool _isGranted
+    ) external whenNotPaused nonReentrant onlyOwner {
+        withdrawable[_userAddress] = _isGranted;
+    }
+
     function withdraw()
         external
         updateReward(msg.sender)
         whenNotPaused
         nonReentrant
     {
+        require(withdrawable[msg.sender], "Permission Denied");
         uint256 burnAmount = 0;
         uint256 stakedAmount = balanceOf[msg.sender];
         uint256 currentTime = block.timestamp;

@@ -9,7 +9,7 @@ const { BN } = require("@openzeppelin/test-helpers");
 
 const BigNumber = require("big-number");
 
-describe("piMarket", function () {
+describe("Staking Yield", function () {
   async function deployStakingYield() {
     [
       alice,
@@ -231,6 +231,32 @@ describe("piMarket", function () {
       console.log("bidder1 earned", await stakingYield.earned(bidder1));
     });
 
+    it("should let not bob withdraw Tokens If permission is not granted", async () => {
+      await expect(stakingYield.connect(bob).withdraw()).to.be.revertedWith(
+        "Permission Denied"
+      );
+    });
+
+    it("should not let non owner give the permission to bob for withdraw", async () => {
+      await expect(stakingYield.connect(bob).withdrawPermission(bob, true)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
+    });
+
+    it("should not let owner give the permission to bob for withdraw if It's paused", async () => {
+      await stakingYield.pause();
+
+      // await sampleERC20.approve(await stakingYield.getAddress(), "300000000000000000000000");
+      await expect(
+        stakingYield.withdrawPermission(bob, true)
+      ).to.be.revertedWith("Pausable: paused");
+      await stakingYield.unpause();
+    });
+
+    it("should let owner give the permission to bob for withdraw", async () => {
+      await stakingYield.withdrawPermission(bob, true);
+    });
+
     it("should let not bob withdraw Tokens within 6 months", async () => {
       await expect(stakingYield.connect(bob).withdraw()).to.be.revertedWith(
         "Can't withdraw tokens within 6 months"
@@ -241,6 +267,9 @@ describe("piMarket", function () {
       console.log("time", await time.latest());
       console.log("bob time", await stakingYield.stakeTimestamps(bob));
       await time.increase(15778476);
+
+      
+
       let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 1", b1.toString());
       expect(b1).to.equal("6900000000000000000000000");
@@ -289,6 +318,8 @@ describe("piMarket", function () {
       console.log("fee 2", b3.toString());
       expect(b3).to.equal("0");
 
+      await stakingYield.withdrawPermission(carl, true);
+
       await stakingYield.connect(carl).withdraw();
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 3", b2.toString());
@@ -310,6 +341,8 @@ describe("piMarket", function () {
       let b3 = await sampleERC20.balanceOf(bidder1);
       console.log("fee 2", b3.toString());
       expect(b3).to.equal("0");
+
+      await stakingYield.withdrawPermission(bidder1, true);
 
       await stakingYield.connect(bidder1).withdraw();
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
@@ -386,6 +419,8 @@ describe("piMarket", function () {
       let b3 = await sampleERC20.balanceOf(bidder2);
       console.log("fee 2", b3.toString());
       expect(b3).to.equal("0");
+
+      await stakingYield.withdrawPermission(bidder2, true);
 
       await stakingYield.connect(bidder2).withdraw();
 
