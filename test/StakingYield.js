@@ -101,7 +101,7 @@ describe("Staking Yield", function () {
       console.log("fee 1", b1.toString());
     });
 
-    it("should let bob stake 3 lacks token to contract", async () => {
+    it("should let stake 3 lacks token to contract for bob", async () => {
       await sampleERC20.mint(alice, "300000000000000000000000");
       await sampleERC20.approve(
         await stakingYield.getAddress(),
@@ -123,7 +123,7 @@ describe("Staking Yield", function () {
       console.log("bob earned", await stakingYield.earned(bob));
     });
 
-    it("should let carl stake 6 lacks token to contract", async () => {
+    it("should let owner stake 3 lacks token to contract for carl", async () => {
       await time.increase(30000);
       await sampleERC20.mint(alice, "300000000000000000000000");
       await sampleERC20.approve(
@@ -148,7 +148,7 @@ describe("Staking Yield", function () {
       console.log("bob earned", await stakingYield.earned(bob));
     });
 
-    it("should let carl stake 6 lacks token to contract", async () => {
+    it("should let owner stake 3 lacks token to contract for new one", async () => {
       await time.increase(30000);
       await sampleERC20.mint(alice, "300000000000000000000000");
       await sampleERC20.approve(
@@ -259,14 +259,14 @@ describe("Staking Yield", function () {
 
     it("should let not bob withdraw Tokens within 6 months", async () => {
       await expect(stakingYield.connect(bob).withdraw()).to.be.revertedWith(
-        "Can't withdraw tokens within 6 months"
+        "Can't withdraw tokens within one Year"
       );
     });
 
     it("should let bob withdraw amount before 1 year", async () => {
       console.log("time", await time.latest());
       console.log("bob time", await stakingYield.stakeTimestamps(bob));
-      await time.increase(15778476);
+      await time.increase(31556926);
 
       
 
@@ -309,7 +309,7 @@ describe("Staking Yield", function () {
     it("should let carl withdraw amount after 1 year", async () => {
       console.log("time", await time.latest());
       console.log("bob time", await stakingYield.stakeTimestamps(bob));
-      await time.increase(31556951);
+      // await time.increase(31556951);
       let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 1", b1.toString());
       expect(b1).to.equal("6600000000000000000000000");
@@ -327,7 +327,7 @@ describe("Staking Yield", function () {
 
       let b4 = await sampleERC20.balanceOf(carl);
       console.log("fee 4", b4.toString());
-      expect(b4).to.equal("240000000000000000000000");
+      expect(b4).to.equal("150000000000000000000000");
     });
 
     it("should let bidder withdraw amount after 2 years and before 3 years", async () => {
@@ -351,7 +351,7 @@ describe("Staking Yield", function () {
 
       let b4 = await sampleERC20.balanceOf(bidder1);
       console.log("fee 4", b4.toString());
-      expect(b4).to.equal("270000000000000000000000");
+      expect(b4).to.equal("225000000000000000000000");
     });
 
     it("should let not carl withdraw any amount again", async () => {
@@ -362,7 +362,7 @@ describe("Staking Yield", function () {
 
       let b3 = await sampleERC20.balanceOf(carl);
       console.log("fee 2", b3.toString());
-      expect(b3).to.equal("240000000000000000000000");
+      expect(b3).to.equal("150000000000000000000000");
 
       await stakingYield.connect(carl).withdraw();
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
@@ -371,7 +371,7 @@ describe("Staking Yield", function () {
 
       let b4 = await sampleERC20.balanceOf(carl);
       console.log("fee 4", b4.toString());
-      expect(b4).to.equal("240000000000000000000000");
+      expect(b4).to.equal("150000000000000000000000");
     });
 
     it("should let carl withdraw his reward", async () => {
@@ -387,7 +387,7 @@ describe("Staking Yield", function () {
 
       let b3 = await sampleERC20.balanceOf(carl);
       console.log("fee 2", b3.toString());
-      expect(b3).to.equal("240000000000000000000000");
+      expect(b3).to.equal("150000000000000000000000");
 
       await stakingYield.connect(carl).getReward();
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());

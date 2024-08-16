@@ -50,7 +50,6 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         burnableToken = ERC20Burnable(_stakingToken);
     }
 
-    uint256 constant SIX_MONTHS = 180 days;
     uint256 constant ONE_YEAR = 365 days;
     uint256 constant TWO_YEARS = 2 * 365 days;
     uint256 constant THREE_YEARS = 3 * 365 days;
@@ -121,14 +120,12 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         uint256 stakeTime = stakeTimestamps[msg.sender];
         uint256 withdrawableAmount = stakedAmount;
 
-        if (currentTime < stakeTime + SIX_MONTHS) {
-            revert("Can't withdraw tokens within 6 months");
-        } else if (currentTime < stakeTime + ONE_YEAR) {
-            burnAmount = (stakedAmount * 5000) / 10000;
+        if (currentTime < stakeTime + ONE_YEAR) {
+            revert("Can't withdraw tokens within one Year");
         } else if (currentTime < stakeTime + TWO_YEARS) {
-            burnAmount = (stakedAmount * 2000) / 10000;
+            burnAmount = (stakedAmount * 5000) / 10000;
         } else if (currentTime < stakeTime + THREE_YEARS) {
-            burnAmount = (stakedAmount * 1000) / 10000;
+            burnAmount = (stakedAmount * 2500) / 10000;
         }
 
         withdrawableAmount -= burnAmount;
