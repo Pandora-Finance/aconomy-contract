@@ -38,6 +38,7 @@ contract poolAddress is
         __ReentrancyGuard_init();
         __Ownable_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
         poolRegistryAddress = _poolRegistry;
         AconomyFeeAddress = _AconomyFeeAddress;
         loanId = 0;
