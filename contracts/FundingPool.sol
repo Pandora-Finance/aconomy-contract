@@ -65,14 +65,6 @@ contract FundingPool is Initializable, ReentrancyGuardUpgradeable {
         uint256 Expiration
     );
 
-    event InstallmentRepaid(
-        uint256 poolId,
-        uint256 bidId,
-        uint256 owedAmount,
-        uint256 dueAmount,
-        uint256 interest
-    );
-
     event FullAmountRepaid(
         uint256 poolId,
         uint256 bidId,

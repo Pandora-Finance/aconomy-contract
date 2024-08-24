@@ -53,12 +53,6 @@ contract poolAddress is
 
     event loanAccepted(uint256 poolId, uint256 indexed loanId, address indexed lender);
 
-    event repaidAmounts(
-        uint256 poolId,
-        uint256 owedPrincipal,
-        uint256 duePrincipal,
-        uint256 interest
-    );
     event AcceptedLoanDetail(
         uint256 poolId,
         uint256 indexed loanId,
