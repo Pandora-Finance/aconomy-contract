@@ -127,6 +127,7 @@ describe("piNFT", function () {
         await aconomyFee.getAddress(),
         await collectionFactory.getAddress(),
         await piNftMethods.getAddress(),
+        await piNFT.getAddress(),
       ],
       {
         initializer: "initialize",
@@ -2046,7 +2047,7 @@ it("should edit the price after listing on sale", async () => {
 
 it("should not let seller buy their own nft", async () => {
   await expect(
-    piMarket.connect(alice).BuyNFT(1, false, { value: 50000 })
+    piMarket.connect(alice).BuyNFT(1, { value: 50000 })
   ).to.be.revertedWithoutReason();
 });
 
@@ -2060,7 +2061,7 @@ it("should let bob buy piNFT", async () => {
 
   const _balance1 = await ethers.provider.getBalance(alice.getAddress());
 
-  result2 = await piMarket.connect(bob).BuyNFT(1, false, { value: 50000 });
+  result2 = await piMarket.connect(bob).BuyNFT(1, { value: 50000 });
   expect(await validatedNFT.ownerOf(3)).to.equal(await bob.getAddress());
 
   let newMeta = await piMarket._tokenMeta(1);

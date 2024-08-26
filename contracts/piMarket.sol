@@ -50,6 +50,7 @@ contract piMarket is
         bool directSale;
         bool bidSale;
         bool status;
+        bool fromCollection;
         uint256 bidEndTime;
         address currentOwner;
         address currency;
@@ -96,6 +97,7 @@ contract piMarket is
     address private feeAddress;
     address private collectionFactoryAddress;
     address private piNFTMethodsAddress;
+    address public piNFTaddress;
     mapping(uint256 => TokenMeta) public _tokenMeta;
     mapping(uint256 => BidOrder[]) public Bids;
     mapping(uint256 => Swap) private _swaps;
@@ -127,7 +129,8 @@ contract piMarket is
     function initialize(
         address _feeAddress,
         address _collectionFactoryAddress,
-        address _piNFTMethodsAddress
+        address _piNFTMethodsAddress,
+        address _piNFTaddress
     ) public initializer {
         require(_feeAddress != address(0));
         require(_collectionFactoryAddress != address(0));
@@ -139,6 +142,7 @@ contract piMarket is
         feeAddress = _feeAddress;
         collectionFactoryAddress = _collectionFactoryAddress;
         piNFTMethodsAddress = _piNFTMethodsAddress;
+        piNFTaddress = _piNFTaddress;
     }
 
     function pause() external onlyOwner {
@@ -178,6 +182,11 @@ contract piMarket is
         _saleIdCounter.increment();
         require(_price >= 10000);
         require(_contractAddress != address(0));
+        bool _fromCollection = true;
+
+        if(_contractAddress == piNFTaddress) {
+            _fromCollection = false;
+        }
 
         //needs approval on frontend
         ERC721(_contractAddress).safeTransferFrom(
@@ -194,6 +203,7 @@ contract piMarket is
             true,
             false,
             true,
+            _fromCollection,
             0,
             msg.sender,
             _currency
@@ -277,17 +287,15 @@ contract piMarket is
     /**
      * @notice Allows a user to buy an nft on sale.
      * @param _saleId The Id of the sale.
-     * @param _fromCollection A boolean indicating if the nft is from a priavte collection.
      */
     function BuyNFT(
-        uint256 _saleId,
-        bool _fromCollection
+        uint256 _saleId
     ) external payable whenNotPaused nonReentrant {
         TokenMeta memory meta = _tokenMeta[_saleId];
 
         LibShare.Share[] memory royalties;
         LibShare.Share[] memory validatorRoyalties;
-        if (_fromCollection) {
+        if (meta.fromCollection) {
             royalties = getCollectionRoyalty(
                 collectionFactoryAddress,
                 meta.tokenContractAddress
@@ -370,6 +378,12 @@ contract piMarket is
         require(_bidTime != 0);
         _saleIdCounter.increment();
 
+        bool _fromCollection = true;
+
+        if(_contractAddress == piNFTaddress) {
+            _fromCollection = false;
+        }
+
         //needs approval on frontend
         ERC721(_contractAddress).safeTransferFrom(
             msg.sender,
@@ -385,6 +399,7 @@ contract piMarket is
             false,
             true,
             true,
+            _fromCollection,
             block.timestamp + _bidTime,
             msg.sender,
             _currency
@@ -439,16 +454,14 @@ contract piMarket is
      * @notice executes a sale with a specified bid.
      * @param _saleId The Id of the sale.
      * @param _bidOrderID The Id of the bid.
-     * @param _fromCollection Boolean indicating if the nft is from a private collection.
      */
     function executeBidOrder(
         uint256 _saleId,
-        uint256 _bidOrderID,
-        bool _fromCollection
+        uint256 _bidOrderID
     ) external whenNotPaused nonReentrant {
         LibShare.Share[] memory royalties;
         LibShare.Share[] memory validatorRoyalties;
-        if (_fromCollection) {
+        if (_tokenMeta[_saleId].fromCollection) {
             royalties = getCollectionRoyalty(
                 collectionFactoryAddress,
                 _tokenMeta[_saleId].tokenContractAddress
@@ -561,14 +574,8 @@ contract piMarket is
      * @param _swapId The Id of the swap.
      */
     function cancelSwap(uint256 _swapId) public whenNotPaused nonReentrant {
-        require(msg.sender == _swaps[_swapId].initiator);
-        require(_swaps[_swapId].status);
-        _swaps[_swapId].status = false;
-        ERC721(_swaps[_swapId].initiatorNFTAddress).safeTransferFrom(
-            address(this),
-            _swaps[_swapId].initiator,
-            _swaps[_swapId].initiatorNftId
-        );
+
+        LibMarket.LibCalcelSwap(_swaps[_swapId]);
 
         emit SwapCancelled(_swapId);
     }

@@ -116,6 +116,7 @@ describe("piMarketERC20Collection", function () {
                 await aconomyFee.getAddress(),
                 await factory.getAddress(),
                 await piNftMethods.getAddress(),
+                await piNFT.getAddress(),
             ],
             {
                 initializer: "initialize",
@@ -307,7 +308,7 @@ describe("piMarketERC20Collection", function () {
 
             await sampleERC20.connect(alice).approve(piMarket.getAddress(), 50000);
             await expect(
-                piMarket.BuyNFT(1, true)
+                piMarket.BuyNFT(1)
             ).to.be.revertedWithoutReason();
         })
 
@@ -323,7 +324,7 @@ describe("piMarketERC20Collection", function () {
 
             await sampleERC20.connect(bob).approve(piMarket.getAddress(), 50000);
 
-            result2 = await piMarket.connect(bob).BuyNFT(1, true);
+            result2 = await piMarket.connect(bob).BuyNFT(1);
             expect(await collectionContract.ownerOf(0)).to.equal(await bob.getAddress());
             /*validator 200
                         royalties 500
@@ -446,7 +447,7 @@ describe("piMarketERC20Collection", function () {
 
             result2 = await piMarket
                 .connect(alice)
-                .BuyNFT(2, true);
+                .BuyNFT(2);
             expect(await collectionContract.ownerOf(0)).to.equal(await alice.getAddress());
             /*validator 200
                         royalties 500
@@ -749,10 +750,10 @@ describe("piMarketERC20Collection", function () {
             let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
 
             await expect(
-                piMarket.connect(bob).executeBidOrder(4, 2, true)
+                piMarket.connect(bob).executeBidOrder(4, 2)
             ).to.be.revertedWithoutReason();
 
-            await piMarket.connect(alice).executeBidOrder(4, 2, true);
+            await piMarket.connect(alice).executeBidOrder(4, 2);
 
             expect(await collectionContract.ownerOf(1)).to.equal(await bidder1.getAddress());
 
@@ -817,7 +818,7 @@ describe("piMarketERC20Collection", function () {
 
         it("should not execute a withdrawn bid", async () => {
             await expect(
-                piMarket.connect(alice).executeBidOrder(4, 1, false)
+                piMarket.connect(alice).executeBidOrder(4, 1)
             ).to.be.revertedWithoutReason();
         })
 
@@ -863,10 +864,10 @@ describe("piMarketERC20Collection", function () {
             let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
 
             await expect(
-                piMarket.connect(bob).executeBidOrder(5, 0, true)
+                piMarket.connect(bob).executeBidOrder(5, 0)
             ).to.be.revertedWithoutReason();
 
-            await piMarket.connect(alice).executeBidOrder(5, 0, true);
+            await piMarket.connect(alice).executeBidOrder(5, 0);
             expect(await collectionContract.ownerOf(1)).to.equal(await bidder1.getAddress());
 
             let balance1 = await sampleERC20.balanceOf(alice.getAddress());

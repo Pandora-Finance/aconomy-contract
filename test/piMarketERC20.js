@@ -114,6 +114,7 @@ describe("piMarketERC20", function () {
                 await aconomyFee.getAddress(),
                 await factory.getAddress(),
                 await piNftMethods.getAddress(),
+                await piNFT.getAddress(),
             ],
             {
                 initializer: "initialize",
@@ -277,7 +278,7 @@ describe("piMarketERC20", function () {
 
         it("should not let seller buy their own nft", async () => {
             await expect(
-                piMarket.connect(alice).BuyNFT(1, false)
+                piMarket.connect(alice).BuyNFT(1)
             ).to.be.revertedWithoutReason();
         });
 
@@ -286,7 +287,7 @@ describe("piMarketERC20", function () {
             expect(meta.status).to.equal(true);
 
             //not enough balance
-            await expect(piMarket.connect(bob).BuyNFT(1, false)).to.be.revertedWithoutReason()
+            await expect(piMarket.connect(bob).BuyNFT(1)).to.be.revertedWithoutReason()
 
             await sampleERC20.mint(bob, 50000);
 
@@ -297,7 +298,7 @@ describe("piMarketERC20", function () {
 
             await sampleERC20.connect(bob).approve(piMarket.getAddress(), 50000);
 
-            result2 = await piMarket.connect(bob).BuyNFT(1, false);
+            result2 = await piMarket.connect(bob).BuyNFT(1);
             expect(await piNFT.ownerOf(0)).to.equal(await bob.getAddress());
             /*validator 200
                         royalties 500
@@ -418,7 +419,7 @@ describe("piMarketERC20", function () {
 
             result2 = await piMarket
                 .connect(alice)
-                .BuyNFT(2, false);
+                .BuyNFT(2);
             expect(await piNFT.ownerOf(0)).to.equal(await alice.getAddress());
             /*validator 200
                         royalties 500
@@ -724,10 +725,10 @@ describe("piMarketERC20", function () {
             let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
 
             await expect(
-                piMarket.connect(bob).executeBidOrder(4, 2, false)
+                piMarket.connect(bob).executeBidOrder(4, 2)
             ).to.be.revertedWithoutReason();
 
-            await piMarket.connect(alice).executeBidOrder(4, 2, false);
+            await piMarket.connect(alice).executeBidOrder(4, 2);
             
             expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
@@ -793,7 +794,7 @@ describe("piMarketERC20", function () {
 
         it("should not execute a withdrawn bid", async () => {
             await expect(
-                piMarket.connect(alice).executeBidOrder(4, 1, false)
+                piMarket.connect(alice).executeBidOrder(4, 1)
             ).to.be.revertedWithoutReason();
         })
 
@@ -838,10 +839,10 @@ describe("piMarketERC20", function () {
             let _balance4 = await sampleERC20.balanceOf(validator.getAddress());
 
             await expect(
-                piMarket.connect(bob).executeBidOrder(5, 0, false)
+                piMarket.connect(bob).executeBidOrder(5, 0)
             ).to.be.revertedWithoutReason();
 
-            await piMarket.connect(alice).executeBidOrder(5, 0, false);
+            await piMarket.connect(alice).executeBidOrder(5, 0);
             expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
             let balance1 = await sampleERC20.balanceOf(alice.getAddress());
@@ -1016,7 +1017,7 @@ describe("piMarketERC20", function () {
         //     await piMarket.connect(bob).BuyNFT(6, false, { value: 5000 })
         //   ).to.be.revertedWithoutReason();
 
-          result2 = await piMarket.connect(bob).BuyNFT(6, false);
+          result2 = await piMarket.connect(bob).BuyNFT(6);
 
         //   await expect(
         //     await piMarket.connect(bob).BuyNFT(6, false, { value: 50000 })
@@ -1133,7 +1134,7 @@ describe("piMarketERC20", function () {
             expect(meta.status).to.equal(true);
             expect(meta.bidSale).to.equal(true);
 
-            await piMarket.connect(alice).executeBidOrder(7, 2, false);
+            await piMarket.connect(alice).executeBidOrder(7, 2);
 
             expect(await piNFT.ownerOf(3)).to.equal(await bidder1.getAddress());
 

@@ -112,6 +112,7 @@ describe("piMarket", function () {
         await aconomyFee.getAddress(),
         await collectionFactory.getAddress(),
         await piNftMethods.getAddress(),
+        await piNFT.getAddress(),
       ],
       {
         initializer: "initialize",
@@ -336,7 +337,7 @@ describe("piMarket", function () {
 
     it("should not let seller buy their own nft", async () => {
       await expect(
-        piMarket.connect(alice).BuyNFT(1, false, { value: 50000 })
+        piMarket.connect(alice).BuyNFT(1, { value: 50000 })
       ).to.be.revertedWithoutReason();
     });
 
@@ -344,7 +345,7 @@ describe("piMarket", function () {
       await piMarket.pause();
 
       await expect(
-        piMarket.connect(bob).BuyNFT(1, false, { value: 50000 })
+        piMarket.connect(bob).BuyNFT(1, { value: 50000 })
       ).to.be.revertedWith("Pausable: paused");
 
       await piMarket.unpause();
@@ -369,7 +370,7 @@ describe("piMarket", function () {
         validator.getAddress()
       );
 
-      result2 = await piMarket.connect(bob).BuyNFT(1, false, { value: 50000 });
+      result2 = await piMarket.connect(bob).BuyNFT(1, { value: 50000 });
       expect(await piNFT.ownerOf(0)).to.equal(await bob.getAddress());
       const balance1 = await ethers.provider.getBalance(alice.getAddress());
       const balance2 = await ethers.provider.getBalance(
@@ -505,7 +506,7 @@ describe("piMarket", function () {
 
       result2 = await piMarket
         .connect(alice)
-        .BuyNFT(2, false, { value: 50000 });
+        .BuyNFT(2, { value: 50000 });
       expect(await piNFT.ownerOf(0)).to.equal(await alice.getAddress());
       const balance1 = await ethers.provider.getBalance(bob.getAddress());
       const balance2 = await ethers.provider.getBalance(
@@ -853,7 +854,7 @@ describe("piMarket", function () {
       await piMarket.pause();
 
       await expect(
-        piMarket.connect(alice).executeBidOrder(4, 2, false)
+        piMarket.connect(alice).executeBidOrder(4, 2)
       ).to.be.revertedWith("Pausable: paused");
 
       await piMarket.unpause();
@@ -872,10 +873,10 @@ describe("piMarket", function () {
       );
 
       await expect(
-        piMarket.connect(bob).executeBidOrder(4, 2, false)
+        piMarket.connect(bob).executeBidOrder(4, 2)
       ).to.be.revertedWithoutReason();
 
-      await piMarket.connect(alice).executeBidOrder(4, 2, false);
+      await piMarket.connect(alice).executeBidOrder(4, 2);
       // result = await piNFT.ownerOf(1);
       expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
@@ -951,7 +952,7 @@ describe("piMarket", function () {
 
     it("should not execute a withdrawn bid", async () => {
       await expect(
-        piMarket.connect(alice).executeBidOrder(4, 1, false)
+        piMarket.connect(alice).executeBidOrder(4, 1)
       ).to.be.revertedWithoutReason();
     });
 
@@ -988,7 +989,7 @@ describe("piMarket", function () {
         validator.getAddress()
       );
 
-      await piMarket.connect(alice).executeBidOrder(5, 0, false);
+      await piMarket.connect(alice).executeBidOrder(5, 0);
 
       expect(await piNFT.ownerOf(1)).to.equal(await bidder1.getAddress());
 
@@ -1149,7 +1150,7 @@ describe("piMarket", function () {
 
     it("should not allow owner to accept withdrawn bid", async () => {
       await expect(
-        piMarket.executeBidOrder(6, 0, false)
+        piMarket.executeBidOrder(6, 0)
       ).to.be.revertedWithoutReason();
     });
 
@@ -1666,13 +1667,13 @@ describe("piMarket", function () {
       expect(meta.bidSale).to.equal(false);
 
       await expect(
-        piMarket.connect(bob).BuyNFT(9, false, { value: 5000 })
+        piMarket.connect(bob).BuyNFT(9, { value: 5000 })
       ).to.be.revertedWithoutReason();
 
-      result2 = await piMarket.connect(bob).BuyNFT(9, false, { value: 50000 });
+      result2 = await piMarket.connect(bob).BuyNFT(9, { value: 50000 });
 
       await expect(
-        piMarket.connect(bob).BuyNFT(9, false, { value: 50000 })
+        piMarket.connect(bob).BuyNFT(9, { value: 50000 })
       ).to.be.revertedWithoutReason();
 
 
@@ -1777,9 +1778,9 @@ describe("piMarket", function () {
       expect(meta.status).to.equal(true);
       expect(meta.bidSale).to.equal(true);
 
-      await expect(piMarket.connect(bob).BuyNFT(10, false, { value: 70000 })).to.be.revertedWithoutReason()
+      await expect(piMarket.connect(bob).BuyNFT(10, { value: 70000 })).to.be.revertedWithoutReason()
 
-      await piMarket.connect(alice).executeBidOrder(10, 2, false);
+      await piMarket.connect(alice).executeBidOrder(10, 2);
     });
 
 

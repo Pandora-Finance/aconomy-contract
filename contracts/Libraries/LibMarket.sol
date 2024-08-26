@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../utils/LibShare.sol";
 import "../piMarket.sol";
@@ -362,5 +363,18 @@ library LibMarket {
                 revert("no Money left!");
             }
         }
+    }
+
+    function LibCalcelSwap(
+        piMarket.Swap storage swap
+    ) external {
+        require(msg.sender == swap.initiator);
+        require(swap.status);
+        swap.status = false;
+        ERC721(swap.initiatorNFTAddress).safeTransferFrom(
+            address(this),
+            swap.initiator,
+            swap.initiatorNftId
+        );
     }
 }
