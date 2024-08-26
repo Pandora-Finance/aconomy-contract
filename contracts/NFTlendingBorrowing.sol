@@ -465,7 +465,7 @@ contract NFTlendingBorrowing is
         // transferring NFT to this address
         ERC721(NFTdetails[_NFTid].contractAddress).safeTransferFrom(
             address(this),
-            msg.sender,
+            NFTdetails[_NFTid].tokenIdOwner,
             NFTdetails[_NFTid].NFTtokenId
         );
         emit repaid(
