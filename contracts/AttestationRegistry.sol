@@ -6,6 +6,7 @@ import "./interfaces/IAttestationRegistry.sol";
 
 contract AttestationRegistry is IAttestationRegistry {
     mapping(bytes32 => ASRecord) public _registry;
+    uint8 Callable;
     bytes32 private constant EMPTY_UUID = 0;
     event Registered(
         bytes32 indexed uuid,
@@ -21,6 +22,7 @@ contract AttestationRegistry is IAttestationRegistry {
         override
         returns (bytes32)
     {
+        require(Callable < 2, "Already called");
         uint256 index = ++_asCount;
         bytes32 uuid = _getUUID(schema);
         if (_registry[uuid].uuid != EMPTY_UUID) {
@@ -34,6 +36,7 @@ contract AttestationRegistry is IAttestationRegistry {
         });
 
         _registry[uuid] = asRecord;
+        Callable++;
 
         emit Registered(uuid, index, schema, msg.sender);
 

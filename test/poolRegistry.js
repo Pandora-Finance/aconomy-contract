@@ -80,18 +80,51 @@ const {
       const mintToken = await hre.ethers.deployContract("mintToken", ["100000000000"]);
       erc20 = await mintToken.waitForDeployment();
   
-      return { aconomyFee, attestServices, erc20, poolRegis, poolAddressInstance, account0, account1, account2, account3, random };
+      return { aconomyFee,attestRegistry, attestServices, erc20, poolRegis, poolAddressInstance, account0, account1, account2, account3, random };
     }
   
     describe("Deployment", function () {
         it("should set Aconomyfee", async () => {
-            let{ aconomyFee, attestServices, erc20, poolRegis, poolAddressInstance, account0, account1, account2, account3, random } = await deployContractFactory()
+            let{ aconomyFee,attestRegistry, attestServices, erc20, poolRegis, poolAddressInstance, account0, account1, account2, account3, random } = await deployContractFactory()
             await aconomyFee.setAconomyPoolFee(200);
             let protocolFee = await aconomyFee.AconomyPoolFee();
             let aconomyFeeOwner = await aconomyFee.getAconomyOwnerAddress();
             expect(aconomyFeeOwner).to.equal(await account0.getAddress());
             expect(protocolFee).to.equal(200);
           });
+
+          it("should get fail", async () => {
+            const LibCalculations = await hre.ethers.deployContract("LibCalculations", []);
+            await LibCalculations.waitForDeployment();
+
+            const LibPool = await hre.ethers.deployContract("LibPool", []);
+            await LibPool.waitForDeployment();
+
+            const FundingPool = await hre.ethers.getContractFactory("FundingPool", {
+              libraries: {
+                LibCalculations: await LibCalculations.getAddress()
+              }
+            })
+            const fundingPool = await FundingPool.deploy();
+            await fundingPool.waitForDeployment();
+
+            const poolRegistry = await hre.ethers.getContractFactory("poolRegistry", {
+              libraries: {
+                LibPool: await LibPool.getAddress()
+              }
+            })
+
+            await expect(
+              upgrades.deployProxy(poolRegistry, [await attestServices.getAddress(), await aconomyFee.getAddress(), await fundingPool.getAddress()], {
+                initializer: "initialize",
+                kind: "uups",
+                unsafeAllow: ["external-library-linking"],
+              })
+            ).to.be.revertedWith("Already called");
+
+          });
+
+          
 
           it("should not let non owner to pause and unpause the contract", async () => {
             await expect(
