@@ -51,6 +51,7 @@ contract CollectionMethods is
         string memory _name,
         string memory _symbol
     ) external initializer {
+        __ReentrancyGuard_init();
         __ERC721_init(_name, _symbol);
         __ERC721URIStorage_init();
         collectionOwner = _collectionOwner;
