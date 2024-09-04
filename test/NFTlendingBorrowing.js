@@ -1221,7 +1221,7 @@ describe("NFT Lending and Borrowing", function (){
 
       await expect(
         nftLendBorrow.connect(carl).ClaimNFT(10, 0)
-    ).to.be.revertedWith("!expiration")
+    ).to.be.revertedWith("You can't claim yet")
 
 
     });
