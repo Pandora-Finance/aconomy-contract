@@ -228,7 +228,7 @@ contract NFTlendingBorrowing is
             _expectedAmount,
             _percent,
             _duration,
-            _expiration
+            _expiration + block.timestamp
         );
     }
 
@@ -343,7 +343,7 @@ contract NFTlendingBorrowing is
             _bidAmount,
             _percent,
             _duration,
-            _expiration,
+            _expiration + block.timestamp,
             _ERC20Address
         );
     }
