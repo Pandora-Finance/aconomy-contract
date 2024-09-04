@@ -108,7 +108,7 @@ library LibNFTLendingBorrowing {
         require(nftDetail.listed, "It's not listed for Borrowing");
         require(bidDetail.bidAccepted, "Bid not Accepted");
         require(!nftDetail.repaid, "Already Repaid");
-        require(block.timestamp > bidDetail.expiration, "!expiration");
+        require(block.timestamp > bidDetail.acceptedTimestamp + bidDetail.duration, "You can't claim yet");
         require(msg.sender == bidDetail.bidderAddress, "!Bidder");
         nftDetail.claimed = true;
         // transferring NFT to this address

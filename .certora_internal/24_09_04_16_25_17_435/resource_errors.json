@@ -1,0 +1,17 @@
+{
+    "topics": [
+        {
+            "name": "type_check",
+            "messages": [
+                {
+                    "message": "Error in spec file (CollectionFactory.spec:29:12): Syntax error: unexpected token near `description`",
+                    "location": []
+                },
+                {
+                    "message": "Error in spec file (CollectionFactory.spec:31:71): Syntax error: unexpected token near `,`",
+                    "location": []
+                }
+            ]
+        }
+    ]
+}

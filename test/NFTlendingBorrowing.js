@@ -1221,13 +1221,13 @@ describe("NFT Lending and Borrowing", function (){
 
       await expect(
         nftLendBorrow.connect(carl).ClaimNFT(10, 0)
-    ).to.be.revertedWith("!expiration")
+    ).to.be.revertedWith("You can't claim yet")
 
 
     });
 
     it("Should let time increase 200 Seconds", async () => {
-      time.increase(200);
+      time.increase(201);
     });
 
     it("Should not let carl claim that NFT", async () => {

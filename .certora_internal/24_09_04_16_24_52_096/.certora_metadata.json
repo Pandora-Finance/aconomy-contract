@@ -1,0 +1,41 @@
+{
+    "CLI_package_name": "certora-cli",
+    "CLI_version": "7.14.2",
+    "branch": "AuditFixes",
+    "certora_ci_client": null,
+    "conf": {
+        "files": [
+            "contracts/CollectionFactory.sol"
+        ],
+        "loop_iter": "3",
+        "msg": "Verification of NFTlendingBorrowing",
+        "optimistic_loop": true,
+        "process": "emv",
+        "solc_optimize": "1000000",
+        "solc_via_ir": true,
+        "verify": "CollectionFactory:certora/CollectionFactory.spec"
+    },
+    "conf_path": null,
+    "cwd_relative": ".",
+    "dirty": false,
+    "group_id": null,
+    "main_spec": "certora/CollectionFactory.spec",
+    "origin": "https://github.com/Pandora-Finance/aconomy-contract.git",
+    "python_version": "3.10.12",
+    "raw_args": [
+        "/home/dell/.local/bin/certoraRun",
+        "contracts/CollectionFactory.sol",
+        "--verify",
+        "CollectionFactory:certora/CollectionFactory.spec",
+        "--optimistic_loop",
+        "--loop_iter",
+        "3",
+        "--solc_via_ir",
+        "--solc_optimize",
+        "1000000",
+        "--msg",
+        "Verification of NFTlendingBorrowing"
+    ],
+    "revision": "8f4f71e65dafbe2cd936eaf530b4ea8624edac61",
+    "timestamp": "1725427492.067746"
+}

@@ -1,0 +1,12 @@
+Saving last configuration file to .certora_internal/24_09_04_16_25_17_435/run.conf
+There is no TAC file. Going to script EVMVerifier/certoraBuild.py to main_with_args()
+Creating dir /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_04_16_25_17_435/.certora_config
+In /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionFactory.spec, found the imports: []
+copying spec file /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionFactory.spec to /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_04_16_25_17_435/.certora_sources/.0_CollectionFactory.spec.spec
+writing /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_04_16_25_17_435/.certora_verify.json
+running ['java', '-jar', '/home/dell/.local/lib/python3.10/site-packages/certora_jars/Typechecker.jar', '-buildDirectory', '/home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_04_16_25_17_435']
+Failed to compile spec files:
+[main] ERROR ALWAYS - Found errors in certora/CollectionFactory.spec:
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:29:12): Syntax error: unexpected token near `description`
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:31:71): Syntax error: unexpected token near `,`
+build failed
