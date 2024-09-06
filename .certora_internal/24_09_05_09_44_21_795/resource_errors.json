@@ -1,0 +1,13 @@
+{
+    "topics": [
+        {
+            "name": "type_check",
+            "messages": [
+                {
+                    "message": "Error in spec file (CollectionMethods.spec:51:15): Syntax error: unexpected token near `i`",
+                    "location": []
+                }
+            ]
+        }
+    ]
+}

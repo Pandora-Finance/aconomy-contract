@@ -1,0 +1,8 @@
+{
+    "importFilesToOrigRelpaths": {},
+    "primary_contract": "CollectionMethods",
+    "specfile": "/home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionMethods.spec",
+    "specfileOrigRelpath": "certora/CollectionMethods.spec",
+    "specfilesToImportDecls": {},
+    "type": "spec"
+}

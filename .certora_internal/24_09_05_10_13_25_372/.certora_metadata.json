@@ -1,0 +1,41 @@
+{
+    "CLI_package_name": "certora-cli",
+    "CLI_version": "7.14.2",
+    "branch": "certora",
+    "certora_ci_client": null,
+    "conf": {
+        "files": [
+            "contracts/piMarket.sol"
+        ],
+        "loop_iter": "3",
+        "msg": "Verification of piMarket",
+        "optimistic_loop": true,
+        "process": "emv",
+        "solc_optimize": "1000000",
+        "solc_via_ir": true,
+        "verify": "piMarket:certora/piMarket.spec"
+    },
+    "conf_path": null,
+    "cwd_relative": ".",
+    "dirty": true,
+    "group_id": null,
+    "main_spec": "certora/piMarket.spec",
+    "origin": "https://github.com/Pandora-Finance/aconomy-contract.git",
+    "python_version": "3.10.12",
+    "raw_args": [
+        "/home/dell/.local/bin/certoraRun",
+        "contracts/piMarket.sol",
+        "--verify",
+        "piMarket:certora/piMarket.spec",
+        "--optimistic_loop",
+        "--loop_iter",
+        "3",
+        "--solc_via_ir",
+        "--solc_optimize",
+        "1000000",
+        "--msg",
+        "Verification of piMarket"
+    ],
+    "revision": "34d8da1e56f7b036eb5a74146109faf87bc1eaf5",
+    "timestamp": "1725491605.894713"
+}

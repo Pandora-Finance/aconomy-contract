@@ -1,0 +1,14 @@
+Saving last configuration file to .certora_internal/24_09_05_09_22_48_588/run.conf
+There is no TAC file. Going to script EVMVerifier/certoraBuild.py to main_with_args()
+Creating dir /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_22_48_588/.certora_config
+In /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionFactory.spec, found the imports: []
+copying spec file /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionFactory.spec to /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_22_48_588/.certora_sources/.0_CollectionFactory.spec.spec
+writing /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_22_48_588/.certora_verify.json
+running ['java', '-jar', '/home/dell/.local/lib/python3.10/site-packages/certora_jars/Typechecker.jar', '-buildDirectory', '/home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_22_48_588']
+Failed to compile spec files:
+[main] ERROR ALWAYS - Found errors in certora/CollectionFactory.spec:
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:27:52): Syntax error: unexpected token near `description`
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:29:71): Syntax error: unexpected token near `,`
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:56:32): Since CVL 2, invariants must end with `;`
+[main] ERROR ALWAYS - Error in spec file (CollectionFactory.spec:61:32): Since CVL 2, invariants must end with `;`
+build failed

@@ -1,0 +1,21 @@
+{
+    "topics": [
+        {
+            "name": "type_check",
+            "messages": [
+                {
+                    "message": "Error in spec file (piMarket.spec:8:46): Syntax error: unexpected token near `;`",
+                    "location": []
+                },
+                {
+                    "message": "Error in spec file (piMarket.spec:9:58): Syntax error: unexpected token near `;`",
+                    "location": []
+                },
+                {
+                    "message": "Error in spec file (piMarket.spec:36:1): Syntax error: unexpected token near `rule`",
+                    "location": []
+                }
+            ]
+        }
+    ]
+}

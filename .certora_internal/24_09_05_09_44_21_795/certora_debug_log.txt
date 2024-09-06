@@ -1,0 +1,11 @@
+Saving last configuration file to .certora_internal/24_09_05_09_44_21_795/run.conf
+There is no TAC file. Going to script EVMVerifier/certoraBuild.py to main_with_args()
+Creating dir /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_44_21_795/.certora_config
+In /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionMethods.spec, found the imports: []
+copying spec file /home/dell/Documents/Aconomy/aconomy-contract/certora/CollectionMethods.spec to /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_44_21_795/.certora_sources/.0_CollectionMethods.spec.spec
+writing /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_44_21_795/.certora_verify.json
+running ['java', '-jar', '/home/dell/.local/lib/python3.10/site-packages/certora_jars/Typechecker.jar', '-buildDirectory', '/home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_09_44_21_795']
+Failed to compile spec files:
+[main] ERROR ALWAYS - Found errors in certora/CollectionMethods.spec:
+[main] ERROR ALWAYS - Error in spec file (CollectionMethods.spec:51:15): Syntax error: unexpected token near `i`
+build failed

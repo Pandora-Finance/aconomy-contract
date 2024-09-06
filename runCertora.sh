@@ -50,10 +50,26 @@ echo "CERTORAKEY is set to: $CERTORAKEY"
 #     --rule_sanity \
 #     --send_only
 
-certoraRun contracts/CollectionFactory.sol    \
- --verify CollectionFactory:certora/CollectionFactory.spec  \
+# certoraRun contracts/CollectionFactory.sol    \
+#  --verify CollectionFactory:certora/CollectionFactory.spec  \
+#     --optimistic_loop \
+#     --loop_iter 3 \
+#     --solc_via_ir \
+#     --solc_optimize 1000000 \
+#     --msg "Verification of CollectionFactory"
+
+# certoraRun contracts/CollectionMethods.sol    \
+#  --verify CollectionMethods:certora/CollectionMethods.spec  \
+#     --optimistic_loop \
+#     --loop_iter 3 \
+#     --solc_via_ir \
+#     --solc_optimize 1000000 \
+#     --msg "Verification of CollectionMethods"
+
+certoraRun contracts/piMarket.sol    \
+ --verify piMarket:certora/piMarket.spec  \
     --optimistic_loop \
     --loop_iter 3 \
     --solc_via_ir \
     --solc_optimize 1000000 \
-    --msg "Verification of NFTlendingBorrowing"
+    --msg "Verification of piMarket"

@@ -1,0 +1,15 @@
+Saving last configuration file to .certora_internal/24_09_05_10_15_07_481/run.conf
+There is no TAC file. Going to script EVMVerifier/certoraBuild.py to main_with_args()
+Creating dir /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_10_15_07_481/.certora_config
+In /home/dell/Documents/Aconomy/aconomy-contract/certora/piMarket.spec, found the imports: []
+copying spec file /home/dell/Documents/Aconomy/aconomy-contract/certora/piMarket.spec to /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_10_15_07_481/.certora_sources/.0_piMarket.spec.spec
+writing /home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_10_15_07_481/.certora_verify.json
+running ['java', '-jar', '/home/dell/.local/lib/python3.10/site-packages/certora_jars/Typechecker.jar', '-buildDirectory', '/home/dell/Documents/Aconomy/aconomy-contract/.certora_internal/24_09_05_10_15_07_481']
+Failed to compile spec files:
+[main] ERROR ALWAYS - Found errors in certora/piMarket.spec:
+[main] ERROR ALWAYS - Error in spec file (piMarket.spec:8:38): Since CVL 2, methods block entries must end with `;`
+[main] ERROR ALWAYS - Error in spec file (piMarket.spec:8:46): Syntax error: unexpected token near `;`
+[main] ERROR ALWAYS - Error in spec file (piMarket.spec:9:50): Since CVL 2, methods block entries must end with `;`
+[main] ERROR ALWAYS - Error in spec file (piMarket.spec:9:58): Syntax error: unexpected token near `;`
+[main] ERROR ALWAYS - Error in spec file (piMarket.spec:36:1): Syntax error: unexpected token near `rule`
+build failed
