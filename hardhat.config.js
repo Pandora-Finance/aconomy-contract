@@ -23,6 +23,14 @@ module.exports = {
     arbitrum_goerli: {
       url: `https://goerli-rollup.arbitrum.io/rpc`,
       accounts: [process.env.PK]
+    },
+    arbitrum: {
+      url: "https://arb1.arbitrum.io/rpc",  // Arbitrum One RPC URL
+      accounts: [process.env.PK], // Use your private key from .env or directly
+    },
+    bsc: {
+      url: "https://bsc-dataseed.binance.org/",  // BNB Mainnet RPC URL
+      accounts: [process.env.PK],  // Use your private key from the .env file
     }
   },
   gasReporter: {
@@ -34,6 +42,7 @@ module.exports = {
       arbitrumGoerli: `${process.env.ARBISCAN}`,
       polygonMumbai : `${process.env.MATICSCAN}`,
       bscTestnet: `${process.env.BSCSCAN}`,
+      arbitrumOne: `${process.env.arbitrum}`,
     }
   }
 };

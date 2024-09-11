@@ -221,6 +221,8 @@ contract NFTlendingBorrowing is
 
         NFTdetails[_NFTid] = details;
 
+        uint256 exp = _expiration + block.timestamp;
+
         emit NFTlisted(
             _NFTid,
             _tokenId,
@@ -228,7 +230,7 @@ contract NFTlendingBorrowing is
             _expectedAmount,
             _percent,
             _duration,
-            _expiration + block.timestamp
+            exp
         );
     }
 
@@ -335,6 +337,7 @@ contract NFTlendingBorrowing is
             ),
             "Unable to tansfer Your ERC20"
         );
+        uint256 exp = _expiration + block.timestamp;
         emit AppliedBid(
             Bids[_NFTid].length - 1,
             _NFTid,
@@ -343,7 +346,7 @@ contract NFTlendingBorrowing is
             _bidAmount,
             _percent,
             _duration,
-            _expiration + block.timestamp,
+            exp,
             _ERC20Address
         );
     }
