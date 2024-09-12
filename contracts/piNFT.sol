@@ -6,6 +6,9 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // import "./AconomyERC2771Context.sol";
 import {
     ERC2771Context,
@@ -18,6 +21,7 @@ contract piNFT is
     ERC721URIStorageUpgradeable,
     ReentrancyGuardUpgradeable,
     PausableUpgradeable,
+    OwnableUpgradeable,
     ERC2771Context,
     UUPSUpgradeable
 {
@@ -65,6 +69,7 @@ contract piNFT is
         ERC2771Context(tfGelato);
         __ERC721URIStorage_init();
         __Pausable_init();
+        __Ownable_init();
         __ReentrancyGuard_init();
         piNFTMethodsAddress = _piNFTMethodsAddress;
     }

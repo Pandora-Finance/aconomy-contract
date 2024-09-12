@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./utils/LibShare.sol";
 import "./piNFT.sol";
 // import "./AconomyERC2771Context.sol";
@@ -19,6 +20,7 @@ contract piNFTMethods is
     ReentrancyGuardUpgradeable,
     ERC2771Context,
     PausableUpgradeable,
+    OwnableUpgradeable,
     IERC721ReceiverUpgradeable,
     UUPSUpgradeable
 {
@@ -120,7 +122,8 @@ contract piNFTMethods is
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
         __Pausable_init();
-        ERC2771Context(tfGelato);
+        ERC2771Context(trustedForwarder);
+        __Ownable_init();
     }
 
     function setPiMarket(address _piMarket) external onlyOwner {
