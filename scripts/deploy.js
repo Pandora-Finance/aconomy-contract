@@ -57,7 +57,7 @@ async function main() {
       LibNFTLendingBorrowing: await LibNFTLendingBorrowing.getAddress()
     }
   })
-  const lending = await upgrades.deployProxy(NFTlendingBorrowing, ["0x68a99c3e90cf4CcBC933dAaE4F303cfC05291871"], {
+  const lending = await upgrades.deployProxy(NFTlendingBorrowing, ["0x4a3639F748a384896cBE9cC4f600a1a10830e3d9"], {
     initializer: "initialize",
     kind: "uups",
     unsafeAllow: ["external-library-linking"],

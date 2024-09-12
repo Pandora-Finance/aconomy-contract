@@ -6,7 +6,11 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./AconomyERC2771Context.sol";
+// import "./AconomyERC2771Context.sol";
+import {
+    ERC2771Context,
+    Context
+} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "./utils/LibShare.sol";
 import "./piNFTMethods.sol";
 
@@ -14,7 +18,7 @@ contract piNFT is
     ERC721URIStorageUpgradeable,
     ReentrancyGuardUpgradeable,
     PausableUpgradeable,
-    AconomyERC2771Context,
+    ERC2771Context,
     UUPSUpgradeable
 {
     using Counters for Counters.Counter;
@@ -58,7 +62,7 @@ contract piNFT is
         address tfGelato
     ) public initializer {
         __ERC721_init(_name, _symbol);
-        AconomyERC2771Context_init(tfGelato);
+        ERC2771Context(tfGelato);
         __ERC721URIStorage_init();
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -105,8 +109,7 @@ contract piNFT is
         string memory _uri,
         LibShare.Share[] memory royalties
     ) external whenNotPaused returns (uint256) {
-        require(isTrustedForwarder(msg.sender));
-        return mintNFT(_to, _uri, royalties);
+        return mintNFT(_msgSender(), _uri, royalties);
     }
 
     /**
@@ -203,24 +206,25 @@ contract piNFT is
         return _exists(_tokenId);
     }
 
+    // Overrides needed due to multiple inheritance of Context:
+    // https://docs.soliditylang.org/en/v0.8.19/contracts.html#function-overriding
+
     function _msgSender()
         internal
         view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
-        returns (address sender)
+        override(Context, ERC2771Context)
+        returns (address)
     {
-        return AconomyERC2771Context._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     function _msgData()
         internal
         view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
+        override(Context, ERC2771Context)
         returns (bytes calldata)
     {
-        return AconomyERC2771Context._msgData();
+        return ERC2771Context._msgData();
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}

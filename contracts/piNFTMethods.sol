@@ -9,11 +9,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./utils/LibShare.sol";
 import "./piNFT.sol";
-import "./AconomyERC2771Context.sol";
+// import "./AconomyERC2771Context.sol";
+import {
+    ERC2771Context,
+    Context
+} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
 contract piNFTMethods is
     ReentrancyGuardUpgradeable,
-    AconomyERC2771Context,
+    ERC2771Context,
     PausableUpgradeable,
     IERC721ReceiverUpgradeable,
     UUPSUpgradeable
@@ -116,33 +120,32 @@ contract piNFTMethods is
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
         __Pausable_init();
-        AconomyERC2771Context_init(trustedForwarder);
+        ERC2771Context(tfGelato);
     }
 
     function setPiMarket(address _piMarket) external onlyOwner {
         piMarketAddress = _piMarket;
     }
+    // Overrides needed due to multiple inheritance of Context:
+    // https://docs.soliditylang.org/en/v0.8.19/contracts.html#function-overriding
 
     function _msgSender()
         internal
         view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
-        returns (address sender)
+        override(Context, ERC2771Context)
+        returns (address)
     {
-        return AconomyERC2771Context._msgSender();
+        return ERC2771Context._msgSender();
     }
 
     function _msgData()
         internal
         view
-        virtual
-        override(AconomyERC2771Context, ContextUpgradeable)
+        override(Context, ERC2771Context)
         returns (bytes calldata)
     {
-        return AconomyERC2771Context._msgData();
+        return ERC2771Context._msgData();
     }
-
     function pause() external onlyOwner {
         _pause();
     }
@@ -170,10 +173,9 @@ contract piNFTMethods is
         uint256 _tokenId,
         address _validator
     ) external whenNotPaused {
-        require(isTrustedForwarder(msg.sender));
         require(
             IERC721Upgradeable(_collectionAddress).ownerOf(_tokenId) ==
-                AconomyERC2771Context._msgSender()
+                _msgSender()
         );
         require(erc20Contracts[_collectionAddress][_tokenId].length == 0);
         approvedValidator[_collectionAddress][_tokenId] = _validator;
