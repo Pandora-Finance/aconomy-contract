@@ -46,22 +46,22 @@ async function main() {
   // await CollectionMethods.initialize(walletAddress, await collectionFactory.getAddress(), "xyz", "xyz")
 
 
-  const LibCalculations = await hre.ethers.deployContract("LibCalculations", []);
-  await LibCalculations.waitForDeployment();
-  const LibNFTLendingBorrowing = await hre.ethers.deployContract("LibNFTLendingBorrowing", []);
-  await LibNFTLendingBorrowing.waitForDeployment();
+  // const LibCalculations = await hre.ethers.deployContract("LibCalculations", []);
+  // await LibCalculations.waitForDeployment();
+  // const LibNFTLendingBorrowing = await hre.ethers.deployContract("LibNFTLendingBorrowing", []);
+  // await LibNFTLendingBorrowing.waitForDeployment();
 
-  const NFTlendingBorrowing = await hre.ethers.getContractFactory("NFTlendingBorrowing", {
-    libraries: {
-      LibCalculations: await LibCalculations.getAddress(),
-      LibNFTLendingBorrowing: await LibNFTLendingBorrowing.getAddress()
-    }
-  })
-  const lending = await upgrades.deployProxy(NFTlendingBorrowing, ["0x4a3639F748a384896cBE9cC4f600a1a10830e3d9"], {
-    initializer: "initialize",
-    kind: "uups",
-    unsafeAllow: ["external-library-linking"],
-  })
+  // const NFTlendingBorrowing = await hre.ethers.getContractFactory("NFTlendingBorrowing", {
+  //   libraries: {
+  //     LibCalculations: await LibCalculations.getAddress(),
+  //     LibNFTLendingBorrowing: await LibNFTLendingBorrowing.getAddress()
+  //   }
+  // })
+  // const lending = await upgrades.deployProxy(NFTlendingBorrowing, ["0x4a3639F748a384896cBE9cC4f600a1a10830e3d9"], {
+  //   initializer: "initialize",
+  //   kind: "uups",
+  //   unsafeAllow: ["external-library-linking"],
+  // })
 
 
 
@@ -100,12 +100,20 @@ async function main() {
   //     kind: "uups",
   //   }
   // );
+
+  const stakingyield = await hre.ethers.deployContract("StakingYield", [
+    "0xf09451EE328471390ac0C01cb17753b3d05e7eB8",
+    "0x37a6F444c6b3A42fA37476bB1Ed79F567b26b82D",
+  ]);
+  stakingYield = await stakingyield.waitForDeployment();
+
+  console.log("stakingYield : ", await stakingYield.getAddress());
   // console.log("ValidatedNFT : ", await validatedNFT.getAddress())
   //  console.log("ValidatorStake : ", await Stake.getAddress())
   // console.log("AconomyFee : ", await aconomyfee.getAddress())
   // console.log("CollectionMethods : ", await CollectionMethod.getAddress())
   // console.log("CollectionFactory : ", await collectionFactory.getAddress())
-  console.log("NFTlendingBorrowing : ", await lending.getAddress())
+  // console.log("NFTlendingBorrowing : ", await lending.getAddress())
   // console.log("piNFT: ", await pi.getAddress());
   // console.log("piNFTMethods", await piNftMethods.getAddress());
   // console.log("piMarket:", await market.getAddress());

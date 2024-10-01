@@ -31,6 +31,7 @@ describe("Staking Yield", function () {
 
     const stakingyield = await hre.ethers.deployContract("StakingYield", [
       await sampleERC20.getAddress(),
+      "0x37a6F444c6b3A42fA37476bB1Ed79F567b26b82D"
     ]);
     stakingYield = await stakingyield.waitForDeployment();
 
@@ -425,19 +426,47 @@ describe("Staking Yield", function () {
 
     it("should let not non owner emergency withdraw", async () => {
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
+
+      await stakingYield.pause();
+
       await expect(
         stakingYield.connect(royaltyReceiver).recoverERC20(alice, b2)
       ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await stakingYield.unpause();
     });
+
+    it("should let not non owner emergency withdraw without paused", async () => {
+      let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
+
+      await expect(
+        stakingYield.connect(royaltyReceiver).recoverERC20(alice, b2)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+    });
+
+    it("should let not emergency withdraw when the function is unpaused", async () => {
+      let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
+
+      await expect(
+        stakingYield.recoverERC20(alice, b2)
+      ).to.be.revertedWith("Pausable: not paused");
+
+    });
+
 
     it("should let owner emergency withdraw", async () => {
       let b2 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 4", b2.toString());
-      await stakingYield.recoverERC20(royaltyReceiver, b2);
+      await stakingYield.pause();
+
+      await stakingYield.recoverERC20(await sampleERC20.getAddress(), b2);
+
+      await stakingYield.unpause();
       let b4 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       expect(b4).to.equal("0");
 
-      let b5 = await sampleERC20.balanceOf(royaltyReceiver);
+      let b5 = await sampleERC20.balanceOf("0x37a6F444c6b3A42fA37476bB1Ed79F567b26b82D");
       expect(b5).to.equal(b2);
     });
   });

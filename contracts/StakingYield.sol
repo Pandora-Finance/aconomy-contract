@@ -25,10 +25,11 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
     mapping(address => uint256) public userRewardPerTokenPaid;
     // User address => rewards to be claimed
     mapping(address => uint256) public rewards;
-
     // Total staked
     uint256 public totalSupply;
-
+    // GnosisSafe wallet address
+    address public GnosisSafe; 
+    // yield will generate based on rewardTokens
     uint256 public rewardTokens;
     // User address => staked amount
     mapping(address => uint256) public balanceOf;
@@ -39,15 +40,17 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 recieved, uint256 Burned);
+    event Withdrawn(address indexed user, uint256 received, uint256 Burned);
     event RewardPaid(address indexed user, uint256 reward);
     event RewardsDurationUpdated(uint256 newDuration);
-    event Recovered(address ownerAddress, uint256 amount);
+    event Recovered(address receiverAddress,address ERC20Address, uint256 amount);
     event RewardTokenDeposited(uint256 Amount);
+    event UpdatedRewardToken(uint256 Amount);
 
-    constructor(address _stakingToken) {
+    constructor(address _stakingToken, address _safe) {
         Token = IERC20(_stakingToken);
         burnableToken = ERC20Burnable(_stakingToken);
+        GnosisSafe = _safe;
     }
 
     uint256 constant ONE_YEAR = 365 days;
@@ -162,6 +165,13 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         emit RewardTokenDeposited(_amount);
     }
 
+    function updateRewardToken(
+        uint256 _rewardTokens
+    ) external onlyOwner whenNotPaused nonReentrant {
+        rewardTokens = _rewardTokens;
+        emit UpdatedRewardToken(_rewardTokens);
+    }
+
     function setRewardsDuration(uint256 _duration) external onlyOwner {
         require(finishAt < block.timestamp, "reward duration not finished");
         duration = _duration;
@@ -190,12 +200,14 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         emit RewardAdded(_amount);
     }
 
+    // Function that can only be called when the contract IS paused
     function recoverERC20(
-        address ownerAddress,
+        address ERC20Address,
         uint256 tokenAmount
-    ) external onlyOwner nonReentrant whenNotPaused {
-        Token.transfer(ownerAddress, tokenAmount);
-        emit Recovered(ownerAddress, tokenAmount);
+    ) external onlyOwner nonReentrant whenPaused {
+        bool isSuccess = IERC20(ERC20Address).transfer(GnosisSafe, tokenAmount);
+        require(isSuccess, "Transfer failed");
+        emit Recovered(GnosisSafe, ERC20Address, tokenAmount);
     }
 
     function _min(uint256 x, uint256 y) private pure returns (uint256) {

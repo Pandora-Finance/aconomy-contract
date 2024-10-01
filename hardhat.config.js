@@ -31,6 +31,11 @@ module.exports = {
     bsc: {
       url: "https://bsc-dataseed.binance.org/",  // BNB Mainnet RPC URL
       accounts: [process.env.PK],  // Use your private key from the .env file
+    },
+    sepolia: {
+      url: "https://sepolia.infura.io/v3/9a5b274c0d3542cf9b79260a741c06ef", 
+      accounts: [process.env.PK],       
+      chainId: 11155111                 
     }
   },
   gasReporter: {
@@ -43,6 +48,7 @@ module.exports = {
       polygonMumbai : `${process.env.MATICSCAN}`,
       bsc: `${process.env.BSCSCAN}`,
       arbitrumOne: `${process.env.arbitrum}`,
+      sepolia: `${process.env.SEPOLIASCAN}`,
     }
   }
 };
