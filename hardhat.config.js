@@ -46,7 +46,7 @@ module.exports = {
     apiKey: {
       arbitrumGoerli: `${process.env.ARBISCAN}`,
       polygonMumbai : `${process.env.MATICSCAN}`,
-      bsc: `${process.env.BSCSCAN}`,
+      bscTestnet: `${process.env.BSCSCAN}`,
       arbitrumOne: `${process.env.arbitrum}`,
       sepolia: `${process.env.SEPOLIASCAN}`,
     }

@@ -72,7 +72,7 @@ describe("Staking Yield", function () {
     });
 
     it("should let owner set RewardsDuration for one year", async () => {
-      await stakingYield.setRewardsDuration(31535975);
+      await stakingYield.setRewardsDuration(31535975, 1);
       // console.log("fee 111",await stakingYield.RewardTokens());
     });
 
@@ -82,7 +82,7 @@ describe("Staking Yield", function () {
       await sampleERC20
         .connect(alice)
         .approve(await stakingYield.getAddress(), "6000000000000000000000000");
-      await stakingYield.depositRewardToken("6000000000000000000000000");
+      await stakingYield.depositRewardToken("6000000000000000000000000", 1);
       // await stakingYield.notifyRewardAmount("6000000000000000000000000");
       let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 1", b1.toString());
@@ -93,7 +93,7 @@ describe("Staking Yield", function () {
 
       // await sampleERC20.connect(alice).approve(await stakingYield.getAddress(), "6000000000000000000000000");
       // await stakingYield.depositRewardToken("6000000000000000000000000");
-      await stakingYield.notifyRewardAmount("6000000000000000000000000");
+      await stakingYield.notifyRewardAmount("6000000000000000000000000", 1);
       let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       console.log("fee 1", b1.toString());
     });
@@ -104,7 +104,7 @@ describe("Staking Yield", function () {
         await stakingYield.getAddress(),
         "300000000000000000000000"
       );
-      await stakingYield.stake(bob, "300000000000000000000000");
+      await stakingYield.stake(bob, "300000000000000000000000", 1);
 
       // let b1 = await sampleERC20.balanceOf(bob);
       //     console.log("fee 1", );
@@ -127,7 +127,7 @@ describe("Staking Yield", function () {
         await stakingYield.getAddress(),
         "300000000000000000000000"
       );
-      await stakingYield.stake(carl, "300000000000000000000000");
+      await stakingYield.stake(carl, "300000000000000000000000", 1);
 
       // let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       //   console.log("fee 1", b1);
@@ -152,7 +152,7 @@ describe("Staking Yield", function () {
         await stakingYield.getAddress(),
         "300000000000000000000000"
       );
-      await stakingYield.stake(bidder1, "300000000000000000000000");
+      await stakingYield.stake(bidder1, "300000000000000000000000", 1);
 
       // let b1 = await sampleERC20.balanceOf(await stakingYield.getAddress());
       //   console.log("fee 1", b1);
@@ -193,7 +193,7 @@ describe("Staking Yield", function () {
         "300000000000000000000000"
       );
       await expect(
-        stakingYield.stake(bidder1, "300000000000000000000000")
+        stakingYield.stake(bidder1, "300000000000000000000000", 1)
       ).to.be.revertedWith("Pausable: paused");
       await stakingYield.unpause();
     });
@@ -206,7 +206,7 @@ describe("Staking Yield", function () {
         "300000000000000000000000"
       );
       await expect(
-        stakingYield.depositRewardToken("300000000000000000000000")
+        stakingYield.depositRewardToken("300000000000000000000000", 1)
       ).to.be.revertedWith("Pausable: paused");
       await stakingYield.unpause();
     });
@@ -216,7 +216,7 @@ describe("Staking Yield", function () {
 
       // await sampleERC20.approve(await stakingYield.getAddress(), "300000000000000000000000");
       await expect(
-        stakingYield.notifyRewardAmount("300000000000000000000000")
+        stakingYield.notifyRewardAmount("300000000000000000000000", 1)
       ).to.be.revertedWith("Pausable: paused");
       await stakingYield.unpause();
     });
@@ -400,7 +400,7 @@ describe("Staking Yield", function () {
         await stakingYield.getAddress(),
         "600000000000000000000000"
       );
-      await stakingYield.stake(bidder2, "600000000000000000000000");
+      await stakingYield.stake(bidder2, "600000000000000000000000", 1);
 
       const result = await stakingYield.balanceOf(bidder2);
       expect(result).to.equal("600000000000000000000000");

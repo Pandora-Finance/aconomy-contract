@@ -38,14 +38,15 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
     // User address => bool
     mapping(address => bool) public withdrawable;
 
-    event RewardAdded(uint256 reward);
-    event Staked(address indexed user, uint256 amount);
+    event RewardAdded(uint256 reward, uint256 seasonNumber);
+    event Staked(address indexed user, uint256 amount, uint256 seasonNumber);
     event Withdrawn(address indexed user, uint256 received, uint256 Burned);
     event RewardPaid(address indexed user, uint256 reward);
-    event RewardsDurationUpdated(uint256 newDuration);
+    event RewardsDurationUpdated(uint256 newDuration, uint256 seasonNumber);
     event Recovered(address receiverAddress,address ERC20Address, uint256 amount);
-    event RewardTokenDeposited(uint256 Amount);
+    event RewardTokenDeposited(uint256 Amount, uint256 seasonNumber);
     event UpdatedRewardToken(uint256 Amount);
+    event permissionGranted(address userAddress, bool isGranted);
 
     constructor(address _stakingToken, address _safe) {
         Token = IERC20(_stakingToken);
@@ -93,14 +94,15 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
 
     function stake(
         address _userAddress,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _seasonNumber
     ) external updateReward(_userAddress) whenNotPaused nonReentrant onlyOwner {
         require(_amount > 0, "amount = 0");
         Token.transferFrom(msg.sender, address(this), _amount);
         balanceOf[_userAddress] += _amount;
         stakeTimestamps[_userAddress] = block.timestamp;
         totalSupply += _amount;
-        emit Staked(_userAddress, _amount);
+        emit Staked(_userAddress, _amount, _seasonNumber);
     }
 
     function withdrawPermission(
@@ -108,6 +110,7 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         bool _isGranted
     ) external whenNotPaused nonReentrant onlyOwner {
         withdrawable[_userAddress] = _isGranted;
+        emit permissionGranted(_userAddress, _isGranted);
     }
 
     function withdraw()
@@ -158,11 +161,12 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
     }
 
     function depositRewardToken(
-        uint256 _amount
+        uint256 _amount,
+        uint256 _seasonNumber
     ) external onlyOwner whenNotPaused nonReentrant {
         Token.transferFrom(msg.sender, address(this), _amount);
         rewardTokens += _amount;
-        emit RewardTokenDeposited(_amount);
+        emit RewardTokenDeposited(_amount, _seasonNumber);
     }
 
     function updateRewardToken(
@@ -172,14 +176,15 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
         emit UpdatedRewardToken(_rewardTokens);
     }
 
-    function setRewardsDuration(uint256 _duration) external onlyOwner {
+    function setRewardsDuration(uint256 _duration, uint256 _seasonNumber) external onlyOwner {
         require(finishAt < block.timestamp, "reward duration not finished");
         duration = _duration;
-        emit RewardsDurationUpdated(_duration);
+        emit RewardsDurationUpdated(_duration, _seasonNumber);
     }
 
     function notifyRewardAmount(
-        uint256 _amount
+        uint256 _amount,
+        uint256 _seasonNumber
     ) external onlyOwner nonReentrant whenNotPaused updateReward(address(0)) {
         if (block.timestamp >= finishAt) {
             rewardRate = _amount / duration;
@@ -197,7 +202,7 @@ contract StakingYield is Ownable, ReentrancyGuard, Pausable {
 
         finishAt = block.timestamp + duration;
         updatedAt = block.timestamp;
-        emit RewardAdded(_amount);
+        emit RewardAdded(_amount, _seasonNumber);
     }
 
     // Function that can only be called when the contract IS paused
