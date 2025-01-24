@@ -374,6 +374,7 @@ contract EscrowMarketplace is
 
         escrow.state = EscrowState.AWAITING_PAYMENT;
         escrow.status = false;
+        escrow.buyer = msg.sender;
 
         emit PaymentDeposited(_escrowId, msg.sender, escrow.price);
     }
@@ -455,8 +456,7 @@ contract EscrowMarketplace is
         );
 
         escrow.state = EscrowState.COMPLETED;
-        bool isSuccess = IERC20(escrow.currency).transferFrom(
-            address(this),
+        bool isSuccess = IERC20(escrow.currency).transfer(
             escrow.seller,
             escrow.price
         );
